@@ -1,0 +1,854 @@
+# Sprint Status - Hospitality POS System
+# Generated: January 2025
+# Updated: Full system with 39 epics including gap analysis critical features
+#
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+project_name: Hospitality POS System
+total_epics: 47
+total_stories: 209
+generated_date: 2025-01-04
+last_updated: 2026-01-16
+update_note: "Added Epics 39-47 - Complete Gap Analysis coverage (23 stories from competitive market research)"
+tracking_system: file-system
+story_location: "_bmad-output/stories"
+
+development_status:
+  # Epic 1: Foundation & Infrastructure
+  epic-1: done
+  1-1-project-setup-and-solution-structure: done
+  1-2-database-schema-creation: done
+  1-3-entity-framework-core-configuration: done
+  1-4-base-repository-pattern-implementation: done
+  1-5-mvvm-base-infrastructure: done
+  epic-1-retrospective: optional
+
+  # Epic 2: User Authentication & Authorization
+  epic-2: done
+  2-1-user-login-screen: done
+  2-2-password-management: done
+  2-3-role-management: done
+  2-4-user-management: done
+  2-5-permission-checking: done
+  2-6-permission-override-with-pin: done
+  epic-2-retrospective: optional
+
+  # Epic 3: Work Period Management
+  epic-3: done
+  3-1-open-work-period: done
+  3-2-work-period-status-display: done
+  3-3-x-report-generation: done
+  3-4-close-work-period-with-z-report: done
+  epic-3-retrospective: optional
+
+  # Epic 4: Product & Category Management
+  epic-4: done
+  4-1-category-management: done
+  4-2-product-creation: done
+  4-3-product-editing-and-price-management: done
+  4-4-product-image-management: done
+  4-5-product-search-and-listing: done
+  epic-4-retrospective: optional
+
+  # Epic 5: Sales & Order Management
+  epic-5: done
+  5-1-touch-optimized-product-grid: done
+  5-2-order-creation: done
+  5-3-order-item-management: done
+  5-4-kitchen-order-ticket-printing: done
+  5-5-incremental-order-printing: done
+  5-6-order-hold-functionality: done
+  epic-5-retrospective: optional
+
+  # Epic 6: Receipt Management
+  epic-6: done
+  6-1-receipt-creation: done
+  6-2-receipt-settlement: done
+  6-3-receipt-ownership-enforcement: done
+  6-4-bill-splitting: done
+  6-5-bill-merging: done
+  6-6-receipt-voiding: done
+  epic-6-retrospective: optional
+
+  # Epic 7: Payment Processing
+  epic-7: done
+  7-1-payment-method-configuration: done
+  7-2-cash-payment-processing: done
+  7-3-mpesa-payment-processing: done
+  7-4-card-payment-processing: done
+  7-5-split-payment-processing: done
+  7-6-card-payment-gateway-integration: backlog
+  epic-7-retrospective: optional
+
+  # Epic 8: Inventory Management
+  epic-8: done
+  8-1-automatic-stock-deduction: done
+  8-2-stock-level-display-alerts: done
+  8-3-manual-stock-adjustment: done
+  8-4-stock-return-on-void: done
+  8-5-stock-take: done
+  epic-8-retrospective: optional
+
+  # Epic 9: Purchase & Supplier Management
+  epic-9: done
+  9-1-supplier-management: done
+  9-2-purchase-order-creation: done
+  9-3-goods-receiving-with-po: done
+  9-4-direct-goods-receiving: done
+  epic-9-retrospective: optional
+
+  # Epic 10: Reporting & Analytics
+  epic-10: done
+  10-1-sales-reports: done
+  10-2-void-discount-reports: done
+  10-3-inventory-reports: done
+  10-4-audit-trail-reports: done
+  10-5-report-export: done
+  epic-10-retrospective: optional
+
+  # Epic 11: Table & Floor Management (Hospitality)
+  epic-11: done
+  11-1-floor-plan-configuration: done
+  11-2-table-status-display: done
+  11-3-table-transfer: done
+  epic-11-retrospective: optional
+
+  # Epic 12: Printing & Hardware Integration
+  epic-12: done
+  12-1-receipt-printer-configuration: done
+  12-2-kitchen-printer-configuration: done
+  12-3-escpos-print-implementation: done
+  12-4-cash-drawer-integration: done
+  epic-12-retrospective: optional
+
+  # Epic 13: System Mode Configuration
+  epic-13: done
+  13-1-business-mode-configuration: done
+  13-2-feature-toggle-management: done
+  13-3-mode-aware-ui-shell: done
+  epic-13-retrospective: optional
+
+  # Epic 14: Product Offers & Promotions (Retail)
+  epic-14: done
+  14-1-product-offer-configuration: done
+  14-2-active-offer-application: done
+  14-3-offer-price-display: done
+  14-4-offer-reporting: done
+  epic-14-retrospective: optional
+
+  # Epic 15: Supplier Credit Management
+  epic-15: done
+  15-1-supplier-payment-terms: done
+  15-2-delivery-payment-status: done
+  15-3-supplier-invoice-tracking: done
+  15-4-accounts-payable-reports: done
+  15-5-withholding-tax-integration: backlog
+  epic-15-retrospective: optional
+
+  # Epic 16: Employee & Payroll Management
+  epic-16: done
+  16-1-employee-management: done
+  16-2-salary-component-configuration: done
+  16-3-payroll-period-management: done
+  16-4-payslip-generation: done
+  16-5-payroll-reports: done
+  16-6-housing-levy-calculation: backlog
+  epic-16-retrospective: optional
+
+  # Epic 17: Accounting Module
+  epic-17: done
+  17-1-chart-of-accounts-setup: done
+  17-2-expense-management: done
+  17-3-auto-journal-posting: done
+  17-4-trial-balance-report: done
+  17-5-income-statement-balance-sheet: done
+  epic-17-retrospective: optional
+
+  # Epic 18: Kenya eTIMS Compliance (MANDATORY)
+  epic-18: done
+  18-1-etims-control-unit-registration: done
+  18-2-kra-compliant-invoice-generation: done
+  18-3-real-time-etims-submission: done
+  18-4-offline-etims-queue-management: done
+  18-5-etims-credit-note-submission: done
+  18-6-etims-status-dashboard: done
+  18-7-kra-pin-validation-api: backlog
+  epic-18-retrospective: optional
+
+  # Epic 19: M-Pesa Daraja API Integration
+  epic-19: done
+  19-1-daraja-api-configuration: done
+  19-2-stk-push-payment-initiation: done
+  19-3-mpesa-payment-confirmation: done
+  19-4-mpesa-transaction-status-query: done
+  19-5-manual-mpesa-entry-fallback: done
+  epic-19-retrospective: optional
+
+  # Epic 20: Barcode, Scale & PLU Management (Retail)
+  epic-20: done
+  20-1-barcode-scanner-integration: done
+  20-2-random-weight-barcode-processing: done
+  20-3-plu-code-quick-entry: done
+  20-4-scale-integration: done
+  20-5-plu-code-management: done
+  20-6-gs1-databar-full-support: backlog
+  epic-20-retrospective: optional
+
+  # Epic 21: Advanced Loyalty Program (Retail)
+  epic-21: done
+  21-1-customer-enrollment: done
+  21-2-points-earning: done
+  21-3-points-redemption: done
+  21-4-membership-tier-management: done
+  21-5-customer-purchase-history: done
+  epic-21-retrospective: optional
+
+  # Epic 22: Multi-Store HQ Management (Retail Chains)
+  epic-22: done
+  22-1-central-product-master: done
+  22-2-central-pricing-management: done
+  22-3-central-promotion-deployment: done
+  22-4-consolidated-chain-reporting: done
+  22-5-store-data-synchronization: done
+  epic-22-retrospective: optional
+
+  # Epic 23: Stock Transfers (Retail Chains)
+  epic-23: in-progress
+  23-1-transfer-request-creation: done
+  23-2-transfer-approval: in-progress
+  23-3-transfer-shipment: in-progress
+  23-4-transfer-receiving: in-progress
+  epic-23-retrospective: optional
+
+  # Epic 24: Batch & Expiry Tracking (Retail)
+  epic-24: in-progress
+  24-1-batch-recording-on-receipt: in-progress
+  24-2-expiry-alert-dashboard: in-progress
+  24-3-expired-item-blocking: in-progress
+  24-4-batch-traceability: done
+  24-5-expiry-waste-reporting: done
+  epic-24-retrospective: optional
+
+  # Epic 25: Offline-First & Cloud Sync
+  epic-25: in-progress
+  25-1-local-database-setup: done
+  25-2-sync-queue-management: in-progress
+  25-3-real-time-sync-signalr: in-progress
+  25-4-conflict-resolution: in-progress
+  25-5-sync-status-dashboard: in-progress
+  epic-25-retrospective: optional
+
+  # Epic 26: Recipe & Ingredient Management (Hospitality) - NEW
+  epic-26: in-progress
+  26-1-recipe-definition: in-progress
+  26-2-ingredient-costing: in-progress
+  26-3-automatic-ingredient-deduction: done
+  26-4-sub-recipes-and-batch-prep: done
+  epic-26-retrospective: optional
+
+  # Epic 27: Kitchen Display System (KDS) - NEW
+  epic-27: in-progress
+  27-1-kds-station-configuration: in-progress
+  27-2-real-time-order-display: in-progress
+  27-3-order-status-management: in-progress
+  27-4-order-timer-and-priorities: in-progress
+  27-5-expo-station-and-all-call: done
+  epic-27-retrospective: optional
+
+  # Epic 28: Shelf Label Printing (Retail) - NEW
+  epic-28: in-progress
+  28-1-label-printer-configuration: in-progress
+  28-2-label-template-management: in-progress
+  28-3-individual-and-batch-label-printing: in-progress
+  epic-28-retrospective: optional
+
+  # Epic 29: Advanced Promotions Engine (Retail) - IMPLEMENTED
+  epic-29: done
+  29-1-bogo-promotions: done
+  29-2-mix-and-match-promotions: done
+  29-3-quantity-break-pricing: done
+  29-4-combo-bundle-deals: done
+  29-5-coupon-management: done
+  29-6-automatic-markdown-management: done
+  epic-29-retrospective: optional
+
+  # Epic 30: Accounts Receivable - IMPLEMENTED
+  epic-30: done
+  30-1-customer-credit-account-setup: done
+  30-2-credit-sale-processing: done
+  30-3-accounts-receivable-aging: done
+  30-4-customer-payment-recording: done
+  30-5-customer-statement-generation: done
+  epic-30-retrospective: optional
+
+  # Epic 31: Bank Reconciliation - IMPLEMENTED
+  epic-31: done
+  31-1-bank-account-configuration: done
+  31-2-bank-statement-import: done
+  31-3-automatic-transaction-matching: done
+  31-4-manual-matching-and-reconciliation: done
+  epic-31-retrospective: optional
+
+  # Epic 32: Hotel PMS Integration - IMPLEMENTED
+  epic-32: done
+  32-1-pms-connection-configuration: done
+  32-2-guest-lookup-and-verification: done
+  32-3-room-charge-posting: done
+  32-4-guest-folio-display: done
+  32-5-table-reservation-system: done
+  32-6-package-meal-plan-handling: done
+  epic-32-retrospective: optional
+
+  # Epic 33: REST API Layer - IMPLEMENTED (Critical for Integrations)
+  epic-33: done
+  33-1-api-framework-setup: done
+  33-2-api-authentication-jwt-oauth: done
+  33-3-core-api-endpoints: done
+  33-4-webhook-event-system: done
+  33-5-api-documentation-openapi-swagger: done
+  epic-33-retrospective: optional
+
+  # Epic 34: Additional Mobile Money (Kenya) - IMPLEMENTED
+  epic-34: done
+  34-1-airtel-money-integration: done
+  34-2-airtel-money-payment-processing: done
+  34-3-t-kash-integration: done
+  epic-34-retrospective: optional
+
+  # Epic 35: Enhanced Financial Reporting - IMPLEMENTED
+  epic-35: done
+  35-1-cash-flow-statement: done
+  35-2-general-ledger-report: done
+  35-3-gross-margin-analysis: done
+  35-4-comparative-financial-reports: done
+  35-5-departmental-pl: done
+  35-6-multi-currency-support: done
+  epic-35-retrospective: optional
+
+  # Epic 36: Budget & Cost Management - IMPLEMENTED
+  epic-36: done
+  36-1-budget-creation: done
+  36-2-budget-vs-actual-tracking: done
+  36-3-recurring-expense-templates: done
+  36-4-cost-center-department-setup: done
+  36-5-petty-cash-management: done
+  epic-36-retrospective: optional
+
+  # Epic 37: Checkout Enhancements - IMPLEMENTED
+  epic-37: done
+  37-1-suspended-transactions-park-recall: done
+  37-2-customer-facing-display: done
+  37-3-enhanced-split-payment: done
+  37-4-quick-amount-buttons: done
+  37-5-cash-back-on-debit-transactions: done
+  37-6-age-verification-triggers: done
+  37-7-multi-lane-coordination: done
+  epic-37-retrospective: optional
+
+  # Epic 38: Inventory Analytics (Retail) - IMPLEMENTED
+  epic-38: done
+  38-1-stock-valuation-methods: done
+  38-2-automatic-reorder-generation: done
+  38-3-shrinkage-analysis: done
+  38-4-dead-stock-identification: done
+  epic-38-retrospective: optional
+
+  # Epic 39: Gap Analysis Critical Features (Phase 0 - Critical Compliance)
+  # Source: _bmad-output/feature-gap-analysis-2026-01-16.md
+  # Based on competitive market research of 50+ Kenya/Africa POS systems
+  epic-39: done
+  39-1-etims-api-integration: done
+  39-2-mpesa-daraja-stk-push: done
+  39-3-batch-expiry-tracking: done
+  39-4-expiry-alert-dashboard: done
+  39-5-customer-loyalty-points: done
+  39-6-offline-operation-sync: done
+  epic-39-retrospective: optional
+
+  # Epic 39 Complete - All 6 stories done
+
+  # Epic 40: Real-Time Analytics & Reporting (Phase 1 - High Priority)
+  epic-40: in-progress
+  40-1-realtime-sales-dashboard: done
+  40-2-automated-email-reports: review
+  40-3-comparative-analytics: done
+  40-4-profit-margin-reports: done
+  epic-40-retrospective: optional
+
+  # Epic 41: Mobile & Remote Management (Phase 1 - High Priority)
+  epic-41: done
+  41-1-mobile-reporting-app: done
+  epic-41-retrospective: optional
+
+  # Epic 42: Payment & Currency Enhancements (Phase 1 - High Priority)
+  epic-42: done
+  42-1-qr-code-payment: done
+  42-2-multi-currency-support: done
+  epic-42-retrospective: optional
+
+  # Epic 43: Hardware Integration Enhancements (Phase 1 - High Priority)
+  epic-43: done
+  43-1-weight-scale-integration: done
+  43-2-customer-display-integration: done
+  epic-43-retrospective: optional
+
+  # Epic 44: Hospitality Feature Enhancements (Phase 2 - Medium Priority)
+  epic-44: done
+  44-1-qr-menu-ordering: done
+  44-2-happy-hour-pricing: done
+  epic-44-retrospective: optional
+
+  # Epic 45: Employee & HR Management (Phase 2-3 - Medium/Low Priority)
+  epic-45: done
+  45-1-time-attendance: done
+  45-2-shift-scheduling: done
+  45-3-commission-calculation: done
+  45-4-leave-management: done
+  epic-45-retrospective: optional
+
+  # Epic 46: Inventory Loss Prevention (Phase 2 - Medium Priority)
+  epic-46: done
+  46-1-waste-shrinkage-tracking: done
+  epic-46-retrospective: optional
+
+  # Epic 47: Customer Marketing (Phase 2 - Medium Priority)
+  epic-47: done
+  47-1-sms-marketing: done
+  epic-47-retrospective: optional
+
+epic_summary:
+  epic-1:
+    title: "Foundation & Infrastructure"
+    priority: critical
+    stories: 5
+    status: done
+    mode: all
+  epic-2:
+    title: "User Authentication & Authorization"
+    priority: critical
+    stories: 6
+    status: done
+    mode: all
+  epic-3:
+    title: "Work Period Management"
+    priority: critical
+    stories: 4
+    status: done
+    mode: all
+  epic-4:
+    title: "Product & Category Management"
+    priority: critical
+    stories: 5
+    status: done
+    mode: all
+  epic-5:
+    title: "Sales & Order Management"
+    priority: critical
+    stories: 6
+    status: done
+    mode: all
+  epic-6:
+    title: "Receipt Management"
+    priority: critical
+    stories: 6
+    status: done
+    mode: all
+  epic-7:
+    title: "Payment Processing"
+    priority: critical
+    stories: 6
+    status: done
+    mode: all
+  epic-8:
+    title: "Inventory Management"
+    priority: high
+    stories: 5
+    status: done
+    mode: all
+  epic-9:
+    title: "Purchase & Supplier Management"
+    priority: medium
+    stories: 4
+    status: done
+    mode: all
+  epic-10:
+    title: "Reporting & Analytics"
+    priority: high
+    stories: 5
+    status: done
+    mode: all
+  epic-11:
+    title: "Table & Floor Management"
+    priority: medium
+    stories: 3
+    status: done
+    mode: hospitality
+  epic-12:
+    title: "Printing & Hardware Integration"
+    priority: high
+    stories: 4
+    status: done
+    mode: all
+  epic-13:
+    title: "System Mode Configuration"
+    priority: critical
+    stories: 3
+    status: done
+    mode: all
+  epic-14:
+    title: "Product Offers & Promotions"
+    priority: high
+    stories: 4
+    status: done
+    mode: retail
+  epic-15:
+    title: "Supplier Credit Management"
+    priority: high
+    stories: 5
+    status: done
+    mode: all
+  epic-16:
+    title: "Employee & Payroll Management"
+    priority: medium
+    stories: 6
+    status: done
+    mode: all
+  epic-17:
+    title: "Accounting Module"
+    priority: medium
+    stories: 5
+    status: done
+    mode: all
+  epic-18:
+    title: "Kenya eTIMS Compliance"
+    priority: critical
+    stories: 7
+    status: done
+    mode: all_kenya
+  epic-19:
+    title: "M-Pesa Daraja API Integration"
+    priority: critical
+    stories: 5
+    status: done
+    mode: all_kenya
+  epic-20:
+    title: "Barcode, Scale & PLU Management"
+    priority: high
+    stories: 6
+    status: done
+    mode: retail
+  epic-21:
+    title: "Advanced Loyalty Program"
+    priority: high
+    stories: 5
+    status: done
+    mode: retail
+  epic-22:
+    title: "Multi-Store HQ Management"
+    priority: high
+    stories: 5
+    status: done
+    mode: retail_chains
+  epic-23:
+    title: "Stock Transfers"
+    priority: medium
+    stories: 4
+    status: in-progress
+    mode: retail_chains
+  epic-24:
+    title: "Batch & Expiry Tracking"
+    priority: high
+    stories: 5
+    status: in-progress
+    mode: retail
+  epic-25:
+    title: "Offline-First & Cloud Sync"
+    priority: critical
+    stories: 5
+    status: in-progress
+    mode: all
+  epic-26:
+    title: "Recipe & Ingredient Management"
+    priority: high
+    stories: 4
+    status: in-progress
+    mode: hospitality
+  epic-27:
+    title: "Kitchen Display System (KDS)"
+    priority: high
+    stories: 5
+    status: in-progress
+    mode: hospitality
+  epic-28:
+    title: "Shelf Label Printing"
+    priority: medium
+    stories: 3
+    status: in-progress
+    mode: retail
+  epic-29:
+    title: "Advanced Promotions Engine"
+    priority: critical
+    stories: 6
+    status: done
+    mode: retail
+  epic-30:
+    title: "Accounts Receivable"
+    priority: critical
+    stories: 5
+    status: done
+    mode: all
+  epic-31:
+    title: "Bank Reconciliation"
+    priority: critical
+    stories: 4
+    status: done
+    mode: all
+  epic-32:
+    title: "Hotel PMS Integration"
+    priority: critical
+    stories: 6
+    status: done
+    mode: hospitality
+  epic-33:
+    title: "REST API Layer"
+    priority: critical
+    stories: 5
+    status: done
+    mode: all
+  epic-34:
+    title: "Additional Mobile Money"
+    priority: high
+    stories: 3
+    status: done
+    mode: all_kenya
+  epic-35:
+    title: "Enhanced Financial Reporting"
+    priority: high
+    stories: 6
+    status: done
+    mode: all
+  epic-36:
+    title: "Budget & Cost Management"
+    priority: high
+    stories: 5
+    status: done
+    mode: all
+  epic-37:
+    title: "Checkout Enhancements"
+    priority: medium
+    stories: 7
+    status: done
+    mode: all
+  epic-38:
+    title: "Inventory Analytics"
+    priority: high
+    stories: 4
+    status: done
+    mode: retail
+  epic-39:
+    title: "Gap Analysis Critical Features"
+    priority: critical
+    stories: 6
+    status: done
+    mode: all_kenya
+    source: "feature-gap-analysis-2026-01-16.md"
+    note: "Phase 0 Critical - eTIMS, M-Pesa, Batch/Expiry, Loyalty, Offline - COMPLETED"
+  epic-40:
+    title: "Real-Time Analytics & Reporting"
+    priority: high
+    stories: 4
+    status: in-progress
+    mode: all
+    source: "feature-gap-analysis-2026-01-16.md"
+    note: "Phase 1 - Dashboard (done), Email Reports, Comparative Analytics, Margins"
+  epic-41:
+    title: "Mobile & Remote Management"
+    priority: high
+    stories: 1
+    status: done
+    mode: all
+    source: "feature-gap-analysis-2026-01-16.md"
+    note: "Phase 1 - Mobile reporting app for iOS/Android - COMPLETED"
+  epic-42:
+    title: "Payment & Currency Enhancements"
+    priority: high
+    stories: 2
+    status: done
+    mode: all
+    source: "feature-gap-analysis-2026-01-16.md"
+    note: "Phase 1 - QR Code Payments, Multi-Currency - COMPLETED"
+  epic-43:
+    title: "Hardware Integration Enhancements"
+    priority: high
+    stories: 2
+    status: done
+    mode: retail
+    source: "feature-gap-analysis-2026-01-16.md"
+    note: "Phase 1 - Weight Scale, Customer Display - COMPLETED"
+  epic-44:
+    title: "Hospitality Feature Enhancements"
+    priority: medium
+    stories: 2
+    status: done
+    mode: hospitality
+    source: "feature-gap-analysis-2026-01-16.md"
+    note: "Phase 2 - QR Menu Ordering, Happy Hour Pricing - COMPLETED"
+  epic-45:
+    title: "Employee & HR Management"
+    priority: medium
+    stories: 4
+    status: done
+    mode: all
+    source: "feature-gap-analysis-2026-01-16.md"
+    note: "Phase 2-3 - Time & Attendance, Scheduling, Commission, Leave - ALL COMPLETED"
+  epic-46:
+    title: "Inventory Loss Prevention"
+    priority: medium
+    stories: 1
+    status: done
+    mode: all
+    source: "feature-gap-analysis-2026-01-16.md"
+    note: "Phase 2 - Waste and Shrinkage Tracking - COMPLETED"
+  epic-47:
+    title: "Customer Marketing"
+    priority: medium
+    stories: 1
+    status: done
+    mode: all
+    source: "feature-gap-analysis-2026-01-16.md"
+    note: "Phase 2 - SMS Marketing to Loyalty Members - COMPLETED"
+
+progress_summary:
+  total_epics: 47
+  total_stories: 209
+  epics_done: 34
+  epics_in_progress: 8
+  epics_backlog: 5
+  stories_done: 163
+  stories_ready_for_dev: 18
+  stories_in_progress: 22
+  stories_backlog: 6
+  percent_complete: 78.0
+
+# NEW EPICS ADDED (26-38) - Covers previously missing functionality:
+# - Epic 26-27: Hospitality features (Recipe, KDS)
+# - Epic 28: Retail shelf labels
+# - Epic 29-30: Advanced promotions & AR
+# - Epic 31: Bank reconciliation
+# - Epic 32: Hotel PMS with reservations & meal plans
+# - Epic 33: REST API & webhooks (Critical for integrations)
+# - Epic 34: Additional Kenya mobile money
+# - Epic 35-36: Enhanced financial features
+# - Epic 37: Checkout enhancements
+# - Epic 38: Inventory analytics
+
+# GAP COVERAGE FROM POS_Remaining_Gaps.md:
+# ✅ REST API Layer → Epic 33 (IMPLEMENTED)
+# ✅ Webhook/Event System → Epic 33.4 (IMPLEMENTED)
+# ✅ Table Reservations → Epic 32.5 (IMPLEMENTED)
+# ✅ Hotel Package Billing → Epic 32.6 (IMPLEMENTED)
+# ✅ AP Aging Report → Epic 15.4 (IMPLEMENTED)
+# ✅ Advanced Promotions Engine → Epic 29 (IMPLEMENTED)
+# ✅ Accounts Receivable → Epic 30 (IMPLEMENTED)
+# ✅ Bank Reconciliation → Epic 31 (IMPLEMENTED)
+# ✅ Additional Mobile Money → Epic 34 (IMPLEMENTED)
+# ✅ Enhanced Financial Reporting → Epic 35 (IMPLEMENTED)
+# ✅ Budget & Cost Management → Epic 36 (IMPLEMENTED)
+# ✅ Checkout Enhancements → Epic 37 (IMPLEMENTED)
+# ✅ Inventory Analytics → Epic 38 (IMPLEMENTED)
+#
+# REMAINING BACKLOG STORIES (in existing epics):
+# ❌ 7-6 Card Payment Gateway Integration
+# ❌ 15-5 Withholding Tax Integration
+# ❌ 16-6 Housing Levy Calculation
+# ❌ 18-7 KRA PIN Validation API
+# ❌ 20-6 GS1 DataBar Full Support
+
+recommended_next_sprints:
+  sprint-current:
+    focus: "Complete Stock Transfers (Epic 23)"
+    stories:
+      - 23-2-transfer-approval
+      - 23-3-transfer-shipment
+      - 23-4-transfer-receiving
+
+  # GAP ANALYSIS IMPLEMENTATION ROADMAP
+  # ===================================
+
+  phase-0-critical:
+    focus: "Gap Analysis Critical Features (Epic 39) - LEGAL & COMPETITIVE MUST-HAVE"
+    estimated_effort: "9-14 weeks"
+    rationale: "Cannot legally operate in Kenya without eTIMS. Cannot compete without M-Pesa STK"
+    epics:
+      - epic-39  # eTIMS, M-Pesa, Batch/Expiry, Loyalty, Offline
+    stories:
+      - 39-1-etims-api-integration      # KRA mandatory - legal compliance
+      - 39-2-mpesa-daraja-stk-push      # Payment competitiveness
+      - 39-3-batch-expiry-tracking      # Food safety compliance
+      - 39-4-expiry-alert-dashboard     # Waste reduction
+      - 39-5-customer-loyalty-points    # Customer retention
+      - 39-6-offline-operation-sync     # Operational continuity
+
+  phase-1-competitive:
+    focus: "Competitive Features (Epics 40-43) - HIGH PRIORITY"
+    estimated_effort: "9-12 weeks"
+    rationale: "Expected by market, significantly impacts competitiveness"
+    epics:
+      - epic-40  # Real-Time Analytics & Reporting
+      - epic-41  # Mobile Reporting App
+      - epic-42  # QR Payments, Multi-Currency
+      - epic-43  # Weight Scale, Customer Display
+    stories:
+      - 40-1-realtime-sales-dashboard
+      - 40-2-automated-email-reports
+      - 40-3-comparative-analytics
+      - 40-4-profit-margin-reports
+      - 41-1-mobile-reporting-app
+      - 42-1-qr-code-payment
+      - 42-2-multi-currency-support
+      - 43-1-weight-scale-integration
+      - 43-2-customer-display-integration
+
+  phase-2-enhanced:
+    focus: "Enhanced Features (Epics 44-47) - MEDIUM PRIORITY"
+    estimated_effort: "10-15 weeks"
+    rationale: "Improve user experience and operational efficiency"
+    epics:
+      - epic-44  # QR Menu, Happy Hour
+      - epic-45  # Time & Attendance, Scheduling, Commission, Leave
+      - epic-46  # Waste & Shrinkage Tracking
+      - epic-47  # SMS Marketing
+    stories:
+      - 44-1-qr-menu-ordering
+      - 44-2-happy-hour-pricing
+      - 45-1-time-attendance
+      - 45-2-shift-scheduling
+      - 45-3-commission-calculation
+      - 45-4-leave-management
+      - 46-1-waste-shrinkage-tracking
+      - 47-1-sms-marketing
+
+  phase-3-hospitality:
+    focus: "Hospitality & Advanced Features (Epics 25-28)"
+    rationale: "Complete hospitality mode and advanced retail features"
+    epics:
+      - epic-25  # Offline/Cloud Sync
+      - epic-26  # Recipe & Ingredient Management
+      - epic-27  # Kitchen Display System (KDS)
+      - epic-28  # Shelf Label Printing
