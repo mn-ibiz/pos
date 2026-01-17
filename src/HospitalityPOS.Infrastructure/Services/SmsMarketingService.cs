@@ -2,6 +2,7 @@
 // Implementation of SMS marketing service
 // Story 47-1: SMS Marketing to Customers
 
+using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.Core.Models.Marketing;
@@ -10,16 +11,18 @@ namespace HospitalityPOS.Infrastructure.Services;
 
 /// <summary>
 /// Service for SMS marketing campaigns and customer segmentation.
+/// Thread-safe implementation using concurrent collections.
 /// </summary>
 public class SmsMarketingService : ISmsMarketingService
 {
-    // In-memory storage for demo
-    private readonly List<SmsTemplate> _templates = new();
-    private readonly List<CustomerSegment> _segments = new();
-    private readonly List<SmsCampaign> _campaigns = new();
-    private readonly List<SmsSentLog> _sentLogs = new();
-    private readonly List<SmsOptOutLog> _optOutLogs = new();
-    private readonly List<TransactionalSmsConfig> _transactionalConfigs = new();
+    // Thread-safe in-memory storage for demo
+    private readonly ConcurrentBag<SmsTemplate> _templates = new();
+    private readonly ConcurrentBag<CustomerSegment> _segments = new();
+    private readonly ConcurrentBag<SmsCampaign> _campaigns = new();
+    private readonly ConcurrentBag<SmsSentLog> _sentLogs = new();
+    private readonly ConcurrentBag<SmsOptOutLog> _optOutLogs = new();
+    private readonly ConcurrentBag<TransactionalSmsConfig> _transactionalConfigs = new();
+    private readonly object _settingsLock = new();
     private SmsMarketingSettings _settings = new();
     private int _nextTemplateId = 1;
     private int _nextSegmentId = 1;
@@ -27,8 +30,8 @@ public class SmsMarketingService : ISmsMarketingService
     private long _nextLogId = 1;
     private int _nextOptOutLogId = 1;
 
-    // Simulated customer data
-    private readonly List<CustomerSmsInfo> _customers = new();
+    // Simulated customer data (thread-safe)
+    private readonly ConcurrentBag<CustomerSmsInfo> _customers = new();
 
     public SmsMarketingService()
     {
@@ -79,10 +82,31 @@ public class SmsMarketingService : ISmsMarketingService
             }
         };
 
+        // Initialize templates synchronously without blocking async context
+        // This is safe in constructor since we're creating data synchronously
         foreach (var request in defaults)
         {
-            CreateTemplateAsync(request).GetAwaiter().GetResult();
+            CreateTemplateSynchronously(request);
         }
+    }
+
+    /// <summary>
+    /// Creates a template synchronously for use during initialization.
+    /// </summary>
+    private void CreateTemplateSynchronously(SmsTemplateRequest request)
+    {
+        var template = new SmsTemplate
+        {
+            Id = Interlocked.Increment(ref _nextTemplateId),
+            Name = request.Name,
+            Category = request.Category,
+            MessageText = request.MessageText,
+            Placeholders = ExtractPlaceholders(request.MessageText),
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _templates.Add(template);
     }
 
     private void InitializeTransactionalConfigs()
@@ -121,7 +145,7 @@ public class SmsMarketingService : ISmsMarketingService
     {
         var template = new SmsTemplate
         {
-            Id = _nextTemplateId++,
+            Id = Interlocked.Increment(ref _nextTemplateId),
             Name = request.Name,
             Category = request.Category,
             MessageText = request.MessageText,
@@ -236,11 +260,11 @@ public class SmsMarketingService : ISmsMarketingService
 
     #region Customer Segmentation
 
-    public Task<CustomerSegment> CreateSegmentAsync(CustomerSegmentRequest request)
+    public async Task<CustomerSegment> CreateSegmentAsync(CustomerSegmentRequest request)
     {
         var segment = new CustomerSegment
         {
-            Id = _nextSegmentId++,
+            Id = Interlocked.Increment(ref _nextSegmentId),
             Name = request.Name,
             Description = request.Description,
             FilterCriteria = request.FilterCriteria,
@@ -250,16 +274,16 @@ public class SmsMarketingService : ISmsMarketingService
             CreatedAt = DateTime.UtcNow
         };
 
-        // Calculate initial count
-        var result = EvaluateSegmentAsync(request.FilterCriteria).GetAwaiter().GetResult();
+        // Calculate initial count asynchronously
+        var result = await EvaluateSegmentAsync(request.FilterCriteria);
         segment.CachedCount = result.MatchingCount;
         segment.LastCalculatedAt = DateTime.UtcNow;
 
         _segments.Add(segment);
-        return Task.FromResult(segment);
+        return segment;
     }
 
-    public Task<CustomerSegment> UpdateSegmentAsync(CustomerSegmentRequest request)
+    public async Task<CustomerSegment> UpdateSegmentAsync(CustomerSegmentRequest request)
     {
         var segment = _segments.FirstOrDefault(s => s.Id == request.Id)
             ?? throw new InvalidOperationException($"Segment {request.Id} not found");
@@ -268,12 +292,12 @@ public class SmsMarketingService : ISmsMarketingService
         segment.Description = request.Description;
         segment.FilterCriteria = request.FilterCriteria;
 
-        // Recalculate count
-        var result = EvaluateSegmentAsync(request.FilterCriteria).GetAwaiter().GetResult();
+        // Recalculate count asynchronously
+        var result = await EvaluateSegmentAsync(request.FilterCriteria);
         segment.CachedCount = result.MatchingCount;
         segment.LastCalculatedAt = DateTime.UtcNow;
 
-        return Task.FromResult(segment);
+        return segment;
     }
 
     public Task<bool> DeleteSegmentAsync(int segmentId)
@@ -485,7 +509,7 @@ public class SmsMarketingService : ISmsMarketingService
 
         var campaign = new SmsCampaign
         {
-            Id = _nextCampaignId++,
+            Id = Interlocked.Increment(ref _nextCampaignId),
             Name = request.Name,
             TemplateId = request.TemplateId,
             MessageText = request.MessageText,
@@ -698,7 +722,7 @@ public class SmsMarketingService : ISmsMarketingService
             // Simulated send
             var log = new SmsSentLog
             {
-                Id = _nextLogId++,
+                Id = Interlocked.Increment(ref _nextLogId),
                 CampaignId = campaignId,
                 CampaignName = campaign.Name,
                 CustomerId = customer.CustomerId,
@@ -789,17 +813,30 @@ public class SmsMarketingService : ISmsMarketingService
             message = config.DefaultMessage ?? GetDefaultTransactionalMessage(request.Type);
         }
 
-        // Merge data
+        // Build combined data dictionary with customer data as base, then overlay request data
+        // This ensures a single rendering pass to avoid double-rendering issues
+        var combinedData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "CustomerName", customer.Name },
+            { "PointsBalance", customer.PointsBalance?.ToString("N0") ?? "0" },
+            { "TierName", customer.TierName ?? "Member" },
+            { "StoreName", _settings.StoreName },
+            { "PhoneNumber", customer.PhoneNumber }
+        };
+
+        // Overlay request-specific data (takes precedence over customer defaults)
         foreach (var (key, value) in request.Data)
         {
-            message = message.Replace($"{{{key}}}", value, StringComparison.OrdinalIgnoreCase);
+            combinedData[key] = value;
         }
-        message = RenderMessage(message, customer);
+
+        // Single rendering pass with all data
+        message = RenderMessageWithData(message, combinedData);
 
         // Create log entry
         var log = new SmsSentLog
         {
-            Id = _nextLogId++,
+            Id = Interlocked.Increment(ref _nextLogId),
             CustomerId = customer.CustomerId,
             CustomerName = customer.Name,
             PhoneNumber = customer.PhoneNumber,
@@ -859,6 +896,17 @@ public class SmsMarketingService : ISmsMarketingService
 
     public Task<bool> ProcessOptOutAsync(string phoneNumber, string keyword)
     {
+        // Input validation
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+        {
+            throw new ArgumentException("Phone number cannot be empty", nameof(phoneNumber));
+        }
+
+        if (string.IsNullOrWhiteSpace(keyword))
+        {
+            throw new ArgumentException("Keyword cannot be empty", nameof(keyword));
+        }
+
         var customer = _customers.FirstOrDefault(c => c.PhoneNumber == phoneNumber);
         if (customer == null) return Task.FromResult(false);
 
@@ -866,7 +914,7 @@ public class SmsMarketingService : ISmsMarketingService
 
         var log = new SmsOptOutLog
         {
-            Id = _nextOptOutLogId++,
+            Id = Interlocked.Increment(ref _nextOptOutLogId),
             CustomerId = customer.CustomerId,
             CustomerName = customer.Name,
             PhoneNumber = phoneNumber,

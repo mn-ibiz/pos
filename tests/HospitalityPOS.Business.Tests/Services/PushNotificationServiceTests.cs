@@ -97,6 +97,40 @@ public class PushNotificationServiceTests
     }
 
     [Fact]
+    public async Task SendToUserAsync_WithDisabledNotificationType_StillLogsAndFiresEvent()
+    {
+        // Arrange
+        _service.SetNotificationPreferences(1, new NotificationPreferences
+        {
+            UserId = 1,
+            DailySummaryEnabled = false // Disable daily summary
+        });
+
+        PushNotificationSentEventArgs? capturedArgs = null;
+        _service.NotificationSent += (sender, args) => capturedArgs = args;
+
+        // Act
+        var result = await _service.SendToUserAsync(
+            userId: 1,
+            title: "Skipped Notification",
+            body: "This should be logged even though disabled",
+            type: NotificationType.DailySummary);
+
+        // Assert - verify logging occurred
+        var history = await _service.GetNotificationHistoryAsync(1, 10);
+        history.Should().Contain(h =>
+            h.Title == "Skipped Notification" &&
+            h.Success == false &&
+            h.ErrorMessage!.Contains("disabled"));
+
+        // Assert - verify event was fired
+        capturedArgs.Should().NotBeNull();
+        capturedArgs!.UserId.Should().Be(1);
+        capturedArgs.Success.Should().BeFalse();
+        capturedArgs.Type.Should().Be(NotificationType.DailySummary);
+    }
+
+    [Fact]
     public async Task SendToUsersAsync_WithMultipleUsers_SendsToAll()
     {
         // Arrange

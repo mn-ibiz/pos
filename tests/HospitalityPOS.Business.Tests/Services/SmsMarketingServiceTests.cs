@@ -517,6 +517,77 @@ public class SmsMarketingServiceTests
         result.Message.Should().Contain("opted out");
     }
 
+    [Fact]
+    public async Task SendTransactionalSmsAsync_HandlesValuesWithBracesWithoutDoubleRendering()
+    {
+        // Arrange - test that values containing braces don't get double-rendered
+        await _service.UpdateTransactionalConfigAsync(new TransactionalSmsConfig
+        {
+            Type = TransactionalSmsType.PointsEarned,
+            IsEnabled = true,
+            DefaultMessage = "You earned {PointsEarned} points! Balance: {PointsBalance}"
+        });
+
+        var request = new TransactionalSmsRequest
+        {
+            Type = TransactionalSmsType.PointsEarned,
+            CustomerId = 1,
+            Data = new Dictionary<string, string>
+            {
+                // Value contains braces that could be misinterpreted as placeholders
+                { "PointsEarned", "100 {bonus}" }
+            }
+        };
+
+        // Act
+        var result = await _service.SendTransactionalSmsAsync(request);
+
+        // Assert - should succeed without errors from double-rendering
+        result.Success.Should().BeTrue();
+
+        // Verify the message was sent correctly via the sent log
+        var logs = await _service.GetSentLogAsync();
+        var lastLog = logs.LastOrDefault();
+        lastLog.Should().NotBeNull();
+        // The value "100 {bonus}" should appear as-is, not be treated as a placeholder
+        lastLog!.MessageText.Should().Contain("100 {bonus}");
+    }
+
+    [Fact]
+    public async Task SendTransactionalSmsAsync_RequestDataOverridesCustomerData()
+    {
+        // Arrange - verify request data takes precedence over customer defaults
+        await _service.UpdateTransactionalConfigAsync(new TransactionalSmsConfig
+        {
+            Type = TransactionalSmsType.TierUpgrade,
+            IsEnabled = true,
+            DefaultMessage = "Welcome {CustomerName}! You are now {TierName}!"
+        });
+
+        var request = new TransactionalSmsRequest
+        {
+            Type = TransactionalSmsType.TierUpgrade,
+            CustomerId = 1,
+            Data = new Dictionary<string, string>
+            {
+                // Override the tier name from customer data
+                { "TierName", "Diamond Elite" }
+            }
+        };
+
+        // Act
+        var result = await _service.SendTransactionalSmsAsync(request);
+
+        // Assert
+        result.Success.Should().BeTrue();
+
+        var logs = await _service.GetSentLogAsync();
+        var lastLog = logs.LastOrDefault();
+        lastLog.Should().NotBeNull();
+        // Request data "Diamond Elite" should override customer's default tier
+        lastLog!.MessageText.Should().Contain("Diamond Elite");
+    }
+
     #endregion
 
     #region Opt-In/Opt-Out Tests

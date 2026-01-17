@@ -2,8 +2,11 @@
 // Service implementation for push notifications via Firebase Cloud Messaging
 // Story 41-1: Mobile Reporting App
 
+using System.Collections.Concurrent;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.Core.Models.Mobile;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace HospitalityPOS.Infrastructure.Services;
 
@@ -13,22 +16,41 @@ namespace HospitalityPOS.Infrastructure.Services;
 /// </summary>
 public class PushNotificationService : IPushNotificationService
 {
-    // In-memory storage (replace with database in production)
-    private readonly List<NotificationLog> _notificationLogs = new();
-    private readonly List<ScheduledNotification> _scheduledNotifications = new();
-    private readonly Dictionary<int, List<string>> _userDeviceTokens = new();
-    private readonly Dictionary<int, NotificationPreferences> _preferences = new();
-    private readonly Dictionary<string, List<int>> _roleUsers = new();
+    // Thread-safe collections for singleton service
+    private readonly ConcurrentBag<NotificationLog> _notificationLogs = new();
+    private readonly ConcurrentBag<ScheduledNotification> _scheduledNotifications = new();
+    private readonly ConcurrentDictionary<int, List<string>> _userDeviceTokens = new();
+    private readonly ConcurrentDictionary<int, NotificationPreferences> _preferences = new();
+    private readonly ConcurrentDictionary<string, List<int>> _roleUsers = new();
+    private readonly object _tokenLock = new();
 
     private int _notificationLogIdCounter;
     private int _scheduledNotificationIdCounter;
 
-    // FCM configuration (would come from IConfiguration in production)
-    private readonly string _fcmServerKey = "YOUR_FCM_SERVER_KEY";
-    private readonly string _fcmSenderId = "YOUR_FCM_SENDER_ID";
+    // FCM configuration from IConfiguration
+    private readonly string _fcmServerKey;
+    private readonly string _fcmSenderId;
+    private readonly ILogger<PushNotificationService> _logger;
 
-    public PushNotificationService()
+    public PushNotificationService(IConfiguration configuration, ILogger<PushNotificationService> logger)
     {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+        // Load FCM credentials from configuration with validation
+        _fcmServerKey = configuration["Firebase:ServerKey"] ?? string.Empty;
+        _fcmSenderId = configuration["Firebase:SenderId"] ?? string.Empty;
+
+        // Validate credentials are properly configured (warn if not, don't crash for dev environments)
+        if (string.IsNullOrWhiteSpace(_fcmServerKey) || _fcmServerKey.StartsWith("YOUR_"))
+        {
+            _logger.LogWarning("Firebase:ServerKey is not configured. Push notifications will be simulated.");
+        }
+
+        if (string.IsNullOrWhiteSpace(_fcmSenderId) || _fcmSenderId.StartsWith("YOUR_"))
+        {
+            _logger.LogWarning("Firebase:SenderId is not configured. Push notifications will be simulated.");
+        }
+
         // Initialize sample data
         _userDeviceTokens[1] = new List<string> { "device_token_admin_1", "device_token_admin_2" };
         _userDeviceTokens[2] = new List<string> { "device_token_manager_1" };
@@ -70,18 +92,21 @@ public class PushNotificationService : IPushNotificationService
 
     public async Task<PushNotificationResult> SendAsync(PushNotificationRequest request)
     {
-        await Task.CompletedTask;
+        ArgumentNullException.ThrowIfNull(request);
 
         var tokens = new List<string>();
 
-        // Collect tokens from user IDs
+        // Collect tokens from user IDs (thread-safe access)
         if (request.UserIds?.Any() == true)
         {
             foreach (var userId in request.UserIds)
             {
                 if (_userDeviceTokens.TryGetValue(userId, out var userTokens))
                 {
-                    tokens.AddRange(userTokens);
+                    lock (_tokenLock)
+                    {
+                        tokens.AddRange(userTokens);
+                    }
                 }
             }
         }
@@ -143,11 +168,37 @@ public class PushNotificationService : IPushNotificationService
         // Check user preferences
         if (!ShouldSendNotification(userId, type))
         {
-            return new PushNotificationResult
+            var result = new PushNotificationResult
             {
                 Success = false,
                 ErrorMessage = "User has disabled this notification type"
             };
+
+            // Log the skipped notification for audit trail
+            var log = new NotificationLog
+            {
+                Id = ++_notificationLogIdCounter,
+                UserId = userId,
+                DeviceToken = string.Join(",", _userDeviceTokens.GetValueOrDefault(userId) ?? new List<string>()),
+                Type = type,
+                Title = title,
+                Body = body,
+                Success = false,
+                ErrorMessage = result.ErrorMessage,
+                SentAt = DateTime.UtcNow
+            };
+            _notificationLogs.Add(log);
+
+            // Fire event for consistency
+            OnNotificationSent(new PushNotificationSentEventArgs
+            {
+                UserId = userId,
+                Type = type,
+                Success = false,
+                SentAt = DateTime.UtcNow
+            });
+
+            return result;
         }
 
         return await SendAsync(new PushNotificationRequest
@@ -552,16 +603,19 @@ public class PushNotificationService : IPushNotificationService
 
     /// <summary>
     /// Registers a device token for a user (for testing).
+    /// Thread-safe implementation.
     /// </summary>
     public void RegisterDeviceToken(int userId, string token)
     {
-        if (!_userDeviceTokens.ContainsKey(userId))
+        ArgumentException.ThrowIfNullOrWhiteSpace(token);
+
+        lock (_tokenLock)
         {
-            _userDeviceTokens[userId] = new List<string>();
-        }
-        if (!_userDeviceTokens[userId].Contains(token))
-        {
-            _userDeviceTokens[userId].Add(token);
+            var tokens = _userDeviceTokens.GetOrAdd(userId, _ => new List<string>());
+            if (!tokens.Contains(token))
+            {
+                tokens.Add(token);
+            }
         }
     }
 
@@ -575,18 +629,21 @@ public class PushNotificationService : IPushNotificationService
 
     /// <summary>
     /// Adds users to a role (for testing).
+    /// Thread-safe implementation.
     /// </summary>
     public void AddUsersToRole(string role, params int[] userIds)
     {
-        if (!_roleUsers.ContainsKey(role))
+        ArgumentException.ThrowIfNullOrWhiteSpace(role);
+
+        lock (_tokenLock)
         {
-            _roleUsers[role] = new List<int>();
-        }
-        foreach (var userId in userIds)
-        {
-            if (!_roleUsers[role].Contains(userId))
+            var users = _roleUsers.GetOrAdd(role, _ => new List<int>());
+            foreach (var userId in userIds)
             {
-                _roleUsers[role].Add(userId);
+                if (!users.Contains(userId))
+                {
+                    users.Add(userId);
+                }
             }
         }
     }
