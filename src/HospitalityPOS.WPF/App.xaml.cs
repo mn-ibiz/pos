@@ -1,0 +1,407 @@
+using System.IO;
+using System.Windows;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Serilog;
+using HospitalityPOS.Core.Interfaces;
+using HospitalityPOS.Infrastructure.Extensions;
+using HospitalityPOS.Infrastructure.Services;
+using HospitalityPOS.Infrastructure.Printing;
+using HospitalityPOS.Business.Extensions;
+using HospitalityPOS.WPF.Services;
+using HospitalityPOS.WPF.ViewModels;
+using HospitalityPOS.WPF.Views;
+using HospitalityPOS.Infrastructure.BackgroundJobs;
+using HospitalityPOS.Infrastructure.Services;
+
+namespace HospitalityPOS.WPF;
+
+/// <summary>
+/// Application entry point and dependency injection configuration.
+/// </summary>
+public partial class App : Application
+{
+    private readonly IHost _host;
+
+    /// <summary>
+    /// Gets the service provider for resolving dependencies.
+    /// </summary>
+    public static IServiceProvider Services { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the application configuration.
+    /// </summary>
+    public static IConfiguration Configuration { get; private set; } = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="App"/> class.
+    /// </summary>
+    public App()
+    {
+        // Build configuration
+        Configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production"}.json", optional: true)
+            .Build();
+
+        // Configure Serilog
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.File(
+                path: "logs/pos-.log",
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 30,
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+            .CreateLogger();
+
+        _host = Host.CreateDefaultBuilder()
+            .UseSerilog()
+            .ConfigureServices((context, services) =>
+            {
+                ConfigureServices(services);
+            })
+            .Build();
+
+        Services = _host.Services;
+    }
+
+    private static void ConfigureServices(IServiceCollection services)
+    {
+        // Get connection string from configuration
+        var connectionString = Configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found in configuration.");
+
+        // Register Infrastructure services (DbContext, UnitOfWork, Repositories)
+        services.AddInfrastructureServices(connectionString);
+
+        // Register Business services
+        services.AddBusinessServices();
+
+        // Register HttpClientFactory with named clients for external API integrations
+        services.AddHttpClient("EtimsApi", client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(30);
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+        });
+
+        services.AddHttpClient("MpesaApi", client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(30);
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+        });
+
+        // Cloud Sync API client (Epic 25)
+        services.AddHttpClient("CloudSync", client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(30);
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+        });
+
+        // Configure Cloud API settings
+        services.Configure<CloudApiSettings>(Configuration.GetSection(CloudApiSettings.SectionName));
+
+        // Password service (Singleton - stateless)
+        services.AddSingleton<IPasswordService, PasswordService>();
+
+        // User and Session services
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IRoleService, RoleService>();
+        services.AddSingleton<ISessionService, SessionService>();
+        services.AddSingleton<IAutoLogoutService, AutoLogoutService>();
+
+        // Authorization service (Singleton - caches permissions per user)
+        services.AddSingleton<IAuthorizationService, AuthorizationService>();
+
+        // Permission override service (Singleton - uses IServiceScopeFactory internally)
+        services.AddSingleton<IPermissionOverrideService, PermissionOverrideService>();
+
+        // Work period service (Scoped - accesses DbContext directly)
+        services.AddScoped<IWorkPeriodService, WorkPeriodService>();
+
+        // Category service (Scoped - accesses DbContext directly)
+        services.AddScoped<ICategoryService, CategoryService>();
+
+        // Product service (Scoped - accesses DbContext directly)
+        services.AddScoped<IProductService, ProductService>();
+
+        // Offer service (Scoped - accesses DbContext directly)
+        services.AddScoped<IOfferService, OfferService>();
+
+        // Supplier credit service (Scoped - accesses DbContext directly)
+        services.AddScoped<ISupplierCreditService, SupplierCreditService>();
+
+        // Employee service (Scoped - accesses DbContext directly)
+        services.AddScoped<IEmployeeService, EmployeeService>();
+
+        // Attendance service (Scoped - accesses DbContext directly)
+        services.AddScoped<IAttendanceService, AttendanceService>();
+
+        // Payroll service (Scoped - accesses DbContext directly)
+        services.AddScoped<IPayrollService, PayrollService>();
+
+        // Accounting service (Scoped - accesses DbContext directly)
+        services.AddScoped<IAccountingService, AccountingService>();
+
+        // eTIMS service (Scoped - accesses DbContext directly)
+        services.AddScoped<IEtimsService, EtimsService>();
+
+        // eTIMS QR Code service (Scoped - generates QR codes for receipts)
+        services.AddScoped<IEtimsQrCodeService, EtimsQrCodeService>();
+
+        // M-Pesa service (Scoped - accesses DbContext directly)
+        services.AddScoped<IMpesaService, MpesaService>();
+
+        // Barcode service (Scoped - accesses DbContext directly)
+        services.AddScoped<IBarcodeService, BarcodeService>();
+
+        // Order service (Scoped - accesses DbContext directly)
+        services.AddScoped<IOrderService, OrderService>();
+
+        // Receipt service (Scoped - accesses DbContext directly)
+        services.AddScoped<IReceiptService, ReceiptService>();
+
+        // Receipt split service (Scoped - accesses DbContext directly)
+        services.AddScoped<IReceiptSplitService, ReceiptSplitService>();
+
+        // Receipt merge service (Scoped - accesses DbContext directly)
+        services.AddScoped<IReceiptMergeService, ReceiptMergeService>();
+
+        // Receipt void service (Scoped - accesses DbContext directly)
+        services.AddScoped<IReceiptVoidService, ReceiptVoidService>();
+
+        // Payment method service (Scoped - accesses DbContext directly)
+        services.AddScoped<IPaymentMethodService, PaymentMethodService>();
+
+        // Floor service (Scoped - accesses DbContext directly)
+        services.AddScoped<IFloorService, FloorService>();
+
+        // Table transfer service (Scoped - accesses DbContext directly)
+        services.AddScoped<ITableTransferService, TableTransferService>();
+
+        // Ownership service (Singleton - uses IServiceScopeFactory internally)
+        services.AddSingleton<IOwnershipService, OwnershipService>();
+
+        // Kitchen print service (Singleton - stateless printer operations)
+        services.AddSingleton<IKitchenPrintService, KitchenPrintService>();
+
+        // Report print service (Singleton - stateless printer operations)
+        services.AddSingleton<IReportPrintService, ReportPrintService>();
+
+        // Cash drawer service (Singleton - stateless drawer operations)
+        services.AddSingleton<ICashDrawerService, CashDrawerService>();
+
+        // System configuration service (Singleton - manages business mode and feature flags)
+        services.AddSingleton<ISystemConfigurationService, SystemConfigurationService>();
+
+        // UI shell service (Singleton - manages layout mode based on business mode)
+        services.AddSingleton<IUiShellService, UiShellService>();
+
+        // Image service (Singleton - stateless file operations)
+        services.AddSingleton<IImageService, ImageService>();
+
+        // Export service (Singleton - stateless export operations)
+        services.AddSingleton<IExportService, ExportService>();
+
+        // Dashboard service (Scoped - accesses DbContext for real-time data)
+        services.AddScoped<IDashboardService, DashboardService>();
+
+        // Background Jobs (Hosted Services)
+        services.AddHostedService<ExpireBatchesJob>();    // Daily at midnight
+        services.AddHostedService<ExpirePointsJob>();     // Monthly on 1st
+        services.AddHostedService<ExpireReservationsJob>(); // Hourly
+
+        // Configure points expiry options
+        services.Configure<PointsExpiryOptions>(Configuration.GetSection(PointsExpiryOptions.SectionName));
+
+        // Printer discovery service (Singleton - stateless printer detection)
+        services.AddSingleton<IPrinterDiscoveryService, PrinterDiscoveryService>();
+
+        // Printer service (Scoped - accesses DbContext directly)
+        services.AddScoped<IPrinterService, PrinterService>();
+
+        // Kitchen order routing service (Scoped - accesses DbContext for order routing)
+        services.AddScoped<IKitchenOrderRoutingService, KitchenOrderRoutingService>();
+
+        // Printer communication service (Singleton - Windows API for raw printing)
+        services.AddSingleton<IPrinterCommunicationService, PrinterCommunicationService>();
+
+        // Print queue manager (Singleton - manages print job queue with retry)
+        services.AddSingleton<IPrintQueueManager, PrintQueueManager>();
+
+        // Image converter (Singleton - converts images to ESC/POS raster format)
+        services.AddSingleton<IImageConverter, ImageConverter>();
+
+        // Navigation and Dialog services (Singleton - shared across app)
+        services.AddSingleton<INavigationService, NavigationService>();
+        services.AddSingleton<IDialogService, DialogService>();
+
+        // Register ViewModels (Transient - new instance each navigation)
+        services.AddTransient<MainViewModel>();
+        services.AddTransient<LoginViewModel>();
+        services.AddTransient<AutoLogoutSettingsViewModel>();
+        services.AddTransient<ChangePasswordViewModel>();
+        services.AddTransient<RoleManagementViewModel>();
+        services.AddTransient<RoleEditorViewModel>();
+        services.AddTransient<UserManagementViewModel>();
+        services.AddTransient<UserEditorViewModel>();
+        services.AddTransient<CategoryManagementViewModel>();
+        services.AddTransient<ProductManagementViewModel>();
+        services.AddTransient<POSViewModel>();
+        services.AddTransient<SettlementViewModel>();
+        services.AddTransient<PaymentMethodsViewModel>();
+        services.AddTransient<InventoryViewModel>();
+        services.AddTransient<StockAlertWidgetViewModel>();
+        services.AddTransient<SuppliersViewModel>();
+        services.AddTransient<PurchaseOrdersViewModel>();
+        services.AddTransient<SalesReportsViewModel>();
+        services.AddTransient<ExceptionReportsViewModel>();
+        services.AddTransient<InventoryReportsViewModel>();
+        services.AddTransient<AuditReportsViewModel>();
+        services.AddTransient<GoodsReceivingViewModel>();
+        services.AddTransient<DirectReceivingViewModel>();
+        services.AddTransient<ExportDialogViewModel>();
+        // Factory for creating ExportDialogViewModel (used by SalesReportsViewModel)
+        services.AddSingleton<Func<ExportDialogViewModel>>(sp => () => sp.GetRequiredService<ExportDialogViewModel>());
+        services.AddTransient<FloorManagementViewModel>();
+        services.AddTransient<FloorDialogViewModel>();
+        services.AddTransient<TableDialogViewModel>();
+        services.AddTransient<SectionDialogViewModel>();
+        services.AddTransient<TableMapViewModel>();
+        services.AddTransient<PrinterSettingsViewModel>();
+        services.AddTransient<KitchenPrinterSettingsViewModel>();
+        services.AddTransient<CashDrawerSettingsViewModel>();
+        services.AddTransient<SetupWizardViewModel>();
+        services.AddTransient<FeatureSettingsViewModel>();
+        services.AddTransient<OffersViewModel>();
+        services.AddTransient<OfferEditorViewModel>();
+        services.AddTransient<OfferReportViewModel>();
+        services.AddTransient<SupplierInvoicesViewModel>();
+        services.AddTransient<SupplierStatementViewModel>();
+        services.AddTransient<EmployeesViewModel>();
+        services.AddTransient<EmployeeEditorViewModel>();
+        services.AddTransient<AttendanceViewModel>();
+        services.AddTransient<PayrollViewModel>();
+        services.AddTransient<PayslipHistoryViewModel>();
+        services.AddTransient<ChartOfAccountsViewModel>();
+        services.AddTransient<JournalEntriesViewModel>();
+        services.AddTransient<FinancialReportsViewModel>();
+        services.AddTransient<EtimsDashboardViewModel>();
+        services.AddTransient<EtimsDeviceSettingsViewModel>();
+        services.AddTransient<MpesaDashboardViewModel>();
+        services.AddTransient<MpesaSettingsViewModel>();
+        services.AddTransient<PLUManagementViewModel>();
+        services.AddTransient<BarcodeSettingsViewModel>();
+        services.AddTransient<CustomerEnrollmentViewModel>();
+        services.AddTransient<DashboardViewModel>();
+
+        // Stock Transfer ViewModels (Epic 23)
+        services.AddTransient<StockTransferViewModel>();
+        services.AddTransient<CreateTransferRequestViewModel>();
+        services.AddTransient<TransferDetailsViewModel>();
+        services.AddTransient<TransferApprovalViewModel>();
+        services.AddTransient<TransferReceiveViewModel>();
+
+        // Batch/Expiry ViewModels (Epic 24)
+        services.AddTransient<BatchManagementViewModel>();
+        services.AddTransient<ExpiryAlertsViewModel>();
+
+        // Loyalty ViewModels (Epic 39)
+        services.AddTransient<CustomerListViewModel>();
+        services.AddTransient<LoyaltySettingsViewModel>();
+
+        // Email ViewModels (Epic 40)
+        services.AddTransient<EmailSettingsViewModel>();
+
+        // Email Services (Epic 40)
+        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IEmailReportService, EmailReportService>();
+        services.AddScoped<EmailTriggerService>();
+        services.AddHostedService<EmailSchedulerService>();
+
+        // Future ViewModels:
+        // services.AddTransient<SettingsViewModel>();
+
+        // Register Views
+        services.AddTransient<MainWindow>();
+
+        // Serilog logger
+        services.AddSingleton(Log.Logger);
+
+        // Configuration
+        services.AddSingleton(Configuration);
+    }
+
+    /// <inheritdoc />
+    protected override async void OnStartup(StartupEventArgs e)
+    {
+        try
+        {
+            await _host.StartAsync();
+
+            Log.Information("Application starting up");
+
+            // Initialize database - apply migrations and seed data
+            Log.Information("Initializing database...");
+            await Services.InitializeDatabaseAsync(seed: true);
+            Log.Information("Database initialized successfully");
+
+            // Show the main window
+            var mainWindow = Services.GetRequiredService<MainWindow>();
+            mainWindow.Show();
+
+            // Check if initial setup is complete
+            var configService = Services.GetRequiredService<ISystemConfigurationService>();
+            var setupComplete = await configService.IsSetupCompleteAsync();
+
+            var navigationService = Services.GetRequiredService<INavigationService>();
+
+            if (!setupComplete)
+            {
+                // First run - show setup wizard
+                Log.Information("First run detected - showing setup wizard");
+                navigationService.NavigateTo<SetupWizardViewModel>();
+            }
+            else
+            {
+                // Setup complete - navigate to login screen
+                navigationService.NavigateTo<LoginViewModel>();
+                Log.Information("Navigation to Login screen completed");
+            }
+
+            base.OnStartup(e);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed during application startup");
+            MessageBox.Show(
+                $"Failed to start application: {ex.Message}\n\nPlease ensure SQL Server Express is running.",
+                "Startup Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            Shutdown(1);
+        }
+    }
+
+    /// <inheritdoc />
+    protected override async void OnExit(ExitEventArgs e)
+    {
+        try
+        {
+            Log.Information("Application shutting down");
+
+            await _host.StopAsync();
+            _host.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error during application shutdown");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+            base.OnExit(e);
+        }
+    }
+}

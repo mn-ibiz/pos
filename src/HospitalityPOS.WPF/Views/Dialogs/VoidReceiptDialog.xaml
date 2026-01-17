@@ -1,0 +1,259 @@
+<Window x:Class="HospitalityPOS.WPF.Views.Dialogs.VoidReceiptDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Void Receipt"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Width="500"
+        Height="600"
+        Background="#1E1E2E"
+        AllowsTransparency="True">
+
+    <Window.Resources>
+        <Style x:Key="ReasonRadioButton" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,4,0,4"/>
+            <Setter Property="Padding" Value="8,8,8,8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="RootBorder"
+                                Background="#2D2D44"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}"
+                                Cursor="Hand">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Ellipse x:Name="OuterCircle"
+                                         Width="18" Height="18"
+                                         Stroke="#6B7280"
+                                         StrokeThickness="2"
+                                         Fill="Transparent"/>
+                                <Ellipse x:Name="InnerCircle"
+                                         Width="10" Height="10"
+                                         Fill="#EF4444"
+                                         Visibility="Collapsed"/>
+                                <ContentPresenter Grid.Column="1"
+                                                  VerticalAlignment="Center"
+                                                  Margin="8,0,0,0"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="OuterCircle" Property="Stroke" Value="#EF4444"/>
+                                <Setter TargetName="InnerCircle" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="RootBorder" Property="Background" Value="#3D3D5C"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RootBorder" Property="Background" Value="#3D3D5C"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="VoidButton" TargetType="Button">
+            <Setter Property="Background" Value="#EF4444"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="16,8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#DC2626"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#4B5563"/>
+                                <Setter Property="Foreground" Value="#9CA3AF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CancelButton" TargetType="Button">
+            <Setter Property="Background" Value="#374151"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="16,8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#4B5563"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border BorderBrush="#3D3D5C" BorderThickness="1" CornerRadius="8">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0" Background="#2D2D44" CornerRadius="8,8,0,0">
+                <StackPanel Margin="20,16">
+                    <TextBlock Text="VOID RECEIPT"
+                               Foreground="#EF4444"
+                               FontSize="20"
+                               FontWeight="Bold"/>
+                    <TextBlock x:Name="ReceiptNumberText"
+                               Text="R-20251220-0001"
+                               Foreground="White"
+                               FontSize="16"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Content -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="20,16">
+                    <!-- Warning -->
+                    <Border Background="#7F1D1D" CornerRadius="6" Padding="12" Margin="0,0,0,16">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="⚠"
+                                       Foreground="#FBBF24"
+                                       FontSize="18"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="This action cannot be undone"
+                                       Foreground="#FCA5A5"
+                                       FontSize="14"
+                                       VerticalAlignment="Center"
+                                       Margin="12,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Receipt Summary -->
+                    <TextBlock Text="Receipt Summary:"
+                               Foreground="#9CA3AF"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,8"/>
+                    <Border Background="#2D2D44" CornerRadius="6" Padding="12" Margin="0,0,0,16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Row="0" Grid.Column="0">
+                                <TextBlock Text="Table" Foreground="#6B7280" FontSize="11"/>
+                                <TextBlock x:Name="TableText" Text="5" Foreground="White" FontSize="14"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="1">
+                                <TextBlock Text="Status" Foreground="#6B7280" FontSize="11"/>
+                                <TextBlock x:Name="StatusText" Text="Pending" Foreground="#FBBF24" FontSize="14"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,12,0,0">
+                                <TextBlock Text="Total Amount" Foreground="#6B7280" FontSize="11"/>
+                                <TextBlock x:Name="TotalText" Text="KSh 2,262.00" Foreground="#22C55E" FontSize="16" FontWeight="Bold"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,12,0,0">
+                                <TextBlock Text="Items" Foreground="#6B7280" FontSize="11"/>
+                                <TextBlock x:Name="ItemCountText" Text="5" Foreground="White" FontSize="14"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,12,0,0">
+                                <TextBlock Text="Created By" Foreground="#6B7280" FontSize="11"/>
+                                <TextBlock x:Name="CreatedByText" Text="John Smith" Foreground="White" FontSize="14"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Void Reason Selection -->
+                    <TextBlock Text="Void Reason (Required):"
+                               Foreground="White"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,8"/>
+
+                    <StackPanel x:Name="ReasonsPanel">
+                        <!-- Reasons populated programmatically -->
+                    </StackPanel>
+
+                    <!-- Additional Notes -->
+                    <TextBlock x:Name="NotesLabel"
+                               Text="Additional Notes:"
+                               Foreground="#9CA3AF"
+                               FontSize="12"
+                               Margin="0,16,0,8"/>
+                    <TextBox x:Name="NotesTextBox"
+                             Height="80"
+                             Background="#2D2D44"
+                             Foreground="White"
+                             BorderBrush="#3D3D5C"
+                             BorderThickness="1"
+                             Padding="12"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             FontSize="14"/>
+
+                    <!-- Error Message -->
+                    <TextBlock x:Name="ErrorMessageText"
+                               Foreground="#EF4444"
+                               FontSize="12"
+                               Visibility="Collapsed"
+                               Margin="0,8,0,0"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Footer Buttons -->
+            <Border Grid.Row="2" Background="#2D2D44" CornerRadius="0,0,8,8" Padding="20,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            Content="Cancel"
+                            Style="{StaticResource CancelButton}"
+                            Click="CancelButton_Click"/>
+
+                    <Button x:Name="VoidButton"
+                            Grid.Column="2"
+                            Content="Void Receipt"
+                            Style="{StaticResource VoidButton}"
+                            Click="VoidButton_Click"
+                            IsEnabled="False"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

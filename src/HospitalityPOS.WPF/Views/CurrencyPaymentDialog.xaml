@@ -1,0 +1,446 @@
+<Window x:Class="HospitalityPOS.WPF.Views.CurrencyPaymentDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Multi-Currency Payment"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Width="600" Height="700">
+    <Window.Resources>
+        <!-- Dark Theme Colors -->
+        <SolidColorBrush x:Key="PrimaryBackground" Color="#1E1E2E"/>
+        <SolidColorBrush x:Key="SecondaryBackground" Color="#2D2D3D"/>
+        <SolidColorBrush x:Key="CardBackground" Color="#363647"/>
+        <SolidColorBrush x:Key="PrimaryText" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="SecondaryText" Color="#A0A0B0"/>
+        <SolidColorBrush x:Key="AccentBlue" Color="#3B82F6"/>
+        <SolidColorBrush x:Key="AccentGreen" Color="#22C55E"/>
+        <SolidColorBrush x:Key="AccentYellow" Color="#F59E0B"/>
+        <SolidColorBrush x:Key="AccentRed" Color="#EF4444"/>
+
+        <!-- Currency Card Style -->
+        <Style x:Key="CurrencyCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <!-- Button Styles -->
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBlue}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="24,12"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#4F8EF7"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#4A4A5A"/>
+                    <Setter Property="Foreground" Value="#6A6A7A"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource SecondaryText}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource SecondaryText}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2A2A3A"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="QuickAmountButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+            <Setter Property="Foreground" Value="{StaticResource PrimaryText}"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#464657"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Bool to Visibility Converter -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+    </Window.Resources>
+
+    <Border Background="{StaticResource PrimaryBackground}" CornerRadius="16">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0" Background="{StaticResource AccentBlue}"
+                    CornerRadius="16,16,0,0" Padding="20,16">
+                <Grid>
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="MULTI-CURRENCY PAYMENT"
+                                   FontSize="18" FontWeight="Bold"
+                                   Foreground="White"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Select payment currency"
+                                   FontSize="12"
+                                   Foreground="#FFFFFFCC"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <!-- Close Button -->
+                    <Button Content="X"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Background="Transparent"
+                            Foreground="White"
+                            BorderThickness="0"
+                            FontSize="18"
+                            Width="30" Height="30"
+                            Cursor="Hand"
+                            Command="{Binding CancelCommand}"/>
+                </Grid>
+            </Border>
+
+            <!-- Content -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="24">
+                    <!-- Amount Due in Base Currency -->
+                    <Border Background="{StaticResource SecondaryBackground}"
+                            CornerRadius="8" Padding="20" Margin="0,0,0,20">
+                        <StackPanel>
+                            <TextBlock Text="Amount Due"
+                                       FontSize="12"
+                                       Foreground="{StaticResource SecondaryText}"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding FormattedAmountDueBase}"
+                                       FontSize="36" FontWeight="Bold"
+                                       Foreground="{StaticResource PrimaryText}"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Currency Selection -->
+                    <TextBlock Text="Select Currency"
+                               FontSize="14" FontWeight="SemiBold"
+                               Foreground="{StaticResource PrimaryText}"
+                               Margin="0,0,0,12"/>
+
+                    <ItemsControl ItemsSource="{Binding AvailableCurrencies}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="3"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.SelectCurrencyCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}"
+                                        Margin="4">
+                                    <Button.Template>
+                                        <ControlTemplate>
+                                            <Border x:Name="CurrencyBorder"
+                                                    Background="{StaticResource CardBackground}"
+                                                    CornerRadius="8"
+                                                    Padding="12"
+                                                    Cursor="Hand">
+                                                <StackPanel HorizontalAlignment="Center">
+                                                    <TextBlock Text="{Binding Symbol}"
+                                                               FontSize="24" FontWeight="Bold"
+                                                               Foreground="{StaticResource PrimaryText}"
+                                                               HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Code}"
+                                                               FontSize="14"
+                                                               Foreground="{StaticResource SecondaryText}"
+                                                               HorizontalAlignment="Center"
+                                                               Margin="0,4,0,0"/>
+                                                    <TextBlock Text="{Binding Name}"
+                                                               FontSize="10"
+                                                               Foreground="{StaticResource SecondaryText}"
+                                                               HorizontalAlignment="Center"
+                                                               TextWrapping="Wrap"
+                                                               TextAlignment="Center"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="CurrencyBorder" Property="Background" Value="#464657"/>
+                                                </Trigger>
+                                                <DataTrigger Value="True">
+                                                    <DataTrigger.Binding>
+                                                        <MultiBinding Converter="{x:Null}">
+                                                            <!-- In production, use a proper equality converter -->
+                                                        </MultiBinding>
+                                                    </DataTrigger.Binding>
+                                                    <Setter TargetName="CurrencyBorder" Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
+                                                </DataTrigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Selected Currency & Exchange Rate -->
+                    <Border Background="{StaticResource CardBackground}"
+                            CornerRadius="8" Padding="16"
+                            Margin="0,20,0,0"
+                            Visibility="{Binding IsCurrencySelected, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Amount Due in Selected Currency"
+                                               FontSize="12"
+                                               Foreground="{StaticResource SecondaryText}"/>
+                                    <TextBlock Text="{Binding FormattedAmountDueSelected}"
+                                               FontSize="28" FontWeight="Bold"
+                                               Foreground="{StaticResource AccentBlue}"
+                                               Margin="0,4,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Exchange Rate"
+                                               FontSize="10"
+                                               Foreground="{StaticResource SecondaryText}"
+                                               HorizontalAlignment="Right"/>
+                                    <TextBlock Text="{Binding ExchangeRateDisplay}"
+                                               FontSize="12"
+                                               Foreground="{StaticResource SecondaryText}"
+                                               HorizontalAlignment="Right"
+                                               Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Warning Message -->
+                            <Border Background="#2D2520"
+                                    CornerRadius="4" Padding="8"
+                                    Margin="0,12,0,0"
+                                    Visibility="{Binding HasExchangeRateWarning, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="{Binding WarningMessage}"
+                                           FontSize="12"
+                                           Foreground="{StaticResource AccentYellow}"/>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Amount Paid Input -->
+                    <TextBlock Text="Amount Paid"
+                               FontSize="14" FontWeight="SemiBold"
+                               Foreground="{StaticResource PrimaryText}"
+                               Margin="0,20,0,12"/>
+
+                    <Border Background="{StaticResource SecondaryBackground}"
+                            CornerRadius="8" Padding="16">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="{Binding SelectedCurrency.Symbol, FallbackValue='KSh'}"
+                                           FontSize="24" FontWeight="Bold"
+                                           Foreground="{StaticResource SecondaryText}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,12,0"/>
+
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding AmountPaid, UpdateSourceTrigger=PropertyChanged}"
+                                         FontSize="32" FontWeight="Bold"
+                                         Background="Transparent"
+                                         Foreground="{StaticResource PrimaryText}"
+                                         BorderThickness="0"
+                                         HorizontalAlignment="Stretch"
+                                         VerticalContentAlignment="Center"/>
+                            </Grid>
+
+                            <!-- Quick Amount Buttons -->
+                            <TextBlock Text="Quick amounts"
+                                       FontSize="11"
+                                       Foreground="{StaticResource SecondaryText}"
+                                       Margin="0,16,0,8"/>
+
+                            <WrapPanel>
+                                <Button Content="Exact"
+                                        Command="{Binding SetExactAmountCommand}"
+                                        Style="{StaticResource QuickAmountButtonStyle}"/>
+                                <Button Content="1"
+                                        Command="{Binding SetQuickAmountCommand}"
+                                        CommandParameter="1"
+                                        Style="{StaticResource QuickAmountButtonStyle}"/>
+                                <Button Content="5"
+                                        Command="{Binding SetQuickAmountCommand}"
+                                        CommandParameter="5"
+                                        Style="{StaticResource QuickAmountButtonStyle}"/>
+                                <Button Content="10"
+                                        Command="{Binding SetQuickAmountCommand}"
+                                        CommandParameter="10"
+                                        Style="{StaticResource QuickAmountButtonStyle}"/>
+                                <Button Content="20"
+                                        Command="{Binding SetQuickAmountCommand}"
+                                        CommandParameter="20"
+                                        Style="{StaticResource QuickAmountButtonStyle}"/>
+                                <Button Content="50"
+                                        Command="{Binding SetQuickAmountCommand}"
+                                        CommandParameter="50"
+                                        Style="{StaticResource QuickAmountButtonStyle}"/>
+                                <Button Content="100"
+                                        Command="{Binding SetQuickAmountCommand}"
+                                        CommandParameter="100"
+                                        Style="{StaticResource QuickAmountButtonStyle}"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Change Display -->
+                    <Border Background="{StaticResource AccentGreen}"
+                            CornerRadius="8" Padding="16"
+                            Margin="0,20,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Change (in KES)"
+                                       FontSize="12"
+                                       Foreground="#FFFFFFCC"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding FormattedChange}"
+                                       FontSize="32" FontWeight="Bold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Receipt Preview -->
+                    <Border Background="{StaticResource CardBackground}"
+                            CornerRadius="8" Padding="16"
+                            Margin="0,20,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Receipt will show:"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{StaticResource SecondaryText}"
+                                       Margin="0,0,0,8"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,4">
+                                <TextBlock Text="Total:" Width="120"
+                                           Foreground="{StaticResource SecondaryText}"/>
+                                <TextBlock Text="{Binding FormattedAmountDueBase}"
+                                           Foreground="{StaticResource PrimaryText}"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,4">
+                                <TextBlock Text="Paid:" Width="120"
+                                           Foreground="{StaticResource SecondaryText}"/>
+                                <TextBlock Foreground="{StaticResource PrimaryText}">
+                                    <Run Text="{Binding SelectedCurrency.Symbol, Mode=OneWay}"/>
+                                    <Run Text=" "/>
+                                    <Run Text="{Binding AmountPaid, StringFormat=N2, Mode=OneWay}"/>
+                                    <Run Text=" ("/>
+                                    <Run Text="{Binding SelectedCurrency.Code, Mode=OneWay}"/>
+                                    <Run Text=")"/>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,4">
+                                <TextBlock Text="Exchange Rate:" Width="120"
+                                           Foreground="{StaticResource SecondaryText}"/>
+                                <TextBlock Text="{Binding ExchangeRateDisplay}"
+                                           Foreground="{StaticResource PrimaryText}"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,4">
+                                <TextBlock Text="Change:" Width="120"
+                                           Foreground="{StaticResource SecondaryText}"/>
+                                <TextBlock Text="{Binding FormattedChange}"
+                                           Foreground="{StaticResource AccentGreen}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Footer Buttons -->
+            <Border Grid.Row="2" Background="{StaticResource SecondaryBackground}"
+                    CornerRadius="0,0,16,16" Padding="24,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="1"
+                            Content="Cancel"
+                            Command="{Binding CancelCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Margin="0,0,12,0"/>
+
+                    <Button Grid.Column="2"
+                            Content="Confirm Payment"
+                            Command="{Binding ConfirmPaymentCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

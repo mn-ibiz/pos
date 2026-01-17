@@ -1,0 +1,756 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.KitchenPrinterSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="900" d:DesignWidth="1400"
+             Background="#1E1E2E">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
+
+        <!-- Action Button Style -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="4,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="16,8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="#4E4E6E"/>
+        </Style>
+
+        <!-- Small Button Style -->
+        <Style x:Key="SmallActionButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="MinHeight" Value="32"/>
+            <Setter Property="MinWidth" Value="80"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <!-- TextBox Style -->
+        <Style x:Key="SettingsTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#3D3D5C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          VerticalAlignment="Center"
+                                          Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#F97316"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ComboBox Style -->
+        <Style x:Key="SettingsComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#3D3D5C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <!-- RadioButton Style -->
+        <Style x:Key="SettingsRadioButton" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="border"
+                                Background="#2D2D44"
+                                BorderBrush="#4E4E6E"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="12,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="radioBorder"
+                                        Width="20" Height="20"
+                                        CornerRadius="10"
+                                        Background="#3D3D5C"
+                                        BorderBrush="#4E4E6E"
+                                        BorderThickness="2"
+                                        VerticalAlignment="Center">
+                                    <Ellipse x:Name="radioDot"
+                                             Width="10" Height="10"
+                                             Fill="#F97316"
+                                             Visibility="Collapsed"/>
+                                </Border>
+                                <ContentPresenter Grid.Column="1"
+                                                  Margin="12,0,0,0"
+                                                  VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#F97316"/>
+                                <Setter TargetName="border" Property="Background" Value="#3D2D1F"/>
+                                <Setter TargetName="radioBorder" Property="BorderBrush" Value="#F97316"/>
+                                <Setter TargetName="radioDot" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3D3D5C"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- CheckBox Style -->
+        <Style x:Key="SettingsCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="checkBorder"
+                                    Width="24" Height="24"
+                                    Background="#3D3D5C"
+                                    BorderBrush="#4E4E6E"
+                                    BorderThickness="2"
+                                    CornerRadius="4"
+                                    VerticalAlignment="Center">
+                                <TextBlock x:Name="checkMark"
+                                           Text="&#10003;"
+                                           FontSize="14"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Visibility="Collapsed"/>
+                            </Border>
+                            <ContentPresenter Grid.Column="1"
+                                              Margin="12,0,0,0"
+                                              VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="checkBorder" Property="Background" Value="#F97316"/>
+                                <Setter TargetName="checkBorder" Property="BorderBrush" Value="#EA580C"/>
+                                <Setter TargetName="checkMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="checkBorder" Property="BorderBrush" Value="#6E6EAE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Category CheckBox Style -->
+        <Style x:Key="CategoryCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="border"
+                                Background="#3D3D5C"
+                                BorderBrush="#4E4E6E"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="10,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="checkBorder"
+                                        Width="20" Height="20"
+                                        Background="#2D2D44"
+                                        BorderBrush="#4E4E6E"
+                                        BorderThickness="2"
+                                        CornerRadius="4"
+                                        VerticalAlignment="Center">
+                                    <TextBlock x:Name="checkMark"
+                                               Text="&#10003;"
+                                               FontSize="12"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Visibility="Collapsed"/>
+                                </Border>
+                                <ContentPresenter Grid.Column="1"
+                                                  Margin="10,0,0,0"
+                                                  VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#F97316"/>
+                                <Setter TargetName="border" Property="Background" Value="#3D2D1F"/>
+                                <Setter TargetName="checkBorder" Property="Background" Value="#F97316"/>
+                                <Setter TargetName="checkBorder" Property="BorderBrush" Value="#EA580C"/>
+                                <Setter TargetName="checkMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#4D4D6C"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ListView Item Style -->
+        <Style x:Key="PrinterListViewItem" TargetType="ListViewItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="0"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}"
+                                Margin="0,2">
+                            <ContentPresenter HorizontalAlignment="Stretch"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#3D3D5C"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#F97316"/>
+                                <Setter TargetName="Bd" Property="BorderThickness" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#353550"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="280"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="300"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.ColumnSpan="3" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="1"
+                       Text="KITCHEN PRINTER CONFIGURATION"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Foreground="#F97316"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+
+            <Button Grid.Column="2"
+                    Content="+ Add Kitchen Printer"
+                    Style="{StaticResource ActionButton}"
+                    Background="#F97316"
+                    Command="{Binding AddKitchenPrinterCommand}"/>
+        </Grid>
+
+        <!-- Printer List Panel -->
+        <Border Grid.Row="1" Grid.Column="0"
+                Background="#2D2D44"
+                CornerRadius="12"
+                Margin="0,0,12,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- List Header -->
+                <Border Grid.Row="0" Background="#3D3D5C" CornerRadius="12,12,0,0" Padding="16,12">
+                    <TextBlock Text="Kitchen Printers"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="White"/>
+                </Border>
+
+                <!-- Printer List -->
+                <ListView Grid.Row="1"
+                          ItemsSource="{Binding KitchenPrinters}"
+                          SelectedItem="{Binding SelectedPrinter, Mode=TwoWay}"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          ItemContainerStyle="{StaticResource PrinterListViewItem}"
+                          Margin="8">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Printer Name and Status -->
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Name}"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Foreground="White"/>
+                                    <Border Background="#F97316"
+                                            CornerRadius="4"
+                                            Padding="6,2"
+                                            Margin="8,0,0,0"
+                                            Visibility="{Binding IsDefault, Converter={StaticResource BoolToVisibility}}">
+                                        <TextBlock Text="Default"
+                                                   FontSize="10"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"/>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- Connection Info -->
+                                <TextBlock Grid.Row="1"
+                                           FontSize="11"
+                                           Foreground="#9CA3AF"
+                                           Margin="0,4,0,0">
+                                    <Run Text="{Binding ConnectionType, Mode=OneWay}"/>
+                                    <Run Text=" - "/>
+                                    <Run Text="{Binding Status, Mode=OneWay}"/>
+                                </TextBlock>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <!-- List Actions -->
+                <StackPanel Grid.Row="2" Margin="12">
+                    <Button Content="Delete Printer"
+                            Style="{StaticResource ActionButton}"
+                            Background="#EF4444"
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding DeletePrinterCommand}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Printer Details Panel -->
+        <ScrollViewer Grid.Row="1" Grid.Column="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Margin="0,0,12,0">
+            <Border Background="#2D2D44"
+                    CornerRadius="12"
+                    Padding="20">
+                <StackPanel>
+                    <!-- Section: Printer Details -->
+                    <StackPanel Margin="0,0,0,20">
+                        <TextBlock Text="PRINTER DETAILS"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="#F97316"
+                                   Margin="0,0,0,12"/>
+
+                        <TextBlock Text="Printer Name"
+                                   Foreground="#9CA3AF"
+                                   FontSize="12"
+                                   Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding PrinterName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource SettingsTextBox}"/>
+                    </StackPanel>
+
+                    <!-- Section: Connection Type -->
+                    <StackPanel Margin="0,0,0,20">
+                        <TextBlock Text="CONNECTION TYPE"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="#F97316"
+                                   Margin="0,0,0,12"/>
+
+                        <UniformGrid Columns="2" Margin="0,0,0,8">
+                            <RadioButton Content="Network (TCP/IP)"
+                                         Style="{StaticResource SettingsRadioButton}"
+                                         IsChecked="{Binding IsNetwork}"
+                                         Command="{Binding SetConnectionTypeCommand}"
+                                         CommandParameter="Network"
+                                         Margin="0,0,4,4"/>
+                            <RadioButton Content="Windows Printer"
+                                         Style="{StaticResource SettingsRadioButton}"
+                                         IsChecked="{Binding IsWindowsDriver}"
+                                         Command="{Binding SetConnectionTypeCommand}"
+                                         CommandParameter="WindowsDriver"
+                                         Margin="4,0,0,4"/>
+                        </UniformGrid>
+
+                        <!-- Network Settings -->
+                        <StackPanel Visibility="{Binding IsNetwork, Converter={StaticResource BoolToVisibility}}"
+                                    Margin="0,8,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="IP Address"
+                                               Foreground="#9CA3AF"
+                                               FontSize="12"
+                                               Margin="0,0,0,6"/>
+                                    <TextBox Text="{Binding IpAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource SettingsTextBox}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Port"
+                                               Foreground="#9CA3AF"
+                                               FontSize="12"
+                                               Margin="0,0,0,6"/>
+                                    <TextBox Text="{Binding Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource SettingsTextBox}"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Windows Printer Selection -->
+                        <StackPanel Visibility="{Binding IsWindowsDriver, Converter={StaticResource BoolToVisibility}}"
+                                    Margin="0,8,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Windows Printer"
+                                           Foreground="#9CA3AF"
+                                           FontSize="12"
+                                           Margin="0,0,0,6"/>
+                                <Button Grid.Column="1"
+                                        Content="Detect"
+                                        Style="{StaticResource SmallActionButton}"
+                                        Background="#3B82F6"
+                                        Command="{Binding DetectPrintersCommand}"/>
+                            </Grid>
+                            <ComboBox ItemsSource="{Binding AvailableWindowsPrinters}"
+                                      SelectedValue="{Binding WindowsPrinterName, Mode=TwoWay}"
+                                      Style="{StaticResource SettingsComboBox}"
+                                      Height="44"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Section: Category Routing -->
+                    <StackPanel Margin="0,0,0,20">
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="CATEGORY ROUTING"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       Foreground="#F97316"/>
+                            <Button Grid.Column="1"
+                                    Content="All"
+                                    Style="{StaticResource SmallActionButton}"
+                                    Background="#22C55E"
+                                    MinWidth="50"
+                                    Command="{Binding SelectAllCategoriesCommand}"
+                                    Margin="0,0,4,0"/>
+                            <Button Grid.Column="2"
+                                    Content="None"
+                                    Style="{StaticResource SmallActionButton}"
+                                    Background="#6B7280"
+                                    MinWidth="50"
+                                    Command="{Binding DeselectAllCategoriesCommand}"/>
+                        </Grid>
+
+                        <Border Background="#1E1E2E"
+                                CornerRadius="8"
+                                Padding="8"
+                                MaxHeight="200">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding Categories}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding Category.Name}"
+                                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                      Style="{StaticResource CategoryCheckBox}"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Section: KOT Display Options -->
+                    <StackPanel Margin="0,0,0,20">
+                        <TextBlock Text="KOT DISPLAY OPTIONS"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="#F97316"
+                                   Margin="0,0,0,12"/>
+
+                        <UniformGrid Columns="2">
+                            <CheckBox Content="Show table number"
+                                      Style="{StaticResource SettingsCheckBox}"
+                                      IsChecked="{Binding ShowTableNumber}"/>
+                            <CheckBox Content="Show waiter name"
+                                      Style="{StaticResource SettingsCheckBox}"
+                                      IsChecked="{Binding ShowWaiterName}"/>
+                            <CheckBox Content="Show order time"
+                                      Style="{StaticResource SettingsCheckBox}"
+                                      IsChecked="{Binding ShowOrderTime}"/>
+                            <CheckBox Content="Show order number"
+                                      Style="{StaticResource SettingsCheckBox}"
+                                      IsChecked="{Binding ShowOrderNumber}"/>
+                            <CheckBox Content="Show category headers"
+                                      Style="{StaticResource SettingsCheckBox}"
+                                      IsChecked="{Binding ShowCategoryHeader}"/>
+                            <CheckBox Content="Group items by category"
+                                      Style="{StaticResource SettingsCheckBox}"
+                                      IsChecked="{Binding GroupByCategory}"/>
+                        </UniformGrid>
+                    </StackPanel>
+
+                    <!-- Section: Item Display -->
+                    <StackPanel Margin="0,0,0,20">
+                        <TextBlock Text="ITEM DISPLAY"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="#F97316"
+                                   Margin="0,0,0,12"/>
+
+                        <CheckBox Content="Show quantity in large font"
+                                  Style="{StaticResource SettingsCheckBox}"
+                                  IsChecked="{Binding ShowQuantityLarge}"/>
+                        <CheckBox Content="Indent modifiers"
+                                  Style="{StaticResource SettingsCheckBox}"
+                                  IsChecked="{Binding ShowModifiersIndented}"/>
+                        <CheckBox Content="Highlight notes/special requests"
+                                  Style="{StaticResource SettingsCheckBox}"
+                                  IsChecked="{Binding ShowNotesHighlighted}"/>
+                        <CheckBox Content="Highlight allergy information"
+                                  Style="{StaticResource SettingsCheckBox}"
+                                  IsChecked="{Binding HighlightAllergies}"/>
+                    </StackPanel>
+
+                    <!-- Section: Alerts -->
+                    <StackPanel Margin="0,0,0,20">
+                        <TextBlock Text="ALERTS"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="#F97316"
+                                   Margin="0,0,0,12"/>
+
+                        <CheckBox Content="Beep on print"
+                                  Style="{StaticResource SettingsCheckBox}"
+                                  IsChecked="{Binding BeepOnPrint}"/>
+
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Text="Beep count"
+                                           Foreground="#9CA3AF"
+                                           FontSize="12"
+                                           Margin="0,0,0,6"/>
+                                <TextBox Text="{Binding BeepCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SettingsTextBox}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="Copies per order"
+                                           Foreground="#9CA3AF"
+                                           FontSize="12"
+                                           Margin="0,0,0,6"/>
+                                <TextBox Text="{Binding CopiesPerOrder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SettingsTextBox}"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Status Message -->
+                    <Border CornerRadius="8"
+                            Padding="16,12"
+                            Margin="0,0,0,20"
+                            Visibility="{Binding HasStatusMessage, Converter={StaticResource BoolToVisibility}}">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="#374151"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsStatusSuccess}" Value="True">
+                                        <Setter Property="Background" Value="#166534"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsStatusSuccess}" Value="False">
+                                        <Setter Property="Background" Value="#991B1B"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="White"
+                                   FontSize="14"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+
+                    <!-- Action Buttons -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Content="Test KOT"
+                                Style="{StaticResource ActionButton}"
+                                Background="#6366F1"
+                                Command="{Binding TestPrintCommand}"
+                                Margin="0,0,4,0"/>
+                        <Button Grid.Column="1"
+                                Content="Check Status"
+                                Style="{StaticResource ActionButton}"
+                                Background="#0891B2"
+                                Command="{Binding CheckStatusCommand}"
+                                Margin="4,0"/>
+                        <Button Grid.Column="2"
+                                Content="Set Default"
+                                Style="{StaticResource ActionButton}"
+                                Background="#F59E0B"
+                                Command="{Binding SetAsDefaultCommand}"
+                                Margin="4,0"/>
+                        <Button Grid.Column="3"
+                                Content="Save"
+                                Style="{StaticResource ActionButton}"
+                                Background="#22C55E"
+                                Command="{Binding SaveCommand}"
+                                Margin="4,0,0,0"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+
+        <!-- KOT Preview Panel -->
+        <Border Grid.Row="1" Grid.Column="2"
+                Background="#2D2D44"
+                CornerRadius="12">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Preview Header -->
+                <Border Grid.Row="0" Background="#3D3D5C" CornerRadius="12,12,0,0" Padding="16,12">
+                    <TextBlock Text="KOT Preview"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="White"/>
+                </Border>
+
+                <!-- Preview Content -->
+                <Border Grid.Row="1"
+                        Background="#0D0D17"
+                        Margin="12"
+                        CornerRadius="8"
+                        Padding="16">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <TextBlock Text="{Binding KotPreview}"
+                                   FontFamily="Consolas"
+                                   FontSize="12"
+                                   Foreground="#22C55E"
+                                   TextWrapping="Wrap"/>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Loading Overlay -->
+        <Border Grid.Row="1" Grid.ColumnSpan="3"
+                Background="#80000000"
+                CornerRadius="12"
+                Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True"
+                             Width="200"
+                             Height="4"
+                             Foreground="#F97316"/>
+                <TextBlock Text="{Binding BusyMessage}"
+                           Foreground="White"
+                           FontSize="14"
+                           HorizontalAlignment="Center"
+                           Margin="0,16,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

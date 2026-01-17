@@ -1,0 +1,331 @@
+<Window x:Class="HospitalityPOS.WPF.Views.OfferEditorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        mc:Ignorable="d"
+        Title="{Binding Title}"
+        Width="600" Height="700"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <Style x:Key="FormLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#9CA3AF"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+
+        <Style x:Key="FormTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#252540"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          VerticalAlignment="Center"
+                                          Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#6E6EAE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FormComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#252540"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+        </Style>
+
+        <Style x:Key="FormDatePicker" TargetType="DatePicker">
+            <Setter Property="Background" Value="#252540"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+        </Style>
+
+        <Style x:Key="RadioButton" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,0,20,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="24,12">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="#4E4E6E"/>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="#1E1E2E" CornerRadius="16" BorderBrush="#4E4E6E" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0" Background="#252540" CornerRadius="16,16,0,0">
+                <Grid Margin="24,16">
+                    <TextBlock Text="{Binding Title}"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               VerticalAlignment="Center"/>
+                    <Button HorizontalAlignment="Right"
+                            Command="{Binding CancelCommand}"
+                            Background="Transparent"
+                            Cursor="Hand"
+                            MinWidth="32" MinHeight="32">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="border" Background="Transparent" CornerRadius="4">
+                                    <TextBlock Text="&#xE711;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="16"
+                                               Foreground="#9CA3AF"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="border" Property="Background" Value="#3D3D5C"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Form Content -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="24,16">
+                <StackPanel>
+                    <!-- Product Selection -->
+                    <TextBlock Style="{StaticResource FormLabel}" Text="Product *"/>
+                    <TextBox Style="{StaticResource FormTextBox}"
+                             Text="{Binding ProductSearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,4"/>
+                    <ComboBox Style="{StaticResource FormComboBox}"
+                              ItemsSource="{Binding Products}"
+                              SelectedItem="{Binding SelectedProduct}"
+                              DisplayMemberPath="Name"
+                              Margin="0,0,0,16"/>
+
+                    <!-- Offer Name -->
+                    <TextBlock Style="{StaticResource FormLabel}" Text="Offer Name *"/>
+                    <TextBox Style="{StaticResource FormTextBox}"
+                             Text="{Binding OfferName, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,16"/>
+
+                    <!-- Description -->
+                    <TextBlock Style="{StaticResource FormLabel}" Text="Description"/>
+                    <TextBox Style="{StaticResource FormTextBox}"
+                             Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                             Height="80"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             VerticalContentAlignment="Top"
+                             Margin="0,0,0,16"/>
+
+                    <!-- Pricing Type -->
+                    <TextBlock Style="{StaticResource FormLabel}" Text="Pricing Type"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <RadioButton Style="{StaticResource RadioButton}"
+                                     Content="Fixed Price"
+                                     IsChecked="{Binding IsFixedPriceMode}"
+                                     Command="{Binding SetFixedPriceModeCommand}"/>
+                        <RadioButton Style="{StaticResource RadioButton}"
+                                     Content="Discount Percentage"
+                                     IsChecked="{Binding IsPercentageMode}"
+                                     Command="{Binding SetPercentageModeCommand}"/>
+                    </StackPanel>
+
+                    <!-- Pricing Details -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Fixed Price Input -->
+                        <StackPanel Grid.Column="0" Visibility="{Binding IsFixedPriceMode, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Style="{StaticResource FormLabel}" Text="Offer Price (KSh) *"/>
+                            <TextBox Style="{StaticResource FormTextBox}"
+                                     Text="{Binding OfferPrice, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}"/>
+                        </StackPanel>
+
+                        <!-- Percentage Input -->
+                        <StackPanel Grid.Column="0" Visibility="{Binding IsPercentageMode, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Style="{StaticResource FormLabel}" Text="Discount Percentage *"/>
+                            <TextBox Style="{StaticResource FormTextBox}"
+                                     Text="{Binding DiscountPercent, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+
+                        <!-- Price Summary -->
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Style="{StaticResource FormLabel}" Text="Price Summary"/>
+                            <Border Background="#252540" CornerRadius="8" Padding="16">
+                                <StackPanel>
+                                    <Grid>
+                                        <TextBlock Text="Original:" Foreground="#9CA3AF"/>
+                                        <TextBlock Text="{Binding OriginalPrice, StringFormat='KSh {0:N2}'}"
+                                                   HorizontalAlignment="Right"
+                                                   Foreground="White"/>
+                                    </Grid>
+                                    <Grid Margin="0,8,0,0">
+                                        <TextBlock Text="Offer Price:" Foreground="#10B981" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding CalculatedOfferPrice, StringFormat='KSh {0:N2}'}"
+                                                   HorizontalAlignment="Right"
+                                                   Foreground="#10B981" FontWeight="SemiBold"/>
+                                    </Grid>
+                                    <Grid Margin="0,8,0,0">
+                                        <TextBlock Text="Savings:" Foreground="#F59E0B"/>
+                                        <TextBlock Text="{Binding Savings, StringFormat='KSh {0:N2}'}"
+                                                   HorizontalAlignment="Right"
+                                                   Foreground="#F59E0B"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Date Range -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Style="{StaticResource FormLabel}" Text="Start Date *"/>
+                            <DatePicker Style="{StaticResource FormDatePicker}"
+                                        SelectedDate="{Binding StartDate}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Style="{StaticResource FormLabel}" Text="End Date *"/>
+                            <DatePicker Style="{StaticResource FormDatePicker}"
+                                        SelectedDate="{Binding EndDate}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Quantity Limits -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Style="{StaticResource FormLabel}" Text="Min Quantity"/>
+                            <TextBox Style="{StaticResource FormTextBox}"
+                                     Text="{Binding MinQuantity, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Style="{StaticResource FormLabel}" Text="Max Quantity (optional)"/>
+                            <TextBox Style="{StaticResource FormTextBox}"
+                                     Text="{Binding MaxQuantity, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Validation Messages -->
+                    <ItemsControl ItemsSource="{Binding ValidationErrors}" Margin="0,0,0,8">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#7F1D1D" CornerRadius="4" Padding="12,8" Margin="0,0,0,4">
+                                    <TextBlock Text="{Binding}" Foreground="#FCA5A5" TextWrapping="Wrap"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <ItemsControl ItemsSource="{Binding ValidationWarnings}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#78350F" CornerRadius="4" Padding="12,8" Margin="0,0,0,4">
+                                    <TextBlock Text="{Binding}" Foreground="#FCD34D" TextWrapping="Wrap"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Footer -->
+            <Border Grid.Row="2" Background="#252540" CornerRadius="0,0,16,16">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="24,16">
+                    <Button Style="{StaticResource ActionButton}"
+                            Content="Cancel"
+                            Command="{Binding CancelCommand}"
+                            Margin="0,0,12,0"/>
+                    <Button Style="{StaticResource ActionButton}"
+                            Content="Save Offer"
+                            Command="{Binding SaveCommand}"
+                            Background="#10B981"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

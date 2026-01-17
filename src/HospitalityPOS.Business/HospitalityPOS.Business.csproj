@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>14</LangVersion>
+    <RootNamespace>HospitalityPOS.Business</RootNamespace>
+    <AssemblyName>HospitalityPOS.Business</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HospitalityPOS.Core\HospitalityPOS.Core.csproj" />
+    <ProjectReference Include="..\HospitalityPOS.Infrastructure\HospitalityPOS.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

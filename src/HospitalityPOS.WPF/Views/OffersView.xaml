@@ -1,0 +1,441 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.OffersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1200"
+             Background="#1E1E2E">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
+
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="4,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="16,8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="#4E4E6E"/>
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Background" Value="#10B981"/>
+        </Style>
+
+        <Style x:Key="WarningButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Background" Value="#F59E0B"/>
+        </Style>
+
+        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Background" Value="#EF4444"/>
+        </Style>
+
+        <Style x:Key="SearchTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          VerticalAlignment="Center"
+                                          Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#6E6EAE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FilterComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+        </Style>
+
+        <Style x:Key="StatCard" TargetType="Border">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="0,0,16,0"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Style="{StaticResource ActionButton}"
+                        Command="{Binding GoBackCommand}"
+                        Background="Transparent"
+                        MinWidth="44"
+                        ToolTip="Go Back">
+                    <TextBlock Text="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
+                </Button>
+                <TextBlock Text="Product Offers"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           Foreground="White"
+                           VerticalAlignment="Center"
+                           Margin="12,0,0,0"/>
+            </StackPanel>
+
+            <Button Grid.Column="2"
+                    Style="{StaticResource PrimaryButton}"
+                    Command="{Binding CreateOfferCommand}"
+                    Content="+ New Offer"/>
+        </Grid>
+
+        <!-- Stats Cards -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,24">
+            <Border Style="{StaticResource StatCard}">
+                <StackPanel>
+                    <TextBlock Text="Active Offers" Foreground="#9CA3AF" FontSize="12"/>
+                    <TextBlock Text="{Binding ActiveOfferCount}" Foreground="#10B981" FontSize="28" FontWeight="Bold"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource StatCard}">
+                <StackPanel>
+                    <TextBlock Text="Upcoming" Foreground="#9CA3AF" FontSize="12"/>
+                    <TextBlock Text="{Binding UpcomingOfferCount}" Foreground="#3B82F6" FontSize="28" FontWeight="Bold"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource StatCard}">
+                <StackPanel>
+                    <TextBlock Text="Expired" Foreground="#9CA3AF" FontSize="12"/>
+                    <TextBlock Text="{Binding ExpiredOfferCount}" Foreground="#F59E0B" FontSize="28" FontWeight="Bold"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource StatCard}" Margin="0">
+                <StackPanel>
+                    <TextBlock Text="Total Offers" Foreground="#9CA3AF" FontSize="12"/>
+                    <TextBlock Text="{Binding TotalOfferCount}" Foreground="White" FontSize="28" FontWeight="Bold"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- Filters Row -->
+        <Grid Grid.Row="2" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0" Margin="0,0,16,0">
+                <TextBox Style="{StaticResource SearchTextBox}"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Search offers or products"/>
+                <TextBlock Text="&#xE721;"
+                           FontFamily="Segoe MDL2 Assets"
+                           Foreground="#6B7280"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Left"
+                           Margin="12,0,0,0"
+                           IsHitTestVisible="False"/>
+                <Button Style="{StaticResource ActionButton}"
+                        Background="Transparent"
+                        MinWidth="32"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,4,0"
+                        Command="{Binding ClearSearchCommand}"
+                        Visibility="{Binding SearchText.Length, Converter={StaticResource BoolToVisibility}}"
+                        ToolTip="Clear Search">
+                    <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
+                </Button>
+            </Grid>
+
+            <ComboBox Grid.Column="1"
+                      Style="{StaticResource FilterComboBox}"
+                      ItemsSource="{Binding StatusFilters}"
+                      SelectedItem="{Binding SelectedStatusFilter}"
+                      DisplayMemberPath="DisplayName"/>
+
+            <Button Grid.Column="2"
+                    Style="{StaticResource ActionButton}"
+                    Command="{Binding LoadDataCommand}"
+                    Margin="16,0,0,0"
+                    ToolTip="Refresh">
+                <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
+            </Button>
+        </Grid>
+
+        <!-- Offers Grid -->
+        <Border Grid.Row="3" Background="#2D2D44" CornerRadius="12">
+            <Grid>
+                <DataGrid ItemsSource="{Binding Offers}"
+                          SelectedItem="{Binding SelectedOffer}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#3D3D5C"
+                          Background="Transparent"
+                          RowBackground="Transparent"
+                          AlternatingRowBackground="#252540"
+                          BorderThickness="0"
+                          SelectionMode="Single"
+                          SelectionUnit="FullRow"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          CanUserReorderColumns="True"
+                          CanUserResizeColumns="True"
+                          CanUserSortColumns="True"
+                          Foreground="White"
+                          FontSize="14">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#1E1E2E"/>
+                            <Setter Property="Foreground" Value="#9CA3AF"/>
+                            <Setter Property="Padding" Value="16,12"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#3D3D5C"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Padding" Value="16,12"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}">
+                                            <ContentPresenter VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#3D3D6E"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#353550"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="OFFER NAME"
+                                            Binding="{Binding OfferName}"
+                                            Width="*"/>
+                        <DataGridTextColumn Header="PRODUCT"
+                                            Binding="{Binding Product.Name}"
+                                            Width="*"/>
+                        <DataGridTemplateColumn Header="PRICING" Width="150">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Foreground="#10B981" FontWeight="SemiBold">
+                                            <TextBlock.Text>
+                                                <MultiBinding StringFormat="KSh {0:N0}">
+                                                    <Binding Path="OfferPrice"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                        <TextBlock Foreground="#6B7280" FontSize="11">
+                                            <TextBlock.Text>
+                                                <MultiBinding StringFormat="Was KSh {0:N0}">
+                                                    <Binding Path="Product.SellingPrice"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="START DATE"
+                                            Binding="{Binding StartDate, StringFormat='{}{0:dd MMM yyyy}'}"
+                                            Width="120"/>
+                        <DataGridTextColumn Header="END DATE"
+                                            Binding="{Binding EndDate, StringFormat='{}{0:dd MMM yyyy}'}"
+                                            Width="120"/>
+                        <DataGridTemplateColumn Header="STATUS" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#6B7280"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Active">
+                                                        <Setter Property="Background" Value="#10B981"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Upcoming">
+                                                        <Setter Property="Background" Value="#3B82F6"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Expired">
+                                                        <Setter Property="Background" Value="#F59E0B"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Inactive">
+                                                        <Setter Property="Background" Value="#6B7280"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding Status}"
+                                                   Foreground="White"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="ACTIONS" Width="200">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Style="{StaticResource ActionButton}"
+                                                MinWidth="32" MinHeight="32"
+                                                Background="#3B82F6"
+                                                Command="{Binding DataContext.EditOfferCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                ToolTip="Edit">
+                                            <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
+                                        </Button>
+                                        <Button Style="{StaticResource ActionButton}"
+                                                MinWidth="32" MinHeight="32"
+                                                Background="#F59E0B"
+                                                Command="{Binding DataContext.ExtendOfferCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                ToolTip="Extend"
+                                                Margin="4,0,0,0">
+                                            <TextBlock Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
+                                        </Button>
+                                        <Button Style="{StaticResource ActionButton}"
+                                                MinWidth="32" MinHeight="32"
+                                                Background="#EF4444"
+                                                Command="{Binding DataContext.DeleteOfferCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                ToolTip="Delete"
+                                                Margin="4,0,0,0">
+                                            <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Loading Overlay -->
+                <Border Background="#80000000"
+                        Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xE117;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="48"
+                                   Foreground="White"
+                                   HorizontalAlignment="Center">
+                            <TextBlock.RenderTransform>
+                                <RotateTransform x:Name="LoadingRotate" CenterX="24" CenterY="24"/>
+                            </TextBlock.RenderTransform>
+                            <TextBlock.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetName="LoadingRotate"
+                                                             Storyboard.TargetProperty="Angle"
+                                                             From="0" To="360"
+                                                             Duration="0:0:1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </TextBlock.Triggers>
+                        </TextBlock>
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="White"
+                                   Margin="0,12,0,0"
+                                   FontSize="14"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Empty State -->
+                <StackPanel VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Visibility="{Binding Offers.Count, Converter={StaticResource InverseBoolToVisibility}}">
+                    <TextBlock Text="&#xE719;"
+                               FontFamily="Segoe MDL2 Assets"
+                               FontSize="64"
+                               Foreground="#6B7280"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="No offers found"
+                               Foreground="#9CA3AF"
+                               FontSize="18"
+                               Margin="0,16,0,8"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Create a new offer to get started"
+                               Foreground="#6B7280"
+                               FontSize="14"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,252 @@
+<Window x:Class="HospitalityPOS.WPF.Views.Dialogs.OpenWorkPeriodDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Open Work Period"
+        Width="450"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="ToolWindow"
+        ResizeMode="NoResize"
+        Background="#2D2D44">
+
+    <Window.Resources>
+        <Style x:Key="NumpadButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="72" />
+            <Setter Property="Height" Value="56" />
+            <Setter Property="Margin" Value="3" />
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Background" Value="#3D3D5C" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#4D4D7C" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#5D5D8C" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NumpadClearButtonStyle" TargetType="Button" BasedOn="{StaticResource NumpadButtonStyle}">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Background" Value="#664444" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#885555" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#AA6666" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="48" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Open Work Period"
+                       Foreground="White"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center" />
+            <TextBlock Text="Enter the opening cash float amount"
+                       Foreground="#8888AA"
+                       FontSize="14"
+                       HorizontalAlignment="Center"
+                       Margin="0,8,0,0" />
+        </StackPanel>
+
+        <!-- Previous Closing Balance (if available) -->
+        <Border x:Name="PreviousClosingPanel"
+                Grid.Row="1"
+                Background="#1E1E2E"
+                BorderBrush="#4A4A6A"
+                BorderThickness="1"
+                CornerRadius="6"
+                Padding="16,12"
+                Margin="0,0,0,16"
+                Visibility="Collapsed">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Previous Period Closing Balance:"
+                               Foreground="#8888AA"
+                               FontSize="12" />
+                    <TextBlock x:Name="PreviousClosingText"
+                               Text="KSh 0.00"
+                               Foreground="#4CAF50"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Margin="0,4,0,0" />
+                </StackPanel>
+                <Button x:Name="CarryForwardButton"
+                        Grid.Column="1"
+                        Content="Use This"
+                        Background="#4CAF50"
+                        Foreground="White"
+                        Padding="16,8"
+                        FontSize="14"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Click="CarryForwardButton_Click"
+                        VerticalAlignment="Center">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center" />
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Amount Display -->
+        <Border Grid.Row="2"
+                Background="#1E1E2E"
+                BorderBrush="#4A4A6A"
+                BorderThickness="1"
+                CornerRadius="6"
+                Padding="20,16"
+                Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="Opening Float Amount"
+                           Foreground="#8888AA"
+                           FontSize="12"
+                           HorizontalAlignment="Center" />
+                <TextBlock x:Name="AmountDisplay"
+                           Text="KSh 0.00"
+                           Foreground="White"
+                           FontSize="36"
+                           FontWeight="Bold"
+                           FontFamily="Consolas"
+                           HorizontalAlignment="Center"
+                           Margin="0,8,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- Numeric Keypad -->
+        <Grid Grid.Row="3"
+              HorizontalAlignment="Center"
+              Margin="0,0,0,16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="64" />
+                <RowDefinition Height="64" />
+                <RowDefinition Height="64" />
+                <RowDefinition Height="64" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80" />
+                <ColumnDefinition Width="80" />
+                <ColumnDefinition Width="80" />
+                <ColumnDefinition Width="80" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Row 1: 1, 2, 3, backspace -->
+            <Button Grid.Row="0" Grid.Column="0" Content="1" Style="{StaticResource NumpadButtonStyle}" Click="NumpadButton_Click" />
+            <Button Grid.Row="0" Grid.Column="1" Content="2" Style="{StaticResource NumpadButtonStyle}" Click="NumpadButton_Click" />
+            <Button Grid.Row="0" Grid.Column="2" Content="3" Style="{StaticResource NumpadButtonStyle}" Click="NumpadButton_Click" />
+            <Button Grid.Row="0" Grid.Column="3" Content="⌫" Style="{StaticResource NumpadClearButtonStyle}" Click="BackspaceButton_Click" FontSize="20" />
+
+            <!-- Row 2: 4, 5, 6, clear -->
+            <Button Grid.Row="1" Grid.Column="0" Content="4" Style="{StaticResource NumpadButtonStyle}" Click="NumpadButton_Click" />
+            <Button Grid.Row="1" Grid.Column="1" Content="5" Style="{StaticResource NumpadButtonStyle}" Click="NumpadButton_Click" />
+            <Button Grid.Row="1" Grid.Column="2" Content="6" Style="{StaticResource NumpadButtonStyle}" Click="NumpadButton_Click" />
+            <Button Grid.Row="1" Grid.Column="3" Content="CLR" Style="{StaticResource NumpadClearButtonStyle}" Click="ClearButton_Click" />
+
+            <!-- Row 3: 7, 8, 9, 00 -->
+            <Button Grid.Row="2" Grid.Column="0" Content="7" Style="{StaticResource NumpadButtonStyle}" Click="NumpadButton_Click" />
+            <Button Grid.Row="2" Grid.Column="1" Content="8" Style="{StaticResource NumpadButtonStyle}" Click="NumpadButton_Click" />
+            <Button Grid.Row="2" Grid.Column="2" Content="9" Style="{StaticResource NumpadButtonStyle}" Click="NumpadButton_Click" />
+            <Button Grid.Row="2" Grid.Column="3" Content="00" Style="{StaticResource NumpadButtonStyle}" Click="DoubleZeroButton_Click" FontSize="20" />
+
+            <!-- Row 4: ., 0, 000 -->
+            <Button Grid.Row="3" Grid.Column="0" Content="." Style="{StaticResource NumpadButtonStyle}" Click="DecimalButton_Click" />
+            <Button Grid.Row="3" Grid.Column="1" Content="0" Style="{StaticResource NumpadButtonStyle}" Click="NumpadButton_Click" />
+            <Button Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Content="000" Style="{StaticResource NumpadButtonStyle}" Click="TripleZeroButton_Click" Width="156" FontSize="20" />
+        </Grid>
+
+        <!-- Error Message -->
+        <TextBlock x:Name="ErrorMessageText"
+                   Grid.Row="4"
+                   Text=""
+                   Foreground="#FF6B6B"
+                   FontSize="13"
+                   HorizontalAlignment="Center"
+                   TextWrapping="Wrap"
+                   Margin="0,0,0,12"
+                   Visibility="Collapsed" />
+
+        <!-- Action Buttons -->
+        <Grid Grid.Row="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0"
+                    Content="Cancel"
+                    Background="#4A4A6A"
+                    Foreground="White"
+                    Style="{StaticResource ActionButtonStyle}"
+                    Click="CancelButton_Click" />
+
+            <Button Grid.Column="2"
+                    Content="Open Period"
+                    Background="#4CAF50"
+                    Foreground="White"
+                    Style="{StaticResource ActionButtonStyle}"
+                    Click="OpenPeriodButton_Click" />
+        </Grid>
+    </Grid>
+</Window>

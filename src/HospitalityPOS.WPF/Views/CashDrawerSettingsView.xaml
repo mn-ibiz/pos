@@ -1,0 +1,442 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.CashDrawerSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewmodels="clr-namespace:HospitalityPOS.WPF.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewmodels:CashDrawerSettingsViewModel}"
+             d:DesignHeight="700" d:DesignWidth="1200"
+             Background="#1E1E2E">
+
+    <UserControl.Resources>
+        <!-- Green accent color for Cash Drawer -->
+        <Color x:Key="AccentColor">#10B981</Color>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#059669"/>
+
+        <SolidColorBrush x:Key="CardBackground" Color="#2D2D3D"/>
+        <SolidColorBrush x:Key="InputBackground" Color="#1E1E2E"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#3D3D4D"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#A0A0B0"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#6B7280"/>
+        <SolidColorBrush x:Key="SuccessBrush" Color="#22C55E"/>
+        <SolidColorBrush x:Key="WarningBrush" Color="#F59E0B"/>
+        <SolidColorBrush x:Key="ErrorBrush" Color="#EF4444"/>
+
+        <!-- Button Style -->
+        <Style x:Key="AccentButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource AccentHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DangerButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource ErrorBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#DC2626"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="350"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Panel: Drawer List -->
+        <Border Grid.Column="0" Background="{StaticResource CardBackground}" CornerRadius="12" Margin="0,0,12,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <Border Grid.Row="0" Background="{StaticResource AccentBrush}" CornerRadius="12,12,0,0" Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Cash Drawers" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                        <Button Grid.Column="1" Style="{StaticResource SecondaryButton}"
+                                Content="+ Add" Padding="12,6"
+                                Command="{Binding NewDrawerCommand}"/>
+                    </Grid>
+                </Border>
+
+                <!-- Drawer List -->
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding CashDrawers}"
+                         SelectedItem="{Binding SelectedDrawer}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Padding="8">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="12"/>
+                            <Setter Property="Margin" Value="0,4"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border Background="{TemplateBinding Background}"
+                                                CornerRadius="8"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                            </Trigger>
+                                            <MultiTrigger>
+                                                <MultiTrigger.Conditions>
+                                                    <Condition Property="IsMouseOver" Value="True"/>
+                                                    <Condition Property="IsSelected" Value="False"/>
+                                                </MultiTrigger.Conditions>
+                                                <Setter Property="Background" Value="{StaticResource InputBackground}"/>
+                                            </MultiTrigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimary}" FontSize="14"/>
+                                <TextBlock Text="{Binding LinkedPrinter.Name}"
+                                           Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <Border Background="{StaticResource SuccessBrush}"
+                                            CornerRadius="4" Padding="6,2"
+                                            Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <TextBlock Text="Active" Foreground="White" FontSize="10"/>
+                                    </Border>
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+
+        <!-- Center Panel: Drawer Settings -->
+        <Border Grid.Column="1" Background="{StaticResource CardBackground}" CornerRadius="12" Margin="0,0,12,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="24">
+                    <!-- Section: Basic Settings -->
+                    <TextBlock Text="DRAWER SETTINGS" FontWeight="Bold"
+                               Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,0,0,16"/>
+
+                    <!-- Drawer Name -->
+                    <TextBlock Text="Drawer Name" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,8"/>
+                    <TextBox Text="{Binding DrawerName, UpdateSourceTrigger=PropertyChanged}"
+                             Background="{StaticResource InputBackground}"
+                             Foreground="{StaticResource TextPrimary}"
+                             BorderBrush="{StaticResource BorderBrush}"
+                             Padding="12,10" FontSize="14"/>
+
+                    <!-- Linked Printer -->
+                    <TextBlock Text="Linked Printer" Foreground="{StaticResource TextSecondary}" Margin="0,16,0,8"/>
+                    <ComboBox ItemsSource="{Binding AvailablePrinters}"
+                              SelectedItem="{Binding SelectedPrinter}"
+                              DisplayMemberPath="Name"
+                              Background="{StaticResource InputBackground}"
+                              Foreground="{StaticResource TextPrimary}"
+                              BorderBrush="{StaticResource BorderBrush}"
+                              Padding="12,10"/>
+
+                    <!-- Drawer Pin -->
+                    <TextBlock Text="Drawer Pin" Foreground="{StaticResource TextSecondary}" Margin="0,16,0,8"/>
+                    <ComboBox ItemsSource="{Binding DrawerPinOptions}"
+                              SelectedItem="{Binding DrawerPin}"
+                              Background="{StaticResource InputBackground}"
+                              Foreground="{StaticResource TextPrimary}"
+                              BorderBrush="{StaticResource BorderBrush}"
+                              Padding="12,10"/>
+
+                    <!-- Separator -->
+                    <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,24"/>
+
+                    <!-- Section: Auto-Open Options -->
+                    <TextBlock Text="AUTO-OPEN OPTIONS" FontWeight="Bold"
+                               Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,0,0,16"/>
+
+                    <CheckBox IsChecked="{Binding AutoOpenOnCashPayment}" Margin="0,8">
+                        <TextBlock Text="Open on cash payment" Foreground="{StaticResource TextPrimary}"/>
+                    </CheckBox>
+
+                    <CheckBox IsChecked="{Binding AutoOpenOnCashRefund}" Margin="0,8">
+                        <TextBlock Text="Open on cash refund" Foreground="{StaticResource TextPrimary}"/>
+                    </CheckBox>
+
+                    <CheckBox IsChecked="{Binding AutoOpenOnDrawerCount}" Margin="0,8">
+                        <TextBlock Text="Open on drawer count" Foreground="{StaticResource TextPrimary}"/>
+                    </CheckBox>
+
+                    <!-- Separator -->
+                    <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,24"/>
+
+                    <!-- Status Display -->
+                    <TextBlock Text="DRAWER STATUS" FontWeight="Bold"
+                               Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,0,0,16"/>
+
+                    <Border Background="{StaticResource InputBackground}" CornerRadius="8" Padding="16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Ellipse Width="12" Height="12" Margin="0,0,12,0">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse">
+                                        <Setter Property="Fill" Value="{StaticResource TextMuted}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DrawerStatus}" Value="Open">
+                                                <Setter Property="Fill" Value="{StaticResource SuccessBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding DrawerStatus}" Value="Closed">
+                                                <Setter Property="Fill" Value="{StaticResource WarningBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+
+                            <TextBlock Grid.Column="1" Text="{Binding DrawerStatus}"
+                                       Foreground="{StaticResource TextPrimary}" FontSize="14"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Action Buttons -->
+                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Content="Test Drawer"
+                                Command="{Binding TestDrawerCommand}"
+                                Margin="0,0,8,0"/>
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Content="Manual Open"
+                                Command="{Binding OpenDrawerManualCommand}"
+                                Margin="0,0,8,0"/>
+                        <Button Style="{StaticResource DangerButton}"
+                                Content="Delete"
+                                Command="{Binding DeleteDrawerCommand}"
+                                Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}"
+                                Margin="0,0,8,0"/>
+                        <Button Style="{StaticResource AccentButton}"
+                                Content="Save"
+                                Command="{Binding SaveDrawerCommand}"/>
+                    </StackPanel>
+
+                    <!-- Status Message -->
+                    <TextBlock Text="{Binding StatusMessage}"
+                               Foreground="{StaticResource TextSecondary}"
+                               Margin="0,16,0,0"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding StatusMessage, Converter={StaticResource NullToVisibilityConverter}}"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Right Panel: Activity Log -->
+        <Border Grid.Column="2" Background="{StaticResource CardBackground}" CornerRadius="12">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <Border Grid.Row="0" Background="{StaticResource AccentBrush}" CornerRadius="12,12,0,0" Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Activity Log" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                        <Button Grid.Column="1" Style="{StaticResource SecondaryButton}"
+                                Content="Refresh" Padding="12,6"
+                                Command="{Binding RefreshLogsCommand}"/>
+                    </Grid>
+                </Border>
+
+                <!-- Date Navigator -->
+                <Border Grid.Row="1" Background="{StaticResource InputBackground}" Padding="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0" Style="{StaticResource SecondaryButton}"
+                                Content="&lt;" Padding="8,4"
+                                Command="{Binding PreviousDayCommand}"/>
+
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding SelectedLogDate, StringFormat='{}{0:dddd, MMMM d, yyyy}'}"
+                                   Foreground="{StaticResource TextPrimary}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+
+                        <Button Grid.Column="2" Style="{StaticResource SecondaryButton}"
+                                Content="&gt;" Padding="8,4"
+                                Command="{Binding NextDayCommand}"/>
+                    </Grid>
+                </Border>
+
+                <!-- Log List -->
+                <ListBox Grid.Row="2"
+                         ItemsSource="{Binding TodayLogs}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Padding="8">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="Margin" Value="0,2"/>
+                            <Setter Property="Background" Value="{StaticResource InputBackground}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border Background="{TemplateBinding Background}"
+                                                CornerRadius="6"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Time -->
+                                <TextBlock Grid.Column="0" Grid.Row="0"
+                                           Text="{Binding OpenedAt, StringFormat='{}{0:HH:mm}'}"
+                                           Foreground="{StaticResource TextSecondary}"
+                                           FontWeight="SemiBold"/>
+
+                                <!-- Reason and User -->
+                                <StackPanel Grid.Column="1" Grid.Row="0">
+                                    <TextBlock Text="{Binding Reason}"
+                                               Foreground="{StaticResource TextPrimary}"/>
+                                    <TextBlock Foreground="{StaticResource TextMuted}" FontSize="11">
+                                        <Run Text="by"/>
+                                        <Run Text="{Binding User.DisplayName}"/>
+                                    </TextBlock>
+                                </StackPanel>
+
+                                <!-- Reference/Notes -->
+                                <TextBlock Grid.Column="1" Grid.Row="1"
+                                           Text="{Binding Reference}"
+                                           Foreground="{StaticResource TextMuted}"
+                                           FontSize="11"
+                                           Visibility="{Binding Reference, Converter={StaticResource NullToVisibilityConverter}}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+
+        <!-- Loading Overlay -->
+        <Border Grid.ColumnSpan="3"
+                Background="#80000000"
+                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
+                <TextBlock Text="{Binding StatusMessage}"
+                           Foreground="White"
+                           Margin="0,12,0,0"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

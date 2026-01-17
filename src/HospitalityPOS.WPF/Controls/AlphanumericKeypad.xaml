@@ -1,0 +1,114 @@
+<UserControl x:Class="HospitalityPOS.WPF.Controls.AlphanumericKeypad"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="280" d:DesignWidth="400">
+    <UserControl.Resources>
+        <Style x:Key="KeypadButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#3D3D5C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="MinWidth" Value="36"/>
+            <Setter Property="MinHeight" Value="40"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                BorderThickness="0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#4D4D6C"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#22C55E"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="BackspaceButtonStyle" TargetType="Button" BasedOn="{StaticResource KeypadButtonStyle}">
+            <Setter Property="Background" Value="#F97316"/>
+        </Style>
+
+        <Style x:Key="ClearButtonStyle" TargetType="Button" BasedOn="{StaticResource KeypadButtonStyle}">
+            <Setter Property="Background" Value="#EF4444"/>
+        </Style>
+
+        <Style x:Key="SpaceButtonStyle" TargetType="Button" BasedOn="{StaticResource KeypadButtonStyle}">
+            <Setter Property="Background" Value="#2D2D44"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="#1E1E2E" CornerRadius="8" Padding="8">
+        <StackPanel>
+            <!-- Number Row -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="1" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="1"/>
+                <Button Content="2" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="2"/>
+                <Button Content="3" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="3"/>
+                <Button Content="4" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="4"/>
+                <Button Content="5" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="5"/>
+                <Button Content="6" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="6"/>
+                <Button Content="7" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="7"/>
+                <Button Content="8" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="8"/>
+                <Button Content="9" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="9"/>
+                <Button Content="0" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="0"/>
+            </StackPanel>
+
+            <!-- QWERTY Row 1 -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                <Button Content="Q" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="Q"/>
+                <Button Content="W" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="W"/>
+                <Button Content="E" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="E"/>
+                <Button Content="R" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="R"/>
+                <Button Content="T" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="T"/>
+                <Button Content="Y" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="Y"/>
+                <Button Content="U" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="U"/>
+                <Button Content="I" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="I"/>
+                <Button Content="O" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="O"/>
+                <Button Content="P" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="P"/>
+            </StackPanel>
+
+            <!-- QWERTY Row 2 -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                <Button Content="A" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="A"/>
+                <Button Content="S" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="S"/>
+                <Button Content="D" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="D"/>
+                <Button Content="F" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="F"/>
+                <Button Content="G" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="G"/>
+                <Button Content="H" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="H"/>
+                <Button Content="J" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="J"/>
+                <Button Content="K" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="K"/>
+                <Button Content="L" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="L"/>
+            </StackPanel>
+
+            <!-- QWERTY Row 3 -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                <Button Content="Z" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="Z"/>
+                <Button Content="X" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="X"/>
+                <Button Content="C" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="C"/>
+                <Button Content="V" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="V"/>
+                <Button Content="B" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="B"/>
+                <Button Content="N" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="N"/>
+                <Button Content="M" Style="{StaticResource KeypadButtonStyle}" Click="OnKeyClick" Tag="M"/>
+                <Button Content="DEL" Style="{StaticResource BackspaceButtonStyle}" Click="OnBackspaceClick" MinWidth="50"/>
+            </StackPanel>
+
+            <!-- Bottom Row: Clear -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                <Button Content="CLEAR" Style="{StaticResource ClearButtonStyle}" Click="OnClearClick" MinWidth="100"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

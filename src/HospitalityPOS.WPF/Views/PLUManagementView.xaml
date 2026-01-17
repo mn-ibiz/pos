@@ -1,0 +1,174 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.PLUManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1000"
+             Loaded="UserControl_Loaded">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#F5F5F5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="350"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Panel - PLU List -->
+        <Grid Grid.Column="0" Margin="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                <TextBlock Text="PLU Code Management" FontSize="24" FontWeight="Bold" Foreground="#1B5E20"/>
+                <TextBlock Text="Manage Price Look-Up codes for quick product entry" Foreground="#666" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- Toolbar -->
+            <Grid Grid.Row="1" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                        Padding="10,8" BorderThickness="1" BorderBrush="#E0E0E0">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Style.Triggers>
+                                <Trigger Property="Text" Value="">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <VisualBrush Stretch="None" AlignmentX="Left">
+                                                <VisualBrush.Visual>
+                                                    <TextBlock Text="  Search PLU codes..." Foreground="#999"/>
+                                                </VisualBrush.Visual>
+                                            </VisualBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+
+                <CheckBox Grid.Column="1" Content="Active Only" IsChecked="{Binding ShowActiveOnly}"
+                         VerticalAlignment="Center" Margin="16,0"/>
+
+                <Button Grid.Column="2" Content="+ New PLU" Command="{Binding NewPLUCommand}"
+                       Padding="16,8" Background="#1B5E20" Foreground="White" BorderThickness="0" Margin="0,0,8,0"/>
+
+                <Button Grid.Column="3" Content="Refresh" Command="{Binding LoadDataCommand}"
+                       Padding="12,8"/>
+            </Grid>
+
+            <!-- PLU List -->
+            <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="0">
+                <DataGrid ItemsSource="{Binding PLUCodes}" SelectedItem="{Binding SelectedPLU}"
+                         AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                         GridLinesVisibility="Horizontal" BorderThickness="0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="PLU Code" Binding="{Binding Code}" Width="100" FontWeight="SemiBold"/>
+                        <DataGridTextColumn Header="Product" Binding="{Binding Product.Name}" Width="*"/>
+                        <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="150"/>
+                        <DataGridCheckBoxColumn Header="Weighted" Binding="{Binding IsWeighted}" Width="80"/>
+                        <DataGridTextColumn Header="Tare (g)" Binding="{Binding TareWeight, StringFormat='{}{0:N0}'}" Width="80"/>
+                        <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive}" Width="60"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- Loading Overlay -->
+            <Border Grid.Row="2" Background="#80FFFFFF" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="Loading..." HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"/>
+            </Border>
+        </Grid>
+
+        <!-- Right Panel - Edit Form -->
+        <Border Grid.Column="1" Background="#FFFFFF" Padding="16" BorderBrush="#E0E0E0" BorderThickness="1,0,0,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Messages -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                        <TextBlock Text="{Binding ErrorMessage}" Foreground="#D32F2F" TextWrapping="Wrap"
+                                  Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisibility}}"/>
+                        <TextBlock Text="{Binding SuccessMessage}" Foreground="#1B5E20" TextWrapping="Wrap"
+                                  Visibility="{Binding SuccessMessage, Converter={StaticResource BoolToVisibility}}"/>
+                    </StackPanel>
+
+                    <!-- No Selection -->
+                    <StackPanel Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center"
+                               Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibility}, ConverterParameter=Invert}">
+                        <TextBlock Text="Select a PLU code to edit" FontSize="14" Foreground="#999" HorizontalAlignment="Center"/>
+                        <TextBlock Text="or click '+ New PLU' to create one" FontSize="12" Foreground="#BBB"
+                                  HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                        <Button Content="Edit Selected" Command="{Binding EditPLUCommand}" Padding="16,8" Margin="0,16,0,0"
+                               IsEnabled="{Binding SelectedPLU, Converter={StaticResource BoolToVisibility}}"/>
+                        <Button Content="Delete Selected" Command="{Binding DeletePLUCommand}" Padding="16,8" Margin="0,8,0,0"
+                               Background="#D32F2F" Foreground="White" BorderThickness="0"
+                               IsEnabled="{Binding SelectedPLU, Converter={StaticResource BoolToVisibility}}"/>
+                    </StackPanel>
+
+                    <!-- Edit Form -->
+                    <StackPanel Grid.Row="2" Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding EditId, StringFormat='Edit PLU #{0}', FallbackValue='New PLU'}"
+                                  FontSize="18" FontWeight="Bold" Foreground="#1B5E20" Margin="0,0,0,16"/>
+
+                        <TextBlock Text="PLU Code *" Foreground="#666" FontSize="12" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding EditCode, UpdateSourceTrigger=PropertyChanged}"
+                                Padding="10,8" Margin="0,0,0,12"/>
+
+                        <TextBlock Text="Product *" Foreground="#666" FontSize="12" Margin="0,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}"
+                                 DisplayMemberPath="Name" Padding="10,8" Margin="0,0,0,12"/>
+
+                        <TextBlock Text="Display Name (optional)" Foreground="#666" FontSize="12" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding EditDisplayName, UpdateSourceTrigger=PropertyChanged}"
+                                Padding="10,8" Margin="0,0,0,12"/>
+
+                        <CheckBox Content="Weighted Item" IsChecked="{Binding EditIsWeighted}" Margin="0,0,0,12"/>
+
+                        <StackPanel Visibility="{Binding EditIsWeighted, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="Tare Weight (grams)" Foreground="#666" FontSize="12" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding EditTareWeight, UpdateSourceTrigger=PropertyChanged}"
+                                    Padding="10,8" Margin="0,0,0,12"/>
+                        </StackPanel>
+
+                        <TextBlock Text="Sort Order" Foreground="#666" FontSize="12" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding EditSortOrder, UpdateSourceTrigger=PropertyChanged}"
+                                Padding="10,8" Margin="0,0,0,12"/>
+
+                        <CheckBox Content="Active" IsChecked="{Binding EditIsActive}" Margin="0,0,0,24"/>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Cancel" Command="{Binding CancelEditCommand}" Padding="16,8" Margin="0,0,8,0"/>
+                            <Button Content="Save" Command="{Binding SavePLUCommand}"
+                                   Padding="16,8" Background="#1B5E20" Foreground="White" BorderThickness="0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

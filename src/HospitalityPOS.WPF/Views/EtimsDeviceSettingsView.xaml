@@ -1,0 +1,282 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.EtimsDeviceSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:HospitalityPOS.WPF.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:EtimsDeviceSettingsViewModel}"
+             d:DesignHeight="700" d:DesignWidth="1000">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#00695C" Padding="20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <TextBlock Text="eTIMS Device Settings" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Configure eTIMS Control Unit devices" FontSize="14" Foreground="#B3FFFFFF" Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <Button Grid.Column="1" Content="+ Add Device" Command="{Binding NewDeviceCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1" Margin="15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="400"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Device List -->
+            <Border Grid.Column="0" Background="White" CornerRadius="8" Margin="0,0,15,0"
+                    Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Inverse}">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                </Border.Effect>
+
+                <DataGrid ItemsSource="{Binding Devices}"
+                          SelectedItem="{Binding SelectedDevice}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          SelectionMode="Single"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          BorderThickness="0"
+                          RowHeight="50">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="" Width="40">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Ellipse Width="12" Height="12" HorizontalAlignment="Center">
+                                        <Ellipse.Style>
+                                            <Style TargetType="Ellipse">
+                                                <Setter Property="Fill" Value="#9E9E9E"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Active">
+                                                        <Setter Property="Fill" Value="#4CAF50"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Registered">
+                                                        <Setter Property="Fill" Value="#FF9800"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Suspended">
+                                                        <Setter Property="Fill" Value="#F44336"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Ellipse.Style>
+                                    </Ellipse>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Serial Number" Binding="{Binding DeviceSerialNumber}" Width="*"/>
+                        <DataGridTextColumn Header="Control Unit ID" Binding="{Binding ControlUnitId}" Width="120"/>
+                        <DataGridTextColumn Header="Branch" Binding="{Binding BranchName}" Width="120"/>
+                        <DataGridTextColumn Header="Environment" Binding="{Binding Environment}" Width="100"/>
+                        <DataGridTemplateColumn Header="Primary" Width="70">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding IsPrimary, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Yes|No'}"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{Binding IsPrimary, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#4CAF50|Gray'}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- Edit Form -->
+            <Border Grid.Column="0" Background="White" CornerRadius="8" Margin="0,0,15,0"
+                    Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                </Border.Effect>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="20">
+                        <TextBlock Text="Device Configuration" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,20"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Row 1 -->
+                            <StackPanel Margin="0,0,10,15">
+                                <TextBlock Text="Device Serial Number *" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding EditDeviceSerialNumber, UpdateSourceTrigger=PropertyChanged}" Padding="10"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="10,0,0,15">
+                                <TextBlock Text="Control Unit ID *" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding EditControlUnitId, UpdateSourceTrigger=PropertyChanged}" Padding="10"/>
+                            </StackPanel>
+
+                            <!-- Row 2 -->
+                            <StackPanel Grid.Row="1" Margin="0,0,10,15">
+                                <TextBlock Text="Business PIN *" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding EditBusinessPin, UpdateSourceTrigger=PropertyChanged}" Padding="10"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,0,15">
+                                <TextBlock Text="Business Name *" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding EditBusinessName, UpdateSourceTrigger=PropertyChanged}" Padding="10"/>
+                            </StackPanel>
+
+                            <!-- Row 3 -->
+                            <StackPanel Grid.Row="2" Margin="0,0,10,15">
+                                <TextBlock Text="Branch Code" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding EditBranchCode, UpdateSourceTrigger=PropertyChanged}" Padding="10"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="10,0,0,15">
+                                <TextBlock Text="Branch Name" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding EditBranchName, UpdateSourceTrigger=PropertyChanged}" Padding="10"/>
+                            </StackPanel>
+
+                            <!-- Row 4 -->
+                            <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="0,0,0,15">
+                                <TextBlock Text="API Base URL" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding EditApiBaseUrl, UpdateSourceTrigger=PropertyChanged}" Padding="10"/>
+                            </StackPanel>
+
+                            <!-- Row 5 -->
+                            <StackPanel Grid.Row="4" Margin="0,0,10,15">
+                                <TextBlock Text="API Key" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <PasswordBox x:Name="ApiKeyBox" Padding="10"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="4" Grid.Column="1" Margin="10,0,0,15">
+                                <TextBlock Text="API Secret" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <PasswordBox x:Name="ApiSecretBox" Padding="10"/>
+                            </StackPanel>
+
+                            <!-- Row 6 -->
+                            <StackPanel Grid.Row="5" Margin="0,0,10,15">
+                                <TextBlock Text="Environment" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <ComboBox ItemsSource="{Binding Environments}"
+                                          SelectedItem="{Binding EditEnvironment}"
+                                          Padding="10"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="5" Grid.Column="1" Margin="10,0,0,15" VerticalAlignment="Bottom">
+                                <CheckBox Content="Set as Primary Device" IsChecked="{Binding EditIsPrimary}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                            <Button Content="Cancel" Command="{Binding CancelEditCommand}"
+                                    Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
+                            <Button Content="Save Device" Command="{Binding SaveDeviceCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Device Details Panel -->
+            <Border Grid.Column="1" Background="White" CornerRadius="8">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                </Border.Effect>
+
+                <Grid>
+                    <!-- Device Selected -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  Visibility="{Binding SelectedDevice, Converter={StaticResource NullToVisibilityConverter}}">
+                        <StackPanel Margin="20">
+                            <TextBlock Text="Device Details" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,20"/>
+
+                            <TextBlock Text="Serial Number" FontSize="12" Foreground="Gray"/>
+                            <TextBlock Text="{Binding SelectedDevice.DeviceSerialNumber}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="Control Unit ID" FontSize="12" Foreground="Gray"/>
+                            <TextBlock Text="{Binding SelectedDevice.ControlUnitId}" FontSize="16" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="Business" FontSize="12" Foreground="Gray"/>
+                            <TextBlock FontSize="14" Margin="0,0,0,15">
+                                <Run Text="{Binding SelectedDevice.BusinessName}"/>
+                                <Run Text=" ("/>
+                                <Run Text="{Binding SelectedDevice.BusinessPin}"/>
+                                <Run Text=")"/>
+                            </TextBlock>
+
+                            <TextBlock Text="Branch" FontSize="12" Foreground="Gray"/>
+                            <TextBlock FontSize="14" Margin="0,0,0,15">
+                                <Run Text="{Binding SelectedDevice.BranchName}"/>
+                                <Run Text=" ["/>
+                                <Run Text="{Binding SelectedDevice.BranchCode}"/>
+                                <Run Text="]"/>
+                            </TextBlock>
+
+                            <TextBlock Text="Status" FontSize="12" Foreground="Gray"/>
+                            <TextBlock Text="{Binding SelectedDevice.Status}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="Environment" FontSize="12" Foreground="Gray"/>
+                            <TextBlock Text="{Binding SelectedDevice.Environment}" FontSize="14" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="Registration Date" FontSize="12" Foreground="Gray"/>
+                            <TextBlock Text="{Binding SelectedDevice.RegistrationDate, StringFormat=g}" FontSize="14" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="Last Communication" FontSize="12" Foreground="Gray"/>
+                            <TextBlock Text="{Binding SelectedDevice.LastCommunication, StringFormat=g, TargetNullValue='Never'}"
+                                       FontSize="14" Margin="0,0,0,20"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                <Button Content="Edit" Command="{Binding EditDeviceCommand}"
+                                        Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
+                                <Button Content="Test Connection" Command="{Binding TestConnectionCommand}"
+                                        Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                <Button Content="Activate" Command="{Binding ActivateDeviceCommand}"
+                                        Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,10,0"
+                                        IsEnabled="{Binding SelectedDevice.Status, Converter={StaticResource NotEqualToConverter}, ConverterParameter=Active}"/>
+                                <Button Content="Deactivate" Command="{Binding DeactivateDeviceCommand}"
+                                        Style="{StaticResource DangerButtonStyle}"
+                                        IsEnabled="{Binding SelectedDevice.Status, Converter={StaticResource EqualToConverter}, ConverterParameter=Active}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- No Device Selected -->
+                    <TextBlock Text="Select a device to view details"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Foreground="Gray" FontSize="14"
+                               Visibility="{Binding SelectedDevice, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Loading Overlay -->
+        <Border Grid.RowSpan="2" Background="#80000000"
+                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
+                <TextBlock Text="Loading..." Foreground="White" Margin="0,10,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

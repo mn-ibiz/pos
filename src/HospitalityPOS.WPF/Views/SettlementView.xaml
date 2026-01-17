@@ -1,0 +1,839 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.SettlementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
+             xmlns:controls="clr-namespace:HospitalityPOS.WPF.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="800" d:DesignWidth="1280"
+             Background="#1E1E2E">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
+        <converters:PaymentMethodCodeToColorConverter x:Key="PaymentMethodColorConverter"/>
+
+        <!-- Payment Method Button Style -->
+        <Style x:Key="PaymentMethodButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="80"/>
+            <Setter Property="MinWidth" Value="140"/>
+            <Setter Property="Margin" Value="8"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Quick Amount Button Style -->
+        <Style x:Key="QuickAmountButton" TargetType="Button">
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Background" Value="#3D3D5C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#22C55E"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Action Button Style -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="50"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="56"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header Bar -->
+        <Border Grid.Row="0" Background="#252538">
+            <Grid Margin="16,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="SETTLE RECEIPT"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="#22C55E"
+                               VerticalAlignment="Center"/>
+                    <Rectangle Width="1" Height="24" Fill="#4E4E6E" Margin="16,0"/>
+                    <TextBlock Text="{Binding Receipt.ReceiptNumber}"
+                               Foreground="White"
+                               FontSize="16"
+                               FontWeight="Medium"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Content="Close"
+                        Background="#4E4E6E"
+                        Style="{StaticResource ActionButton}"
+                        MinWidth="100"
+                        Margin="0,8"
+                        Command="{Binding CloseAsyncCommand}"/>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT: Receipt Summary -->
+            <Border Grid.Column="0" Background="#252538" BorderBrush="#3D3D5C" BorderThickness="0,0,1,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Receipt Header -->
+                    <Border Grid.Row="0" Background="#1E1E2E" Padding="16,12">
+                        <StackPanel>
+                            <Grid>
+                                <TextBlock Text="Receipt Details"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="White"/>
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <TextBlock Text="Table: "
+                                           Foreground="#9CA3AF"
+                                           FontSize="14"/>
+                                <TextBlock Text="{Binding Receipt.TableNumber}"
+                                           Foreground="White"
+                                           FontSize="14"
+                                           FontWeight="Medium"/>
+                                <TextBlock Text="  |  Customer: "
+                                           Foreground="#9CA3AF"
+                                           FontSize="14"
+                                           Margin="16,0,0,0"/>
+                                <TextBlock Text="{Binding Receipt.CustomerName, TargetNullValue='Walk-in'}"
+                                           Foreground="White"
+                                           FontSize="14"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Receipt Items List -->
+                    <ScrollViewer Grid.Row="1"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  PanningMode="VerticalOnly">
+                        <ItemsControl ItemsSource="{Binding ReceiptItems}" Margin="8">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#2D2D44"
+                                            CornerRadius="6"
+                                            Margin="4"
+                                            Padding="12,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding ProductName}"
+                                                           Foreground="White"
+                                                           FontSize="14"
+                                                           FontWeight="Medium"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                    <TextBlock Text="{Binding QuantityDisplay}"
+                                                               Foreground="#9CA3AF"
+                                                               FontSize="12"/>
+                                                    <TextBlock Text=" x "
+                                                               Foreground="#6B7280"
+                                                               FontSize="12"/>
+                                                    <TextBlock Text="{Binding UnitPrice, StringFormat='KSh {0:N2}'}"
+                                                               Foreground="#9CA3AF"
+                                                               FontSize="12"/>
+                                                    <!-- Discount indicator -->
+                                                    <TextBlock Text="{Binding DiscountAmount, StringFormat=' (-{0:N2})'}"
+                                                               Foreground="#EF4444"
+                                                               FontSize="12"
+                                                               Visibility="{Binding HasDiscount, Converter={StaticResource BoolToVisibility}}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding TotalAmount, StringFormat='KSh {0:N2}'}"
+                                                       Foreground="#22C55E"
+                                                       FontSize="14"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!-- Receipt Totals -->
+                    <Border Grid.Row="2" Background="#1E1E2E" Padding="16,12">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Text="Subtotal:" Foreground="#9CA3AF" FontSize="14"/>
+                                <TextBlock Text="{Binding Receipt.Subtotal, StringFormat='KSh {0:N2}'}"
+                                           Foreground="White"
+                                           FontSize="14"
+                                           HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Text="VAT (16%):" Foreground="#9CA3AF" FontSize="14"/>
+                                <TextBlock Text="{Binding Receipt.TaxAmount, StringFormat='KSh {0:N2}'}"
+                                           Foreground="White"
+                                           FontSize="14"
+                                           HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Rectangle Height="1" Fill="#3D3D5C" Margin="0,8"/>
+                            <Grid>
+                                <TextBlock Text="TOTAL:" Foreground="White" FontSize="20" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding Receipt.TotalAmount, StringFormat='KSh {0:N2}'}"
+                                           Foreground="#22C55E"
+                                           FontSize="20"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Right"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Payment Summary -->
+                    <Border Grid.Row="3" Background="#2D2D44" Padding="16,12">
+                        <StackPanel>
+                            <!-- Split Payment Header -->
+                            <TextBlock Text="SPLIT PAYMENT"
+                                       FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="#22C55E"
+                                       Margin="0,0,0,8"
+                                       Visibility="{Binding PaymentLines.Count, Converter={StaticResource BoolToVisibility}}"/>
+
+                            <!-- Payments Made -->
+                            <ItemsControl ItemsSource="{Binding PaymentLines}"
+                                          Visibility="{Binding PaymentLines.Count, Converter={StaticResource BoolToVisibility}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#1E1E2E"
+                                                CornerRadius="4"
+                                                Margin="0,0,0,4"
+                                                Padding="8,6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="{Binding MethodName}"
+                                                               Foreground="White"
+                                                               FontSize="13"
+                                                               FontWeight="Medium"/>
+                                                    <TextBlock Text="{Binding Reference, StringFormat='Ref: {0}'}"
+                                                               Foreground="#6B7280"
+                                                               FontSize="11"
+                                                               Visibility="{Binding HasReference, Converter={StaticResource BoolToVisibility}}"/>
+                                                </StackPanel>
+
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding Amount, StringFormat='KSh {0:N2}'}"
+                                                           Foreground="#22C55E"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           VerticalAlignment="Center"
+                                                           Margin="8,0"/>
+
+                                                <!-- Remove Button -->
+                                                <Button Grid.Column="2"
+                                                        Content="X"
+                                                        Width="24"
+                                                        Height="24"
+                                                        FontSize="12"
+                                                        FontWeight="Bold"
+                                                        Background="#EF4444"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        VerticalAlignment="Center"
+                                                        Command="{Binding DataContext.RemovePaymentLineAsyncCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        ToolTip="Remove this payment">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border x:Name="border"
+                                                                    Background="{TemplateBinding Background}"
+                                                                    CornerRadius="4">
+                                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                                  VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter TargetName="border" Property="Background" Value="#DC2626"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <Rectangle Height="1" Fill="#3D3D5C" Margin="0,8"
+                                       Visibility="{Binding PaymentLines.Count, Converter={StaticResource BoolToVisibility}}"/>
+
+                            <!-- Amount Paid -->
+                            <Grid Margin="0,0,0,4"
+                                  Visibility="{Binding PaymentLines.Count, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="Paid:" Foreground="#9CA3AF" FontSize="14"/>
+                                <TextBlock Text="{Binding AmountPaid, StringFormat='KSh {0:N2}'}"
+                                           Foreground="White"
+                                           FontSize="14"
+                                           HorizontalAlignment="Right"/>
+                            </Grid>
+
+                            <!-- Balance Due -->
+                            <Grid>
+                                <TextBlock Text="BALANCE DUE:" Foreground="White" FontSize="16" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding AmountDue, StringFormat='KSh {0:N2}'}"
+                                           Foreground="#F59E0B"
+                                           FontSize="16"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Right"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- RIGHT: Payment Methods & Entry -->
+            <Grid Grid.Column="1" Background="#1E1E2E">
+                <!-- Payment Method Selection (visible when no method selected) -->
+                <Grid Visibility="{Binding IsPaymentPanelVisible, Converter={StaticResource InverseBoolToVisibility}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Title -->
+                    <TextBlock Grid.Row="0"
+                               Text="Select Payment Method"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               HorizontalAlignment="Center"
+                               Margin="0,40,0,20"/>
+
+                    <!-- Payment Method Buttons -->
+                    <ItemsControl Grid.Row="1"
+                                  ItemsSource="{Binding PaymentMethods}"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel HorizontalAlignment="Center"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Style="{StaticResource PaymentMethodButton}"
+                                        Background="{Binding Code, Converter={StaticResource PaymentMethodColorConverter}}"
+                                        Command="{Binding DataContext.SelectPaymentMethodCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontSize="18"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Quick Settle with Cash -->
+                    <Button Grid.Row="2"
+                            Content="Quick Settle (Exact Cash)"
+                            Background="#22C55E"
+                            Style="{StaticResource ActionButton}"
+                            Width="300"
+                            Margin="0,20,0,40"
+                            Command="{Binding SettleWithCashAsyncCommand}"/>
+                </Grid>
+
+                <!-- Cash Payment Panel -->
+                <Grid Visibility="{Binding IsPaymentPanelVisible, Converter={StaticResource BoolToVisibility}}">
+                    <Border Background="#252538"
+                            CornerRadius="16"
+                            Margin="40"
+                            MaxWidth="500"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center">
+                        <Grid Margin="32">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Payment Method Title -->
+                            <TextBlock Grid.Row="0"
+                                       Text="{Binding SelectedPaymentMethod.Name, StringFormat='{}{0} Payment'}"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,0,0,24"/>
+
+                            <!-- Amount Due -->
+                            <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,0,0,24">
+                                <TextBlock Text="Amount Due"
+                                           FontSize="14"
+                                           Foreground="#9CA3AF"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding AmountDue, StringFormat='KSh {0:N2}'}"
+                                           FontSize="32"
+                                           FontWeight="Bold"
+                                           Foreground="#F59E0B"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Amount Tendered Input (for cash) -->
+                            <StackPanel Grid.Row="2"
+                                        Visibility="{Binding IsCashPayment, Converter={StaticResource BoolToVisibility}}"
+                                        Margin="0,0,0,16">
+                                <TextBlock Text="Amount Tendered"
+                                           FontSize="14"
+                                           Foreground="#9CA3AF"
+                                           Margin="0,0,0,8"/>
+                                <!-- Display current amount -->
+                                <Border Background="#2D2D44"
+                                        CornerRadius="8"
+                                        Padding="16,12"
+                                        Margin="0,0,0,8">
+                                    <TextBlock Text="{Binding EnteredAmountString, StringFormat='KSh {0}'}"
+                                               Foreground="White"
+                                               FontSize="28"
+                                               FontWeight="Bold"
+                                               TextAlignment="Right"/>
+                                </Border>
+                                <!-- Touch Numeric Keypad -->
+                                <controls:NumericKeypad Value="{Binding EnteredAmountString, Mode=TwoWay}"
+                                                        MaxLength="10"
+                                                        Width="260"
+                                                        HorizontalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Quick Amount Buttons (for cash) -->
+                            <ItemsControl Grid.Row="3"
+                                          ItemsSource="{Binding QuickAmounts}"
+                                          Visibility="{Binding IsCashPayment, Converter={StaticResource BoolToVisibility}}"
+                                          Margin="0,0,0,16">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel HorizontalAlignment="Center"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Content="{Binding StringFormat='KSh {0:N0}'}"
+                                                Style="{StaticResource QuickAmountButton}"
+                                                Command="{Binding DataContext.ApplyQuickAmountCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- M-Pesa Payment Panel -->
+                            <StackPanel Grid.Row="3"
+                                        Visibility="{Binding IsMpesaPayment, Converter={StaticResource BoolToVisibility}}"
+                                        Margin="0,0,0,16">
+                                <!-- M-Pesa Logo/Header -->
+                                <Border Background="#4CAF50"
+                                        CornerRadius="8"
+                                        Padding="12,8"
+                                        Margin="0,0,0,16"
+                                        HorizontalAlignment="Center">
+                                    <TextBlock Text="M-PESA"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Foreground="White"/>
+                                </Border>
+
+                                <TextBlock Text="Enter M-Pesa Transaction Code"
+                                           FontSize="14"
+                                           Foreground="#9CA3AF"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,4"/>
+                                <TextBlock Text="(10 characters, e.g., QJK2XXXXXX)"
+                                           FontSize="12"
+                                           Foreground="#6B7280"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,12"/>
+
+                                <!-- Transaction Code Display -->
+                                <Border Background="#2D2D44"
+                                        CornerRadius="8"
+                                        Padding="16,12"
+                                        Margin="0,0,0,8"
+                                        HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding ReferenceNumber, TargetNullValue='__________'}"
+                                               FontSize="28"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               FontFamily="Consolas"
+                                               CharacterSpacing="200"
+                                               HorizontalAlignment="Center"/>
+                                </Border>
+
+                                <!-- Validation Message -->
+                                <TextBlock Text="{Binding MpesaValidationMessage}"
+                                           FontSize="12"
+                                           Foreground="#EF4444"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,8"
+                                           Visibility="{Binding MpesaValidationMessage, Converter={StaticResource BoolToVisibility}}"/>
+
+                                <!-- Valid Code Indicator -->
+                                <TextBlock Text="Valid M-Pesa Code"
+                                           FontSize="12"
+                                           Foreground="#22C55E"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,8"
+                                           Visibility="{Binding IsMpesaCodeValid, Converter={StaticResource BoolToVisibility}}"/>
+
+                                <!-- Alphanumeric Keypad -->
+                                <controls:AlphanumericKeypad Value="{Binding ReferenceNumber, Mode=TwoWay}"
+                                                              MaxLength="10"
+                                                              AutoUppercase="True"
+                                                              HorizontalAlignment="Center"
+                                                              Margin="0,0,0,16"/>
+
+                                <!-- Customer Confirmation Checkbox -->
+                                <Border Background="#1E1E2E"
+                                        CornerRadius="8"
+                                        Padding="16,12"
+                                        Margin="0,8,0,0">
+                                    <CheckBox IsChecked="{Binding CustomerConfirmed}"
+                                              Foreground="White"
+                                              FontSize="14">
+                                        <CheckBox.Content>
+                                            <TextBlock Text="Customer has confirmed receiving the M-Pesa message"
+                                                       TextWrapping="Wrap"
+                                                       MaxWidth="350"/>
+                                        </CheckBox.Content>
+                                    </CheckBox>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Card Payment Panel -->
+                            <StackPanel Grid.Row="3"
+                                        Visibility="{Binding IsCardPayment, Converter={StaticResource BoolToVisibility}}"
+                                        Margin="0,0,0,16">
+                                <!-- Card Type Display -->
+                                <Border Background="#3B82F6"
+                                        CornerRadius="8"
+                                        Padding="16,12"
+                                        Margin="0,0,0,16"
+                                        HorizontalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="CARD"
+                                                   FontSize="20"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"/>
+                                        <TextBlock Text=" - "
+                                                   FontSize="20"
+                                                   Foreground="White"/>
+                                        <TextBlock Text="{Binding SelectedPaymentMethod.Name}"
+                                                   FontSize="20"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Instructions -->
+                                <TextBlock Text="Process payment on external terminal"
+                                           FontSize="14"
+                                           Foreground="#9CA3AF"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,4"/>
+                                <TextBlock Text="then confirm here"
+                                           FontSize="14"
+                                           Foreground="#9CA3AF"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,16"/>
+
+                                <!-- Last 4 Digits (Optional) -->
+                                <TextBlock Text="Last 4 Digits (Optional)"
+                                           FontSize="14"
+                                           Foreground="#9CA3AF"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,8"/>
+
+                                <!-- Display for last 4 digits -->
+                                <Border Background="#2D2D44"
+                                        CornerRadius="8"
+                                        Padding="16,12"
+                                        Margin="0,0,0,8"
+                                        HorizontalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="****"
+                                                   FontSize="28"
+                                                   FontWeight="Bold"
+                                                   Foreground="#6B7280"
+                                                   FontFamily="Consolas"
+                                                   Margin="0,0,8,0"/>
+                                        <TextBlock Text="{Binding CardLastFourDigits, TargetNullValue='____'}"
+                                                   FontSize="28"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"
+                                                   FontFamily="Consolas"
+                                                   CharacterSpacing="200"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Numeric Keypad for 4 digits -->
+                                <controls:NumericKeypad Value="{Binding CardLastFourDigits, Mode=TwoWay}"
+                                                        MaxLength="4"
+                                                        Width="260"
+                                                        HorizontalAlignment="Center"
+                                                        Margin="0,0,0,8"/>
+
+                                <TextBlock Text="Skip if not required"
+                                           FontSize="12"
+                                           Foreground="#6B7280"
+                                           FontStyle="Italic"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Other Reference Input (not M-Pesa, not Card) -->
+                            <StackPanel Grid.Row="3"
+                                        Margin="0,0,0,16">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding RequiresReference}" Value="True"/>
+                                                    <Condition Binding="{Binding IsMpesaPayment}" Value="False"/>
+                                                    <Condition Binding="{Binding IsCardPayment}" Value="False"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="Reference Number"
+                                           FontSize="14"
+                                           Foreground="#9CA3AF"
+                                           Margin="0,0,0,8"/>
+                                <TextBox Text="{Binding ReferenceNumber, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="#2D2D44"
+                                         Foreground="White"
+                                         FontSize="18"
+                                         BorderBrush="#3D3D5C"
+                                         BorderThickness="2"
+                                         Padding="16,12"
+                                         CharacterCasing="Upper"
+                                         MaxLength="20"/>
+                            </StackPanel>
+
+                            <!-- Change Due (for cash) -->
+                            <Border Grid.Row="4"
+                                    Background="#1E1E2E"
+                                    CornerRadius="8"
+                                    Padding="24,16"
+                                    Margin="0,0,0,24"
+                                    Visibility="{Binding IsCashPayment, Converter={StaticResource BoolToVisibility}}">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="CHANGE DUE"
+                                               FontSize="14"
+                                               Foreground="#9CA3AF"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding ChangeDue, StringFormat='KSh {0:N2}'}"
+                                               FontSize="36"
+                                               FontWeight="Bold"
+                                               Foreground="#22C55E"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Action Buttons -->
+                            <Grid Grid.Row="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Button Grid.Column="0"
+                                        Content="Cancel"
+                                        Background="#4E4E6E"
+                                        Style="{StaticResource ActionButton}"
+                                        Margin="0,0,8,0"
+                                        Command="{Binding CancelPaymentCommand}"/>
+
+                                <Button Grid.Column="1"
+                                        Content="Complete Payment"
+                                        Background="#22C55E"
+                                        Style="{StaticResource ActionButton}"
+                                        Margin="8,0,0,0"
+                                        IsEnabled="{Binding CanCompletePayment}"
+                                        Command="{Binding CompletePaymentAsyncCommand}"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Settlement Complete Overlay -->
+                <Grid Visibility="{Binding IsSettlementComplete, Converter={StaticResource BoolToVisibility}}">
+                    <Border Background="#1E1E2E">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="SETTLEMENT COMPLETE"
+                                       FontSize="32"
+                                       FontWeight="Bold"
+                                       Foreground="#22C55E"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,0,0,24"/>
+
+                            <TextBlock Text="{Binding Receipt.ReceiptNumber}"
+                                       FontSize="20"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,0,0,32"/>
+
+                            <!-- Change Amount (if any) -->
+                            <Border Background="#252538"
+                                    CornerRadius="12"
+                                    Padding="48,24"
+                                    Margin="0,0,0,32"
+                                    Visibility="{Binding FinalChangeAmount, Converter={StaticResource BoolToVisibility}}">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="CHANGE DUE"
+                                               FontSize="18"
+                                               Foreground="#9CA3AF"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding FinalChangeAmount, StringFormat='KSh {0:N2}'}"
+                                               FontSize="48"
+                                               FontWeight="Bold"
+                                               Foreground="#22C55E"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Button Content="Start New Order"
+                                    Background="#22C55E"
+                                    Style="{StaticResource ActionButton}"
+                                    Width="250"
+                                    FontSize="18"
+                                    Command="{Binding StartNewOrderCommand}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- Loading Overlay -->
+        <Border Grid.RowSpan="2"
+                Background="#80000000"
+                Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True"
+                             Width="200"
+                             Height="4"
+                             Foreground="#22C55E"/>
+                <TextBlock Text="{Binding BusyMessage}"
+                           Foreground="White"
+                           FontSize="14"
+                           HorizontalAlignment="Center"
+                           Margin="0,16,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,360 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.CustomerEnrollmentView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:HospitalityPOS.WPF.ViewModels"
+             xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="600"
+             Background="#1E1E2E">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisConverter" />
+
+        <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="#3D3D5C" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderBrush" Value="#4A4A6A" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="16,14" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="Height" Value="56" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Style.Triggers>
+                <Trigger Property="IsFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="#6B8DD6" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#AAAACC" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <Style x:Key="ErrorTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FF6B6B" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Margin" Value="0,6,0,0" />
+        </Style>
+
+        <Style x:Key="SuccessTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#4CAF50" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#4CAF50" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="32,16" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Height" Value="56" />
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#5A5A7A" />
+                    <Setter Property="Opacity" Value="0.6" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#3D3D5C" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="24,12" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0"
+                    Content="Cancel"
+                    Command="{Binding CancelCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" />
+
+            <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Title}"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           Foreground="White"
+                           HorizontalAlignment="Center" />
+                <TextBlock Text="Join our loyalty program"
+                           FontSize="14"
+                           Foreground="#888888"
+                           HorizontalAlignment="Center"
+                           Margin="0,4,0,0" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <Border Background="#2D2D44"
+                    CornerRadius="12"
+                    Padding="32"
+                    MaxWidth="500"
+                    HorizontalAlignment="Center">
+                <StackPanel>
+                    <!-- Success Panel -->
+                    <Border Background="#1B4332"
+                            CornerRadius="8"
+                            Padding="20"
+                            Margin="0,0,0,24"
+                            Visibility="{Binding IsEnrollmentComplete, Converter={StaticResource BoolToVisConverter}}">
+                        <StackPanel>
+                            <TextBlock Text="Enrollment Successful!"
+                                       FontSize="20"
+                                       FontWeight="SemiBold"
+                                       Foreground="#4CAF50"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding SuccessMessage}"
+                                       FontSize="14"
+                                       Foreground="White"
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       Margin="0,12,0,16" />
+
+                            <Button Content="Enroll Another Customer"
+                                    Command="{Binding EnrollAnotherCommand}"
+                                    Background="#4CAF50"
+                                    Foreground="White"
+                                    BorderThickness="0"
+                                    Padding="20,12"
+                                    FontSize="14"
+                                    Cursor="Hand"
+                                    HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Duplicate Warning Panel -->
+                    <Border Background="#3D2D1A"
+                            CornerRadius="8"
+                            Padding="20"
+                            Margin="0,0,0,24"
+                            Visibility="{Binding IsDuplicateFound, Converter={StaticResource BoolToVisConverter}}">
+                        <StackPanel>
+                            <TextBlock Text="Customer Already Enrolled"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="#FFA500"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock FontSize="14"
+                                       Foreground="White"
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       Margin="0,8,0,12">
+                                <Run Text="Membership #: " />
+                                <Run Text="{Binding ExistingMember.MembershipNumber, Mode=OneWay}" FontWeight="SemiBold" />
+                            </TextBlock>
+                            <TextBlock FontSize="14"
+                                       Foreground="#AAAACC"
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap">
+                                <Run Text="Points Balance: " />
+                                <Run Text="{Binding ExistingMember.PointsBalance, StringFormat=N0, Mode=OneWay}" FontWeight="SemiBold" />
+                            </TextBlock>
+
+                            <Button Content="View Member Details"
+                                    Command="{Binding ViewExistingMemberCommand}"
+                                    Background="#5A5A7A"
+                                    Foreground="White"
+                                    BorderThickness="0"
+                                    Padding="16,10"
+                                    FontSize="12"
+                                    Cursor="Hand"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,16,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Form Fields (hidden after successful enrollment) -->
+                    <StackPanel Visibility="{Binding IsEnrollmentComplete, Converter={StaticResource InverseBoolToVisConverter}}">
+
+                        <!-- Phone Number (Required) -->
+                        <StackPanel Margin="0,0,0,20">
+                            <TextBlock Style="{StaticResource LabelStyle}">
+                                <Run Text="Phone Number" />
+                                <Run Text="*" Foreground="#FF6B6B" />
+                            </TextBlock>
+                            <TextBox Text="{Binding PhoneNumber, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource InputTextBoxStyle}"
+                                     MaxLength="15"
+                                     x:Name="PhoneNumberTextBox" />
+                            <TextBlock Text="Format: 0712345678 or +254712345678"
+                                       FontSize="11"
+                                       Foreground="#666688"
+                                       Margin="0,4,0,0"
+                                       Visibility="{Binding PhoneError, Converter={StaticResource InverseBoolToVisConverter}}" />
+                            <TextBlock Text="{Binding FormattedPhoneNumber}"
+                                       FontSize="12"
+                                       Foreground="#6B8DD6"
+                                       Margin="0,4,0,0"
+                                       Visibility="{Binding IsPhoneValid, Converter={StaticResource BoolToVisConverter}}" />
+                            <TextBlock Text="{Binding PhoneError}"
+                                       Style="{StaticResource ErrorTextStyle}"
+                                       Visibility="{Binding PhoneError, Converter={StaticResource BoolToVisConverter}}" />
+                        </StackPanel>
+
+                        <!-- Name (Optional) -->
+                        <StackPanel Margin="0,0,0,20">
+                            <TextBlock Text="Customer Name (Optional)" Style="{StaticResource LabelStyle}" />
+                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource InputTextBoxStyle}"
+                                     MaxLength="100" />
+                        </StackPanel>
+
+                        <!-- Email (Optional) -->
+                        <StackPanel Margin="0,0,0,20">
+                            <TextBlock Text="Email Address (Optional)" Style="{StaticResource LabelStyle}" />
+                            <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource InputTextBoxStyle}"
+                                     MaxLength="100" />
+                            <TextBlock Text="{Binding EmailError}"
+                                       Style="{StaticResource ErrorTextStyle}"
+                                       Visibility="{Binding EmailError, Converter={StaticResource BoolToVisConverter}}" />
+                        </StackPanel>
+
+                        <!-- Error Message -->
+                        <Border Background="#3D1A1A"
+                                CornerRadius="8"
+                                Padding="16"
+                                Margin="0,0,0,20"
+                                Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisConverter}}">
+                            <TextBlock Text="{Binding ErrorMessage}"
+                                       Foreground="#FF6B6B"
+                                       FontSize="14"
+                                       TextWrapping="Wrap" />
+                        </Border>
+
+                        <!-- Enroll Button -->
+                        <Button Content="Enroll Customer"
+                                Command="{Binding EnrollCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                HorizontalAlignment="Stretch" />
+
+                        <!-- Quick Actions -->
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,16,0,0">
+                            <Button Content="Clear Form"
+                                    Command="{Binding ClearFormCommand}"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Margin="0,0,12,0" />
+                            <Button Content="Check if Enrolled"
+                                    Command="{Binding CheckDuplicateCommand}"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+
+        <!-- Footer Info -->
+        <Border Grid.Row="2"
+                Background="#2D2D44"
+                CornerRadius="8"
+                Padding="16"
+                Margin="0,24,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                    <TextBlock Text="Earn Points"
+                               FontSize="12"
+                               Foreground="#888888"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="On every purchase"
+                               FontSize="14"
+                               Foreground="White"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                    <TextBlock Text="Redeem Rewards"
+                               FontSize="12"
+                               Foreground="#888888"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="Save on orders"
+                               FontSize="14"
+                               Foreground="White"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                    <TextBlock Text="Exclusive Offers"
+                               FontSize="12"
+                               Foreground="#888888"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="Members only"
+                               FontSize="14"
+                               Foreground="White"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Loading Overlay -->
+        <Border Grid.RowSpan="3"
+                Background="#80000000"
+                Visibility="{Binding IsEnrolling, Converter={StaticResource BoolToVisConverter}}"
+                Panel.ZIndex="100">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True"
+                             Width="200"
+                             Height="4"
+                             Foreground="#4CAF50" />
+                <TextBlock Text="Enrolling customer..."
+                           Foreground="White"
+                           FontSize="16"
+                           Margin="0,16,0,0"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
+        </Border>
+
+        <!-- Busy Overlay (from base) -->
+        <Border Grid.RowSpan="3"
+                Background="#80000000"
+                Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisConverter}}"
+                Panel.ZIndex="100">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True"
+                             Width="200"
+                             Height="4"
+                             Foreground="#6B8DD6" />
+                <TextBlock Text="{Binding BusyMessage}"
+                           Foreground="White"
+                           FontSize="16"
+                           Margin="0,16,0,0"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

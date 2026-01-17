@@ -1,0 +1,304 @@
+<Window x:Class="HospitalityPOS.WPF.Views.Dialogs.PaymentMethodEditorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
+        mc:Ignorable="d"
+        Title="Payment Method Settings"
+        Width="520" Height="680"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:HexColorToBrushConverter x:Key="HexToBrush"/>
+
+        <Style x:Key="LabelText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#B0B0C0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+
+        <Style x:Key="FormTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#3D3D5C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FormComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#3D3D5C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+
+        <Style x:Key="FormCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,4"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="16,8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="#1E1E2E"
+            CornerRadius="12"
+            BorderBrush="#3D3D5C"
+            BorderThickness="1">
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock x:Name="TitleText"
+                           Text="Payment Method Settings"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           Foreground="White"/>
+                <TextBlock x:Name="SubtitleText"
+                           Text="Configure the payment method properties"
+                           FontSize="13"
+                           Foreground="#6E6E8E"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- Form Content -->
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Margin="0,0,12,0">
+                    <!-- Basic Info Section -->
+                    <TextBlock Text="Basic Information"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#8888AA"
+                               Margin="0,0,0,12"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Name *" Style="{StaticResource LabelText}"/>
+                            <TextBox x:Name="NameTextBox" Style="{StaticResource FormTextBox}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Code *" Style="{StaticResource LabelText}"/>
+                            <TextBox x:Name="CodeTextBox"
+                                     Style="{StaticResource FormTextBox}"
+                                     CharacterCasing="Upper"
+                                     MaxLength="20"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="Type" Style="{StaticResource LabelText}"/>
+                    <ComboBox x:Name="TypeComboBox" Style="{StaticResource FormComboBox}"/>
+
+                    <TextBlock Text="Description" Style="{StaticResource LabelText}"/>
+                    <TextBox x:Name="DescriptionTextBox"
+                             Style="{StaticResource FormTextBox}"
+                             Height="60"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"/>
+
+                    <!-- Reference Settings Section -->
+                    <TextBlock Text="Reference Settings"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#8888AA"
+                               Margin="0,8,0,12"/>
+
+                    <CheckBox x:Name="RequiresReferenceCheckBox"
+                              Content="Requires Reference Number"
+                              Style="{StaticResource FormCheckBox}"/>
+
+                    <StackPanel Visibility="{Binding IsChecked, ElementName=RequiresReferenceCheckBox, Converter={StaticResource BoolToVisibility}}"
+                                Margin="24,8,0,0">
+                        <TextBlock Text="Reference Label" Style="{StaticResource LabelText}"/>
+                        <TextBox x:Name="ReferenceLabelTextBox"
+                                 Style="{StaticResource FormTextBox}"
+                                 Text="Reference Number"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Min Length" Style="{StaticResource LabelText}"/>
+                                <TextBox x:Name="MinLengthTextBox"
+                                         Style="{StaticResource FormTextBox}"
+                                         Text="0"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Max Length" Style="{StaticResource LabelText}"/>
+                                <TextBox x:Name="MaxLengthTextBox"
+                                         Style="{StaticResource FormTextBox}"
+                                         Text="50"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Behavior Settings Section -->
+                    <TextBlock Text="Behavior Settings"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#8888AA"
+                               Margin="0,8,0,12"/>
+
+                    <CheckBox x:Name="SupportsChangeCheckBox"
+                              Content="Supports Change Calculation (Cash)"
+                              Style="{StaticResource FormCheckBox}"/>
+
+                    <CheckBox x:Name="OpensDrawerCheckBox"
+                              Content="Opens Cash Drawer"
+                              Style="{StaticResource FormCheckBox}"/>
+
+                    <CheckBox x:Name="IsActiveCheckBox"
+                              Content="Active"
+                              Style="{StaticResource FormCheckBox}"
+                              IsChecked="True"/>
+
+                    <!-- Appearance Section -->
+                    <TextBlock Text="Appearance"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#8888AA"
+                               Margin="0,8,0,12"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Background Color (Hex)" Style="{StaticResource LabelText}"/>
+                            <TextBox x:Name="BackgroundColorTextBox"
+                                     Style="{StaticResource FormTextBox}"
+                                     Text="#4E4E6E"
+                                     MaxLength="7"
+                                     TextChanged="BackgroundColorTextBox_TextChanged"/>
+                        </StackPanel>
+
+                        <Border Grid.Column="2"
+                                x:Name="ColorPreview"
+                                Width="80"
+                                Height="44"
+                                CornerRadius="8"
+                                Background="#4E4E6E"
+                                VerticalAlignment="Bottom"
+                                Margin="0,0,0,12">
+                            <TextBlock Text="Preview"
+                                       FontSize="11"
+                                       FontWeight="Bold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+
+                    <TextBlock Text="Display Order" Style="{StaticResource LabelText}"/>
+                    <TextBox x:Name="DisplayOrderTextBox"
+                             Style="{StaticResource FormTextBox}"
+                             Text="1"
+                             Width="100"
+                             HorizontalAlignment="Left"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Action Buttons -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="ValidationMessage"
+                           Grid.Column="0"
+                           Foreground="#EF4444"
+                           FontSize="13"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"/>
+
+                <Button Grid.Column="1"
+                        Content="Cancel"
+                        Style="{StaticResource ActionButton}"
+                        Background="#4E4E6E"
+                        Click="CancelButton_Click"/>
+
+                <Button Grid.Column="3"
+                        Content="Save"
+                        Style="{StaticResource ActionButton}"
+                        Background="#4CAF50"
+                        Click="SaveButton_Click"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

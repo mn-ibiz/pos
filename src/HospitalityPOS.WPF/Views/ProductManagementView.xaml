@@ -1,0 +1,429 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.ProductManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1200"
+             Background="#1E1E2E">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
+        <converters:StockStatusToTextConverter x:Key="StockStatusToText"/>
+        <converters:StockStatusToColorConverter x:Key="StockStatusToColor"/>
+
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="4,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="16,8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="#4E4E6E"/>
+        </Style>
+
+        <Style x:Key="SearchTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          VerticalAlignment="Center"
+                                          Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#6E6EAE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FilterComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+        </Style>
+
+        <Style x:Key="ModernCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0"
+                    Content="Back"
+                    Style="{StaticResource ActionButton}"
+                    Background="#4E4E6E"
+                    Command="{Binding GoBackCommand}"/>
+
+            <TextBlock Grid.Column="1"
+                       Text="{Binding Title}"
+                       FontSize="28"
+                       FontWeight="SemiBold"
+                       Foreground="White"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+
+            <Button Grid.Column="2"
+                    Content="+ New Product"
+                    Style="{StaticResource ActionButton}"
+                    Background="#4CAF50"
+                    Command="{Binding CreateProductCommand}"/>
+        </Grid>
+
+        <!-- Search and Filter Bar -->
+        <Border Grid.Row="1"
+                Background="#2D2D44"
+                CornerRadius="12"
+                Padding="16"
+                Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Search Box -->
+                <Grid Grid.Column="0" Margin="0,0,16,0">
+                    <TextBox Style="{StaticResource SearchTextBox}"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, Delay=300}"/>
+                    <TextBlock Text="Search by name, code, or barcode..."
+                               FontSize="14"
+                               Foreground="#6E6E8E"
+                               IsHitTestVisible="False"
+                               VerticalAlignment="Center"
+                               Margin="16,0,0,0"
+                               Visibility="{Binding SearchText.Length, Converter={StaticResource InverseBoolToVisibility}}"/>
+                    <Button Content="X"
+                            Width="30"
+                            Height="30"
+                            HorizontalAlignment="Right"
+                            Margin="0,0,8,0"
+                            Background="Transparent"
+                            Foreground="#8888AA"
+                            BorderThickness="0"
+                            FontWeight="Bold"
+                            Cursor="Hand"
+                            Command="{Binding ClearSearchCommand}"
+                            Visibility="{Binding SearchText.Length, Converter={StaticResource BoolToVisibility}}"/>
+                </Grid>
+
+                <!-- Category Filter -->
+                <TextBlock Grid.Column="1"
+                           Text="Category:"
+                           Foreground="#A0A0B0"
+                           FontSize="14"
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0"/>
+
+                <ComboBox Grid.Column="2"
+                          Style="{StaticResource FilterComboBox}"
+                          ItemsSource="{Binding Categories}"
+                          SelectedItem="{Binding SelectedCategory}"
+                          DisplayMemberPath="Name"
+                          Margin="0,0,8,0"/>
+
+                <Button Grid.Column="3"
+                        Content="Clear"
+                        Style="{StaticResource ActionButton}"
+                        Background="#4E4E6E"
+                        MinWidth="70"
+                        Command="{Binding ClearCategoryFilterCommand}"/>
+
+                <!-- Show Inactive Checkbox -->
+                <CheckBox Grid.Column="4"
+                          Style="{StaticResource ModernCheckBox}"
+                          Content="Show Inactive"
+                          IsChecked="{Binding ShowInactiveProducts}"
+                          Margin="16,0,0,0"/>
+            </Grid>
+        </Border>
+
+        <!-- Action Buttons -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    Margin="0,0,0,16">
+            <Button Content="Edit"
+                    Style="{StaticResource ActionButton}"
+                    Background="#2196F3"
+                    Command="{Binding EditProductCommand}"/>
+            <Button Style="{StaticResource ActionButton}"
+                    Command="{Binding ToggleActiveCommand}">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource ActionButton}">
+                        <Setter Property="Content" Value="Deactivate"/>
+                        <Setter Property="Background" Value="#9E9E9E"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedProduct.IsActive}" Value="False">
+                                <Setter Property="Content" Value="Activate"/>
+                                <Setter Property="Background" Value="#4CAF50"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button Content="Delete"
+                    Style="{StaticResource ActionButton}"
+                    Background="#F44336"
+                    Command="{Binding DeleteProductCommand}"/>
+
+            <Rectangle Width="24"/>
+
+            <Button Content="Refresh"
+                    Style="{StaticResource ActionButton}"
+                    Background="#4E4E6E"
+                    Command="{Binding LoadDataCommand}"/>
+        </StackPanel>
+
+        <!-- Product List -->
+        <Border Grid.Row="3"
+                Background="#2D2D44"
+                CornerRadius="12"
+                Padding="0">
+            <DataGrid ItemsSource="{Binding Products}"
+                      SelectedItem="{Binding SelectedProduct}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      Background="Transparent"
+                      BorderThickness="0"
+                      RowBackground="#2D2D44"
+                      AlternatingRowBackground="#353550"
+                      Foreground="White"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="#3E3E5E"
+                      HeadersVisibility="Column"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      SelectionMode="Single"
+                      SelectionUnit="FullRow"
+                      RowHeight="52"
+                      FontSize="14">
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#252538"/>
+                        <Setter Property="Foreground" Value="#A0A0B0"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="FontSize" Value="13"/>
+                        <Setter Property="Padding" Value="16,12"/>
+                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                        <Setter Property="BorderBrush" Value="#3E3E5E"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="Padding" Value="16,8"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="DataGridCell">
+                                    <Border Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#3D3D5C"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.CellStyle>
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#353550"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#3D3D5C"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="100"/>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                    <DataGridTextColumn Header="Category" Binding="{Binding Category.Name}" Width="150"/>
+                    <DataGridTextColumn Header="Selling Price" Width="120">
+                        <DataGridTextColumn.Binding>
+                            <Binding Path="SellingPrice" StringFormat="KSh {0:N2}"/>
+                        </DataGridTextColumn.Binding>
+                    </DataGridTextColumn>
+                    <DataGridTemplateColumn Header="Stock" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Inventory.CurrentStock, StringFormat='{}{0:N0}'}"
+                                               Foreground="White"
+                                               Width="45"
+                                               Margin="0,0,8,0"/>
+                                    <Border CornerRadius="4"
+                                            Padding="6,2"
+                                            Background="{Binding Converter={StaticResource StockStatusToColor}}"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Converter={StaticResource StockStatusToText}}"
+                                                   FontSize="10"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="White"/>
+                                    </Border>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Status" Width="90">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="#2E7D32"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                    <Setter Property="Background" Value="#616161"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="White">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="Active"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                        <Setter Property="Text" Value="Inactive"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- Loading Indicator -->
+        <Border Grid.Row="3"
+                Background="#80000000"
+                CornerRadius="12"
+                Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True"
+                             Width="200"
+                             Height="4"
+                             Foreground="#4CAF50"/>
+                <TextBlock Text="{Binding BusyMessage}"
+                           Foreground="White"
+                           FontSize="14"
+                           HorizontalAlignment="Center"
+                           Margin="0,16,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="4"
+                Background="#2D2D44"
+                CornerRadius="8"
+                Padding="16,8"
+                Margin="0,16,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Foreground="#8888AA" FontSize="13">
+                    <Run Text="Total: "/>
+                    <Run Text="{Binding TotalProductCount, Mode=OneWay}"/>
+                    <Run Text=" | Active: "/>
+                    <Run Text="{Binding ActiveProductCount, Mode=OneWay}"/>
+                    <Run Text=" | Low Stock: "/>
+                    <Run Text="{Binding LowStockCount, Mode=OneWay}" Foreground="#F59E0B"/>
+                    <Run Text=" | Out of Stock: "/>
+                    <Run Text="{Binding OutOfStockCount, Mode=OneWay}" Foreground="#EF4444"/>
+                </TextBlock>
+
+                <TextBlock Grid.Column="1" Foreground="#6E6E8E" FontSize="12">
+                    <Run Text="Selected: "/>
+                    <Run Text="{Binding SelectedProduct.Name, Mode=OneWay, FallbackValue='None'}"/>
+                </TextBlock>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

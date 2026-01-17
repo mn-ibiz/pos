@@ -1,0 +1,65 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters">
+
+    <!-- Boolean to Visibility Converters -->
+    <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
+    <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+    <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+    <converters:EnumBooleanConverter x:Key="EnumBooleanConverter" />
+    <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+    <converters:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter" />
+
+    <!-- Permission-based Converters -->
+    <converters:PermissionToVisibilityConverter x:Key="PermissionToVisibilityConverter" />
+    <converters:AnyPermissionToVisibilityConverter x:Key="AnyPermissionToVisibilityConverter" />
+    <converters:PermissionToEnabledConverter x:Key="PermissionToEnabledConverter" />
+    <converters:PermissionAndBindingEnabledConverter x:Key="PermissionAndBindingEnabledConverter" />
+
+    <!-- Stock Status Converters -->
+    <converters:ProductToStockStatusConverter x:Key="ProductToStockStatusConverter" />
+    <converters:StockStatusToTextConverter x:Key="StockStatusToTextConverter" />
+    <converters:StockStatusToColorConverter x:Key="StockStatusToColorConverter" />
+    <converters:StockStatusEnumToColorConverter x:Key="StockStatusEnumToColorConverter" />
+    <converters:StockStatusEnumToTextConverter x:Key="StockStatusEnumToTextConverter" />
+    <converters:StockAlertToVisibilityConverter x:Key="StockAlertToVisibilityConverter" />
+    <converters:OutOfStockToVisibilityConverter x:Key="OutOfStockToVisibilityConverter" />
+    <converters:LowStockToVisibilityConverter x:Key="LowStockToVisibilityConverter" />
+
+    <!-- Floor/Table Management Converters -->
+    <converters:TableStatusColorConverter x:Key="TableStatusColorConverter" />
+    <converters:TableShapeRadiusConverter x:Key="TableShapeRadiusConverter" />
+    <converters:GridCellSizeConverter x:Key="GridCellSizeConverter" />
+    <converters:HexToColorConverter x:Key="HexToColorConverter" />
+    <converters:InverseNullToVisibilityConverter x:Key="InverseNullToVisibilityConverter" />
+    <converters:EqualityConverter x:Key="EqualityConverter" />
+
+    <!-- Setup Wizard Converters -->
+    <converters:StepToColorConverter x:Key="StepToColorConverter" />
+    <converters:StepToBorderConverter x:Key="StepToBorderConverter" />
+    <converters:StepToVisibilityConverter x:Key="StepToVisibilityConverter" />
+    <converters:BoolToTextConverter x:Key="BoolToTextConverter" />
+    <converters:BoolToVisibilityInverseConverter x:Key="BoolToVisibilityInverseConverter" />
+
+    <!-- Feature Toggle Converters -->
+    <converters:FeatureVisibilityConverter x:Key="FeatureVisibilityConverter" />
+    <converters:FeatureEnabledConverter x:Key="FeatureEnabledConverter" />
+    <converters:ModeVisibilityConverter x:Key="ModeVisibilityConverter" />
+
+    <!-- Layout Mode Converters -->
+    <converters:LayoutModeToVisibilityConverter x:Key="LayoutModeToVisibilityConverter" />
+    <converters:IsHybridModeConverter x:Key="IsHybridModeConverter" />
+    <converters:LayoutModeToIconConverter x:Key="LayoutModeToIconConverter" />
+    <converters:LayoutModeToTextConverter x:Key="LayoutModeToTextConverter" />
+    <converters:LayoutModeToToggleTextConverter x:Key="LayoutModeToToggleTextConverter" />
+
+    <!-- Dashboard Converters (Epic 40) -->
+    <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
+    <converters:GreaterThanZeroToVisibilityConverter x:Key="GreaterThanZeroToVisibility" />
+    <converters:CurrentHourBrushConverter x:Key="CurrentHourBrushConverter" />
+    <converters:SalesToHeightConverter x:Key="SalesToHeightConverter" />
+    <converters:ConnectivityStatusToColorConverter x:Key="ConnectivityStatusToColorConverter" />
+    <converters:ConnectivityStatusToTextConverter x:Key="ConnectivityStatusToTextConverter" />
+
+</ResourceDictionary>

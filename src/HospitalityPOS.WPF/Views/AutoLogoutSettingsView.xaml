@@ -1,0 +1,326 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.AutoLogoutSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="600"
+             Background="#1E1E2E">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+
+        <Style x:Key="SettingLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="#A0A0B0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="SettingDescription" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#606070"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,4,0,0"/>
+        </Style>
+
+        <Style x:Key="ToggleSwitch" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="Margin" Value="8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="16,8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="#4E4E6E"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Title -->
+            <TextBlock Grid.Row="0"
+                       Text="Auto-Logout Settings"
+                       FontSize="24"
+                       FontWeight="SemiBold"
+                       Foreground="White"
+                       Margin="0,0,0,24"/>
+
+            <!-- Settings Content -->
+            <StackPanel Grid.Row="1">
+                <!-- Main Enable Toggle -->
+                <Border Background="#2D2D44"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Enable Auto-Logout"
+                                       Style="{StaticResource SectionHeader}"/>
+                            <TextBlock Text="Automatically log users out based on activity or transaction completion"
+                                       Style="{StaticResource SettingDescription}"/>
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  Style="{StaticResource ToggleSwitch}"
+                                  IsChecked="{Binding EnableAutoLogout}"/>
+                    </Grid>
+                </Border>
+
+                <!-- Logout Trigger Options -->
+                <TextBlock Text="LOGOUT TRIGGER OPTIONS"
+                           Style="{StaticResource SectionHeader}"
+                           Margin="0,16,0,12"/>
+
+                <Border Background="#2D2D44"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,8"
+                        IsEnabled="{Binding EnableAutoLogout}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="After Each Transaction"
+                                       Style="{StaticResource SettingLabel}"/>
+                            <TextBlock Text="Logout when receipt is settled"
+                                       Style="{StaticResource SettingDescription}"/>
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  Style="{StaticResource ToggleSwitch}"
+                                  IsChecked="{Binding LogoutAfterTransaction}"/>
+                    </Grid>
+                </Border>
+
+                <Border Background="#2D2D44"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,8"
+                        IsEnabled="{Binding EnableAutoLogout}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Column="0" Grid.Row="0">
+                            <TextBlock Text="After Inactivity Timeout"
+                                       Style="{StaticResource SettingLabel}"/>
+                            <TextBlock Text="Logout after period of no activity"
+                                       Style="{StaticResource SettingDescription}"/>
+                        </StackPanel>
+                        <CheckBox Grid.Column="1" Grid.Row="0"
+                                  Style="{StaticResource ToggleSwitch}"
+                                  IsChecked="{Binding LogoutAfterInactivity}"/>
+
+                        <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"
+                                    Orientation="Horizontal"
+                                    Margin="0,12,0,0"
+                                    Visibility="{Binding LogoutAfterInactivity, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="Timeout:"
+                                       Style="{StaticResource SettingLabel}"
+                                       Margin="0,0,12,0"/>
+                            <ComboBox ItemsSource="{Binding AvailableTimeoutMinutes}"
+                                      SelectedItem="{Binding InactivityTimeoutMinutes}"
+                                      Width="100"
+                                      Background="#3E3E5E"
+                                      Foreground="White"/>
+                            <TextBlock Text="minutes"
+                                       Style="{StaticResource SettingLabel}"
+                                       Margin="12,0,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Advanced Options -->
+                <TextBlock Text="ADVANCED OPTIONS"
+                           Style="{StaticResource SectionHeader}"
+                           Margin="0,24,0,12"/>
+
+                <Border Background="#2D2D44"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,8"
+                        IsEnabled="{Binding EnableAutoLogout}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Column="0" Grid.Row="0">
+                            <TextBlock Text="Show Warning Before Timeout"
+                                       Style="{StaticResource SettingLabel}"/>
+                            <TextBlock Text="Display countdown dialog before auto-logout"
+                                       Style="{StaticResource SettingDescription}"/>
+                        </StackPanel>
+                        <CheckBox Grid.Column="1" Grid.Row="0"
+                                  Style="{StaticResource ToggleSwitch}"
+                                  IsChecked="{Binding ShowTimeoutWarning}"/>
+
+                        <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"
+                                    Orientation="Horizontal"
+                                    Margin="0,12,0,0"
+                                    Visibility="{Binding ShowTimeoutWarning, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="Warning time:"
+                                       Style="{StaticResource SettingLabel}"
+                                       Margin="0,0,12,0"/>
+                            <TextBox Text="{Binding WarningBeforeLogoutSeconds, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="60"
+                                     Background="#3E3E5E"
+                                     Foreground="White"
+                                     Padding="8,4"
+                                     BorderBrush="#4E4E6E"/>
+                            <TextBlock Text="seconds"
+                                       Style="{StaticResource SettingLabel}"
+                                       Margin="12,0,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Background="#2D2D44"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,8"
+                        IsEnabled="{Binding EnableAutoLogout}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Allow 'Stay Logged In' Button"
+                                       Style="{StaticResource SettingLabel}"/>
+                            <TextBlock Text="Let users extend their session from warning dialog"
+                                       Style="{StaticResource SettingDescription}"/>
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  Style="{StaticResource ToggleSwitch}"
+                                  IsChecked="{Binding AllowStayLoggedIn}"/>
+                    </Grid>
+                </Border>
+
+                <!-- Waiter Accountability -->
+                <TextBlock Text="WAITER ACCOUNTABILITY"
+                           Style="{StaticResource SectionHeader}"
+                           Margin="0,24,0,12"/>
+
+                <Border Background="#2D2D44"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Waiters Can Only View Own Tickets"
+                                       Style="{StaticResource SettingLabel}"/>
+                            <TextBlock Text="Restrict waiters to their own orders only"
+                                       Style="{StaticResource SettingDescription}"/>
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  Style="{StaticResource ToggleSwitch}"
+                                  IsChecked="{Binding EnforceOwnTicketsOnly}"/>
+                    </Grid>
+                </Border>
+
+                <Border Background="#2D2D44"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Require PIN for Void/Discount"
+                                       Style="{StaticResource SettingLabel}"/>
+                            <TextBlock Text="Manager PIN required for voids and discounts"
+                                       Style="{StaticResource SettingDescription}"/>
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  Style="{StaticResource ToggleSwitch}"
+                                  IsChecked="{Binding RequirePinForVoidDiscount}"/>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <!-- Action Buttons -->
+            <StackPanel Grid.Row="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,24,0,0">
+                <Button Content="Reset to Defaults"
+                        Style="{StaticResource ActionButton}"
+                        Background="#E74C3C"
+                        Command="{Binding ResetToDefaultsCommand}"/>
+                <Button Content="Cancel"
+                        Style="{StaticResource ActionButton}"
+                        Command="{Binding CancelCommand}"/>
+                <Button Content="Save Settings"
+                        Style="{StaticResource ActionButton}"
+                        Background="#4CAF50"
+                        Command="{Binding SaveSettingsCommand}"/>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

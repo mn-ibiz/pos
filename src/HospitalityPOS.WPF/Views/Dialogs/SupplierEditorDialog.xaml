@@ -1,0 +1,366 @@
+<Window x:Class="HospitalityPOS.WPF.Views.Dialogs.SupplierEditorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Supplier Editor"
+        Height="720"
+        Width="600"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <Style x:Key="InputTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          VerticalAlignment="Center"
+                                          Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#6E6EAE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="8,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="20,10">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ModernCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <StackPanel Orientation="Horizontal">
+                            <Border x:Name="CheckBorder"
+                                    Width="22"
+                                    Height="22"
+                                    CornerRadius="4"
+                                    Background="#2D2D44"
+                                    BorderBrush="#4E4E6E"
+                                    BorderThickness="1"
+                                    Margin="0,0,10,0">
+                                <Path x:Name="CheckMark"
+                                      Data="M 3 7 L 7 11 L 13 3"
+                                      Stroke="White"
+                                      StrokeThickness="2"
+                                      Visibility="Collapsed"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"/>
+                            </Border>
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckBorder" Property="Background" Value="#4CAF50"/>
+                                <Setter TargetName="CheckBorder" Property="BorderBrush" Value="#4CAF50"/>
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CheckBorder" Property="BorderBrush" Value="#6E6EAE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#A0A0B0"/>
+            <Setter Property="Margin" Value="0,16,0,8"/>
+        </Style>
+
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#8888AA"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="#1E1E2E"
+            CornerRadius="16"
+            BorderBrush="#3E3E5E"
+            BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0" Background="#252538" CornerRadius="16,16,0,0" Padding="24,16">
+                <StackPanel>
+                    <TextBlock x:Name="TitleTextBlock"
+                               Text="Create Supplier"
+                               FontSize="22"
+                               FontWeight="SemiBold"
+                               Foreground="White"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="SubtitleTextBlock"
+                               Text="Add a new supplier to the system"
+                               FontSize="13"
+                               Foreground="#8888AA"
+                               HorizontalAlignment="Center"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Form Fields -->
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Padding="24,8,24,16">
+                <StackPanel>
+                    <!-- Basic Information Section -->
+                    <TextBlock Text="Basic Information" Style="{StaticResource SectionHeader}"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Supplier Code *" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="CodeTextBox"
+                                     Style="{StaticResource InputTextBox}"
+                                     MaxLength="20"
+                                     CharacterCasing="Upper"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Supplier Name *" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="NameTextBox"
+                                     Style="{StaticResource InputTextBox}"
+                                     MaxLength="200"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Contact Section -->
+                    <TextBlock Text="Contact Information" Style="{StaticResource SectionHeader}"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Contact Person" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="ContactPersonTextBox"
+                                     Style="{StaticResource InputTextBox}"
+                                     MaxLength="100"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Phone" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="PhoneTextBox"
+                                     Style="{StaticResource InputTextBox}"
+                                     MaxLength="50"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="Email" Style="{StaticResource FieldLabel}" Margin="0,12,0,4"/>
+                    <TextBox x:Name="EmailTextBox"
+                             Style="{StaticResource InputTextBox}"
+                             MaxLength="100"/>
+
+                    <!-- Address Section -->
+                    <TextBlock Text="Address" Style="{StaticResource SectionHeader}"/>
+
+                    <TextBlock Text="Street Address" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="AddressTextBox"
+                             Style="{StaticResource InputTextBox}"
+                             Height="70"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             VerticalContentAlignment="Top"
+                             MaxLength="500"/>
+
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="City" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="CityTextBox"
+                                     Style="{StaticResource InputTextBox}"
+                                     MaxLength="100"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Country" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="CountryTextBox"
+                                     Style="{StaticResource InputTextBox}"
+                                     Text="Kenya"
+                                     MaxLength="100"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Tax & Banking Section -->
+                    <TextBlock Text="Tax &amp; Banking" Style="{StaticResource SectionHeader}"/>
+
+                    <TextBlock Text="Tax ID / KRA PIN" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TaxIdTextBox"
+                             Style="{StaticResource InputTextBox}"
+                             MaxLength="50"/>
+
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Bank Name" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="BankNameTextBox"
+                                     Style="{StaticResource InputTextBox}"
+                                     MaxLength="100"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Bank Account" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="BankAccountTextBox"
+                                     Style="{StaticResource InputTextBox}"
+                                     MaxLength="50"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Payment Terms Section -->
+                    <TextBlock Text="Payment Terms" Style="{StaticResource SectionHeader}"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Payment Term (Days)" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="PaymentTermDaysTextBox"
+                                     Style="{StaticResource InputTextBox}"
+                                     Text="30"
+                                     PreviewTextInput="IntegerTextBox_PreviewTextInput"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Credit Limit (KSh)" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="CreditLimitTextBox"
+                                     Style="{StaticResource InputTextBox}"
+                                     Text="0"
+                                     PreviewTextInput="DecimalTextBox_PreviewTextInput"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Notes Section -->
+                    <TextBlock Text="Notes" Style="{StaticResource FieldLabel}" Margin="0,16,0,4"/>
+                    <TextBox x:Name="NotesTextBox"
+                             Style="{StaticResource InputTextBox}"
+                             Height="80"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             VerticalContentAlignment="Top"
+                             MaxLength="1000"/>
+
+                    <!-- Active Status -->
+                    <CheckBox x:Name="IsActiveCheckBox"
+                              Content="Active"
+                              Style="{StaticResource ModernCheckBox}"
+                              IsChecked="True"
+                              Margin="0,16,0,0"/>
+
+                    <!-- Error Message -->
+                    <Border x:Name="ErrorBorder"
+                            Background="#3D2030"
+                            CornerRadius="8"
+                            Padding="16"
+                            Margin="0,16,0,0"
+                            Visibility="Collapsed">
+                        <TextBlock x:Name="ErrorTextBlock"
+                                   Foreground="#E74C3C"
+                                   FontSize="13"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Action Buttons -->
+            <Border Grid.Row="2" Background="#252538" CornerRadius="0,0,16,16" Padding="24,16">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancel"
+                            Style="{StaticResource ActionButton}"
+                            Background="#4E4E6E"
+                            Click="CancelButton_Click"/>
+                    <Button Content="Save Supplier"
+                            Style="{StaticResource ActionButton}"
+                            Background="#4CAF50"
+                            Click="SaveButton_Click"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>
