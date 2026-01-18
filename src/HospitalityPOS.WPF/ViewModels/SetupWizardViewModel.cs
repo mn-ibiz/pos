@@ -50,6 +50,15 @@ public partial class SetupWizardViewModel : ObservableObject
     private string _currencySymbol = "Ksh";
 
     [ObservableProperty]
+    private string? _kraPinNumber;
+
+    [ObservableProperty]
+    private string? _vatNumber;
+
+    [ObservableProperty]
+    private decimal _vatRate = 16m;
+
+    [ObservableProperty]
     private bool _isLoading;
 
     [ObservableProperty]
@@ -213,6 +222,11 @@ public partial class SetupWizardViewModel : ObservableObject
                 configuration.CurrencyCode = CurrencyCode;
                 configuration.CurrencySymbol = CurrencySymbol;
                 configuration.BusinessEmail = BusinessEmail;
+
+                // Kenya tax information
+                configuration.KraPinNumber = KraPinNumber;
+                configuration.VatRegistrationNumber = VatNumber;
+                configuration.DefaultTaxRate = VatRate;
 
                 await _configurationService.SaveConfigurationAsync(configuration);
 

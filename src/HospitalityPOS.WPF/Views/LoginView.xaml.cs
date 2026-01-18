@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using HospitalityPOS.WPF.ViewModels;
 
 namespace HospitalityPOS.WPF.Views;
@@ -29,6 +30,45 @@ public partial class LoginView : UserControl
         if (DataContext is LoginViewModel viewModel)
         {
             viewModel.Password = ((PasswordBox)sender).Password;
+        }
+    }
+
+    /// <summary>
+    /// Handles the KeyDown event on the PasswordBox to trigger login on Enter.
+    /// </summary>
+    private void PasswordBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter && DataContext is LoginViewModel viewModel)
+        {
+            if (viewModel.LoginCommand.CanExecute(null))
+            {
+                viewModel.LoginCommand.Execute(null);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles the KeyDown event on the Username TextBox to trigger login on Enter.
+    /// </summary>
+    private void UsernameTextBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            // Move focus to password box
+            PasswordBox.Focus();
+        }
+    }
+
+    /// <summary>
+    /// Fills test credentials for development/testing convenience.
+    /// </summary>
+    private void FillTestCredentials_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is LoginViewModel viewModel)
+        {
+            viewModel.Username = "admin";
+            viewModel.Password = "Admin@123";
+            PasswordBox.Password = "Admin@123";
         }
     }
 }

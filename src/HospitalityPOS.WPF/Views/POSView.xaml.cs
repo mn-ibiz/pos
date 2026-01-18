@@ -1,3 +1,4 @@
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using HospitalityPOS.WPF.ViewModels;
@@ -15,6 +16,17 @@ public partial class POSView : UserControl
     public POSView()
     {
         InitializeComponent();
+        Loaded += POSView_Loaded;
+    }
+
+    /// <summary>
+    /// Focuses the barcode input when the view loads.
+    /// </summary>
+    private void POSView_Loaded(object sender, RoutedEventArgs e)
+    {
+        // Focus the search field for immediate barcode scanning
+        RetailBarcodeInput?.Focus();
+        Keyboard.Focus(RetailBarcodeInput);
     }
 
     /// <summary>

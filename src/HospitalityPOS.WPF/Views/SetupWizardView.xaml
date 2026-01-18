@@ -253,102 +253,213 @@
                 </StackPanel>
 
                 <!-- Step 2: Business Details -->
-                <StackPanel Visibility="{Binding CurrentStep, Converter={StaticResource StepToVisibilityConverter}, ConverterParameter=2}"
-                            MaxWidth="600"
-                            HorizontalAlignment="Left">
-                    <TextBlock Text="{Binding StepTitle}"
-                               FontSize="28"
-                               FontWeight="Bold"
-                               Foreground="White"/>
-                    <TextBlock Text="{Binding StepDescription}"
-                               FontSize="16"
-                               Foreground="#888"
-                               Margin="0,8,0,32"/>
+                <Border Visibility="{Binding CurrentStep, Converter={StaticResource StepToVisibilityConverter}, ConverterParameter=2}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        MinWidth="700"
+                        MaxWidth="900"
+                        Background="#1e1e38"
+                        CornerRadius="16"
+                        Padding="48,40">
+                    <StackPanel>
+                        <TextBlock Text="{Binding StepTitle}"
+                                   FontSize="32"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Enter your business information for receipts and tax compliance"
+                                   FontSize="15"
+                                   Foreground="#888"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,8,0,40"/>
 
-                    <!-- Business Name -->
-                    <TextBlock Text="Business Name *"
-                               Foreground="#aaa"
-                               FontSize="13"
-                               Margin="0,0,0,6"/>
-                    <TextBox Text="{Binding BusinessName, UpdateSourceTrigger=PropertyChanged}"
-                             Style="{StaticResource WizardTextBox}"
-                             Margin="0,0,0,20"/>
+                        <!-- Business Name -->
+                        <TextBlock Text="Business Name *"
+                                   Foreground="#aaa"
+                                   FontSize="14"
+                                   FontWeight="Medium"
+                                   Margin="0,0,0,8"/>
+                        <TextBox Text="{Binding BusinessName, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource WizardTextBox}"
+                                 FontSize="16"
+                                 Height="48"
+                                 Margin="0,0,0,24"/>
 
-                    <!-- Business Address -->
-                    <TextBlock Text="Business Address"
-                               Foreground="#aaa"
-                               FontSize="13"
-                               Margin="0,0,0,6"/>
-                    <TextBox Text="{Binding BusinessAddress, UpdateSourceTrigger=PropertyChanged}"
-                             Style="{StaticResource WizardTextBox}"
-                             TextWrapping="Wrap"
-                             AcceptsReturn="True"
-                             Height="60"
-                             Margin="0,0,0,20"/>
+                        <!-- Business Address -->
+                        <TextBlock Text="Business Address"
+                                   Foreground="#aaa"
+                                   FontSize="14"
+                                   FontWeight="Medium"
+                                   Margin="0,0,0,8"/>
+                        <TextBox Text="{Binding BusinessAddress, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource WizardTextBox}"
+                                 FontSize="16"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 Height="80"
+                                 VerticalContentAlignment="Top"
+                                 Padding="12,12"
+                                 Margin="0,0,0,24"/>
 
-                    <Grid Margin="0,0,0,20">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                        <!-- Phone and Email row -->
+                        <Grid Margin="0,0,0,24">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="24"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <!-- Phone -->
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Phone Number"
-                                       Foreground="#aaa"
-                                       FontSize="13"
-                                       Margin="0,0,0,6"/>
-                            <TextBox Text="{Binding BusinessPhone, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource WizardTextBox}"/>
-                        </StackPanel>
+                            <!-- Phone -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Phone Number"
+                                           Foreground="#aaa"
+                                           FontSize="14"
+                                           FontWeight="Medium"
+                                           Margin="0,0,0,8"/>
+                                <TextBox Text="{Binding BusinessPhone, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource WizardTextBox}"
+                                         FontSize="16"
+                                         Height="48"/>
+                            </StackPanel>
 
-                        <!-- Email -->
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="Email Address"
-                                       Foreground="#aaa"
-                                       FontSize="13"
-                                       Margin="0,0,0,6"/>
-                            <TextBox Text="{Binding BusinessEmail, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource WizardTextBox}"/>
-                        </StackPanel>
-                    </Grid>
+                            <!-- Email -->
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Email Address"
+                                           Foreground="#aaa"
+                                           FontSize="14"
+                                           FontWeight="Medium"
+                                           Margin="0,0,0,8"/>
+                                <TextBox Text="{Binding BusinessEmail, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource WizardTextBox}"
+                                         FontSize="16"
+                                         Height="48"/>
+                            </StackPanel>
+                        </Grid>
 
-                    <!-- Currency Selection -->
-                    <TextBlock Text="Currency"
-                               Foreground="#aaa"
-                               FontSize="13"
-                               Margin="0,0,0,6"/>
-                    <Border Background="#252542"
-                            BorderBrush="#3a3a5c"
-                            BorderThickness="1"
-                            Padding="12,10">
-                        <ComboBox ItemsSource="{Binding CurrencyOptions}"
-                                  SelectedValue="{Binding CurrencyCode}"
-                                  SelectedValuePath="Code"
-                                  Background="Transparent"
-                                  BorderThickness="0"
-                                  Foreground="White"
-                                  FontSize="14">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Display}" Foreground="White"/>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                            <ComboBox.ItemContainerStyle>
-                                <Style TargetType="ComboBoxItem">
-                                    <Setter Property="Background" Value="#252542"/>
-                                    <Setter Property="Foreground" Value="White"/>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsHighlighted" Value="True">
-                                            <Setter Property="Background" Value="#6366F1"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ComboBox.ItemContainerStyle>
-                        </ComboBox>
-                    </Border>
-                </StackPanel>
+                        <!-- Kenya Tax Information Section -->
+                        <Border Background="#252542"
+                                CornerRadius="8"
+                                Padding="20"
+                                Margin="0,0,0,24">
+                            <StackPanel>
+                                <TextBlock Text="Kenya Tax Information (for eTIMS compliance)"
+                                           Foreground="#6366F1"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,16"/>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="24"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- KRA PIN -->
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="KRA PIN Number"
+                                                   Foreground="#aaa"
+                                                   FontSize="14"
+                                                   FontWeight="Medium"
+                                                   Margin="0,0,0,8"/>
+                                        <TextBox Text="{Binding KraPinNumber, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource WizardTextBox}"
+                                                 FontSize="16"
+                                                 Height="48"
+                                                 MaxLength="11"/>
+                                        <TextBlock Text="e.g., A123456789Z"
+                                                   Foreground="#666"
+                                                   FontSize="12"
+                                                   Margin="0,4,0,0"/>
+                                    </StackPanel>
+
+                                    <!-- VAT Number -->
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="VAT Registration Number"
+                                                   Foreground="#aaa"
+                                                   FontSize="14"
+                                                   FontWeight="Medium"
+                                                   Margin="0,0,0,8"/>
+                                        <TextBox Text="{Binding VatNumber, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource WizardTextBox}"
+                                                 FontSize="16"
+                                                 Height="48"/>
+                                        <TextBlock Text="Optional - if VAT registered"
+                                                   Foreground="#666"
+                                                   FontSize="12"
+                                                   Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Currency and VAT Rate row -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="24"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Currency Selection -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Currency"
+                                           Foreground="#aaa"
+                                           FontSize="14"
+                                           FontWeight="Medium"
+                                           Margin="0,0,0,8"/>
+                                <Border Background="#252542"
+                                        BorderBrush="#3a3a5c"
+                                        BorderThickness="1"
+                                        Height="48">
+                                    <ComboBox ItemsSource="{Binding CurrencyOptions}"
+                                              SelectedValue="{Binding CurrencyCode}"
+                                              SelectedValuePath="Code"
+                                              Background="Transparent"
+                                              BorderThickness="0"
+                                              Foreground="White"
+                                              FontSize="16"
+                                              VerticalContentAlignment="Center"
+                                              Padding="12,0">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Display}" Foreground="White"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                        <ComboBox.ItemContainerStyle>
+                                            <Style TargetType="ComboBoxItem">
+                                                <Setter Property="Background" Value="#252542"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsHighlighted" Value="True">
+                                                        <Setter Property="Background" Value="#6366F1"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ComboBox.ItemContainerStyle>
+                                    </ComboBox>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- VAT Rate -->
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="VAT Rate (%)"
+                                           Foreground="#aaa"
+                                           FontSize="14"
+                                           FontWeight="Medium"
+                                           Margin="0,0,0,8"/>
+                                <TextBox Text="{Binding VatRate, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource WizardTextBox}"
+                                         FontSize="16"
+                                         Height="48"/>
+                                <TextBlock Text="Kenya standard VAT is 16%"
+                                           Foreground="#666"
+                                           FontSize="12"
+                                           Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
 
                 <!-- Step 3: Review and Complete -->
                 <StackPanel Visibility="{Binding CurrentStep, Converter={StaticResource StepToVisibilityConverter}, ConverterParameter=3}"

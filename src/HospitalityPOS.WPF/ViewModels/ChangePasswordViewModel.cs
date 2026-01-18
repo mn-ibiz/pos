@@ -228,18 +228,8 @@ public partial class ChangePasswordViewModel : ViewModelBase, INavigationAware
                 // Navigate based on whether this was a forced change
                 if (IsForcedChange)
                 {
-                    // Forced change - continue to main app
-                    // TODO: Navigate to main POS screen when implemented
-                    // For now, we need to go somewhere since history was cleared
-                    await _dialogService.ShowMessageAsync(
-                        "Welcome",
-                        "You may now continue using the system.\n\nThe main POS screen is not yet implemented.");
-
-                    // Cannot use GoBack since history was cleared - stay on a valid screen
-                    // When POS screen is implemented: _navigationService.NavigateTo<POSViewModel>();
-                    // For now, navigate back to login (they'll need to re-authenticate)
-                    // This is temporary until the main POS screen exists
-                    _navigationService.NavigateTo<LoginViewModel>();
+                    // Forced change - continue to main POS screen
+                    _navigationService.NavigateTo<POSViewModel>();
                     _navigationService.ClearHistory();
                 }
                 else

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
@@ -28,6 +29,8 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     private readonly ISessionService _sessionService;
     private readonly IKitchenPrintService _kitchenPrintService;
     private readonly IOfferService _offerService;
+    private readonly IUiShellService _uiShellService;
+    private readonly IBarcodeService _barcodeService;
 
     private const int ItemsPerPage = 15;
     private const decimal TaxRate = 0.16m; // Kenya VAT 16%
@@ -98,6 +101,62 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     /// Gets whether any discount is applied to the order.
     /// </summary>
     public bool HasOrderDiscount => OrderDiscount > 0;
+
+    // ==================== Business Mode Properties ====================
+
+    /// <summary>
+    /// Gets whether the system is in Supermarket mode.
+    /// </summary>
+    public bool IsSupermarketMode => _uiShellService?.CurrentMode == BusinessMode.Supermarket;
+
+    /// <summary>
+    /// Gets whether the system is in Restaurant mode.
+    /// </summary>
+    public bool IsRestaurantMode => _uiShellService?.CurrentMode == BusinessMode.Restaurant;
+
+    /// <summary>
+    /// Gets whether table management UI should be shown.
+    /// </summary>
+    public bool ShowTableManagement => _uiShellService?.ShouldShowTableManagement ?? false;
+
+    /// <summary>
+    /// Gets whether barcode search should be prominently displayed.
+    /// </summary>
+    public bool ShowBarcodeSearch => _uiShellService?.ShouldAutoFocusBarcode ?? false;
+
+    /// <summary>
+    /// Gets the search input placeholder text based on mode.
+    /// </summary>
+    public string SearchPlaceholder => IsSupermarketMode
+        ? "Scan barcode or search products..."
+        : "Search products...";
+
+    /// <summary>
+    /// Gets the order header label based on mode.
+    /// </summary>
+    public string OrderHeaderLabel => IsSupermarketMode ? "Current Sale" : "Current Order";
+
+    /// <summary>
+    /// Gets or sets the barcode/search input.
+    /// </summary>
+    [ObservableProperty]
+    private string _barcodeInput = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the numeric keypad input buffer.
+    /// </summary>
+    [ObservableProperty]
+    private string _keypadInput = "";
+
+    /// <summary>
+    /// Gets the pending quantity display text.
+    /// </summary>
+    public string PendingQuantityDisplay => string.IsNullOrEmpty(KeypadInput) ? "" : $"Qty: {KeypadInput}";
+
+    /// <summary>
+    /// Gets whether there's a pending quantity to apply.
+    /// </summary>
+    public bool HasPendingQuantity => !string.IsNullOrEmpty(KeypadInput);
 
     /// <summary>
     /// Gets the total savings from applied offers.
@@ -288,7 +347,9 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         IReceiptService receiptService,
         ISessionService sessionService,
         IKitchenPrintService kitchenPrintService,
-        IOfferService offerService)
+        IOfferService offerService,
+        IUiShellService uiShellService,
+        IBarcodeService barcodeService)
         : base(logger)
     {
         _productService = productService ?? throw new ArgumentNullException(nameof(productService));
@@ -302,8 +363,10 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         _kitchenPrintService = kitchenPrintService ?? throw new ArgumentNullException(nameof(kitchenPrintService));
         _offerService = offerService ?? throw new ArgumentNullException(nameof(offerService));
+        _uiShellService = uiShellService ?? throw new ArgumentNullException(nameof(uiShellService));
+        _barcodeService = barcodeService ?? throw new ArgumentNullException(nameof(barcodeService));
 
-        Title = "Point of Sale";
+        Title = IsSupermarketMode ? "Point of Sale - Retail" : "Point of Sale";
     }
 
     /// <inheritdoc />
@@ -447,6 +510,119 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     }
 
     /// <summary>
+    /// Handles barcode/product search input (triggered on Enter key).
+    /// </summary>
+    [RelayCommand]
+    private async Task SearchBarcodeAsync()
+    {
+        if (string.IsNullOrWhiteSpace(BarcodeInput))
+        {
+            // Empty input - open product lookup dialog
+            await OpenProductSearchDialogAsync(null);
+            return;
+        }
+
+        await ExecuteAsync(async () =>
+        {
+            var searchTerm = BarcodeInput.Trim();
+
+            // First, try to find by exact barcode match
+            var product = await _barcodeService.GetProductByBarcodeAsync(searchTerm);
+
+            if (product != null)
+            {
+                // Found by barcode - add to order directly with pending quantity
+                var tile = CreateProductTileFromEntity(product);
+                await AddToOrderWithQuantityAsync(tile);
+                BarcodeInput = string.Empty; // Clear for next scan
+                _logger.Debug("Product {Name} added via barcode {Barcode}", product.Name, searchTerm);
+                return;
+            }
+
+            // If no barcode match, search by exact code match
+            var exactCodeMatch = _allProducts.FirstOrDefault(p =>
+                p.Code?.Equals(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false);
+
+            if (exactCodeMatch != null)
+            {
+                var tile = CreateProductTileFromEntity(exactCodeMatch);
+                await AddToOrderWithQuantityAsync(tile);
+                BarcodeInput = string.Empty;
+                _logger.Debug("Product {Name} added via exact code {Code}", exactCodeMatch.Name, searchTerm);
+                return;
+            }
+
+            // No exact match - open product search dialog with the search term
+            await OpenProductSearchDialogAsync(searchTerm);
+
+        }, "Searching...").ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Opens the product search dialog.
+    /// </summary>
+    private async Task OpenProductSearchDialogAsync(string? initialSearchText)
+    {
+        var dialog = new Views.Dialogs.ProductSearchDialog(_productService, initialSearchText);
+        dialog.Owner = Application.Current.MainWindow;
+
+        var result = dialog.ShowDialog();
+
+        if (result == true && dialog.SelectedProduct != null)
+        {
+            var selectedProduct = dialog.SelectedProduct;
+
+            // Find the full product entity
+            var product = _allProducts.FirstOrDefault(p => p.Id == selectedProduct.Id);
+            if (product != null)
+            {
+                var tile = CreateProductTileFromEntity(product);
+                await AddToOrderWithQuantityAsync(tile);
+                _logger.Debug("Product {Name} added via search dialog", product.Name);
+            }
+        }
+
+        BarcodeInput = string.Empty;
+    }
+
+    /// <summary>
+    /// Adds product to order, applying any pending quantity from keypad.
+    /// </summary>
+    private async Task AddToOrderWithQuantityAsync(ProductTileViewModel tile)
+    {
+        // Check if there's a pending quantity from keypad
+        int quantity = 1;
+        if (!string.IsNullOrEmpty(KeypadInput) && int.TryParse(KeypadInput, out int pendingQty) && pendingQty > 0)
+        {
+            quantity = pendingQty;
+            KeypadClear();
+        }
+
+        // Add to order with specified quantity
+        for (int i = 0; i < quantity; i++)
+        {
+            await AddToOrderAsync(tile);
+        }
+    }
+
+    /// <summary>
+    /// Creates a ProductTileViewModel from a Product entity.
+    /// </summary>
+    private ProductTileViewModel CreateProductTileFromEntity(Product p)
+    {
+        return new ProductTileViewModel
+        {
+            Id = p.Id,
+            Code = p.Code ?? "",
+            Name = p.Name,
+            Price = p.SellingPrice,
+            ImagePath = _imageService.GetDisplayImagePath(p.ImagePath),
+            IsOutOfStock = p.Inventory is null || p.Inventory.CurrentStock <= 0,
+            CurrentStock = p.Inventory?.CurrentStock ?? 0
+        };
+    }
+
+    /// <summary>
     /// Refreshes the product grid with current page (synchronous for non-async callers).
     /// </summary>
     private void RefreshProductGrid()
@@ -557,6 +733,7 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
             var orderItem = new OrderItemViewModel
             {
                 ProductId = product.Id,
+                ProductCode = product.Code ?? "",
                 ProductName = product.Name,
                 Price = product.Price,
                 AvailableStock = product.CurrentStock,
@@ -1151,11 +1328,13 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         foreach (var item in order.OrderItems)
         {
             var productName = item.Product?.Name ?? $"Product #{item.ProductId}";
+            var productCode = item.Product?.Code ?? "";
             var availableStock = item.Product?.Inventory?.CurrentStock ?? 999;
 
             OrderItems.Add(new OrderItemViewModel
             {
                 ProductId = item.ProductId,
+                ProductCode = productCode,
                 ProductName = productName,
                 Price = item.UnitPrice,
                 Quantity = (int)item.Quantity,
@@ -1395,6 +1574,15 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     }
 
     /// <summary>
+    /// Navigates to the product management (admin) screen.
+    /// </summary>
+    [RelayCommand]
+    private void GoToAdmin()
+    {
+        _navigationService.NavigateTo<ProductManagementViewModel>();
+    }
+
+    /// <summary>
     /// Navigates to the settlement screen to settle the current receipt.
     /// </summary>
     [RelayCommand]
@@ -1575,6 +1763,216 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         await _dialogService.ShowInfoAsync("Coming Soon", "Customer list feature is coming soon.");
     }
 
+    // ==================== Keyboard Shortcut Commands ====================
+
+    /// <summary>
+    /// Focuses the barcode input field (F1).
+    /// </summary>
+    [RelayCommand]
+    private void FocusBarcodeInput()
+    {
+        // This is handled in the View by focusing the TextBox
+        // The command exists to allow binding
+        OnPropertyChanged(nameof(BarcodeInput));
+    }
+
+    /// <summary>
+    /// Performs a price check on the selected or last item (F7).
+    /// </summary>
+    [RelayCommand]
+    private async Task PriceCheckAsync()
+    {
+        if (!OrderItems.Any())
+        {
+            await _dialogService.ShowInfoAsync("Price Check", "No items in the order to check.");
+            return;
+        }
+
+        var lastItem = OrderItems.LastOrDefault();
+        if (lastItem != null)
+        {
+            var message = $"Item: {lastItem.ProductName}\n" +
+                          $"Code: {lastItem.ProductCode}\n" +
+                          $"Unit Price: KSh {lastItem.Price:N2}\n" +
+                          $"Quantity: {lastItem.Quantity}\n" +
+                          $"Line Total: KSh {lastItem.LineTotal:N2}";
+
+            if (lastItem.HasOfferApplied)
+            {
+                message += $"\n\nOffer Applied: {lastItem.AppliedOfferName}";
+            }
+
+            await _dialogService.ShowInfoAsync("Price Check", message);
+        }
+    }
+
+    /// <summary>
+    /// Initiates card payment (F12).
+    /// </summary>
+    [RelayCommand]
+    private async Task CardPaymentAsync()
+    {
+        if (!OrderItems.Any())
+        {
+            await _dialogService.ShowWarningAsync("Empty Order", "Please add items to the order first.");
+            return;
+        }
+
+        await _dialogService.ShowInfoAsync("Card Payment", $"Card payment for KSh {OrderTotal:N2}\n\nCard payment integration coming soon.");
+    }
+
+    /// <summary>
+    /// Voids the last item added to the order (F6).
+    /// </summary>
+    [RelayCommand]
+    private void VoidLastItem()
+    {
+        if (OrderItems.Any())
+        {
+            var lastItem = OrderItems.Last();
+            OrderItems.Remove(lastItem);
+            RecalculateOrderTotals();
+            _logger.Debug("Voided last item: {ProductName}", lastItem.ProductName);
+        }
+    }
+
+    /// <summary>
+    /// Removes the currently selected item from the order (Delete key).
+    /// </summary>
+    [RelayCommand]
+    private void RemoveSelectedItem()
+    {
+        // For now, remove the last item if no selection mechanism exists
+        VoidLastItem();
+    }
+
+    /// <summary>
+    /// Increases quantity of the last item (+ key).
+    /// </summary>
+    [RelayCommand]
+    private async Task IncreaseSelectedQuantityAsync()
+    {
+        if (OrderItems.Any())
+        {
+            var lastItem = OrderItems.Last();
+            if (lastItem.Quantity < (int)lastItem.AvailableStock)
+            {
+                lastItem.Quantity++;
+                await RecalculateOfferForItemAsync(lastItem);
+                RecalculateOrderTotals();
+            }
+            else
+            {
+                await _dialogService.ShowWarningAsync("Stock Limit", $"Only {(int)lastItem.AvailableStock} units available.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Decreases quantity of the last item (- key).
+    /// </summary>
+    [RelayCommand]
+    private async Task DecreaseSelectedQuantityAsync()
+    {
+        if (OrderItems.Any())
+        {
+            var lastItem = OrderItems.Last();
+            if (lastItem.Quantity > 1)
+            {
+                lastItem.Quantity--;
+                await RecalculateOfferForItemAsync(lastItem);
+                RecalculateOrderTotals();
+            }
+            else
+            {
+                // Remove item if quantity would go to 0
+                OrderItems.Remove(lastItem);
+                RecalculateOrderTotals();
+            }
+        }
+    }
+
+    // ==================== Numeric Keypad Commands ====================
+
+    /// <summary>
+    /// Appends a digit to the keypad input buffer.
+    /// </summary>
+    [RelayCommand]
+    private void KeypadDigit(string digit)
+    {
+        if (KeypadInput.Length < 4) // Limit to 4 digits (max qty 9999)
+        {
+            KeypadInput += digit;
+            OnPropertyChanged(nameof(PendingQuantityDisplay));
+            OnPropertyChanged(nameof(HasPendingQuantity));
+        }
+    }
+
+    /// <summary>
+    /// Clears the keypad input buffer.
+    /// </summary>
+    [RelayCommand]
+    private void KeypadClear()
+    {
+        KeypadInput = "";
+        OnPropertyChanged(nameof(PendingQuantityDisplay));
+        OnPropertyChanged(nameof(HasPendingQuantity));
+    }
+
+    /// <summary>
+    /// Applies the quantity from keypad to the last item in order or sets it as pending for next scan.
+    /// </summary>
+    [RelayCommand]
+    private async Task ApplyQuantityAsync()
+    {
+        if (string.IsNullOrEmpty(KeypadInput))
+        {
+            await _dialogService.ShowInfoAsync("Quantity", "Enter a quantity using the number pad, then press QTY.");
+            return;
+        }
+
+        if (!int.TryParse(KeypadInput, out int qty) || qty <= 0)
+        {
+            await _dialogService.ShowWarningAsync("Invalid Quantity", "Please enter a valid quantity greater than 0.");
+            KeypadClear();
+            return;
+        }
+
+        if (OrderItems.Any())
+        {
+            // Apply to the last item in the order
+            var lastItem = OrderItems.Last();
+            if (qty <= (int)lastItem.AvailableStock)
+            {
+                lastItem.Quantity = qty;
+                await RecalculateOfferForItemAsync(lastItem);
+                RecalculateOrderTotals();
+                _logger.Debug("Applied quantity {Qty} to item {ProductName}", qty, lastItem.ProductName);
+            }
+            else
+            {
+                await _dialogService.ShowWarningAsync("Stock Limit", $"Only {(int)lastItem.AvailableStock} units available in stock.");
+            }
+        }
+        else
+        {
+            await _dialogService.ShowInfoAsync("Quantity Set", $"Quantity {qty} will be applied to the next scanned item.");
+            // Keep the quantity in buffer for the next scanned item
+            return;
+        }
+
+        KeypadClear();
+    }
+
+    /// <summary>
+    /// Called when KeypadInput changes - used to update related properties.
+    /// </summary>
+    partial void OnKeypadInputChanged(string value)
+    {
+        OnPropertyChanged(nameof(PendingQuantityDisplay));
+        OnPropertyChanged(nameof(HasPendingQuantity));
+    }
+
     #endregion
 }
 
@@ -1696,6 +2094,11 @@ public partial class OrderItemViewModel : ObservableObject
     /// Gets or sets the product ID.
     /// </summary>
     public int ProductId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the product code/SKU.
+    /// </summary>
+    public string ProductCode { get; set; } = "";
 
     /// <summary>
     /// Gets or sets the product name.

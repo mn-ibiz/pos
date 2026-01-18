@@ -231,6 +231,18 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
     }
 
     /// <summary>
+    /// Fills in test credentials for development/testing.
+    /// </summary>
+    [RelayCommand]
+    private void FillTestCredentials()
+    {
+        Username = "admin";
+        Password = "Admin@123";
+        // The PasswordBox needs to be updated via code-behind binding
+        OnPropertyChanged(nameof(Password));
+    }
+
+    /// <summary>
     /// Selects a user for PIN entry.
     /// </summary>
     [RelayCommand]
@@ -263,14 +275,8 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
             return;
         }
 
-        // TODO: Replace with POSViewModel when implemented
-        // _navigationService.NavigateTo<POSViewModel>();
-
-        // For now, show welcome message - actual navigation will happen when main POS screen exists
-        await _dialogService.ShowMessageAsync(
-            "Login Successful",
-            $"Welcome, {user.FullName}!\n\nThe main POS screen is not yet implemented.\nYou are now logged in and the system will track your session.")
-            .ConfigureAwait(true);
+        // Navigate to the main POS screen
+        _navigationService.NavigateTo<POSViewModel>();
     }
 
     private async Task LoadQuickLoginUsersAsync()

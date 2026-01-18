@@ -57,7 +57,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     /// Gets the application title.
     /// </summary>
     [ObservableProperty]
-    private string _applicationTitle = "Hospitality POS System";
+    private string _applicationTitle = "ProNet POS";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.

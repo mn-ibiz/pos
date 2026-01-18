@@ -24,6 +24,8 @@ public static class DatabaseSeeder
             {
                 await SeedRolesAsync(context);
                 await SeedPermissionsAsync(context);
+                // Save roles and permissions before creating admin user (required for FK relationships)
+                await context.SaveChangesAsync();
                 await SeedAdminUserAsync(context);
                 await SeedPaymentMethodsAsync(context);
                 await SeedSystemSettingsAsync(context);
@@ -31,6 +33,7 @@ public static class DatabaseSeeder
                 await SeedSalaryComponentsAsync(context);
                 await SeedPointsConfigurationAsync(context);
                 await SeedTierConfigurationsAsync(context);
+                await SeedSampleCategoriesAndProductsAsync(context);
 
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -130,9 +133,9 @@ public static class DatabaseSeeder
     {
         if (await context.Users.AnyAsync()) return;
 
-        // Default admin password: Admin@123 (meets complexity requirements)
+        // Default admin password: Admin@1234 (meets complexity requirements)
         // User must change password on first login
-        const string defaultPassword = "Admin@123";
+        const string defaultPassword = "Admin@1234";
         const int bcryptWorkFactor = 12;
 
         var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Administrator");
@@ -143,6 +146,7 @@ public static class DatabaseSeeder
             Username = "admin",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(defaultPassword, bcryptWorkFactor),
             FullName = "System Administrator",
+            DisplayName = "Admin",
             Email = "admin@example.com",
             MustChangePassword = true,
             PasswordChangedAt = null,
@@ -395,5 +399,87 @@ public static class DatabaseSeeder
         };
 
         await context.TierConfigurations.AddRangeAsync(tiers);
+    }
+
+    private static async Task SeedSampleCategoriesAndProductsAsync(POSDbContext context)
+    {
+        if (await context.Categories.AnyAsync()) return;
+
+        // Sample categories - works for both Restaurant and Supermarket modes
+        var categories = new List<Category>
+        {
+            // Restaurant categories
+            new() { Name = "Beverages", DisplayOrder = 1, IsActive = true },
+            new() { Name = "Main Dishes", DisplayOrder = 2, IsActive = true },
+            new() { Name = "Appetizers", DisplayOrder = 3, IsActive = true },
+            new() { Name = "Desserts", DisplayOrder = 4, IsActive = true },
+            // Supermarket categories
+            new() { Name = "Groceries", DisplayOrder = 5, IsActive = true },
+            new() { Name = "Dairy", DisplayOrder = 6, IsActive = true },
+            new() { Name = "Bakery", DisplayOrder = 7, IsActive = true }
+        };
+
+        await context.Categories.AddRangeAsync(categories);
+        await context.SaveChangesAsync();
+
+        // Get categories for product assignment
+        var beverages = categories.First(c => c.Name == "Beverages");
+        var mainDishes = categories.First(c => c.Name == "Main Dishes");
+        var appetizers = categories.First(c => c.Name == "Appetizers");
+        var desserts = categories.First(c => c.Name == "Desserts");
+        var groceries = categories.First(c => c.Name == "Groceries");
+        var dairy = categories.First(c => c.Name == "Dairy");
+        var bakery = categories.First(c => c.Name == "Bakery");
+
+        // Sample products
+        var products = new List<Product>
+        {
+            // Beverages
+            new() { Code = "BEV001", Name = "Coffee", SellingPrice = 150m, CategoryId = beverages.Id, SKU = "BEV001", IsActive = true, TrackInventory = false },
+            new() { Code = "BEV002", Name = "Tea", SellingPrice = 100m, CategoryId = beverages.Id, SKU = "BEV002", IsActive = true, TrackInventory = false },
+            new() { Code = "BEV003", Name = "Soda (500ml)", SellingPrice = 80m, CategoryId = beverages.Id, SKU = "BEV003", IsActive = true, TrackInventory = true, StockQuantity = 100 },
+            new() { Code = "BEV004", Name = "Fresh Juice", SellingPrice = 200m, CategoryId = beverages.Id, SKU = "BEV004", IsActive = true, TrackInventory = false },
+            new() { Code = "BEV005", Name = "Mineral Water", SellingPrice = 50m, CategoryId = beverages.Id, SKU = "BEV005", IsActive = true, TrackInventory = true, StockQuantity = 200 },
+
+            // Main Dishes
+            new() { Code = "MAIN001", Name = "Chicken Curry", SellingPrice = 650m, CategoryId = mainDishes.Id, SKU = "MAIN001", IsActive = true, TrackInventory = false },
+            new() { Code = "MAIN002", Name = "Beef Stew", SellingPrice = 750m, CategoryId = mainDishes.Id, SKU = "MAIN002", IsActive = true, TrackInventory = false },
+            new() { Code = "MAIN003", Name = "Fish Fillet", SellingPrice = 850m, CategoryId = mainDishes.Id, SKU = "MAIN003", IsActive = true, TrackInventory = false },
+            new() { Code = "MAIN004", Name = "Ugali & Sukuma", SellingPrice = 250m, CategoryId = mainDishes.Id, SKU = "MAIN004", IsActive = true, TrackInventory = false },
+            new() { Code = "MAIN005", Name = "Pilau Rice", SellingPrice = 400m, CategoryId = mainDishes.Id, SKU = "MAIN005", IsActive = true, TrackInventory = false },
+            new() { Code = "MAIN006", Name = "Nyama Choma (500g)", SellingPrice = 800m, CategoryId = mainDishes.Id, SKU = "MAIN006", IsActive = true, TrackInventory = false },
+
+            // Appetizers
+            new() { Code = "APP001", Name = "Samosa (2pcs)", SellingPrice = 100m, CategoryId = appetizers.Id, SKU = "APP001", IsActive = true, TrackInventory = false },
+            new() { Code = "APP002", Name = "Spring Rolls", SellingPrice = 150m, CategoryId = appetizers.Id, SKU = "APP002", IsActive = true, TrackInventory = false },
+            new() { Code = "APP003", Name = "Chips (Fries)", SellingPrice = 200m, CategoryId = appetizers.Id, SKU = "APP003", IsActive = true, TrackInventory = false },
+            new() { Code = "APP004", Name = "Soup of the Day", SellingPrice = 180m, CategoryId = appetizers.Id, SKU = "APP004", IsActive = true, TrackInventory = false },
+
+            // Desserts
+            new() { Code = "DES001", Name = "Ice Cream", SellingPrice = 150m, CategoryId = desserts.Id, SKU = "DES001", IsActive = true, TrackInventory = false },
+            new() { Code = "DES002", Name = "Cake Slice", SellingPrice = 200m, CategoryId = desserts.Id, SKU = "DES002", IsActive = true, TrackInventory = false },
+            new() { Code = "DES003", Name = "Fruit Salad", SellingPrice = 180m, CategoryId = desserts.Id, SKU = "DES003", IsActive = true, TrackInventory = false },
+
+            // Groceries (Supermarket)
+            new() { Code = "GRO001", Name = "Sugar (1kg)", SellingPrice = 180m, CategoryId = groceries.Id, SKU = "GRO001", Barcode = "6001234567890", IsActive = true, TrackInventory = true, StockQuantity = 50 },
+            new() { Code = "GRO002", Name = "Rice (2kg)", SellingPrice = 350m, CategoryId = groceries.Id, SKU = "GRO002", Barcode = "6001234567891", IsActive = true, TrackInventory = true, StockQuantity = 40 },
+            new() { Code = "GRO003", Name = "Cooking Oil (1L)", SellingPrice = 280m, CategoryId = groceries.Id, SKU = "GRO003", Barcode = "6001234567892", IsActive = true, TrackInventory = true, StockQuantity = 30 },
+            new() { Code = "GRO004", Name = "Salt (500g)", SellingPrice = 50m, CategoryId = groceries.Id, SKU = "GRO004", Barcode = "6001234567893", IsActive = true, TrackInventory = true, StockQuantity = 100 },
+            new() { Code = "GRO005", Name = "Maize Flour (2kg)", SellingPrice = 180m, CategoryId = groceries.Id, SKU = "GRO005", Barcode = "6001234567894", IsActive = true, TrackInventory = true, StockQuantity = 60 },
+
+            // Dairy
+            new() { Code = "DAI001", Name = "Fresh Milk (500ml)", SellingPrice = 65m, CategoryId = dairy.Id, SKU = "DAI001", Barcode = "6001234567895", IsActive = true, TrackInventory = true, StockQuantity = 50 },
+            new() { Code = "DAI002", Name = "Yoghurt (500ml)", SellingPrice = 120m, CategoryId = dairy.Id, SKU = "DAI002", Barcode = "6001234567896", IsActive = true, TrackInventory = true, StockQuantity = 30 },
+            new() { Code = "DAI003", Name = "Butter (250g)", SellingPrice = 250m, CategoryId = dairy.Id, SKU = "DAI003", Barcode = "6001234567897", IsActive = true, TrackInventory = true, StockQuantity = 20 },
+            new() { Code = "DAI004", Name = "Cheese (200g)", SellingPrice = 350m, CategoryId = dairy.Id, SKU = "DAI004", Barcode = "6001234567898", IsActive = true, TrackInventory = true, StockQuantity = 15 },
+
+            // Bakery
+            new() { Code = "BAK001", Name = "Bread Loaf", SellingPrice = 60m, CategoryId = bakery.Id, SKU = "BAK001", Barcode = "6001234567899", IsActive = true, TrackInventory = true, StockQuantity = 30 },
+            new() { Code = "BAK002", Name = "Buns (6 pack)", SellingPrice = 80m, CategoryId = bakery.Id, SKU = "BAK002", Barcode = "6001234567900", IsActive = true, TrackInventory = true, StockQuantity = 25 },
+            new() { Code = "BAK003", Name = "Croissant", SellingPrice = 100m, CategoryId = bakery.Id, SKU = "BAK003", Barcode = "6001234567901", IsActive = true, TrackInventory = true, StockQuantity = 20 },
+            new() { Code = "BAK004", Name = "Doughnut", SellingPrice = 50m, CategoryId = bakery.Id, SKU = "BAK004", Barcode = "6001234567902", IsActive = true, TrackInventory = true, StockQuantity = 40 }
+        };
+
+        await context.Products.AddRangeAsync(products);
     }
 }

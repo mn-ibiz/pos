@@ -146,7 +146,12 @@ public class SystemConfigurationService : ISystemConfigurationService, IDisposab
         // Apply mode defaults
         configuration.ApplyModeDefaults();
 
-        await SaveConfigurationAsync(configuration);
+        var saved = await SaveConfigurationAsync(configuration);
+        if (!saved)
+        {
+            _logger.LogError("Failed to save system configuration during setup");
+            throw new InvalidOperationException("Failed to save system configuration. Please check database connection and try again.");
+        }
 
         _logger.LogInformation(
             "Setup completed. Business: {BusinessName}, Mode: {Mode}",

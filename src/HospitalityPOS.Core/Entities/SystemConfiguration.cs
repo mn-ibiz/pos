@@ -57,9 +57,25 @@ public class SystemConfiguration
     public string? BusinessEmail { get; set; }
 
     /// <summary>
-    /// Gets or sets the business tax registration number.
+    /// Gets or sets the business tax registration number (legacy field).
     /// </summary>
     public string? TaxRegistrationNumber { get; set; }
+
+    /// <summary>
+    /// Gets or sets the KRA PIN number (Kenya-specific).
+    /// Format: A followed by 9 digits and ending with a letter (e.g., A123456789Z).
+    /// </summary>
+    public string? KraPinNumber { get; set; }
+
+    /// <summary>
+    /// Gets or sets the VAT registration number (Kenya-specific).
+    /// </summary>
+    public string? VatRegistrationNumber { get; set; }
+
+    /// <summary>
+    /// Gets or sets the default tax rate (VAT rate in Kenya is 16%).
+    /// </summary>
+    public decimal DefaultTaxRate { get; set; } = 16m;
 
     /// <summary>
     /// Gets or sets the currency code (e.g., KES, USD).
