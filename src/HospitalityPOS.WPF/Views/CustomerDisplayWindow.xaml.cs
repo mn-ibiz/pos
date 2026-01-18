@@ -1,7 +1,7 @@
 using System.Windows;
-using System.Windows.Forms;
 using HospitalityPOS.Core.Models.Hardware;
 using HospitalityPOS.WPF.ViewModels;
+using WinFormsScreen = System.Windows.Forms.Screen;
 
 namespace HospitalityPOS.WPF.Views;
 
@@ -42,7 +42,7 @@ public partial class CustomerDisplayWindow : Window
     /// <param name="monitorIndex">Monitor index (0-based).</param>
     public void PositionOnMonitor(int monitorIndex)
     {
-        var screens = Screen.AllScreens;
+        var screens = WinFormsScreen.AllScreens;
 
         if (monitorIndex >= 0 && monitorIndex < screens.Length)
         {
@@ -91,7 +91,7 @@ public partial class CustomerDisplayWindow : Window
     /// <returns>List of available monitors.</returns>
     public static IReadOnlyList<MonitorInfo> GetAvailableMonitors()
     {
-        var screens = Screen.AllScreens;
+        var screens = WinFormsScreen.AllScreens;
         var monitors = new List<MonitorInfo>();
 
         for (int i = 0; i < screens.Length; i++)

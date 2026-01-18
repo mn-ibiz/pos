@@ -228,9 +228,9 @@
                             <DataGridTextColumn Header="Code" Binding="{Binding ProductCode}" Width="80"/>
                             <DataGridTextColumn Header="Product Name" Binding="{Binding ProductName}" Width="200"/>
                             <DataGridTextColumn Header="Category" Binding="{Binding CategoryName}" Width="120"/>
-                            <DataGridTextColumn Header="Stock" Binding="{Binding CurrentStock, StringFormat='{0:N1}'}" Width="80"/>
+                            <DataGridTextColumn Header="Stock" Binding="{Binding CurrentStock, StringFormat='{}{0:N1}'}" Width="80"/>
                             <DataGridTextColumn Header="Unit" Binding="{Binding StockUnit}" Width="60"/>
-                            <DataGridTextColumn Header="Min" Binding="{Binding MinStock, StringFormat='{0:N0}'}" Width="60"/>
+                            <DataGridTextColumn Header="Min" Binding="{Binding MinStock, StringFormat='{}{0:N0}'}" Width="60"/>
                             <DataGridTextColumn Header="Cost Price" Binding="{Binding CostPrice, StringFormat='KSh {0:N2}'}" Width="100"/>
                             <DataGridTextColumn Header="Stock Value" Binding="{Binding StockValue, StringFormat='KSh {0:N0}'}" Width="110"/>
                             <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="70"/>
@@ -282,9 +282,9 @@
                             <DataGridTextColumn Header="Code" Binding="{Binding ProductCode}" Width="80"/>
                             <DataGridTextColumn Header="Product Name" Binding="{Binding ProductName}" Width="200"/>
                             <DataGridTextColumn Header="Category" Binding="{Binding CategoryName}" Width="120"/>
-                            <DataGridTextColumn Header="Current" Binding="{Binding CurrentStock, StringFormat='{0:N1}'}" Width="80"/>
-                            <DataGridTextColumn Header="Min" Binding="{Binding MinStock, StringFormat='{0:N0}'}" Width="60"/>
-                            <DataGridTextColumn Header="Reorder Qty" Binding="{Binding ReorderQty, StringFormat='{0:N0}'}" Width="90"/>
+                            <DataGridTextColumn Header="Current" Binding="{Binding CurrentStock, StringFormat='{}{0:N1}'}" Width="80"/>
+                            <DataGridTextColumn Header="Min" Binding="{Binding MinStock, StringFormat='{}{0:N0}'}" Width="60"/>
+                            <DataGridTextColumn Header="Reorder Qty" Binding="{Binding ReorderQty, StringFormat='{}{0:N0}'}" Width="90"/>
                             <DataGridTextColumn Header="Cost Price" Binding="{Binding CostPrice, StringFormat='KSh {0:N2}'}" Width="100"/>
                             <DataGridTextColumn Header="Reorder Value" Binding="{Binding ReorderValue, StringFormat='KSh {0:N0}'}" Width="110"/>
                             <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="80"/>
@@ -309,22 +309,22 @@
 
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="Total Received" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding StockMovementReport.TotalReceived, StringFormat='{0:N0}'}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
+                                <TextBlock Text="{Binding StockMovementReport.TotalReceived, StringFormat='{}{0:N0}'}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1">
                                 <TextBlock Text="Total Sold/Out" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding StockMovementReport.TotalSold, StringFormat='{0:N0}'}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource ErrorBrush}"/>
+                                <TextBlock Text="{Binding StockMovementReport.TotalSold, StringFormat='{}{0:N0}'}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource ErrorBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Adjustments" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding StockMovementReport.TotalAdjusted, StringFormat='{0:N0}'}" FontSize="24" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding StockMovementReport.TotalAdjusted, StringFormat='{}{0:N0}'}" FontSize="24" FontWeight="Bold"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="3">
                                 <TextBlock Text="Net Movement" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding StockMovementReport.NetMovement, StringFormat='{0:N0}'}" FontSize="24" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding StockMovementReport.NetMovement, StringFormat='{}{0:N0}'}" FontSize="24" FontWeight="Bold"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -339,13 +339,13 @@
                               GridLinesVisibility="Horizontal"
                               HorizontalGridLinesBrush="#E0E0E0">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat='{0:dd/MM/yy}'}" Width="80"/>
+                            <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat='{}{0:dd/MM/yy}'}" Width="80"/>
                             <DataGridTextColumn Header="Time" Binding="{Binding TimeDisplay}" Width="60"/>
                             <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="180"/>
                             <DataGridTextColumn Header="Type" Binding="{Binding MovementType}" Width="100"/>
-                            <DataGridTextColumn Header="Qty" Binding="{Binding Quantity, StringFormat='{0:N1}'}" Width="70"/>
-                            <DataGridTextColumn Header="Before" Binding="{Binding PreviousStock, StringFormat='{0:N1}'}" Width="70"/>
-                            <DataGridTextColumn Header="After" Binding="{Binding NewStock, StringFormat='{0:N1}'}" Width="70"/>
+                            <DataGridTextColumn Header="Qty" Binding="{Binding Quantity, StringFormat='{}{0:N1}'}" Width="70"/>
+                            <DataGridTextColumn Header="Before" Binding="{Binding PreviousStock, StringFormat='{}{0:N1}'}" Width="70"/>
+                            <DataGridTextColumn Header="After" Binding="{Binding NewStock, StringFormat='{}{0:N1}'}" Width="70"/>
                             <DataGridTextColumn Header="Reference" Binding="{Binding Reference}" Width="100"/>
                             <DataGridTextColumn Header="User" Binding="{Binding UserName}" Width="100"/>
                             <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" Width="*"/>
@@ -385,7 +385,7 @@
 
                             <StackPanel Grid.Column="3">
                                 <TextBlock Text="Margin %" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding StockValuationReport.MarginPercentage, StringFormat='{0:N1}%'}" FontSize="24" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding StockValuationReport.MarginPercentage, StringFormat='{}{0:N1}%'}" FontSize="24" FontWeight="Bold"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -402,11 +402,11 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Category" Binding="{Binding CategoryName}" Width="180"/>
                             <DataGridTextColumn Header="Items" Binding="{Binding ItemCount}" Width="70"/>
-                            <DataGridTextColumn Header="Units" Binding="{Binding TotalUnits, StringFormat='{0:N0}'}" Width="80"/>
+                            <DataGridTextColumn Header="Units" Binding="{Binding TotalUnits, StringFormat='{}{0:N0}'}" Width="80"/>
                             <DataGridTextColumn Header="Cost Value" Binding="{Binding CostValue, StringFormat='KSh {0:N0}'}" Width="130"/>
                             <DataGridTextColumn Header="Retail Value" Binding="{Binding RetailValue, StringFormat='KSh {0:N0}'}" Width="130"/>
                             <DataGridTextColumn Header="Potential Profit" Binding="{Binding PotentialProfit, StringFormat='KSh {0:N0}'}" Width="130"/>
-                            <DataGridTextColumn Header="Margin %" Binding="{Binding MarginPercentage, StringFormat='{0:N1}%'}" Width="80"/>
+                            <DataGridTextColumn Header="Margin %" Binding="{Binding MarginPercentage, StringFormat='{}{0:N1}%'}" Width="80"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </StackPanel>
@@ -437,7 +437,7 @@
 
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Days Threshold" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding DeadStockReport.DaysThreshold, StringFormat='{0} days'}" FontSize="28" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding DeadStockReport.DaysThreshold, StringFormat='{}{0} days'}" FontSize="28" FontWeight="Bold"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -455,9 +455,9 @@
                             <DataGridTextColumn Header="Code" Binding="{Binding ProductCode}" Width="80"/>
                             <DataGridTextColumn Header="Product Name" Binding="{Binding ProductName}" Width="200"/>
                             <DataGridTextColumn Header="Category" Binding="{Binding CategoryName}" Width="120"/>
-                            <DataGridTextColumn Header="Stock" Binding="{Binding CurrentStock, StringFormat='{0:N1}'}" Width="80"/>
+                            <DataGridTextColumn Header="Stock" Binding="{Binding CurrentStock, StringFormat='{}{0:N1}'}" Width="80"/>
                             <DataGridTextColumn Header="Stock Value" Binding="{Binding StockValue, StringFormat='KSh {0:N0}'}" Width="120"/>
-                            <DataGridTextColumn Header="Last Movement" Binding="{Binding LastMovementDate, StringFormat='{0:dd/MM/yyyy}'}" Width="110"/>
+                            <DataGridTextColumn Header="Last Movement" Binding="{Binding LastMovementDate, StringFormat='{}{0:dd/MM/yyyy}'}" Width="110"/>
                             <DataGridTextColumn Header="Days Idle" Binding="{Binding DaysSinceMovement}" Width="80"/>
                         </DataGrid.Columns>
                     </DataGrid>
@@ -477,19 +477,19 @@
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="Generated: " Foreground="#666"/>
-                    <TextBlock Text="{Binding CurrentStockReport.GeneratedAt, StringFormat='{0:yyyy-MM-dd HH:mm}'}"
+                    <TextBlock Text="{Binding CurrentStockReport.GeneratedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
                                Foreground="#666"
                                Visibility="{Binding ShowCurrentStockReport, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                    <TextBlock Text="{Binding LowStockReport.GeneratedAt, StringFormat='{0:yyyy-MM-dd HH:mm}'}"
+                    <TextBlock Text="{Binding LowStockReport.GeneratedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
                                Foreground="#666"
                                Visibility="{Binding ShowLowStockReport, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                    <TextBlock Text="{Binding StockMovementReport.GeneratedAt, StringFormat='{0:yyyy-MM-dd HH:mm}'}"
+                    <TextBlock Text="{Binding StockMovementReport.GeneratedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
                                Foreground="#666"
                                Visibility="{Binding ShowStockMovementReport, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                    <TextBlock Text="{Binding StockValuationReport.GeneratedAt, StringFormat='{0:yyyy-MM-dd HH:mm}'}"
+                    <TextBlock Text="{Binding StockValuationReport.GeneratedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
                                Foreground="#666"
                                Visibility="{Binding ShowStockValuationReport, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                    <TextBlock Text="{Binding DeadStockReport.GeneratedAt, StringFormat='{0:yyyy-MM-dd HH:mm}'}"
+                    <TextBlock Text="{Binding DeadStockReport.GeneratedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
                                Foreground="#666"
                                Visibility="{Binding ShowDeadStockReport, Converter={StaticResource BoolToVisibilityConverter}}"/>
                 </StackPanel>

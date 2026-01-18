@@ -65,7 +65,7 @@ public class MpesaConfiguration : BaseEntity
     /// <summary>
     /// Whether this is the active configuration.
     /// </summary>
-    public bool IsActive { get; set; }
+    public new bool IsActive { get; set; }
 
     /// <summary>
     /// Last successful API call timestamp.

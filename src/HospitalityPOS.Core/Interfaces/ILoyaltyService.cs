@@ -1,5 +1,6 @@
 using HospitalityPOS.Core.DTOs;
 using HospitalityPOS.Core.Entities;
+using HospitalityPOS.Core.Enums;
 
 namespace HospitalityPOS.Core.Interfaces;
 

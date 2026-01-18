@@ -14,7 +14,7 @@ public class CheckoutEnhancementService : ICheckoutEnhancementService
     private readonly POSDbContext _context;
 
     // TTL-based cache entry with expiration tracking
-    private record DisplayStateEntry(CustomerDisplayState State, DateTime ExpiresAt);
+    private record DisplayStateEntry(CustomerDisplayStateInfo State, DateTime ExpiresAt);
 
     // Display states cache with TTL support to prevent memory leaks
     private static readonly ConcurrentDictionary<string, DisplayStateEntry> _displayStates = new();
@@ -521,7 +521,7 @@ public class CheckoutEnhancementService : ICheckoutEnhancementService
     }
 
     /// <inheritdoc />
-    public Task<CustomerDisplayState> GetCustomerDisplayStateAsync(
+    public Task<CustomerDisplayStateInfo> GetCustomerDisplayStateInfoAsync(
         int storeId,
         int? terminalId,
         CancellationToken cancellationToken = default)
@@ -533,12 +533,12 @@ public class CheckoutEnhancementService : ICheckoutEnhancementService
         var now = DateTime.UtcNow;
 
         var entry = _displayStates.GetOrAdd(key, _ =>
-            new DisplayStateEntry(new CustomerDisplayState { State = "Idle" }, now.Add(DisplayStateTTL)));
+            new DisplayStateEntry(new CustomerDisplayStateInfo { State = "Idle" }, now.Add(DisplayStateTTL)));
 
         // Check if entry is expired and refresh
         if (entry.ExpiresAt < now)
         {
-            var newEntry = new DisplayStateEntry(new CustomerDisplayState { State = "Idle" }, now.Add(DisplayStateTTL));
+            var newEntry = new DisplayStateEntry(new CustomerDisplayStateInfo { State = "Idle" }, now.Add(DisplayStateTTL));
             _displayStates[key] = newEntry;
             return Task.FromResult(newEntry.State);
         }
@@ -547,10 +547,10 @@ public class CheckoutEnhancementService : ICheckoutEnhancementService
     }
 
     /// <inheritdoc />
-    public Task UpdateCustomerDisplayStateAsync(
+    public Task UpdateCustomerDisplayStateInfoAsync(
         int storeId,
         int? terminalId,
-        CustomerDisplayState state,
+        CustomerDisplayStateInfo state,
         CancellationToken cancellationToken = default)
     {
         var key = $"{storeId}_{terminalId ?? 0}";

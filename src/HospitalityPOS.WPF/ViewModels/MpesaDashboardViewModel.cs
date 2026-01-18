@@ -409,8 +409,7 @@ public partial class MpesaDashboardViewModel : ObservableObject
                 t.PhoneNumber,
                 Amount = $"KES {t.Amount:N2}",
                 Status = t.Status.ToString(),
-                Type = t.TransactionType.ToString(),
-                Source = t.Source.ToString(),
+                Source = t.IsManualEntry ? "Manual" : "STK Push",
                 IsVerified = t.IsVerified ? "Yes" : "No",
                 VerifiedBy = t.VerifiedByUserId?.ToString() ?? "",
                 Notes = t.Notes ?? ""
@@ -459,8 +458,7 @@ public partial class MpesaDashboardViewModel : ObservableObject
                 t.PhoneNumber,
                 Amount = $"KES {t.Amount:N2}",
                 Status = t.Status.ToString(),
-                Type = t.TransactionType.ToString(),
-                Source = t.Source.ToString(),
+                Source = t.IsManualEntry ? "Manual" : "STK Push",
                 IsVerified = t.IsVerified ? "Yes" : "No"
             });
 
@@ -508,8 +506,7 @@ public partial class MpesaDashboardViewModel : ObservableObject
                 t.PhoneNumber,
                 Amount = $"KES {t.Amount:N2}",
                 Status = t.Status.ToString(),
-                Type = t.TransactionType.ToString(),
-                Source = t.Source.ToString(),
+                Source = t.IsManualEntry ? "Manual" : "STK Push",
                 IsVerified = t.IsVerified ? "Yes" : "No"
             });
 

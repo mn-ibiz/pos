@@ -326,20 +326,12 @@ public class ExportService : IExportService
     }
 
     /// <inheritdoc />
-    public async Task<bool> ExportToExcelAsync<T>(IEnumerable<T> data, string defaultFileName, string sheetName, CancellationToken cancellationToken = default)
+    public async Task<bool> ExportToExcelAsync<T>(IEnumerable<T> data, string filePath, string sheetName, CancellationToken cancellationToken = default)
     {
-        _logger.Information("Excel export requested: {FileName}", defaultFileName);
+        _logger.Information("Excel export requested: {FilePath}", filePath);
 
         try
         {
-            // Show save file dialog
-            var filePath = ShowSaveFileDialog(defaultFileName, "Excel Files (*.xlsx)|*.xlsx|All Files (*.*)|*.*", "xlsx");
-            if (string.IsNullOrEmpty(filePath))
-            {
-                _logger.Information("Excel export cancelled by user");
-                return false;
-            }
-
             // Validate path
             var validatedPath = ValidateAndNormalizeFilePath(filePath);
 
@@ -355,26 +347,18 @@ public class ExportService : IExportService
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Failed to export to Excel: {FileName}", defaultFileName);
+            _logger.Error(ex, "Failed to export to Excel: {FilePath}", filePath);
             throw;
         }
     }
 
     /// <inheritdoc />
-    public async Task<bool> ExportToExcelAsync(DataTable dataTable, string defaultFileName, string sheetName, CancellationToken cancellationToken = default)
+    public async Task<bool> ExportToExcelAsync(DataTable dataTable, string filePath, string sheetName, CancellationToken cancellationToken = default)
     {
-        _logger.Information("Excel export requested: {FileName}", defaultFileName);
+        _logger.Information("Excel export requested: {FilePath}", filePath);
 
         try
         {
-            // Show save file dialog
-            var filePath = ShowSaveFileDialog(defaultFileName, "Excel Files (*.xlsx)|*.xlsx|All Files (*.*)|*.*", "xlsx");
-            if (string.IsNullOrEmpty(filePath))
-            {
-                _logger.Information("Excel export cancelled by user");
-                return false;
-            }
-
             // Validate path
             var validatedPath = ValidateAndNormalizeFilePath(filePath);
 
@@ -385,26 +369,9 @@ public class ExportService : IExportService
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Failed to export DataTable to Excel: {FileName}", defaultFileName);
+            _logger.Error(ex, "Failed to export DataTable to Excel: {FilePath}", filePath);
             throw;
         }
-    }
-
-    /// <summary>
-    /// Shows a save file dialog and returns the selected path.
-    /// </summary>
-    private static string? ShowSaveFileDialog(string defaultFileName, string filter, string defaultExtension)
-    {
-        var dialog = new Microsoft.Win32.SaveFileDialog
-        {
-            FileName = SanitizeFilename(defaultFileName),
-            DefaultExt = $".{defaultExtension}",
-            Filter = filter,
-            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
-        };
-
-        var result = dialog.ShowDialog();
-        return result == true ? dialog.FileName : null;
     }
 
     /// <summary>

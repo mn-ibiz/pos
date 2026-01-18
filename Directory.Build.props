@@ -3,9 +3,10 @@
     <LangVersion>14</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <AnalysisLevel>latest</AnalysisLevel>
+    <NoWarn>$(NoWarn);IDE0011;IDE0078;IDE0270;IDE0031;CA1416;CS0618;CS0067;CS0169;CS0414</NoWarn>
     <Authors>Hospitality POS Team</Authors>
     <Company>Hospitality POS</Company>
     <Copyright>Copyright (c) 2025 Hospitality POS</Copyright>

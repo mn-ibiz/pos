@@ -49,6 +49,7 @@ public class ReceiptItem : BaseEntity
     /// Gets or sets the total amount for this line item.
     /// </summary>
     public decimal TotalAmount { get; set; }
+    public decimal TotalPrice { get => TotalAmount; set => TotalAmount = value; }
 
     /// <summary>
     /// Gets or sets the item modifiers.

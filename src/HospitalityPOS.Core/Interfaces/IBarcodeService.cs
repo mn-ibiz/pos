@@ -1,5 +1,6 @@
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Enums;
+using BarcodeType = HospitalityPOS.Core.Enums.BarcodeType;
 
 namespace HospitalityPOS.Core.Interfaces;
 

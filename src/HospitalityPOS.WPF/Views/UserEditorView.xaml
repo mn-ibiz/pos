@@ -11,7 +11,7 @@
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
-        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisConverter" />
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisConverter" />
 
         <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
             <Setter Property="Background" Value="#3D3D5C" />

@@ -39,6 +39,7 @@ public class StockTakeItem : BaseEntity
     /// Gets or sets the variance quantity (Physical - System).
     /// </summary>
     public decimal VarianceQuantity { get; set; }
+    public decimal Variance { get => VarianceQuantity; set => VarianceQuantity = value; }
 
     /// <summary>
     /// Gets or sets the cost price for variance value calculation.

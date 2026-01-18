@@ -127,7 +127,6 @@
                     <DataTemplate>
                         <RadioButton Style="{StaticResource ColorButton}"
                                      GroupName="SectionColors"
-                                     IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWay}"
                                      Command="{Binding DataContext.SelectColorCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                      CommandParameter="{Binding}">
                             <RadioButton.IsChecked>

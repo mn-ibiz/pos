@@ -4,6 +4,7 @@
 
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Models.HR;
+using AttendanceSummaryModel = HospitalityPOS.Core.Models.HR.AttendanceSummary;
 
 namespace HospitalityPOS.Core.Interfaces;
 
@@ -206,7 +207,7 @@ public interface IAttendanceService
     /// <param name="startDate">Start date.</param>
     /// <param name="endDate">End date.</param>
     /// <returns>Attendance summary.</returns>
-    Task<Models.HR.AttendanceSummary> CalculateSummaryAsync(int employeeId, DateOnly startDate, DateOnly endDate);
+    Task<AttendanceSummaryModel> CalculateSummaryAsync(int employeeId, DateOnly startDate, DateOnly endDate);
 
     // Legacy reports (for backward compatibility)
     Task<AttendanceSummary> GetEmployeeAttendanceSummaryAsync(int employeeId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);

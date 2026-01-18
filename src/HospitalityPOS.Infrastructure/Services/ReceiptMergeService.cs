@@ -230,7 +230,8 @@ public class ReceiptMergeService : IReceiptMergeService
     public async Task<IEnumerable<Receipt>> GetMergeableReceiptsAsync(
         CancellationToken cancellationToken = default)
     {
-        var currentWorkPeriodId = _workPeriodService.CurrentWorkPeriodId;
+        var currentWorkPeriod = await _workPeriodService.GetCurrentWorkPeriodAsync(cancellationToken);
+        var currentWorkPeriodId = currentWorkPeriod?.Id;
 
         return await _context.Receipts
             .Include(r => r.ReceiptItems)

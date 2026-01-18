@@ -77,7 +77,7 @@ public interface IFinancialReportingService
     #region Comparative Reports
 
     /// <summary>
-    /// Generates a comparative P&L report.
+    /// Generates a comparative P/L report.
     /// </summary>
     Task<ComparativePLReport> GenerateComparativePLReportAsync(ComparativePLRequest request, CancellationToken cancellationToken = default);
 
@@ -93,10 +93,10 @@ public interface IFinancialReportingService
 
     #endregion
 
-    #region Departmental P&L
+    #region Departmental P/L
 
     /// <summary>
-    /// Generates a departmental P&L report.
+    /// Generates a departmental P/L report.
     /// </summary>
     Task<DepartmentalPLReport> GenerateDepartmentalPLReportAsync(DepartmentalPLRequest request, CancellationToken cancellationToken = default);
 
@@ -385,7 +385,7 @@ public class LowMarginAlert
 }
 
 /// <summary>
-/// Request for comparative P&L report.
+/// Request for comparative P/L report.
 /// </summary>
 public class ComparativePLRequest
 {
@@ -399,7 +399,7 @@ public class ComparativePLRequest
 }
 
 /// <summary>
-/// Comparative P&L report.
+/// Comparative P/L report.
 /// </summary>
 public class ComparativePLReport
 {
@@ -417,7 +417,7 @@ public class ComparativePLReport
 }
 
 /// <summary>
-/// P&L period summary.
+/// P/L period summary.
 /// </summary>
 public class PLPeriodSummary
 {
@@ -435,7 +435,7 @@ public class PLPeriodSummary
 }
 
 /// <summary>
-/// Comparative P&L line item.
+/// Comparative P/L line item.
 /// </summary>
 public class ComparativePLLineItem
 {
@@ -542,7 +542,7 @@ public class BudgetAlert
 }
 
 /// <summary>
-/// Request for departmental P&L report.
+/// Request for departmental P/L report.
 /// </summary>
 public class DepartmentalPLRequest
 {
@@ -555,7 +555,7 @@ public class DepartmentalPLRequest
 }
 
 /// <summary>
-/// Departmental P&L report.
+/// Departmental P/L report.
 /// </summary>
 public class DepartmentalPLReport
 {
@@ -571,7 +571,7 @@ public class DepartmentalPLReport
 }
 
 /// <summary>
-/// P&L for a single department.
+/// P/L for a single department.
 /// </summary>
 public class DepartmentPL
 {

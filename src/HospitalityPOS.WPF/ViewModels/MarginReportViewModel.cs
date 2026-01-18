@@ -164,15 +164,15 @@ public partial class MarginReportViewModel : ViewModelBase, INavigationAware
     #region Navigation
 
     /// <inheritdoc />
-    public async Task OnNavigatedToAsync(object? parameter = null)
+    public void OnNavigatedTo(object? parameter)
     {
-        await LoadReportAsync();
+        _ = LoadReportAsync();
     }
 
     /// <inheritdoc />
-    public Task OnNavigatedFromAsync()
+    public void OnNavigatedFrom()
     {
-        return Task.CompletedTask;
+        // No cleanup needed
     }
 
     #endregion
@@ -243,7 +243,7 @@ public partial class MarginReportViewModel : ViewModelBase, INavigationAware
         try
         {
             IsBusy = true;
-            StatusMessage = "Preparing export...";
+            BusyMessage = "Preparing export...";
 
             if (ProductMargins.Any())
             {
@@ -284,13 +284,13 @@ public partial class MarginReportViewModel : ViewModelBase, INavigationAware
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Failed to export margin report");
+            _logger.Error(ex, "Failed to export margin report");
             await _dialogService.ShowErrorAsync("Export Failed", ex.Message);
         }
         finally
         {
             IsBusy = false;
-            StatusMessage = string.Empty;
+            BusyMessage = string.Empty;
         }
     }
 
@@ -412,7 +412,7 @@ public partial class MarginReportViewModel : ViewModelBase, INavigationAware
         try
         {
             IsBusy = true;
-            StatusMessage = "Loading margin report...";
+            BusyMessage = "Loading margin report...";
 
             var request = new MarginReportRequest
             {
@@ -465,17 +465,17 @@ public partial class MarginReportViewModel : ViewModelBase, INavigationAware
             }
 
             LastRefreshDisplay = $"Updated {DateTime.Now:HH:mm:ss}";
-            Logger.Information("Margin report loaded successfully");
+            _logger.Information("Margin report loaded successfully");
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Failed to load margin report");
+            _logger.Error(ex, "Failed to load margin report");
             await _dialogService.ShowErrorAsync("Error", $"Failed to load report: {ex.Message}");
         }
         finally
         {
             IsBusy = false;
-            StatusMessage = string.Empty;
+            BusyMessage = string.Empty;
         }
     }
 

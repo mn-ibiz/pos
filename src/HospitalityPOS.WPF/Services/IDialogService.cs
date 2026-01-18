@@ -189,6 +189,36 @@ public interface IDialogService
     Task ShowInfoAsync(string title, string message);
 
     /// <summary>
+    /// Shows an info dialog with default title.
+    /// </summary>
+    /// <param name="message">The info message to display.</param>
+    Task ShowInfoAsync(string message);
+
+    /// <summary>
+    /// Shows a success dialog.
+    /// </summary>
+    /// <param name="title">The dialog title.</param>
+    /// <param name="message">The success message to display.</param>
+    Task ShowSuccessAsync(string title, string message);
+
+    /// <summary>
+    /// Shows a success dialog with default title.
+    /// </summary>
+    /// <param name="message">The success message to display.</param>
+    Task ShowSuccessAsync(string message);
+
+    /// <summary>
+    /// Shows an action sheet with multiple options.
+    /// </summary>
+    /// <param name="title">The dialog title.</param>
+    /// <param name="message">The message to display.</param>
+    /// <param name="cancelText">Text for the cancel button.</param>
+    /// <param name="destructiveText">Optional text for a destructive action.</param>
+    /// <param name="options">Array of option strings.</param>
+    /// <returns>The selected option, or null if cancelled.</returns>
+    Task<string?> ShowActionSheetAsync(string title, string? message, string cancelText, string? destructiveText, params string[] options);
+
+    /// <summary>
     /// Shows a confirmation dialog with Yes/No options (alias for ShowConfirmationAsync).
     /// </summary>
     /// <param name="title">The dialog title.</param>

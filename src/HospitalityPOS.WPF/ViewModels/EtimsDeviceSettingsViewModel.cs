@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Enums;
 using HospitalityPOS.Core.Interfaces;
+using HospitalityPOS.WPF.Services;
 
 namespace HospitalityPOS.WPF.ViewModels;
 

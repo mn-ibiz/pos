@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using HospitalityPOS.WPF.ViewModels;
 
 namespace HospitalityPOS.WPF.Views;
 
@@ -11,9 +12,11 @@ public partial class MainWindow : Window
     /// <summary>
     /// Initializes a new instance of the <see cref="MainWindow"/> class.
     /// </summary>
-    public MainWindow()
+    /// <param name="viewModel">The main window view model.</param>
+    public MainWindow(MainWindowViewModel viewModel)
     {
         InitializeComponent();
+        DataContext = viewModel;
     }
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

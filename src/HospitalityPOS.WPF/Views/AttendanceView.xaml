@@ -217,8 +217,8 @@
                         <DataGridTextColumn Header="Clock Out" Binding="{Binding ClockOut, StringFormat='{}{0:hh\\:mm}'}" Width="100"/>
                         <DataGridTextColumn Header="Break Start" Binding="{Binding BreakStart, StringFormat='{}{0:hh\\:mm}'}" Width="100"/>
                         <DataGridTextColumn Header="Break End" Binding="{Binding BreakEnd, StringFormat='{}{0:hh\\:mm}'}" Width="100"/>
-                        <DataGridTextColumn Header="Hours" Binding="{Binding HoursWorked, StringFormat='{0:N1}'}" Width="80"/>
-                        <DataGridTextColumn Header="Overtime" Binding="{Binding OvertimeHours, StringFormat='{0:N1}'}" Width="80"/>
+                        <DataGridTextColumn Header="Hours" Binding="{Binding HoursWorked, StringFormat='{}{0:N1}'}" Width="80"/>
+                        <DataGridTextColumn Header="Overtime" Binding="{Binding OvertimeHours, StringFormat='{}{0:N1}'}" Width="80"/>
                         <DataGridTemplateColumn Header="Status" Width="100">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -267,11 +267,11 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,32,0">
                     <TextBlock Text="Total Hours:" Foreground="#9CA3AF" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <TextBlock Text="{Binding Summaries[0].TotalHoursWorked, StringFormat='{0:N1}'}" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Summaries[0].TotalHoursWorked, StringFormat='{}{0:N1}'}" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Overtime:" Foreground="#9CA3AF" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <TextBlock Text="{Binding Summaries[0].TotalOvertimeHours, StringFormat='{0:N1}'}" FontWeight="Bold" Foreground="#7C3AED" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Summaries[0].TotalOvertimeHours, StringFormat='{}{0:N1}'}" FontWeight="Bold" Foreground="#7C3AED" VerticalAlignment="Center"/>
                 </StackPanel>
 
                 <Button Content="Add Manual Entry"

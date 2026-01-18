@@ -16,7 +16,7 @@ namespace HospitalityPOS.WPF.ViewModels;
 public partial class TransferLineItem : ObservableObject
 {
     [ObservableProperty]
-    private ProductDto? _product;
+    private SourceProductStockDto? _product;
 
     [ObservableProperty]
     private int _requestedQuantity;
@@ -54,10 +54,10 @@ public partial class CreateTransferRequestViewModel : ViewModelBase
     private readonly IInventoryService _inventoryService;
 
     [ObservableProperty]
-    private ObservableCollection<StoreDto> _sourceLocations = new();
+    private ObservableCollection<SourceLocationDto> _sourceLocations = new();
 
     [ObservableProperty]
-    private StoreDto? _selectedSourceLocation;
+    private SourceLocationDto? _selectedSourceLocation;
 
     [ObservableProperty]
     private TransferPriority _priority = TransferPriority.Normal;
@@ -78,10 +78,10 @@ public partial class CreateTransferRequestViewModel : ViewModelBase
     private TransferLineItem? _selectedLineItem;
 
     [ObservableProperty]
-    private ObservableCollection<ProductDto> _availableProducts = new();
+    private ObservableCollection<SourceProductStockDto> _availableProducts = new();
 
     [ObservableProperty]
-    private ProductDto? _selectedProduct;
+    private SourceProductStockDto? _selectedProduct;
 
     [ObservableProperty]
     private int _quantityToAdd = 1;
@@ -133,27 +133,30 @@ public partial class CreateTransferRequestViewModel : ViewModelBase
         await ExecuteAsync(async () =>
         {
             // Load source locations (HQ/warehouses/other stores)
-            var stores = await _transferService.GetAvailableSourceLocationsAsync(
-                SessionService.CurrentStoreId ?? 0);
+            var storeId = SessionService.CurrentStoreId ?? 1;
+            var locations = await _transferService.GetSourceLocationsAsync(storeId);
 
             SourceLocations.Clear();
-            foreach (var store in stores)
+            foreach (var location in locations)
             {
-                SourceLocations.Add(store);
+                SourceLocations.Add(location);
             }
-
-            // Load products
-            await LoadProductsAsync();
 
         }, "Loading...");
     }
 
     private async Task LoadProductsAsync()
     {
-        var products = await _productService.GetAllProductsAsync();
+        if (SelectedSourceLocation == null)
+        {
+            AvailableProducts.Clear();
+            return;
+        }
+
+        var products = await _transferService.GetSourceStockAsync(SelectedSourceLocation.Id);
 
         AvailableProducts.Clear();
-        foreach (var product in products.Where(p => p.IsActive))
+        foreach (var product in products.Where(p => p.TransferableQuantity > 0))
         {
             AvailableProducts.Add(product);
         }
@@ -165,20 +168,17 @@ public partial class CreateTransferRequestViewModel : ViewModelBase
     [RelayCommand]
     private async Task SearchProductsAsync()
     {
-        if (string.IsNullOrWhiteSpace(ProductSearchText))
+        if (SelectedSourceLocation == null)
         {
-            await LoadProductsAsync();
+            ErrorMessage = "Please select a source location first.";
             return;
         }
 
-        var searchLower = ProductSearchText.ToLowerInvariant();
-        var allProducts = await _productService.GetAllProductsAsync();
+        var searchTerm = string.IsNullOrWhiteSpace(ProductSearchText) ? null : ProductSearchText;
+        var products = await _transferService.GetSourceStockAsync(SelectedSourceLocation.Id, searchTerm);
 
         AvailableProducts.Clear();
-        foreach (var product in allProducts.Where(p =>
-            p.IsActive &&
-            (p.Name.ToLowerInvariant().Contains(searchLower) ||
-             p.SKU?.ToLowerInvariant().Contains(searchLower) == true)))
+        foreach (var product in products.Where(p => p.TransferableQuantity > 0))
         {
             AvailableProducts.Add(product);
         }
@@ -188,44 +188,40 @@ public partial class CreateTransferRequestViewModel : ViewModelBase
     /// Adds the selected product to the transfer request.
     /// </summary>
     [RelayCommand]
-    private async Task AddProductAsync()
+    private Task AddProductAsync()
     {
         if (SelectedProduct == null)
         {
             ErrorMessage = "Please select a product.";
-            return;
+            return Task.CompletedTask;
         }
 
         if (QuantityToAdd <= 0)
         {
             ErrorMessage = "Quantity must be greater than zero.";
-            return;
+            return Task.CompletedTask;
         }
 
         if (SelectedSourceLocation == null)
         {
             ErrorMessage = "Please select a source location first.";
-            return;
+            return Task.CompletedTask;
         }
 
         // Check if product already in list
-        var existing = LineItems.FirstOrDefault(l => l.Product?.Id == SelectedProduct.Id);
+        var existing = LineItems.FirstOrDefault(l => l.Product?.ProductId == SelectedProduct.ProductId);
         if (existing != null)
         {
             existing.RequestedQuantity += QuantityToAdd;
         }
         else
         {
-            // Get available stock at source
-            var sourceStock = await _inventoryService.GetStockLevelAsync(
-                SelectedProduct.Id, SelectedSourceLocation.Id);
-
             var lineItem = new TransferLineItem
             {
                 Product = SelectedProduct,
                 RequestedQuantity = QuantityToAdd,
-                SourceAvailableStock = sourceStock,
-                UnitCost = SelectedProduct.CostPrice
+                SourceAvailableStock = SelectedProduct.TransferableQuantity,
+                UnitCost = SelectedProduct.UnitCost
             };
 
             LineItems.Add(lineItem);
@@ -237,6 +233,8 @@ public partial class CreateTransferRequestViewModel : ViewModelBase
 
         OnPropertyChanged(nameof(TotalEstimatedValue));
         OnPropertyChanged(nameof(TotalItemsRequested));
+
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -267,7 +265,7 @@ public partial class CreateTransferRequestViewModel : ViewModelBase
         await ExecuteAsync(async () =>
         {
             var request = BuildTransferRequest();
-            var result = await _transferService.CreateTransferRequestAsync(request, isDraft: true);
+            var result = await _transferService.CreateTransferRequestAsync(request, SessionService.CurrentUserId);
 
             if (result != null)
             {
@@ -300,10 +298,12 @@ public partial class CreateTransferRequestViewModel : ViewModelBase
         await ExecuteAsync(async () =>
         {
             var request = BuildTransferRequest();
-            var result = await _transferService.CreateTransferRequestAsync(request, isDraft: false);
+            var created = await _transferService.CreateTransferRequestAsync(request, SessionService.CurrentUserId);
 
-            if (result != null)
+            if (created != null)
             {
+                // Submit the draft request for approval
+                var result = await _transferService.SubmitRequestAsync(created.Id, SessionService.CurrentUserId);
                 await DialogService.ShowMessageAsync("Success", $"Request submitted: {result.RequestNumber}");
                 _navigationService.NavigateTo<StockTransferViewModel>();
             }
@@ -351,13 +351,13 @@ public partial class CreateTransferRequestViewModel : ViewModelBase
         {
             if (line.RequestedQuantity <= 0)
             {
-                ErrorMessage = $"Quantity for {line.Product?.Name} must be greater than zero.";
+                ErrorMessage = $"Quantity for {line.Product?.ProductName} must be greater than zero.";
                 return false;
             }
 
             if (line.RequestedQuantity > line.SourceAvailableStock)
             {
-                ErrorMessage = $"Requested quantity for {line.Product?.Name} ({line.RequestedQuantity}) " +
+                ErrorMessage = $"Requested quantity for {line.Product?.ProductName} ({line.RequestedQuantity}) " +
                               $"exceeds available stock ({line.SourceAvailableStock}).";
                 return false;
             }
@@ -371,29 +371,34 @@ public partial class CreateTransferRequestViewModel : ViewModelBase
     {
         return new CreateTransferRequestDto
         {
-            RequestingStoreId = SessionService.CurrentStoreId ?? 0,
+            RequestingStoreId = SessionService.CurrentStoreId ?? 1,
             SourceLocationId = SelectedSourceLocation!.Id,
-            SourceLocationType = TransferLocationType.Store, // TODO: Determine from source
+            SourceLocationType = SelectedSourceLocation.LocationType,
             Priority = Priority,
             Reason = Reason,
             RequestedDeliveryDate = RequestedDeliveryDate,
             Notes = Notes,
-            Lines = LineItems.Select(l => new CreateTransferLineDto
+            Lines = LineItems.Select(l => new CreateTransferRequestLineDto
             {
-                ProductId = l.Product!.Id,
+                ProductId = l.Product!.ProductId,
                 RequestedQuantity = l.RequestedQuantity,
-                UnitCost = l.UnitCost,
                 Notes = l.Notes
-            }).ToList(),
-            CreatedByUserId = SessionService.CurrentUserId
+            }).ToList()
         };
     }
 
-    partial void OnSelectedSourceLocationChanged(StoreDto? value)
+    partial void OnSelectedSourceLocationChanged(SourceLocationDto? value)
     {
         // Clear line items when source changes (stock levels change)
         LineItems.Clear();
+        AvailableProducts.Clear();
         OnPropertyChanged(nameof(TotalEstimatedValue));
         OnPropertyChanged(nameof(TotalItemsRequested));
+
+        // Load products for the new source location
+        if (value != null)
+        {
+            _ = LoadProductsAsync();
+        }
     }
 }

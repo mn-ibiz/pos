@@ -741,15 +741,6 @@ public class EscPosPrintDocument
     /// <summary>
     /// Appends raw bytes to the document.
     /// </summary>
-    public EscPosPrintDocument Raw(byte[] data)
-    {
-        _buffer.AddRange(data);
-        return this;
-    }
-
-    /// <summary>
-    /// Appends raw bytes to the document.
-    /// </summary>
     public EscPosPrintDocument Raw(params byte[] data)
     {
         _buffer.AddRange(data);
@@ -908,7 +899,7 @@ public class EscPosPrintDocument
     {
         return DoubleSeparator()
             .EmptyLines(2)
-            .FeedAndFullCut();
+            .FeedAndCut();
     }
 
     #endregion

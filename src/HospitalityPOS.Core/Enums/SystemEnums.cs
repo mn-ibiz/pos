@@ -68,6 +68,11 @@ public enum OrderStatus
 public enum ReceiptStatus
 {
     /// <summary>
+    /// Receipt is open.
+    /// </summary>
+    Open = 0,
+
+    /// <summary>
     /// Receipt has been created.
     /// </summary>
     Created = 1,

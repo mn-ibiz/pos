@@ -5,6 +5,7 @@ using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using BarcodeType = HospitalityPOS.Core.Enums.BarcodeType;
 
 namespace HospitalityPOS.Infrastructure.Services;
 
@@ -92,7 +93,7 @@ public class BarcodeService : IBarcodeService
                 Product = standardBarcode.Product,
                 ProductBarcode = standardBarcode,
                 Quantity = standardBarcode.PackSize,
-                DetectedType = standardBarcode.BarcodeType
+                DetectedType = (BarcodeType)(int)standardBarcode.BarcodeType
             };
         }
 
@@ -173,7 +174,7 @@ public class BarcodeService : IBarcodeService
         {
             ProductId = productId,
             Barcode = barcode,
-            BarcodeType = type,
+            BarcodeType = (HospitalityPOS.Core.Entities.BarcodeType)(int)type,
             IsPrimary = isPrimary,
             PackSize = packSize
         };

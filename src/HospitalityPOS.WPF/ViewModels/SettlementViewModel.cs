@@ -141,7 +141,7 @@ public partial class SettlementViewModel : ViewModelBase, INavigationAware
     /// <summary>
     /// Gets whether M-Pesa payment is selected.
     /// </summary>
-    public bool IsMpesaPayment => SelectedPaymentMethod?.Type == PaymentMethodType.Mobile;
+    public bool IsMpesaPayment => SelectedPaymentMethod?.Type == PaymentMethodType.MPesa;
 
     /// <summary>
     /// Gets whether card payment is selected.
@@ -436,7 +436,7 @@ public partial class SettlementViewModel : ViewModelBase, INavigationAware
         }
 
         OnPropertyChanged(nameof(QuickAmounts));
-        CompletePaymentAsyncCommand.NotifyCanExecuteChanged();
+        CompletePaymentCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>

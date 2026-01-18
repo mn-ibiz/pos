@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Interfaces;
 
@@ -68,6 +69,8 @@ public class POSDbContext : DbContext
     public DbSet<Inventory> Inventories => Set<Inventory>();
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
     public DbSet<AdjustmentReason> AdjustmentReasons => Set<AdjustmentReason>();
+    public DbSet<StockTake> StockTakes => Set<StockTake>();
+    public DbSet<StockTakeItem> StockTakeItems => Set<StockTakeItem>();
     #endregion
 
     #region Suppliers & Purchasing
@@ -322,12 +325,27 @@ public class POSDbContext : DbContext
     #endregion
 
     /// <inheritdoc />
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.ConfigureWarnings(warnings =>
+            warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
+    }
+
+    /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         // Apply all entity configurations from the current assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(POSDbContext).Assembly);
+
+        // SQL Server does not support multiple cascade paths - disable all cascade deletes globally
+        foreach (var foreignKey in modelBuilder.Model.GetEntityTypes()
+            .SelectMany(e => e.GetForeignKeys()))
+        {
+            foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
+        }
 
         // Apply global soft delete filter to all ISoftDeletable entities
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())

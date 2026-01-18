@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Interfaces;
+using HospitalityPOS.WPF.Services;
 
 namespace HospitalityPOS.WPF.ViewModels;
 

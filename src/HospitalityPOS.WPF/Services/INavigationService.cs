@@ -34,6 +34,11 @@ public interface INavigationService
     void GoBack();
 
     /// <summary>
+    /// Navigates back to the previous view (alias for GoBack).
+    /// </summary>
+    void NavigateBack();
+
+    /// <summary>
     /// Clears the navigation history.
     /// </summary>
     void ClearHistory();

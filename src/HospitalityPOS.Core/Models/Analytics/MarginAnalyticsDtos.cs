@@ -334,7 +334,7 @@ public class ProductMarginTrendDto
     {
         > 0.5m => TrendDirection.Up,
         < -0.5m => TrendDirection.Down,
-        _ => TrendDirection.Stable
+        _ => TrendDirection.Flat
     };
 
     /// <summary>Current cost price.</summary>

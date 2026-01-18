@@ -107,27 +107,20 @@ public partial class StockTransferViewModel : ViewModelBase
     private async Task RefreshTransfersAsync()
     {
         var storeId = SessionService.CurrentStoreId;
-        var transfers = await _transferService.GetTransferRequestsAsync(
-            storeId: CanViewAll ? null : storeId,
-            status: StatusFilter,
-            fromDate: FromDate,
-            toDate: ToDate?.AddDays(1)); // Include end date
+        var query = new TransferRequestQueryDto
+        {
+            RequestingStoreId = CanViewAll ? null : storeId,
+            Status = StatusFilter,
+            FromDate = FromDate,
+            ToDate = ToDate?.AddDays(1), // Include end date
+            SearchTerm = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText
+        };
+
+        var transfers = await _transferService.GetTransferRequestsAsync(query);
 
         Transfers.Clear();
         foreach (var transfer in transfers)
         {
-            // Apply search filter if present
-            if (!string.IsNullOrWhiteSpace(SearchText))
-            {
-                var searchLower = SearchText.ToLowerInvariant();
-                if (!transfer.RequestNumber.ToLowerInvariant().Contains(searchLower) &&
-                    !transfer.RequestingStoreName?.ToLowerInvariant().Contains(searchLower) == true &&
-                    !transfer.SourceLocationName?.ToLowerInvariant().Contains(searchLower) == true)
-                {
-                    continue;
-                }
-            }
-
             Transfers.Add(transfer);
         }
     }
@@ -136,16 +129,18 @@ public partial class StockTransferViewModel : ViewModelBase
     {
         var storeId = CanViewAll ? null : SessionService.CurrentStoreId;
 
-        PendingCount = await _transferService.GetTransferCountByStatusAsync(
-            TransferRequestStatus.Submitted, storeId);
+        // Get counts using queries
+        var pendingQuery = new TransferRequestQueryDto { RequestingStoreId = storeId, Status = TransferRequestStatus.Submitted };
+        var pendingTransfers = await _transferService.GetTransferRequestsAsync(pendingQuery);
+        PendingCount = pendingTransfers.Count;
 
-        InTransitCount = await _transferService.GetTransferCountByStatusAsync(
-            TransferRequestStatus.InTransit, storeId);
+        var inTransitQuery = new TransferRequestQueryDto { RequestingStoreId = storeId, Status = TransferRequestStatus.InTransit };
+        var inTransitTransfers = await _transferService.GetTransferRequestsAsync(inTransitQuery);
+        InTransitCount = inTransitTransfers.Count;
 
-        AwaitingReceiptCount = await _transferService.GetTransferCountByStatusAsync(
-            TransferRequestStatus.InTransit, storeId) +
-            await _transferService.GetTransferCountByStatusAsync(
-            TransferRequestStatus.PartiallyReceived, storeId);
+        var partialQuery = new TransferRequestQueryDto { RequestingStoreId = storeId, Status = TransferRequestStatus.PartiallyReceived };
+        var partialTransfers = await _transferService.GetTransferRequestsAsync(partialQuery);
+        AwaitingReceiptCount = inTransitTransfers.Count + partialTransfers.Count;
     }
 
     /// <summary>
@@ -266,12 +261,12 @@ public partial class StockTransferViewModel : ViewModelBase
 
         await ExecuteAsync(async () =>
         {
-            var result = await _transferService.CancelTransferRequestAsync(
+            var result = await _transferService.CancelRequestAsync(
                 SelectedTransfer.Id,
                 SessionService.CurrentUserId,
                 "Cancelled by user");
 
-            if (result)
+            if (result != null)
             {
                 await RefreshTransfersAsync();
                 await LoadSummaryCountsAsync();
@@ -322,7 +317,6 @@ public partial class StockTransferViewModel : ViewModelBase
                 t.SourceLocationName,
                 Status = t.Status.ToString(),
                 t.TotalItemsRequested,
-                t.TotalItemsApproved,
                 t.TotalEstimatedValue,
                 t.SubmittedAt,
                 t.ExpectedDeliveryDate

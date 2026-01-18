@@ -14,6 +14,7 @@ public class JournalEntry : BaseEntity
     public int? ReferenceId { get; set; }
     public int? AccountingPeriodId { get; set; }
     public JournalEntryStatus Status { get; set; } = JournalEntryStatus.Posted;
+    public bool IsPosted { get; set; }
 
     // Navigation properties
     public virtual AccountingPeriod? AccountingPeriod { get; set; }

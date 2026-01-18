@@ -8,8 +8,11 @@ namespace HospitalityPOS.Core.Entities;
 public class StockMovement : BaseEntity
 {
     public int ProductId { get; set; }
+    public int? StoreId { get; set; }
+    public bool IsDeleted { get; set; }
     public MovementType MovementType { get; set; }
     public decimal Quantity { get; set; }
+    public decimal? UnitCost { get; set; }
     public decimal PreviousStock { get; set; }
     public decimal NewStock { get; set; }
     public string? ReferenceType { get; set; }
@@ -27,4 +30,5 @@ public class StockMovement : BaseEntity
     public virtual Product Product { get; set; } = null!;
     public virtual User User { get; set; } = null!;
     public virtual AdjustmentReason? AdjustmentReason { get; set; }
+    public virtual Store? Store { get; set; }
 }

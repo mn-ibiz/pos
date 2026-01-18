@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -279,5 +280,105 @@ public class ReportPrintService : IReportPrintService
         var spaces = LineWidth - label.Length - value.Length;
         if (spaces < 1) spaces = 1;
         return label + new string(' ', spaces) + value;
+    }
+
+    /// <inheritdoc />
+    public async Task PrintReportAsync(string content, string? title = null)
+    {
+        await Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            try
+            {
+                var document = new FlowDocument
+                {
+                    FontFamily = new FontFamily("Consolas"),
+                    FontSize = 10,
+                    PageWidth = 280,
+                    PagePadding = new Thickness(10),
+                    ColumnWidth = 280
+                };
+
+                var lines = content.Split('\n');
+                foreach (var line in lines)
+                {
+                    var paragraph = new Paragraph(new Run(line))
+                    {
+                        Margin = new Thickness(0, 0, 0, 0),
+                        LineHeight = 1
+                    };
+                    document.Blocks.Add(paragraph);
+                }
+
+                var printDialog = new PrintDialog();
+                if (printDialog.ShowDialog() == true)
+                {
+                    var paginator = ((IDocumentPaginatorSource)document).DocumentPaginator;
+                    printDialog.PrintDocument(paginator, title ?? "Report");
+                    _logger.Information("Report printed successfully: {Title}", title);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Failed to print report: {Title}", title);
+                throw;
+            }
+        });
+    }
+
+    /// <inheritdoc />
+    public async Task ExportToPdfAsync(string content, string fileName)
+    {
+        await Task.Run(() =>
+        {
+            try
+            {
+                var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                var filePath = Path.Combine(documentsPath, $"{fileName}_{DateTime.Now:yyyyMMdd_HHmmss}.html");
+
+                // For now, save as HTML which can be opened and printed as PDF
+                File.WriteAllText(filePath, content, Encoding.UTF8);
+                _logger.Information("Report exported to HTML (PDF placeholder): {FilePath}", filePath);
+
+                // Open the file for user to print as PDF
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = filePath,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Failed to export report to PDF: {FileName}", fileName);
+                throw;
+            }
+        });
+    }
+
+    /// <inheritdoc />
+    public async Task ExportToCsvAsync(string content, string fileName)
+    {
+        await Task.Run(() =>
+        {
+            try
+            {
+                var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                var filePath = Path.Combine(documentsPath, $"{fileName}_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
+
+                File.WriteAllText(filePath, content, Encoding.UTF8);
+                _logger.Information("Report exported to CSV: {FilePath}", filePath);
+
+                // Open the file
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = filePath,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Failed to export report to CSV: {FileName}", fileName);
+                throw;
+            }
+        });
     }
 }

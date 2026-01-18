@@ -254,7 +254,7 @@ public class SyncQueueItem : BaseEntity
     public int? StoreId { get; set; }
 
     /// <summary>User who created this sync item.</summary>
-    public int? CreatedByUserId { get; set; }
+    public new int? CreatedByUserId { get; set; }
 
     /// <summary>Reference to the sync batch if part of one.</summary>
     public int? SyncBatchId { get; set; }

@@ -73,7 +73,7 @@ public class ProductOffer : BaseEntity
     /// <summary>
     /// ID of the user who created the offer.
     /// </summary>
-    public int? CreatedByUserId { get; set; }
+    public new int? CreatedByUserId { get; set; }
 
     /// <summary>
     /// Gets whether the offer is currently active based on dates and status.

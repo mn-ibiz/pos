@@ -86,12 +86,12 @@ public interface ICheckoutEnhancementService
     /// <summary>
     /// Gets current display state for a terminal.
     /// </summary>
-    Task<CustomerDisplayState> GetCustomerDisplayStateAsync(int storeId, int? terminalId, CancellationToken cancellationToken = default);
+    Task<CustomerDisplayStateInfo> GetCustomerDisplayStateInfoAsync(int storeId, int? terminalId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Updates current display state.
     /// </summary>
-    Task UpdateCustomerDisplayStateAsync(int storeId, int? terminalId, CustomerDisplayState state, CancellationToken cancellationToken = default);
+    Task UpdateCustomerDisplayStateInfoAsync(int storeId, int? terminalId, CustomerDisplayStateInfo state, CancellationToken cancellationToken = default);
 
     #endregion
 
@@ -273,7 +273,7 @@ public class SuspendedTransactionSearchRequest
 /// <summary>
 /// Current state for customer-facing display.
 /// </summary>
-public class CustomerDisplayState
+public class CustomerDisplayStateInfo
 {
     public string State { get; set; } = "Idle"; // Idle, Transaction, Payment, Complete
     public string? WelcomeMessage { get; set; }

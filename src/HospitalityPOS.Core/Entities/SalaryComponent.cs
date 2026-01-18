@@ -8,6 +8,7 @@ namespace HospitalityPOS.Core.Entities;
 public class SalaryComponent : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
+    public string? Description { get; set; }
     public ComponentType ComponentType { get; set; }
     public bool IsFixed { get; set; } = true;
     public decimal? DefaultAmount { get; set; }

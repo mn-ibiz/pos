@@ -75,7 +75,7 @@ public class PurchaseOrder : BaseEntity
     /// <summary>
     /// Gets or sets the ID of the user who created the PO.
     /// </summary>
-    public int CreatedByUserId { get; set; }
+    public new int CreatedByUserId { get; set; }
 
     /// <summary>
     /// Gets or sets the date when goods were received.

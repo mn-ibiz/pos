@@ -310,7 +310,7 @@ public class ReceiptVoidService : IReceiptVoidService
             }
 
             // Only submit credit note if the invoice was successfully accepted by KRA
-            if (existingInvoice.Status != Enums.EtimsSubmissionStatus.Accepted)
+            if (existingInvoice.Status != EtimsSubmissionStatus.Accepted)
             {
                 _logger.Debug("eTIMS invoice {InvoiceNumber} was not accepted - credit note not required",
                     existingInvoice.InvoiceNumber);
@@ -330,18 +330,18 @@ public class ReceiptVoidService : IReceiptVoidService
             // Attempt real-time submission
             var submittedCreditNote = await _etimsService.SubmitCreditNoteAsync(creditNote.Id);
 
-            if (submittedCreditNote.Status == Enums.EtimsSubmissionStatus.Accepted)
+            if (submittedCreditNote.Status == EtimsSubmissionStatus.Accepted)
             {
                 _logger.Information(
                     "eTIMS credit note {CreditNoteNumber} submitted successfully for voided receipt {ReceiptId}",
                     submittedCreditNote.CreditNoteNumber, receiptId);
             }
-            else if (submittedCreditNote.Status == Enums.EtimsSubmissionStatus.Failed ||
-                     submittedCreditNote.Status == Enums.EtimsSubmissionStatus.Rejected)
+            else if (submittedCreditNote.Status == EtimsSubmissionStatus.Failed ||
+                     submittedCreditNote.Status == EtimsSubmissionStatus.Rejected)
             {
                 // Queue for retry
                 await _etimsService.QueueForSubmissionAsync(
-                    Enums.EtimsDocumentType.CreditNote,
+                    EtimsDocumentType.CreditNote,
                     creditNote.Id,
                     priority: 50);
 
@@ -363,13 +363,13 @@ public class ReceiptVoidService : IReceiptVoidService
                 {
                     var creditNotes = await _etimsService.GetCreditNotesByInvoiceAsync(existingInvoice.Id);
                     var pendingCreditNote = creditNotes.FirstOrDefault(cn =>
-                        cn.Status == Enums.EtimsSubmissionStatus.Pending ||
-                        cn.Status == Enums.EtimsSubmissionStatus.Failed);
+                        cn.Status == EtimsSubmissionStatus.Pending ||
+                        cn.Status == EtimsSubmissionStatus.Failed);
 
                     if (pendingCreditNote != null)
                     {
                         await _etimsService.QueueForSubmissionAsync(
-                            Enums.EtimsDocumentType.CreditNote,
+                            EtimsDocumentType.CreditNote,
                             pendingCreditNote.Id,
                             priority: 100);
                     }

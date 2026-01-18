@@ -82,13 +82,30 @@ public partial class TransferReceiveViewModel : ViewModelBase
     {
         await ExecuteAsync(async () =>
         {
-            Transfer = await _transferService.GetTransferRequestByIdAsync(_transferId);
+            var request = await _transferService.GetTransferRequestAsync(_transferId);
 
-            if (Transfer == null)
+            if (request == null)
             {
                 ErrorMessage = "Transfer request not found.";
                 return;
             }
+
+            // Map to TransferRequestDetailDto
+            Transfer = new TransferRequestDetailDto
+            {
+                Id = request.Id,
+                RequestNumber = request.RequestNumber,
+                Lines = request.Lines.Select(l => new TransferLineDetailDto
+                {
+                    Id = l.Id,
+                    ProductId = l.ProductId,
+                    ProductName = l.ProductName,
+                    ProductSku = l.ProductSku,
+                    ApprovedQuantity = l.ApprovedQuantity,
+                    ShippedQuantity = l.ShippedQuantity,
+                    ReceivedQuantity = l.ReceivedQuantity
+                }).ToList()
+            };
 
             Title = $"Receive: {Transfer.RequestNumber}";
 
@@ -100,7 +117,7 @@ public partial class TransferReceiveViewModel : ViewModelBase
                     LineId = line.Id,
                     ProductId = line.ProductId,
                     ProductName = line.ProductName,
-                    ProductSKU = line.ProductSKU,
+                    ProductSKU = line.ProductSku,
                     ShippedQuantity = line.ShippedQuantity,
                     PreviouslyReceivedQuantity = line.ReceivedQuantity,
                     ReceivedQuantity = line.ShippedQuantity - line.ReceivedQuantity // Default to expected
@@ -169,24 +186,22 @@ public partial class TransferReceiveViewModel : ViewModelBase
 
         await ExecuteAsync(async () =>
         {
-            var receipt = new TransferReceiptDto
+            var receipt = new CreateReceiptDto
             {
                 TransferRequestId = _transferId,
-                ReceivedByUserId = SessionService.CurrentUserId,
                 Notes = ReceiptNotes,
-                Lines = LineItems.Select(l => new ReceiptLineDto
+                Lines = LineItems.Select(l => new CreateReceiptLineDto
                 {
-                    LineId = l.LineId,
+                    RequestLineId = l.LineId,
                     ReceivedQuantity = l.ReceivedQuantity,
-                    DamagedQuantity = l.DamagedQuantity,
-                    MissingQuantity = l.MissingQuantity,
+                    IssueQuantity = l.DamagedQuantity + l.MissingQuantity,
                     Notes = l.Notes
                 }).ToList()
             };
 
-            var result = await _transferService.ReceiveTransferAsync(receipt);
+            var result = await _transferService.CreateReceiptAsync(receipt, SessionService.CurrentUserId);
 
-            if (result)
+            if (result != null)
             {
                 await DialogService.ShowMessageAsync("Success", "Transfer received successfully.");
                 _navigationService.NavigateTo<StockTransferViewModel>();

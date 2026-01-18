@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace HospitalityPOS.Core.Entities;
 
 /// <summary>
@@ -6,17 +8,34 @@ namespace HospitalityPOS.Core.Entities;
 public class Product : BaseEntity
 {
     public string Code { get; set; } = string.Empty;
+    public string? SKU { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public int? CategoryId { get; set; }
     public decimal SellingPrice { get; set; }
+
+    [NotMapped]
+    public decimal Price { get => SellingPrice; set => SellingPrice = value; }
     public decimal? CostPrice { get; set; }
+
+    [NotMapped]
+    public decimal? Cost { get => CostPrice; set => CostPrice = value; }
+    public int StockQuantity { get; set; }
+    public int ReorderLevel { get; set; }
+    public bool IsDeleted { get; set; }
     public decimal TaxRate { get; set; } = 16.00m; // Kenya VAT
     public string UnitOfMeasure { get; set; } = "Each";
     public string? ImagePath { get; set; }
     public string? Barcode { get; set; }
+
+    [NotMapped]
+    public string? ProductCode { get => Barcode; set => Barcode = value; }
     public decimal? MinStockLevel { get; set; }
+
+    [NotMapped]
+    public decimal? MinimumStockLevel { get => MinStockLevel; set => MinStockLevel = value; }
     public decimal? MaxStockLevel { get; set; }
+    public int? SupplierId { get; set; }
 
     /// <summary>
     /// Gets or sets whether inventory tracking is enabled for this product.

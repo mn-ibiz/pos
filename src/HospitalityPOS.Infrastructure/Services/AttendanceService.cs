@@ -7,8 +7,10 @@ using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.Core.Models.HR;
 using HospitalityPOS.Infrastructure.Data;
+using AttendanceSummary = HospitalityPOS.Core.Models.HR.AttendanceSummary;
 using AttendanceSummaryLegacy = HospitalityPOS.Core.Interfaces.AttendanceSummary;
 using AttendanceStatusEntity = HospitalityPOS.Core.Entities.AttendanceStatus;
+using AttendanceStatusModel = HospitalityPOS.Core.Models.HR.AttendanceStatus;
 
 namespace HospitalityPOS.Infrastructure.Services;
 
@@ -96,11 +98,11 @@ public class AttendanceService : IAttendanceService
 
         if (clockInTimeOnly > lateThreshold)
         {
-            record.Status = Models.HR.AttendanceStatus.Late;
+            record.Status = AttendanceStatusModel.Late;
         }
         else
         {
-            record.Status = Models.HR.AttendanceStatus.Present;
+            record.Status = AttendanceStatusModel.Present;
         }
 
         // Raise event
@@ -167,10 +169,9 @@ public class AttendanceService : IAttendanceService
         });
 
         var hoursWorked = record.WorkedHoursDisplay;
-        return ClockResult.Succeeded(record, $"Goodbye {employeeName}! Worked {hoursWorked} today.", now.ToString("h:mm tt"))
-        {
-            HoursWorkedToday = hoursWorked
-        };
+        var result = ClockResult.Succeeded(record, $"Goodbye {employeeName}! Worked {hoursWorked} today.", now.ToString("h:mm tt"));
+        result.HoursWorkedToday = hoursWorked;
+        return result;
     }
 
     public async Task<ClockResult> StartBreakWithPinAsync(int employeeId, string pin)
@@ -608,7 +609,7 @@ public class AttendanceService : IAttendanceService
             EmployeeId = employeeId,
             EmployeeName = employeeName,
             AttendanceDate = date,
-            Status = Models.HR.AttendanceStatus.Absent,
+            Status = AttendanceStatusModel.Absent,
             Notes = reason,
             CreatedAt = DateTime.UtcNow
         };
@@ -649,7 +650,7 @@ public class AttendanceService : IAttendanceService
                 EmployeeName = r.EmployeeName,
                 ClockInTime = r.ClockInTime!.Value,
                 Status = r.CurrentStatus,
-                IsLate = r.Status == Models.HR.AttendanceStatus.Late,
+                IsLate = r.Status == AttendanceStatusModel.Late,
                 MinutesLate = r.MinutesLate,
                 HoursWorkedSoFar = (decimal)(now - r.ClockInTime!.Value).TotalHours
             })
@@ -674,7 +675,7 @@ public class AttendanceService : IAttendanceService
     public Task<IReadOnlyList<AttendanceRecord>> GetLateArrivalsAsync(DateOnly date)
     {
         var records = _records.Values
-            .Where(r => r.AttendanceDate == date && r.Status == Models.HR.AttendanceStatus.Late)
+            .Where(r => r.AttendanceDate == date && r.Status == AttendanceStatusModel.Late)
             .ToList();
 
         return Task.FromResult<IReadOnlyList<AttendanceRecord>>(records);
@@ -709,7 +710,7 @@ public class AttendanceService : IAttendanceService
 
         var groupedByEmployee = filteredRecords.GroupBy(r => r.EmployeeId);
 
-        var summaries = new List<Models.HR.AttendanceSummary>();
+        var summaries = new List<AttendanceSummary>();
         foreach (var group in groupedByEmployee)
         {
             var summary = await CalculateSummaryAsync(group.Key, startDate, endDate);
@@ -766,7 +767,7 @@ public class AttendanceService : IAttendanceService
         };
     }
 
-    public async Task<Models.HR.AttendanceSummary> CalculateSummaryAsync(int employeeId, DateOnly startDate, DateOnly endDate)
+    public async Task<AttendanceSummary> CalculateSummaryAsync(int employeeId, DateOnly startDate, DateOnly endDate)
     {
         var records = await GetRecordsAsync(employeeId, startDate, endDate);
         var employeeName = await GetEmployeeNameAsync(employeeId);
@@ -777,7 +778,7 @@ public class AttendanceService : IAttendanceService
         var regularMinutes = Math.Min(totalMinutes, (int)(_settings.OvertimeThresholdHours * 60 * records.Count));
         var overtimeMinutes = Math.Max(0, totalMinutes - regularMinutes);
 
-        return new Models.HR.AttendanceSummary
+        return new AttendanceSummary
         {
             EmployeeId = employeeId,
             EmployeeName = employeeName,
@@ -787,9 +788,9 @@ public class AttendanceService : IAttendanceService
             RegularHours = regularMinutes / 60m,
             OvertimeHours = overtimeMinutes / 60m,
             BreakHours = breakMinutes / 60m,
-            DaysPresent = records.Count(r => r.Status == Models.HR.AttendanceStatus.Present),
-            DaysLate = records.Count(r => r.Status == Models.HR.AttendanceStatus.Late),
-            DaysAbsent = records.Count(r => r.Status == Models.HR.AttendanceStatus.Absent),
+            DaysPresent = records.Count(r => r.Status == AttendanceStatusModel.Present),
+            DaysLate = records.Count(r => r.Status == AttendanceStatusModel.Late),
+            DaysAbsent = records.Count(r => r.Status == AttendanceStatusModel.Absent),
             TotalLateMinutes = records.Where(r => r.MinutesLate.HasValue).Sum(r => r.MinutesLate!.Value)
         };
     }
@@ -1015,7 +1016,7 @@ public class AttendanceService : IAttendanceService
             ClockInTime = yesterday.ToDateTime(new TimeOnly(8, 55)),
             ClockOutTime = yesterday.ToDateTime(new TimeOnly(17, 15)),
             TotalWorkedMinutes = 500,
-            Status = Models.HR.AttendanceStatus.Present
+            Status = AttendanceStatusModel.Present
         };
 
         _records[_nextRecordId++] = new AttendanceRecord
@@ -1027,7 +1028,7 @@ public class AttendanceService : IAttendanceService
             ClockInTime = yesterday.ToDateTime(new TimeOnly(9, 30)),
             ClockOutTime = yesterday.ToDateTime(new TimeOnly(17, 0)),
             TotalWorkedMinutes = 450,
-            Status = Models.HR.AttendanceStatus.Late
+            Status = AttendanceStatusModel.Late
         };
     }
 

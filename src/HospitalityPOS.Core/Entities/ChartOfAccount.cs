@@ -9,6 +9,7 @@ public class ChartOfAccount : BaseEntity
 {
     public string AccountCode { get; set; } = string.Empty;
     public string AccountName { get; set; } = string.Empty;
+    public string Name { get => AccountName; set => AccountName = value; }
     public AccountType AccountType { get; set; }
     public int? ParentAccountId { get; set; }
     public string? Description { get; set; }

@@ -290,7 +290,7 @@ public partial class InventoryViewModel : ViewModelBase, INavigationAware
         await ExecuteAsync(async () =>
         {
             // Get the product entity
-            var product = await _productService.GetProductByIdAsync(SelectedProduct.ProductId);
+            var product = await _productService.GetByIdAsync(SelectedProduct.ProductId);
             if (product is null)
             {
                 _logger.Warning("Product {ProductId} not found for adjustment", SelectedProduct.ProductId);

@@ -12,30 +12,35 @@ public static class DatabaseSeeder
     /// <summary>
     /// Seeds all default data into the database.
     /// Uses a transaction to ensure atomicity - either all data is seeded or none.
+    /// Wrapped in execution strategy to support SQL Server retry on failure.
     /// </summary>
     public static async Task SeedAsync(POSDbContext context)
     {
-        await using var transaction = await context.Database.BeginTransactionAsync();
-        try
+        var strategy = context.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
         {
-            await SeedRolesAsync(context);
-            await SeedPermissionsAsync(context);
-            await SeedAdminUserAsync(context);
-            await SeedPaymentMethodsAsync(context);
-            await SeedSystemSettingsAsync(context);
-            await SeedChartOfAccountsAsync(context);
-            await SeedSalaryComponentsAsync(context);
-            await SeedPointsConfigurationAsync(context);
-            await SeedTierConfigurationsAsync(context);
+            await using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                await SeedRolesAsync(context);
+                await SeedPermissionsAsync(context);
+                await SeedAdminUserAsync(context);
+                await SeedPaymentMethodsAsync(context);
+                await SeedSystemSettingsAsync(context);
+                await SeedChartOfAccountsAsync(context);
+                await SeedSalaryComponentsAsync(context);
+                await SeedPointsConfigurationAsync(context);
+                await SeedTierConfigurationsAsync(context);
 
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        });
     }
 
     private static async Task SeedRolesAsync(POSDbContext context)

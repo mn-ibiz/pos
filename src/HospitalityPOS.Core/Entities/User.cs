@@ -11,7 +11,11 @@ public class User : BaseEntity
     /// Hashed PIN for quick access authentication. MUST be hashed using BCrypt before storage.
     /// </summary>
     public string? PINHash { get; set; }
+
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public string? PinHash { get => PINHash; set => PINHash = value; }
     public string FullName { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
     public string? Email { get; set; }
     public string? Phone { get; set; }
 

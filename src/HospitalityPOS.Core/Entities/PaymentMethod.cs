@@ -30,7 +30,7 @@ public class PaymentMethod : BaseEntity
     /// <summary>
     /// Gets or sets whether the payment method is active.
     /// </summary>
-    public bool IsActive { get; set; } = true;
+    public new bool IsActive { get; set; } = true;
 
     /// <summary>
     /// Gets or sets whether a reference number is required.

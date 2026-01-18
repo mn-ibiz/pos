@@ -4,6 +4,7 @@
 
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.Core.Models.Inventory;
+using ShrinkageTrendPoint = HospitalityPOS.Core.Interfaces.ShrinkageTrendPoint;
 
 namespace HospitalityPOS.Infrastructure.Services;
 

@@ -43,9 +43,27 @@ public class Receipt : BaseEntity
     public string? CustomerName { get; set; }
 
     /// <summary>
+    /// Gets or sets the date/time of the receipt.
+    /// </summary>
+    public DateTime ReceiptDate { get; set; }
+
+    /// <summary>
     /// Gets or sets the receipt status.
     /// </summary>
     public ReceiptStatus Status { get; set; } = ReceiptStatus.Pending;
+
+    /// <summary>
+    /// Gets or sets whether this receipt has been voided.
+    /// </summary>
+    public bool IsVoided { get; set; }
+
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public bool IsVoid { get => IsVoided; set => IsVoided = value; }
+
+    /// <summary>
+    /// Gets or sets whether this receipt has been fully paid.
+    /// </summary>
+    public bool IsPaid { get; set; }
 
     /// <summary>
     /// Gets or sets the subtotal before tax and discounts.
@@ -66,6 +84,13 @@ public class Receipt : BaseEntity
     /// Gets or sets the total amount (subtotal + tax - discount).
     /// </summary>
     public decimal TotalAmount { get; set; }
+
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public decimal Total { get => TotalAmount; set => TotalAmount = value; }
+
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public decimal SubTotal { get => Subtotal; set => Subtotal = value; }
+    public bool IsDeleted { get; set; }
 
     /// <summary>
     /// Gets or sets the amount paid.
@@ -121,6 +146,11 @@ public class Receipt : BaseEntity
     /// Gets or sets whether this receipt is the result of merging other receipts.
     /// </summary>
     public bool IsMerged { get; set; }
+
+    /// <summary>
+    /// Gets or sets the customer ID.
+    /// </summary>
+    public int? CustomerId { get; set; }
 
     /// <summary>
     /// Gets or sets the loyalty member ID (if linked to loyalty program).
@@ -218,6 +248,9 @@ public class Receipt : BaseEntity
     /// Gets or sets the receipt line items.
     /// </summary>
     public virtual ICollection<ReceiptItem> ReceiptItems { get; set; } = new List<ReceiptItem>();
+
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public virtual ICollection<ReceiptItem> Items { get => ReceiptItems; }
 
     /// <summary>
     /// Gets or sets the payments applied to this receipt.

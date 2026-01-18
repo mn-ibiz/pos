@@ -1245,3 +1245,15 @@ public class IngredientUsageChangeDto
 }
 
 #endregion
+
+/// <summary>
+/// Simple product DTO for recipe service.
+/// </summary>
+public class ProductDto
+{
+    public int Id { get; set; }
+    public string Code { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public decimal SellingPrice { get; set; }
+    public int? CategoryId { get; set; }
+}

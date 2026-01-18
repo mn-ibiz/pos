@@ -492,7 +492,7 @@ public class AccountingService : IAccountingService
     public async Task<JournalEntry> PostExpenseJournalAsync(int expenseId, CancellationToken cancellationToken = default)
     {
         var expense = await _context.Expenses
-            .Include(e => e.Category)
+            .Include(e => e.ExpenseCategory)
             .FirstOrDefaultAsync(e => e.Id == expenseId, cancellationToken)
             ?? throw new InvalidOperationException("Expense not found.");
 

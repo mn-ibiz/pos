@@ -54,6 +54,20 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <!-- ComboBox style for dark theme -->
+        <Style x:Key="WizardComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#252542"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#3a3a5c"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Style.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#252542"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#6366F1"/>
+            </Style.Resources>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -165,7 +179,7 @@
                     <ItemsControl ItemsSource="{Binding ModeOptions}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <UniformGrid Columns="3" HorizontalAlignment="Left"/>
+                                <UniformGrid Columns="2" HorizontalAlignment="Left"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
@@ -305,15 +319,35 @@
                                Foreground="#aaa"
                                FontSize="13"
                                Margin="0,0,0,6"/>
-                    <ComboBox ItemsSource="{Binding CurrencyOptions}"
-                              SelectedValue="{Binding CurrencyCode}"
-                              SelectedValuePath="Code"
-                              DisplayMemberPath="Display"
-                              Background="#252542"
-                              Foreground="White"
-                              BorderBrush="#3a3a5c"
-                              Padding="12,10"
-                              FontSize="14"/>
+                    <Border Background="#252542"
+                            BorderBrush="#3a3a5c"
+                            BorderThickness="1"
+                            Padding="12,10">
+                        <ComboBox ItemsSource="{Binding CurrencyOptions}"
+                                  SelectedValue="{Binding CurrencyCode}"
+                                  SelectedValuePath="Code"
+                                  Background="Transparent"
+                                  BorderThickness="0"
+                                  Foreground="White"
+                                  FontSize="14">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Display}" Foreground="White"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem">
+                                    <Setter Property="Background" Value="#252542"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsHighlighted" Value="True">
+                                            <Setter Property="Background" Value="#6366F1"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+                        </ComboBox>
+                    </Border>
                 </StackPanel>
 
                 <!-- Step 3: Review and Complete -->

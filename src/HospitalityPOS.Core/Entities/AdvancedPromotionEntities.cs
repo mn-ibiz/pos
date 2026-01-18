@@ -16,7 +16,7 @@ public enum BogoType
 }
 
 /// <summary>
-/// Type of Mix & Match promotion.
+/// Type of Mix and Match promotion.
 /// </summary>
 public enum MixMatchType
 {
@@ -85,7 +85,7 @@ public class BogoPromotion : BaseEntity
 }
 
 /// <summary>
-/// Mix & Match promotion configuration.
+/// Mix and Match promotion configuration.
 /// </summary>
 public class MixMatchPromotion : BaseEntity
 {
@@ -95,7 +95,7 @@ public class MixMatchPromotion : BaseEntity
     public int PromotionId { get; set; }
 
     /// <summary>
-    /// Type of Mix & Match promotion.
+    /// Type of Mix and Match promotion.
     /// </summary>
     public MixMatchType MixMatchType { get; set; } = MixMatchType.AnyXForFixedPrice;
 
@@ -125,12 +125,12 @@ public class MixMatchPromotion : BaseEntity
 }
 
 /// <summary>
-/// Group of products for Mix & Match promotions.
+/// Group of products for Mix and Match promotions.
 /// </summary>
 public class MixMatchGroup : BaseEntity
 {
     /// <summary>
-    /// Reference to the Mix & Match promotion.
+    /// Reference to the Mix and Match promotion.
     /// </summary>
     public int MixMatchPromotionId { get; set; }
 
@@ -161,7 +161,7 @@ public class MixMatchGroup : BaseEntity
 }
 
 /// <summary>
-/// Product in a Mix & Match group.
+/// Product in a Mix and Match group.
 /// </summary>
 public class MixMatchGroupProduct : BaseEntity
 {
@@ -174,7 +174,7 @@ public class MixMatchGroupProduct : BaseEntity
 }
 
 /// <summary>
-/// Category in a Mix & Match group (includes all products in category).
+/// Category in a Mix and Match group (includes all products in category).
 /// </summary>
 public class MixMatchGroupCategory : BaseEntity
 {

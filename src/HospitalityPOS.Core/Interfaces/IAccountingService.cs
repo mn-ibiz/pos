@@ -99,7 +99,7 @@ public class TrialBalanceLine
 }
 
 /// <summary>
-/// Income statement (Profit & Loss).
+/// Income statement (Profit and Loss).
 /// </summary>
 public class IncomeStatement
 {

@@ -6,6 +6,16 @@
         "shadcn@latest",
         "mcp"
       ]
+    },
+    "mssql": {
+      "command": "python",
+      "args": ["-m", "mssql_mcp_server"],
+      "env": {
+        "MSSQL_SERVER": "localhost",
+        "MSSQL_PORT": "3706",
+        "MSSQL_DATABASE": "posdb",
+        "MSSQL_WINDOWS_AUTH": "true"
+      }
     }
   }
 }

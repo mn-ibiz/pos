@@ -209,7 +209,7 @@ public class SavedReport : BaseEntity
     /// <summary>
     /// User who created the report.
     /// </summary>
-    public int? CreatedByUserId { get; set; }
+    public new int? CreatedByUserId { get; set; }
 
     /// <summary>
     /// Whether this is a scheduled report.

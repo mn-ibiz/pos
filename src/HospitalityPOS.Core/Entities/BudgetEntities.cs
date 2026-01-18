@@ -76,7 +76,7 @@ public class Budget : BaseEntity
     /// <summary>
     /// User who created the budget.
     /// </summary>
-    public int? CreatedByUserId { get; set; }
+    public new int? CreatedByUserId { get; set; }
 
     /// <summary>
     /// User who approved the budget.
@@ -102,6 +102,11 @@ public class Budget : BaseEntity
     /// Adjustment percentage applied to prior year (if applicable).
     /// </summary>
     public decimal? PriorYearAdjustmentPercent { get; set; }
+
+    /// <summary>
+    /// Whether this budget is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
 
     // Navigation properties
     public virtual Store? Store { get; set; }
@@ -245,6 +250,11 @@ public class RecurringExpenseTemplate : BaseEntity
     /// Supplier ID (if applicable).
     /// </summary>
     public int? SupplierId { get; set; }
+
+    /// <summary>
+    /// Whether this template is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
 
     // Navigation properties
     public virtual Store? Store { get; set; }

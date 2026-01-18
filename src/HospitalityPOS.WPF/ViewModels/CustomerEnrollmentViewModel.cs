@@ -16,6 +16,7 @@ public partial class CustomerEnrollmentViewModel : ViewModelBase, INavigationAwa
     private readonly ILoyaltyService _loyaltyService;
     private readonly INavigationService _navigationService;
     private readonly IDialogService _dialogService;
+    private readonly ISessionService _sessionService;
 
     #region Observable Properties
 
@@ -115,11 +116,13 @@ public partial class CustomerEnrollmentViewModel : ViewModelBase, INavigationAwa
         ILoyaltyService loyaltyService,
         INavigationService navigationService,
         IDialogService dialogService,
+        ISessionService sessionService,
         ILogger logger) : base(logger)
     {
         _loyaltyService = loyaltyService ?? throw new ArgumentNullException(nameof(loyaltyService));
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
 
         Title = "Enroll Customer";
     }
@@ -241,8 +244,8 @@ public partial class CustomerEnrollmentViewModel : ViewModelBase, INavigationAwa
         if (!ValidateAll()) return;
 
         // Get current user ID
-        var currentUserId = SessionService.CurrentUserId;
-        if (!currentUserId.HasValue)
+        var currentUserId = _sessionService.CurrentUserId;
+        if (currentUserId == 0)
         {
             await _dialogService.ShowErrorAsync("Error", "You must be logged in to enroll customers.");
             return;
@@ -262,7 +265,7 @@ public partial class CustomerEnrollmentViewModel : ViewModelBase, INavigationAwa
                 Email = Email?.Trim()
             };
 
-            var result = await _loyaltyService.EnrollCustomerAsync(dto, currentUserId.Value)
+            var result = await _loyaltyService.EnrollCustomerAsync(dto, currentUserId)
                 .ConfigureAwait(true);
 
             if (result.IsSuccess)

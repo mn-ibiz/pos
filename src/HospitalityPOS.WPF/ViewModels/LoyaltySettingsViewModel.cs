@@ -1,9 +1,9 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using HospitalityPOS.Core.DTOs;
+using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.WPF.Services;
 
@@ -16,6 +16,7 @@ public partial class LoyaltySettingsViewModel : ViewModelBase
 {
     private readonly ILoyaltyService _loyaltyService;
     private readonly INavigationService _navigationService;
+    private readonly ISessionService _sessionService;
 
     [ObservableProperty]
     private PointsConfiguration? _currentConfiguration;
@@ -80,12 +81,17 @@ public partial class LoyaltySettingsViewModel : ViewModelBase
 
     public bool CanEditSettings => HasPermission("Loyalty.Settings.Edit");
 
-    public LoyaltySettingsViewModel(ILogger logger)
+    public LoyaltySettingsViewModel(
+        ILoyaltyService loyaltyService,
+        INavigationService navigationService,
+        ISessionService sessionService,
+        ILogger logger)
         : base(logger)
     {
+        _loyaltyService = loyaltyService ?? throw new ArgumentNullException(nameof(loyaltyService));
+        _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
+        _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         Title = "Loyalty Program Settings";
-        _loyaltyService = App.Services.GetRequiredService<ILoyaltyService>();
-        _navigationService = App.Services.GetRequiredService<INavigationService>();
     }
 
     [RelayCommand]
@@ -93,24 +99,26 @@ public partial class LoyaltySettingsViewModel : ViewModelBase
     {
         await ExecuteAsync(async () =>
         {
-            // Load current configuration
+            // Load current configuration from Core entity
             CurrentConfiguration = await _loyaltyService.GetPointsConfigurationAsync();
 
             if (CurrentConfiguration != null)
             {
-                // Populate form fields
-                PointsPerCurrencyUnit = CurrentConfiguration.PointsPerCurrencyUnit;
-                CurrencyUnitsPerPoint = CurrentConfiguration.CurrencyUnitsPerPoint;
-                MinimumEarningAmount = CurrentConfiguration.MinimumEarningAmount;
+                // Map Core entity properties to ViewModel properties
+                // EarningRate = KSh per point, so PointsPerCurrencyUnit = 1/EarningRate
+                CurrencyUnitsPerPoint = CurrentConfiguration.EarningRate;
+                PointsPerCurrencyUnit = CurrentConfiguration.EarningRate > 0 ? 1 / CurrentConfiguration.EarningRate : 0.01m;
+                MinimumEarningAmount = CurrentConfiguration.EarningRate; // Use earning rate as minimum
                 EarnOnDiscountedItems = CurrentConfiguration.EarnOnDiscountedItems;
                 EarnOnTax = CurrentConfiguration.EarnOnTax;
-                PointValueInKes = CurrentConfiguration.PointValueInKes;
+                PointValueInKes = CurrentConfiguration.RedemptionValue;
                 MinimumRedemptionPoints = CurrentConfiguration.MinimumRedemptionPoints;
-                MaximumRedemptionPercent = CurrentConfiguration.MaximumRedemptionPercent;
-                AllowPartialRedemption = CurrentConfiguration.AllowPartialRedemption;
-                PointsExpiryMonths = CurrentConfiguration.PointsExpiryMonths;
-                EnablePointsExpiry = CurrentConfiguration.EnablePointsExpiry;
-                ExpiryWarningDays = CurrentConfiguration.ExpiryWarningDays;
+                MaximumRedemptionPercent = CurrentConfiguration.MaxRedemptionPercentage;
+                AllowPartialRedemption = true; // Not in Core entity, default to true
+                // Convert days to months (approximate)
+                PointsExpiryMonths = CurrentConfiguration.PointsExpiryDays > 0 ? CurrentConfiguration.PointsExpiryDays / 30 : 12;
+                EnablePointsExpiry = CurrentConfiguration.PointsExpiryDays > 0;
+                ExpiryWarningDays = 30; // Not in Core entity, default to 30
             }
 
             // Load tier configurations
@@ -139,7 +147,7 @@ public partial class LoyaltySettingsViewModel : ViewModelBase
             await Task.Delay(100);
             await DialogService.ShowMessageAsync("Success", "Loyalty settings saved successfully.");
 
-            _logger.Information("Loyalty settings updated by user {UserId}", SessionService.CurrentUserId);
+            _logger.Information("Loyalty settings updated by user {UserId}", _sessionService.CurrentUserId);
         }, "Saving settings...");
     }
 
@@ -191,25 +199,6 @@ public partial class LoyaltySettingsViewModel : ViewModelBase
     [RelayCommand]
     private void GoBack()
     {
-        _navigationService.NavigateBack();
+        _navigationService.GoBack();
     }
-}
-
-/// <summary>
-/// Points configuration entity for loyalty program.
-/// </summary>
-public class PointsConfiguration
-{
-    public decimal PointsPerCurrencyUnit { get; set; } = 1;
-    public decimal CurrencyUnitsPerPoint { get; set; } = 100;
-    public decimal MinimumEarningAmount { get; set; } = 100;
-    public bool EarnOnDiscountedItems { get; set; } = true;
-    public bool EarnOnTax { get; set; }
-    public decimal PointValueInKes { get; set; } = 1;
-    public decimal MinimumRedemptionPoints { get; set; } = 100;
-    public decimal MaximumRedemptionPercent { get; set; } = 50;
-    public bool AllowPartialRedemption { get; set; } = true;
-    public int PointsExpiryMonths { get; set; } = 12;
-    public bool EnablePointsExpiry { get; set; } = true;
-    public int ExpiryWarningDays { get; set; } = 30;
 }

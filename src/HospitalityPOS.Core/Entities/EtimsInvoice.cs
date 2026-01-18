@@ -10,7 +10,7 @@ public class EtimsInvoice : BaseEntity
     /// <summary>
     /// Related receipt ID.
     /// </summary>
-    public int ReceiptId { get; set; }
+    public int? ReceiptId { get; set; }
 
     /// <summary>
     /// eTIMS device used for submission.
@@ -138,7 +138,7 @@ public class EtimsInvoice : BaseEntity
     public string? ResponseJson { get; set; }
 
     // Navigation properties
-    public Receipt Receipt { get; set; } = null!;
+    // Receipt navigation removed - FK causes alphabetical table ordering issues in EF migrations
     public EtimsDevice Device { get; set; } = null!;
     public ICollection<EtimsInvoiceItem> Items { get; set; } = [];
 }

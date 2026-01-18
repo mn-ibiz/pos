@@ -1,0 +1,71 @@
+// Global using aliases to resolve WPF vs WinForms namespace conflicts
+// when UseWindowsForms=true (needed for Screen class in CustomerDisplayWindow)
+
+global using Application = System.Windows.Application;
+global using Color = System.Windows.Media.Color;
+global using Point = System.Windows.Point;
+global using Size = System.Windows.Size;
+global using Brush = System.Windows.Media.Brush;
+global using Brushes = System.Windows.Media.Brushes;
+global using FontFamily = System.Windows.Media.FontFamily;
+global using Pen = System.Windows.Media.Pen;
+global using Clipboard = System.Windows.Clipboard;
+global using DataFormats = System.Windows.DataFormats;
+global using DataObject = System.Windows.DataObject;
+global using DragDropEffects = System.Windows.DragDropEffects;
+global using DragEventArgs = System.Windows.DragEventArgs;
+global using DragEventHandler = System.Windows.DragEventHandler;
+global using IDataObject = System.Windows.IDataObject;
+global using MessageBox = System.Windows.MessageBox;
+global using MessageBoxButton = System.Windows.MessageBoxButton;
+global using MessageBoxResult = System.Windows.MessageBoxResult;
+global using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+global using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+global using MouseButtonEventArgs = System.Windows.Input.MouseButtonEventArgs;
+global using Cursor = System.Windows.Input.Cursor;
+global using Cursors = System.Windows.Input.Cursors;
+global using HorizontalAlignment = System.Windows.HorizontalAlignment;
+global using VerticalAlignment = System.Windows.VerticalAlignment;
+global using Thickness = System.Windows.Thickness;
+global using TextAlignment = System.Windows.TextAlignment;
+
+// Control types - prefer WPF
+global using Button = System.Windows.Controls.Button;
+global using CheckBox = System.Windows.Controls.CheckBox;
+global using ComboBox = System.Windows.Controls.ComboBox;
+global using Label = System.Windows.Controls.Label;
+global using ListBox = System.Windows.Controls.ListBox;
+global using ListView = System.Windows.Controls.ListView;
+global using Menu = System.Windows.Controls.Menu;
+global using MenuItem = System.Windows.Controls.MenuItem;
+global using Panel = System.Windows.Controls.Panel;
+global using ProgressBar = System.Windows.Controls.ProgressBar;
+global using RadioButton = System.Windows.Controls.RadioButton;
+global using ScrollBar = System.Windows.Controls.Primitives.ScrollBar;
+global using TextBox = System.Windows.Controls.TextBox;
+global using ToolTip = System.Windows.Controls.ToolTip;
+global using TreeView = System.Windows.Controls.TreeView;
+global using UserControl = System.Windows.Controls.UserControl;
+global using ContentControl = System.Windows.Controls.ContentControl;
+global using Control = System.Windows.Controls.Control;
+global using Image = System.Windows.Controls.Image;
+global using Border = System.Windows.Controls.Border;
+global using Grid = System.Windows.Controls.Grid;
+global using StackPanel = System.Windows.Controls.StackPanel;
+global using Canvas = System.Windows.Controls.Canvas;
+global using DockPanel = System.Windows.Controls.DockPanel;
+global using WrapPanel = System.Windows.Controls.WrapPanel;
+global using TabControl = System.Windows.Controls.TabControl;
+global using TabItem = System.Windows.Controls.TabItem;
+global using GroupBox = System.Windows.Controls.GroupBox;
+global using Expander = System.Windows.Controls.Expander;
+global using ScrollViewer = System.Windows.Controls.ScrollViewer;
+global using Viewbox = System.Windows.Controls.Viewbox;
+
+// Additional WPF types to resolve ambiguities
+global using PrintDialog = System.Windows.Controls.PrintDialog;
+global using Binding = System.Windows.Data.Binding;
+global using Orientation = System.Windows.Controls.Orientation;
+global using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+global using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
+global using ColorConverter = System.Windows.Media.ColorConverter;

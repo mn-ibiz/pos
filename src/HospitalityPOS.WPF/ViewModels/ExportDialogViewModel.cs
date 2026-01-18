@@ -13,7 +13,6 @@ namespace HospitalityPOS.WPF.ViewModels;
 public partial class ExportDialogViewModel : ViewModelBase
 {
     private readonly IExportService _exportService;
-    private readonly ILogger _logger;
 
     /// <summary>
     /// Gets or sets the report data to export.
@@ -64,10 +63,9 @@ public partial class ExportDialogViewModel : ViewModelBase
     /// </summary>
     public ExportDialogViewModel(
         IExportService exportService,
-        ILogger logger)
+        ILogger logger) : base(logger)
     {
         _exportService = exportService;
-        _logger = logger;
         IsPdfSupported = false; // PDF not implemented yet
     }
 

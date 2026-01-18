@@ -59,6 +59,13 @@ public class InverseBoolToVisibilityConverter : IValueConverter
 }
 
 /// <summary>
+/// Alias for InverseBoolToVisibilityConverter for compatibility with views that use the longer name.
+/// </summary>
+public class InverseBooleanToVisibilityConverter : InverseBoolToVisibilityConverter
+{
+}
+
+/// <summary>
 /// Converts a string to Visibility (non-empty = Visible, empty/null = Collapsed).
 /// </summary>
 public class StringToVisibilityConverter : IValueConverter

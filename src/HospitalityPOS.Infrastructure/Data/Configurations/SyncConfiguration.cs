@@ -236,17 +236,17 @@ public class SyncLogConfiguration : IEntityTypeConfiguration<SyncLog>
         builder.Property(e => e.ErrorMessage)
             .HasMaxLength(2000);
 
-        // Foreign key to Store
+        // Foreign key to Store - use Restrict to avoid cascade cycles
         builder.HasOne(e => e.Store)
             .WithMany()
             .HasForeignKey(e => e.StoreId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
-        // Foreign key to SyncBatch (optional)
+        // Foreign key to SyncBatch (optional) - use NoAction to avoid cascade cycles
         builder.HasOne(e => e.SyncBatch)
             .WithMany()
             .HasForeignKey(e => e.SyncBatchId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.NoAction);
 
         // Index on Timestamp
         builder.HasIndex(e => e.Timestamp)

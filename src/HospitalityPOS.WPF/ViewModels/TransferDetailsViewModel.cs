@@ -49,13 +49,63 @@ public partial class TransferDetailsViewModel : ViewModelBase
     {
         await ExecuteAsync(async () =>
         {
-            Transfer = await _transferService.GetTransferRequestByIdAsync(_transferId);
+            var request = await _transferService.GetTransferRequestAsync(_transferId);
 
-            if (Transfer == null)
+            if (request == null)
             {
                 ErrorMessage = "Transfer request not found.";
                 return;
             }
+
+            // Map to TransferRequestDetailDto
+            Transfer = new TransferRequestDetailDto
+            {
+                Id = request.Id,
+                RequestNumber = request.RequestNumber,
+                RequestingStoreId = request.RequestingStoreId,
+                RequestingStoreName = request.RequestingStoreName,
+                SourceLocationId = request.SourceLocationId,
+                SourceLocationName = request.SourceLocationName,
+                SourceLocationType = request.SourceLocationType,
+                Status = request.Status,
+                Priority = request.Priority,
+                Reason = request.Reason,
+                SubmittedAt = request.SubmittedAt,
+                SubmittedByUserName = request.SubmittedByUserName,
+                ApprovedAt = request.ApprovedAt,
+                ApprovedByUserName = request.ApprovedByUserName,
+                ApprovalNotes = request.ApprovalNotes,
+                RequestedDeliveryDate = request.RequestedDeliveryDate,
+                ExpectedDeliveryDate = request.ExpectedDeliveryDate,
+                Notes = request.Notes,
+                RejectionReason = request.RejectionReason,
+                TotalItemsRequested = request.TotalItemsRequested,
+                TotalItemsApproved = request.TotalItemsApproved,
+                TotalEstimatedValue = request.TotalEstimatedValue,
+                LineCount = request.LineCount,
+                CreatedAt = request.CreatedAt,
+                Shipment = request.Shipment,
+                Lines = request.Lines.Select(l => new TransferLineDetailDto
+                {
+                    Id = l.Id,
+                    TransferRequestId = l.TransferRequestId,
+                    ProductId = l.ProductId,
+                    ProductName = l.ProductName,
+                    ProductSku = l.ProductSku,
+                    ProductBarcode = l.ProductBarcode,
+                    CategoryName = l.CategoryName,
+                    RequestedQuantity = l.RequestedQuantity,
+                    ApprovedQuantity = l.ApprovedQuantity,
+                    ShippedQuantity = l.ShippedQuantity,
+                    ReceivedQuantity = l.ReceivedQuantity,
+                    IssueQuantity = l.IssueQuantity,
+                    SourceAvailableStock = l.SourceAvailableStock,
+                    UnitCost = l.UnitCost,
+                    LineTotal = l.LineTotal,
+                    Notes = l.Notes,
+                    ApprovalNotes = l.ApprovalNotes
+                }).ToList()
+            };
 
             Title = $"Transfer: {Transfer.RequestNumber}";
 
@@ -65,7 +115,7 @@ public partial class TransferDetailsViewModel : ViewModelBase
                 LineItems.Add(line);
             }
 
-            var logs = await _transferService.GetTransferActivityLogAsync(_transferId);
+            var logs = await _transferService.GetActivityLogAsync(_transferId);
             ActivityLog.Clear();
             foreach (var log in logs)
             {

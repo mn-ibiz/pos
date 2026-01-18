@@ -317,14 +317,15 @@ public partial class SuppliersViewModel : ViewModelBase, INavigationAware
     /// Views the statement for the selected supplier.
     /// </summary>
     [RelayCommand]
-    private void ViewStatement()
+    private async Task ViewStatementAsync()
     {
         if (SelectedSupplier is null)
         {
             return;
         }
 
-        _navigationService.NavigateTo<SupplierStatementViewModel>(SelectedSupplier.Id);
+        // SupplierStatementViewModel is not yet available
+        await _dialogService.ShowInfoAsync("Coming Soon", "Supplier statement view is coming soon.");
     }
 
     /// <summary>

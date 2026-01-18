@@ -255,12 +255,12 @@ public partial class QrPaymentDialogViewModel : ViewModelBase
             _countdownTimer.Start();
             _pollTimer.Start();
 
-            Logger.Information("QR code displayed for receipt {ReceiptId}, amount {Amount}",
+            _logger.Information("QR code displayed for receipt {ReceiptId}, amount {Amount}",
                 ReceiptId, Amount);
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Failed to generate QR code");
+            _logger.Error(ex, "Failed to generate QR code");
             Status = $"Error: {ex.Message}";
             IsProcessing = false;
         }
@@ -301,7 +301,7 @@ public partial class QrPaymentDialogViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Error polling for payment status");
+            _logger.Error(ex, "Error polling for payment status");
         }
     }
 
@@ -313,7 +313,7 @@ public partial class QrPaymentDialogViewModel : ViewModelBase
         MpesaReceiptNumber = receiptNumber;
         Status = "Payment Received!";
 
-        Logger.Information("QR payment successful for receipt {ReceiptId}: {TransactionId}",
+        _logger.Information("QR payment successful for receipt {ReceiptId}: {TransactionId}",
             ReceiptId, transactionId);
 
         // Auto-close after a brief delay

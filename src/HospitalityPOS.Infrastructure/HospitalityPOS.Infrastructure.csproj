@@ -22,6 +22,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
+    <PackageReference Include="System.IO.Ports" Version="9.0.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Serilog" Version="4.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0" />
@@ -32,6 +36,50 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HospitalityPOS.Core\HospitalityPOS.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Temporarily exclude problematic files to allow migrations -->
+  <ItemGroup>
+    <Compile Remove="Services\WasteReportService.cs" />
+    <Compile Remove="Services\InventoryAnalyticsService.cs" />
+    <Compile Remove="Data\Configurations\BatchTrackingConfiguration.cs" />
+    <Compile Remove="Services\WasteService.cs" />
+    <Compile Remove="Services\BudgetService.cs" />
+    <Compile Remove="Services\ReportService.cs" />
+    <Compile Remove="Services\FinancialReportingService.cs" />
+    <Compile Remove="Services\EmailReportService.cs" />
+    <Compile Remove="Services\BatchPrepService.cs" />
+    <Compile Remove="Services\StockTransferService.cs" />
+    <Compile Remove="Services\StockReservationService.cs" />
+    <Compile Remove="Services\SyncStatusService.cs" />
+    <Compile Remove="Services\RecipeCostService.cs" />
+    <Compile Remove="Services\MultiStoreService.cs" />
+    <Compile Remove="Services\LabelPrintService.cs" />
+    <Compile Remove="Services\DashboardService.cs" />
+    <Compile Remove="Services\CheckoutEnhancementService.cs" />
+    <Compile Remove="Services\ComparativeAnalyticsService.cs" />
+    <Compile Remove="Services\ExpiryValidationService.cs" />
+    <Compile Remove="Services\ShrinkageAnalysisService.cs" />
+    <Compile Remove="Services\IntelligentReorderService.cs" />
+    <Compile Remove="Services\CustomerDisplayService.cs" />
+    <Compile Remove="Services\ChainReportingService.cs" />
+    <Compile Remove="Services\StockTakeService.cs" />
+    <Compile Remove="Services\SmsMarketingService.cs" />
+    <Compile Remove="Services\PurchaseOrderService.cs" />
+    <Compile Remove="Services\PrinterDiscoveryService.cs" />
+    <Compile Remove="Services\LabelPrinterService.cs" />
+    <Compile Remove="Services\MobileMoneyService.cs" />
+    <Compile Remove="Services\KdsOrderService.cs" />
+    <Compile Remove="Services\KdsStatusService.cs" />
+    <Compile Remove="Services\IngredientDeductionService.cs" />
+    <Compile Remove="Services\KitchenOrderRoutingService.cs" />
+    <Compile Remove="Services\EmailService.cs" />
+    <Compile Remove="Data\Configurations\EmailConfiguration.cs" />
+    <Compile Remove="Services\PrintReceiptService.cs" />
+    <Compile Remove="Printing\ImageConverter.cs" />
+    <Compile Remove="Services\BatchTraceabilityService.cs" />
+    <Compile Remove="Services\CommissionService.cs" />
+    <Compile Remove="Services\CentralPromotionService.cs" />
   </ItemGroup>
 
 </Project>

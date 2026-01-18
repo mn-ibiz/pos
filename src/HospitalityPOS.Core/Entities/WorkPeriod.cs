@@ -8,7 +8,9 @@ namespace HospitalityPOS.Core.Entities;
 public class WorkPeriod : BaseEntity
 {
     public DateTime OpenedAt { get; set; }
+    public DateTime StartTime { get => OpenedAt; set => OpenedAt = value; }
     public DateTime? ClosedAt { get; set; }
+    public DateTime? EndTime { get => ClosedAt; set => ClosedAt = value; }
     public int OpenedByUserId { get; set; }
     public int? ClosedByUserId { get; set; }
     public decimal OpeningFloat { get; set; }

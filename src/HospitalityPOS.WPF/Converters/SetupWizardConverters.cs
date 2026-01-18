@@ -89,25 +89,6 @@ public class StepToVisibilityConverter : IValueConverter
 }
 
 /// <summary>
-/// Converts two values to check if they are equal.
-/// </summary>
-public class EqualityConverter : IMultiValueConverter
-{
-    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (values.Length < 2)
-            return false;
-
-        return Equals(values[0], values[1]);
-    }
-
-    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-/// <summary>
 /// Converts boolean to text based on parameter format "TrueText|FalseText".
 /// </summary>
 public class BoolToTextConverter : IValueConverter
@@ -124,22 +105,6 @@ public class BoolToTextConverter : IValueConverter
         }
 
         return value?.ToString() ?? string.Empty;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-/// <summary>
-/// Converts null to Visibility (Collapsed if null, Visible if not null).
-/// </summary>
-public class NullToVisibilityConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        return value != null ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

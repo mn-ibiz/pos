@@ -33,6 +33,12 @@ public interface ISessionService
     string CurrentUserDisplayName { get; }
 
     /// <summary>
+    /// Gets the current store ID for the session.
+    /// Returns null if no store is set or in single-store mode.
+    /// </summary>
+    int? CurrentStoreId { get; }
+
+    /// <summary>
     /// Sets the current user for the session after successful login.
     /// </summary>
     /// <param name="user">The authenticated user.</param>

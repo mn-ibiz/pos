@@ -13,7 +13,7 @@ public class VoidReason : BaseEntity
     /// <summary>
     /// Gets or sets whether this reason is active.
     /// </summary>
-    public bool IsActive { get; set; } = true;
+    public new bool IsActive { get; set; } = true;
 
     /// <summary>
     /// Gets or sets whether additional notes are required when selecting this reason.

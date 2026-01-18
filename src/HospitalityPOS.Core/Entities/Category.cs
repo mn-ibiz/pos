@@ -28,7 +28,12 @@ public class Category : BaseEntity
     /// <summary>
     /// Gets or sets whether the category is active.
     /// </summary>
-    public bool IsActive { get; set; } = true;
+    public new bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Whether this category is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
 
     // Navigation properties
     /// <summary>

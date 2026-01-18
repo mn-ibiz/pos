@@ -174,7 +174,7 @@ public class CentralPromotion : BaseEntity
     /// <summary>
     /// User ID who created the promotion.
     /// </summary>
-    public int? CreatedByUserId { get; set; }
+    public new int? CreatedByUserId { get; set; }
 
     /// <summary>
     /// Gets whether the promotion is currently active based on dates and status.

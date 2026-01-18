@@ -105,21 +105,14 @@ public partial class SetupWizardViewModel : ObservableObject
                 "Restaurant / Hospitality",
                 "Table management, kitchen display, waiter assignment, and hospitality-focused features.",
                 "\uE8BD", // Restaurant icon
-                new[] { "Table Management", "Kitchen Display", "Waiter Assignment", "Course Sequencing" }),
+                new[] { "Table Management", "Kitchen Display", "Waiter Assignment", "Payroll", "Accounting" }),
 
             new BusinessModeOption(
                 BusinessMode.Supermarket,
                 "Supermarket / Retail",
                 "Barcode scanning, product promotions, loyalty program, and retail-focused features.",
                 "\uE7BF", // Shopping cart icon
-                new[] { "Barcode Scanning", "Product Offers", "Loyalty Program", "Batch Tracking" }),
-
-            new BusinessModeOption(
-                BusinessMode.Hybrid,
-                "Hybrid (All Features)",
-                "Full feature set for businesses that need both hospitality and retail capabilities.",
-                "\uE8F1", // Combo icon
-                new[] { "All Restaurant Features", "All Retail Features", "Payroll", "Accounting" })
+                new[] { "Barcode Scanning", "Product Offers", "Loyalty Program", "Payroll", "Accounting" })
         };
 
         SelectedModeOption = ModeOptions[0];
@@ -131,11 +124,17 @@ public partial class SetupWizardViewModel : ObservableObject
         {
             SelectedMode = value.Mode;
         }
+        CanGoNext = ValidateCurrentStep();
     }
 
     partial void OnCurrentStepChanged(int value)
     {
         UpdateStepInfo();
+    }
+
+    partial void OnBusinessNameChanged(string value)
+    {
+        CanGoNext = ValidateCurrentStep();
     }
 
     private void UpdateStepInfo()

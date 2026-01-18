@@ -252,7 +252,7 @@
                         <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*"/>
                         <DataGridTextColumn Header="Original" Binding="{Binding OriginalPrice, StringFormat='KSh {0:N2}'}" Width="100"/>
                         <DataGridTextColumn Header="Offer" Binding="{Binding OfferPrice, StringFormat='KSh {0:N2}'}" Width="100"/>
-                        <DataGridTextColumn Header="Discount %" Binding="{Binding DiscountPercent, StringFormat='{0:N1}%'}" Width="80"/>
+                        <DataGridTextColumn Header="Discount %" Binding="{Binding DiscountPercent, StringFormat='{}{0:N1}%'}" Width="80"/>
                         <DataGridTextColumn Header="Redemptions" Binding="{Binding RedemptionCount}" Width="100"/>
                         <DataGridTextColumn Header="Revenue" Binding="{Binding TotalRevenue, StringFormat='KSh {0:N2}'}" Width="120"/>
                         <DataGridTextColumn Header="Discount Given" Binding="{Binding TotalDiscountGiven, StringFormat='KSh {0:N2}'}" Width="120"/>
@@ -307,7 +307,7 @@
                                Foreground="#9CA3AF"
                                FontSize="14"
                                HorizontalAlignment="Center"/>
-                    <TextBlock Text="{Binding TotalRedemptions, StringFormat='{0:N0}'}"
+                    <TextBlock Text="{Binding TotalRedemptions, StringFormat='{}{0:N0}'}"
                                Foreground="#4F46E5"
                                FontSize="28"
                                FontWeight="Bold"

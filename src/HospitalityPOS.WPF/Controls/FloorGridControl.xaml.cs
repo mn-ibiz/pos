@@ -140,8 +140,7 @@ public partial class FloorGridControl : UserControl
     {
         if (d is FloorGridControl control)
         {
-            control.OnPropertyChanged(new DependencyPropertyChangedEventArgs(
-                DependencyProperty.UnsetValue, e.NewValue, e.Property));
+            control.OnPropertyChanged(e);
         }
     }
 

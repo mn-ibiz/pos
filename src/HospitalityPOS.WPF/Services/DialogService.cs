@@ -474,6 +474,71 @@ public class DialogService : IDialogService
     }
 
     /// <inheritdoc />
+    public Task ShowInfoAsync(string message)
+    {
+        return ShowInfoAsync("Information", message);
+    }
+
+    /// <inheritdoc />
+    public Task ShowSuccessAsync(string title, string message)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+        ArgumentException.ThrowIfNullOrWhiteSpace(message);
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            MessageBox.Show(
+                Application.Current.MainWindow,
+                message,
+                title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        });
+
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public Task ShowSuccessAsync(string message)
+    {
+        return ShowSuccessAsync("Success", message);
+    }
+
+    /// <inheritdoc />
+    public Task<string?> ShowActionSheetAsync(string title, string? message, string cancelText, string? destructiveText, params string[] options)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+        ArgumentException.ThrowIfNullOrWhiteSpace(cancelText);
+
+        var result = Application.Current.Dispatcher.Invoke(() =>
+        {
+            // Build options list for display
+            var allOptions = new List<string>();
+            if (!string.IsNullOrEmpty(destructiveText))
+            {
+                allOptions.Add(destructiveText);
+            }
+            allOptions.AddRange(options);
+            allOptions.Add(cancelText);
+
+            // Show action sheet dialog
+            var dialog = new ActionSheetDialog(title, message, allOptions, cancelText, destructiveText)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.SelectedOption;
+            }
+
+            return null;
+        });
+
+        return Task.FromResult(result);
+    }
+
+    /// <inheritdoc />
     public Task<bool> ShowConfirmAsync(string title, string message)
     {
         return ShowConfirmationAsync(title, message);

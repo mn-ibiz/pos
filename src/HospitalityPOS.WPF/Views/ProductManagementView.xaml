@@ -214,8 +214,7 @@
                     Style="{StaticResource ActionButton}"
                     Background="#2196F3"
                     Command="{Binding EditProductCommand}"/>
-            <Button Style="{StaticResource ActionButton}"
-                    Command="{Binding ToggleActiveCommand}">
+            <Button Command="{Binding ToggleActiveCommand}">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource ActionButton}">
                         <Setter Property="Content" Value="Deactivate"/>

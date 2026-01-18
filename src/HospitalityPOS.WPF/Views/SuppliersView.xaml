@@ -275,7 +275,7 @@
                                             Width="100" />
 
                         <DataGridTextColumn Header="Terms"
-                                            Binding="{Binding PaymentTermDays, StringFormat='{0} days'}"
+                                            Binding="{Binding PaymentTermDays, StringFormat='{}{0} days'}"
                                             Width="70" />
 
                         <DataGridTemplateColumn Header="Credit Limit" Width="100">

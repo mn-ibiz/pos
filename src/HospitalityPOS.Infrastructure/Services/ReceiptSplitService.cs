@@ -146,7 +146,7 @@ public class ReceiptSplitService : IReceiptSplitService
                     ParentReceiptId = original.Id,
                     IsSplit = true,
                     SplitNumber = i,
-                    SplitType = Enums.SplitType.Equal
+                    SplitType = SplitType.Equal
                 };
 
                 _context.Receipts.Add(splitReceipt);
@@ -281,7 +281,7 @@ public class ReceiptSplitService : IReceiptSplitService
                     ParentReceiptId = original.Id,
                     IsSplit = true,
                     SplitNumber = splitNumber++,
-                    SplitType = Enums.SplitType.ByItem
+                    SplitType = SplitType.ByItem
                 };
 
                 // Create new receipt items for the split (copy from original)

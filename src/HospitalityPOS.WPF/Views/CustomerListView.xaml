@@ -213,7 +213,6 @@
 
                 <TextBox Grid.Column="0"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         Style="{StaticResource SearchTextBoxStyle}"
                          Margin="0,0,12,0">
                     <TextBox.Resources>
                         <VisualBrush x:Key="SearchHint" TileMode="None" Stretch="None" AlignmentX="Left">
@@ -381,7 +380,6 @@
                             Margin="0,0,8,0"
                             IsEnabled="{Binding SelectedMember, Converter={StaticResource BoolToVisConverter}}" />
                     <Button Command="{Binding DeactivateMemberCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}"
                             Margin="0,0,8,0"
                             Visibility="{Binding CanDeactivateMembers, Converter={StaticResource BoolToVisConverter}}">
                         <Button.Style>

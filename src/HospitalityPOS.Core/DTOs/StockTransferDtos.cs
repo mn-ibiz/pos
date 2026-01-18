@@ -725,6 +725,27 @@ public class TransferDocumentLineDto
 
 #endregion
 
+#region Transfer Detail View DTOs
+
+/// <summary>
+/// Detailed transfer request DTO for viewing transfer details.
+/// </summary>
+public class TransferRequestDetailDto : StockTransferRequestDto
+{
+    public new List<TransferLineDetailDto> Lines { get; set; } = new();
+}
+
+/// <summary>
+/// Detailed line item DTO for transfer details view.
+/// </summary>
+public class TransferLineDetailDto : TransferRequestLineDto
+{
+    public string StockUnit { get; set; } = string.Empty;
+    public decimal TotalValue => (ApprovedQuantity ?? RequestedQuantity) * UnitCost;
+}
+
+#endregion
+
 #region Variance and Receipt Summary DTOs
 
 /// <summary>

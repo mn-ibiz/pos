@@ -17,13 +17,13 @@ public partial class OfferReportViewModel : ViewModelBase, INavigationAware
     private readonly IOrderService _orderService;
     private readonly IDialogService _dialogService;
     private readonly IReportPrintService _reportPrintService;
-    private readonly ILogger _logger = Log.ForContext<OfferReportViewModel>();
 
     public OfferReportViewModel(
         IOfferService offerService,
         IOrderService orderService,
         IDialogService dialogService,
-        IReportPrintService reportPrintService)
+        IReportPrintService reportPrintService,
+        ILogger logger) : base(logger)
     {
         _offerService = offerService;
         _orderService = orderService;
@@ -100,14 +100,14 @@ public partial class OfferReportViewModel : ViewModelBase, INavigationAware
 
     #region Navigation
 
-    public Task OnNavigatedToAsync(object? parameter)
+    public void OnNavigatedTo(object? parameter)
     {
-        return GenerateReportAsync();
+        _ = GenerateReportAsync();
     }
 
-    public Task OnNavigatedFromAsync()
+    public void OnNavigatedFrom()
     {
-        return Task.CompletedTask;
+        // No cleanup needed
     }
 
     #endregion

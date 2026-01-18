@@ -568,7 +568,6 @@
                                                FontWeight="Bold"
                                                Foreground="White"
                                                FontFamily="Consolas"
-                                               CharacterSpacing="200"
                                                HorizontalAlignment="Center"/>
                                 </Border>
 
@@ -673,8 +672,7 @@
                                                    FontSize="28"
                                                    FontWeight="Bold"
                                                    Foreground="White"
-                                                   FontFamily="Consolas"
-                                                   CharacterSpacing="200"/>
+                                                   FontFamily="Consolas"/>
                                     </StackPanel>
                                 </Border>
 

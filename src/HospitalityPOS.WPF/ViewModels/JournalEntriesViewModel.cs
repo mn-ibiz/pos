@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Enums;
 using HospitalityPOS.Core.Interfaces;
+using HospitalityPOS.WPF.Services;
 
 namespace HospitalityPOS.WPF.ViewModels;
 
@@ -138,7 +139,7 @@ public partial class JournalEntriesViewModel : ObservableObject
     {
         if (value != null)
         {
-            EntryLines = new ObservableCollection<JournalEntryLine>(value.Lines);
+            EntryLines = new ObservableCollection<JournalEntryLine>(value.JournalEntryLines);
         }
         else
         {
@@ -228,10 +229,10 @@ public partial class JournalEntriesViewModel : ObservableObject
                 EntryNumber = EditEntryNumber,
                 EntryDate = EditEntryDate,
                 Description = EditDescription,
-                Reference = string.IsNullOrWhiteSpace(EditReference) ? null : EditReference,
-                PeriodId = CurrentPeriod!.Id,
+                ReferenceType = string.IsNullOrWhiteSpace(EditReference) ? null : EditReference,
+                AccountingPeriodId = CurrentPeriod!.Id,
                 CreatedByUserId = _sessionService.CurrentUser?.Id ?? 1,
-                Lines = EditLines.Select(l => new JournalEntryLine
+                JournalEntryLines = EditLines.Select(l => new JournalEntryLine
                 {
                     AccountId = l.AccountId,
                     Description = l.Description,
@@ -369,7 +370,7 @@ public partial class JournalEntriesViewModel : ObservableObject
 
         var result = await _dialogService.ShowConfirmationAsync(
             "Close Period",
-            $"Are you sure you want to close period '{CurrentPeriod.Name}'? No more entries can be made to this period.");
+            $"Are you sure you want to close period '{CurrentPeriod.PeriodName}'? No more entries can be made to this period.");
 
         if (!result) return;
 

@@ -178,7 +178,7 @@ public partial class DashboardViewModel : ViewModelBase, INavigationAware
     /// <summary>
     /// Called when navigating to this view.
     /// </summary>
-    public async void OnNavigatedTo()
+    public async void OnNavigatedTo(object? parameter)
     {
         _logger.Information("Navigated to Dashboard");
 

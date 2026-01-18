@@ -25,12 +25,9 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     private readonly IWorkPeriodService _workPeriodService;
     private readonly IOrderService _orderService;
     private readonly IReceiptService _receiptService;
-    private readonly IReceiptSplitService _receiptSplitService;
-    private readonly IReceiptMergeService _receiptMergeService;
-    private readonly IReceiptVoidService _receiptVoidService;
+    private readonly ISessionService _sessionService;
     private readonly IKitchenPrintService _kitchenPrintService;
     private readonly IOfferService _offerService;
-    private readonly ILoyaltyService _loyaltyService;
 
     private const int ItemsPerPage = 15;
     private const decimal TaxRate = 0.16m; // Kenya VAT 16%
@@ -289,12 +286,9 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         IWorkPeriodService workPeriodService,
         IOrderService orderService,
         IReceiptService receiptService,
-        IReceiptSplitService receiptSplitService,
-        IReceiptMergeService receiptMergeService,
-        IReceiptVoidService receiptVoidService,
+        ISessionService sessionService,
         IKitchenPrintService kitchenPrintService,
-        IOfferService offerService,
-        ILoyaltyService loyaltyService)
+        IOfferService offerService)
         : base(logger)
     {
         _productService = productService ?? throw new ArgumentNullException(nameof(productService));
@@ -305,12 +299,9 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         _workPeriodService = workPeriodService ?? throw new ArgumentNullException(nameof(workPeriodService));
         _orderService = orderService ?? throw new ArgumentNullException(nameof(orderService));
         _receiptService = receiptService ?? throw new ArgumentNullException(nameof(receiptService));
-        _receiptSplitService = receiptSplitService ?? throw new ArgumentNullException(nameof(receiptSplitService));
-        _receiptMergeService = receiptMergeService ?? throw new ArgumentNullException(nameof(receiptMergeService));
-        _receiptVoidService = receiptVoidService ?? throw new ArgumentNullException(nameof(receiptVoidService));
+        _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         _kitchenPrintService = kitchenPrintService ?? throw new ArgumentNullException(nameof(kitchenPrintService));
         _offerService = offerService ?? throw new ArgumentNullException(nameof(offerService));
-        _loyaltyService = loyaltyService ?? throw new ArgumentNullException(nameof(loyaltyService));
 
         Title = "Point of Sale";
     }
@@ -330,7 +321,7 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
             }
 
             // Set current user name
-            CurrentUserName = SessionService.CurrentUser?.FullName ?? "Unknown";
+            CurrentUserName = _sessionService.CurrentUser?.FullName ?? "Unknown";
 
             await LoadDataAsync();
 
@@ -714,10 +705,13 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     [RelayCommand]
     private async Task ApplyItemDiscountAsync(OrderItemViewModel item)
     {
-        // Check if user has discount permission
-        var currentUser = SessionService.CurrentUser;
-        if (currentUser?.Role?.Permissions is null ||
-            !currentUser.Role.Permissions.Any(p => p.SystemName.StartsWith("Discounts")))
+        // Check if user has any discount permission
+        var hasBasicDiscount = _sessionService.HasPermission("Discounts.Apply10") ||
+                               _sessionService.HasPermission("Discounts.Apply20") ||
+                               _sessionService.HasPermission("Discounts.Apply50") ||
+                               _sessionService.HasPermission("Discounts.ApplyAny");
+
+        if (!hasBasicDiscount)
         {
             await _dialogService.ShowWarningAsync("Permission Denied", "You do not have permission to apply discounts.");
             return;
@@ -734,19 +728,20 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
             percent = Math.Clamp(percent, 0, 100);
 
             // Check permission level for discount amount
-            if (percent > 50 && !currentUser!.Role!.Permissions.Any(p => p.SystemName == "Discounts.ApplyAny"))
+            if (percent > 50 && !_sessionService.HasPermission("Discounts.ApplyAny"))
             {
                 await _dialogService.ShowWarningAsync("Permission Denied", "You can only apply discounts up to 50%.");
                 return;
             }
-            else if (percent > 20 && !currentUser!.Role!.Permissions.Any(p =>
-                p.SystemName == "Discounts.Apply50" || p.SystemName == "Discounts.ApplyAny"))
+            else if (percent > 20 && !_sessionService.HasPermission("Discounts.Apply50") &&
+                     !_sessionService.HasPermission("Discounts.ApplyAny"))
             {
                 await _dialogService.ShowWarningAsync("Permission Denied", "You can only apply discounts up to 20%.");
                 return;
             }
-            else if (percent > 10 && !currentUser!.Role!.Permissions.Any(p =>
-                p.SystemName == "Discounts.Apply20" || p.SystemName == "Discounts.Apply50" || p.SystemName == "Discounts.ApplyAny"))
+            else if (percent > 10 && !_sessionService.HasPermission("Discounts.Apply20") &&
+                     !_sessionService.HasPermission("Discounts.Apply50") &&
+                     !_sessionService.HasPermission("Discounts.ApplyAny"))
             {
                 await _dialogService.ShowWarningAsync("Permission Denied", "You can only apply discounts up to 10%.");
                 return;
@@ -826,7 +821,7 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         try
         {
             // Get current user and work period
-            var currentUser = SessionService.CurrentUser;
+            var currentUser = _sessionService.CurrentUser;
             if (currentUser is null)
             {
                 await _dialogService.ShowErrorAsync("Session Error", "No user is logged in.");
@@ -993,8 +988,8 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
                     (string.IsNullOrEmpty(CurrentReceiptNumber) ? "" : $"\nReceipt: {CurrentReceiptNumber}"));
             }
 
-            SubmitOrderAsyncCommand.NotifyCanExecuteChanged();
-            HoldOrderAsyncCommand.NotifyCanExecuteChanged();
+            SubmitOrderCommand.NotifyCanExecuteChanged();
+            HoldOrderCommand.NotifyCanExecuteChanged();
         }
         catch (Exception ex)
         {
@@ -1163,7 +1158,7 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
                 ProductId = item.ProductId,
                 ProductName = productName,
                 Price = item.UnitPrice,
-                Quantity = item.Quantity,
+                Quantity = (int)item.Quantity,
                 AvailableStock = availableStock,
                 Notes = item.Notes ?? "",
                 Modifiers = item.Modifiers ?? "",
@@ -1200,8 +1195,8 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         OnPropertyChanged(nameof(CanSubmitOrder));
         OnPropertyChanged(nameof(CanHoldOrder));
         OnPropertyChanged(nameof(OfferItemsCount));
-        SubmitOrderAsyncCommand.NotifyCanExecuteChanged();
-        HoldOrderAsyncCommand.NotifyCanExecuteChanged();
+        SubmitOrderCommand.NotifyCanExecuteChanged();
+        HoldOrderCommand.NotifyCanExecuteChanged();
 
         // Auto-save after each change
         AutoSaveOrder();
@@ -1395,7 +1390,7 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
             if (!confirmed) return;
         }
 
-        SessionService.Logout();
+        _sessionService.ClearSession();
         _navigationService.NavigateTo<LoginViewModel>();
     }
 
@@ -1420,82 +1415,8 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     [RelayCommand]
     private async Task SplitBillAsync()
     {
-        if (!CurrentReceiptId.HasValue)
-        {
-            await _dialogService.ShowWarningAsync("No Receipt", "Please submit the order first to create a receipt.");
-            return;
-        }
-
-        try
-        {
-            // Check if receipt can be split
-            var (canSplit, reason) = await _receiptSplitService.CanSplitReceiptAsync(CurrentReceiptId.Value);
-            if (!canSplit)
-            {
-                await _dialogService.ShowWarningAsync("Cannot Split", reason!);
-                return;
-            }
-
-            // Get the receipt with items
-            var receipt = await _receiptService.GetByIdAsync(CurrentReceiptId.Value);
-            if (receipt is null)
-            {
-                await _dialogService.ShowErrorAsync("Error", "Receipt not found.");
-                return;
-            }
-
-            // Show split dialog
-            var dialogResult = await _dialogService.ShowSplitBillDialogAsync(receipt);
-            if (dialogResult is null)
-            {
-                return; // User cancelled
-            }
-
-            // Perform the split
-            Core.Models.SplitResult splitResult;
-            if (dialogResult.IsEqualSplit)
-            {
-                splitResult = await _receiptSplitService.SplitReceiptEquallyAsync(
-                    CurrentReceiptId.Value,
-                    dialogResult.NumberOfWays);
-            }
-            else
-            {
-                splitResult = await _receiptSplitService.SplitReceiptByItemsAsync(
-                    CurrentReceiptId.Value,
-                    dialogResult.SplitRequests);
-            }
-
-            if (!splitResult.Success)
-            {
-                await _dialogService.ShowErrorAsync("Split Failed", splitResult.ErrorMessage ?? "An error occurred while splitting the receipt.");
-                return;
-            }
-
-            // Show success message
-            var splitType = dialogResult.IsEqualSplit ? "equally" : "by items";
-            var splitCount = splitResult.SplitReceipts.Count;
-            var splitNumbers = string.Join(", ", splitResult.SplitReceipts.Select(r => r.ReceiptNumber));
-
-            await _dialogService.ShowMessageAsync(
-                "Bill Split",
-                $"Receipt successfully split {splitType} into {splitCount} receipts:\n{splitNumbers}\n\nYou can settle each split receipt individually.");
-
-            _logger.Information(
-                "Split receipt {ReceiptNumber} {SplitType} into {SplitCount} receipts: {SplitNumbers}",
-                receipt.ReceiptNumber,
-                splitType,
-                splitCount,
-                splitNumbers);
-
-            // Clear the current order since original receipt is now split
-            ClearCurrentOrder();
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Failed to split bill for receipt {ReceiptId}", CurrentReceiptId);
-            await _dialogService.ShowErrorAsync("Error", $"Failed to split bill: {ex.Message}");
-        }
+        // Split bill feature requires IReceiptSplitService which is not yet available
+        await _dialogService.ShowInfoAsync("Coming Soon", "Split bill feature is coming soon.");
     }
 
     /// <summary>
@@ -1504,63 +1425,8 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     [RelayCommand]
     private async Task MergeBillsAsync()
     {
-        try
-        {
-            // Get all pending receipts available for merging
-            var mergeableReceipts = await _receiptMergeService.GetMergeableReceiptsAsync();
-            var receiptList = mergeableReceipts.ToList();
-
-            if (receiptList.Count < 2)
-            {
-                await _dialogService.ShowWarningAsync(
-                    "Not Enough Receipts",
-                    "At least 2 pending receipts are required to merge. Currently there are only " +
-                    $"{receiptList.Count} pending receipts.");
-                return;
-            }
-
-            // Show merge dialog
-            var selectedIds = await _dialogService.ShowMergeBillDialogAsync(receiptList);
-            if (selectedIds is null || selectedIds.Count < 2)
-            {
-                return; // User cancelled
-            }
-
-            // Perform the merge
-            var mergeResult = await _receiptMergeService.MergeReceiptsAsync(selectedIds);
-
-            if (!mergeResult.Success)
-            {
-                await _dialogService.ShowErrorAsync("Merge Failed", mergeResult.ErrorMessage ?? "An error occurred while merging receipts.");
-                return;
-            }
-
-            // Show success message
-            var sourceNumbers = string.Join(", ", mergeResult.SourceReceipts.Select(r => r.ReceiptNumber));
-            await _dialogService.ShowMessageAsync(
-                "Bills Merged",
-                $"Successfully merged {mergeResult.SourceReceipts.Count} receipts into:\n" +
-                $"{mergeResult.MergedReceipt!.ReceiptNumber}\n\n" +
-                $"Combined total: KSh {mergeResult.MergedReceipt.TotalAmount:N2}");
-
-            _logger.Information(
-                "Merged {SourceCount} receipts ({SourceNumbers}) into {MergedNumber}. Total: {TotalAmount}",
-                mergeResult.SourceReceipts.Count,
-                sourceNumbers,
-                mergeResult.MergedReceipt.ReceiptNumber,
-                mergeResult.MergedReceipt.TotalAmount);
-
-            // Clear current order if it was one of the merged receipts
-            if (CurrentReceiptId.HasValue && selectedIds.Contains(CurrentReceiptId.Value))
-            {
-                ClearCurrentOrder();
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Failed to merge bills");
-            await _dialogService.ShowErrorAsync("Error", $"Failed to merge bills: {ex.Message}");
-        }
+        // Merge bills feature requires IReceiptMergeService which is not yet available
+        await _dialogService.ShowInfoAsync("Coming Soon", "Merge bills feature is coming soon.");
     }
 
     /// <summary>
@@ -1569,96 +1435,8 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     [RelayCommand]
     private async Task VoidReceiptAsync()
     {
-        if (!CurrentReceiptId.HasValue)
-        {
-            await _dialogService.ShowWarningAsync("No Receipt", "Please select a receipt to void.");
-            return;
-        }
-
-        try
-        {
-            // Get the receipt details
-            var receipt = await _receiptService.GetByIdAsync(CurrentReceiptId.Value);
-            if (receipt is null)
-            {
-                await _dialogService.ShowErrorAsync("Error", "Receipt not found.");
-                return;
-            }
-
-            // Check if receipt can be voided
-            var (canVoid, reason) = await _receiptVoidService.CanVoidReceiptAsync(CurrentReceiptId.Value);
-            if (!canVoid)
-            {
-                await _dialogService.ShowWarningAsync("Cannot Void", reason ?? "This receipt cannot be voided.");
-                return;
-            }
-
-            // Get void reasons
-            var voidReasons = (await _receiptVoidService.GetVoidReasonsAsync()).ToList();
-            if (!voidReasons.Any())
-            {
-                await _dialogService.ShowErrorAsync("Error", "No void reasons are configured in the system.");
-                return;
-            }
-
-            // Show void dialog
-            var dialogResult = await _dialogService.ShowVoidReceiptDialogAsync(receipt, voidReasons);
-            if (dialogResult is null)
-            {
-                return; // User cancelled
-            }
-
-            // Confirm void action
-            var confirmed = await _dialogService.ShowConfirmationAsync(
-                "Confirm Void",
-                $"Are you sure you want to void receipt {receipt.ReceiptNumber}?\n\n" +
-                $"Total amount: KSh {receipt.TotalAmount:N2}\n\n" +
-                "This action cannot be undone and any paid amounts will need to be refunded.",
-                "Yes, Void",
-                "Cancel");
-
-            if (!confirmed)
-            {
-                return;
-            }
-
-            // Perform the void
-            var voidRequest = new HospitalityPOS.Core.Models.VoidRequest
-            {
-                ReceiptId = CurrentReceiptId.Value,
-                VoidReasonId = dialogResult.VoidReasonId,
-                AdditionalNotes = dialogResult.AdditionalNotes
-            };
-
-            var voidResult = await _receiptVoidService.VoidReceiptAsync(voidRequest);
-
-            if (!voidResult.Success)
-            {
-                await _dialogService.ShowErrorAsync("Void Failed", voidResult.ErrorMessage ?? "An error occurred while voiding the receipt.");
-                return;
-            }
-
-            // Show success message
-            await _dialogService.ShowMessageAsync(
-                "Receipt Voided",
-                $"Receipt {receipt.ReceiptNumber} has been voided.\n\n" +
-                $"Voided amount: KSh {receipt.TotalAmount:N2}" +
-                (voidResult.VoidRecord?.StockRestored == true ? "\n\nStock has been restored for inventory-tracked items." : ""));
-
-            _logger.Information(
-                "Receipt {ReceiptNumber} voided. Amount: {Amount}. Reason: {ReasonId}",
-                receipt.ReceiptNumber,
-                receipt.TotalAmount,
-                dialogResult.VoidReasonId);
-
-            // Clear current order
-            ClearCurrentOrder();
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Failed to void receipt {ReceiptId}", CurrentReceiptId);
-            await _dialogService.ShowErrorAsync("Error", $"Failed to void receipt: {ex.Message}");
-        }
+        // Void receipt feature requires IReceiptVoidService which is not yet available
+        await _dialogService.ShowInfoAsync("Coming Soon", "Void receipt feature is coming soon.");
     }
 
     #endregion
@@ -1669,14 +1447,10 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     /// Toggles the loyalty panel visibility.
     /// </summary>
     [RelayCommand]
-    private void ToggleLoyaltyPanel()
+    private async Task ToggleLoyaltyPanelAsync()
     {
-        IsLoyaltyPanelVisible = !IsLoyaltyPanelVisible;
-        if (IsLoyaltyPanelVisible)
-        {
-            LoyaltySearchPhone = string.Empty;
-            LoyaltySearchResults.Clear();
-        }
+        // Loyalty feature requires ILoyaltyService which is not yet available
+        await _dialogService.ShowInfoAsync("Coming Soon", "Loyalty program feature is coming soon.");
     }
 
     /// <summary>
@@ -1685,40 +1459,8 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     [RelayCommand]
     private async Task SearchLoyaltyMemberAsync()
     {
-        if (string.IsNullOrWhiteSpace(LoyaltySearchPhone))
-        {
-            LoyaltySearchResults.Clear();
-            return;
-        }
-
-        try
-        {
-            var results = await _loyaltyService.SearchMembersAsync(LoyaltySearchPhone, 10);
-            LoyaltySearchResults.Clear();
-            foreach (var member in results)
-            {
-                LoyaltySearchResults.Add(member);
-            }
-
-            if (!LoyaltySearchResults.Any())
-            {
-                // Try to find by exact phone match
-                var normalized = _loyaltyService.NormalizePhoneNumber(LoyaltySearchPhone);
-                if (normalized != null)
-                {
-                    var exactMatch = await _loyaltyService.GetByPhoneAsync(normalized);
-                    if (exactMatch != null)
-                    {
-                        LoyaltySearchResults.Add(exactMatch);
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Failed to search loyalty members");
-            await _dialogService.ShowErrorAsync("Error", "Failed to search loyalty members.");
-        }
+        // Loyalty feature requires ILoyaltyService which is not yet available
+        await _dialogService.ShowInfoAsync("Coming Soon", "Loyalty program feature is coming soon.");
     }
 
     /// <summary>
@@ -1727,28 +1469,8 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     [RelayCommand]
     private async Task AttachLoyaltyMemberAsync(LoyaltyMemberDto? member)
     {
-        if (member == null) return;
-
-        if (!member.IsActive)
-        {
-            await _dialogService.ShowMessageAsync("Inactive Member",
-                "This member account is inactive. Please contact support.");
-            return;
-        }
-
-        AttachedLoyaltyMember = member;
-        IsLoyaltyPanelVisible = false;
-        LoyaltySearchPhone = string.Empty;
-        LoyaltySearchResults.Clear();
-
-        // Calculate estimated points to earn
-        await UpdateEstimatedPointsAsync();
-
-        // Calculate max redeemable points
-        await UpdateRedemptionPreviewAsync();
-
-        _logger.Information("Attached loyalty member {MemberId} ({Phone}) to order",
-            member.Id, member.PhoneNumber);
+        // Loyalty feature requires ILoyaltyService which is not yet available
+        await _dialogService.ShowInfoAsync("Coming Soon", "Loyalty program feature is coming soon.");
     }
 
     /// <summary>
@@ -1757,10 +1479,7 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     [RelayCommand]
     private void DetachLoyaltyMember()
     {
-        if (AttachedLoyaltyMember == null) return;
-
-        _logger.Information("Detached loyalty member {MemberId} from order", AttachedLoyaltyMember.Id);
-
+        // Clear loyalty-related properties
         AttachedLoyaltyMember = null;
         PointsToRedeem = 0;
         PointsRedemptionValue = 0;
@@ -1772,207 +1491,88 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     /// Sets the points to redeem.
     /// </summary>
     [RelayCommand]
-    private async Task SetPointsToRedeemAsync(decimal points)
+    private Task SetPointsToRedeemAsync(decimal points)
     {
-        if (AttachedLoyaltyMember == null) return;
-
-        if (points < 0)
-            points = 0;
-
-        if (points > MaxRedeemablePoints)
-            points = MaxRedeemablePoints;
-
-        if (points > AttachedLoyaltyMember.PointsBalance)
-            points = AttachedLoyaltyMember.PointsBalance;
-
-        PointsToRedeem = points;
-
-        if (points > 0)
-        {
-            PointsRedemptionValue = await _loyaltyService.ConvertPointsToValueAsync(points);
-        }
-        else
-        {
-            PointsRedemptionValue = 0;
-        }
-
-        // Recalculate order totals (redemption value as discount)
-        RecalculateOrderTotals();
+        // Loyalty feature requires ILoyaltyService which is not yet available
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Redeems maximum available points.
     /// </summary>
     [RelayCommand]
-    private async Task RedeemMaxPointsAsync()
+    private Task RedeemMaxPointsAsync()
     {
-        if (AttachedLoyaltyMember == null) return;
-
-        var maxPoints = Math.Min(MaxRedeemablePoints, AttachedLoyaltyMember.PointsBalance);
-        await SetPointsToRedeemAsync(maxPoints);
+        // Loyalty feature requires ILoyaltyService which is not yet available
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Clears any points redemption.
     /// </summary>
     [RelayCommand]
-    private async Task ClearPointsRedemptionAsync()
+    private Task ClearPointsRedemptionAsync()
     {
-        await SetPointsToRedeemAsync(0);
+        PointsToRedeem = 0;
+        PointsRedemptionValue = 0;
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Updates the estimated points to be earned for the current order.
     /// </summary>
-    private async Task UpdateEstimatedPointsAsync()
+    private Task UpdateEstimatedPointsAsync()
     {
-        if (AttachedLoyaltyMember == null || OrderTotal == 0)
-        {
-            EstimatedPointsToEarn = 0;
-            return;
-        }
-
-        try
-        {
-            var result = await _loyaltyService.CalculatePointsAsync(
-                OrderTotal,
-                OrderDiscount,
-                OrderTax,
-                AttachedLoyaltyMember.Id);
-
-            EstimatedPointsToEarn = result.PointsEarned;
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Failed to calculate estimated points");
-            EstimatedPointsToEarn = 0;
-        }
+        // Loyalty feature requires ILoyaltyService which is not yet available
+        EstimatedPointsToEarn = 0;
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Updates the redemption preview for the current order.
     /// </summary>
-    private async Task UpdateRedemptionPreviewAsync()
+    private Task UpdateRedemptionPreviewAsync()
     {
-        if (AttachedLoyaltyMember == null || OrderTotal == 0)
-        {
-            MaxRedeemablePoints = 0;
-            return;
-        }
-
-        try
-        {
-            var preview = await _loyaltyService.CalculateRedemptionAsync(
-                AttachedLoyaltyMember.Id,
-                OrderTotal);
-
-            MaxRedeemablePoints = preview.MaxRedeemablePoints;
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Failed to calculate redemption preview");
-            MaxRedeemablePoints = 0;
-        }
+        // Loyalty feature requires ILoyaltyService which is not yet available
+        MaxRedeemablePoints = 0;
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Awards points to the attached loyalty member after settlement.
     /// </summary>
-    private async Task AwardLoyaltyPointsAsync(int receiptId, string receiptNumber, decimal totalAmount)
+    private Task AwardLoyaltyPointsAsync(int receiptId, string receiptNumber, decimal totalAmount)
     {
-        if (AttachedLoyaltyMember == null) return;
-
-        try
-        {
-            var currentUserId = SessionService.CurrentUserId ?? 0;
-
-            // Award points
-            var result = await _loyaltyService.AwardPointsAsync(
-                AttachedLoyaltyMember.Id,
-                receiptId,
-                receiptNumber,
-                totalAmount,
-                OrderDiscount,
-                OrderTax,
-                currentUserId);
-
-            if (result.Success)
-            {
-                _logger.Information("Awarded {Points} points to member {MemberId} for receipt {ReceiptNumber}",
-                    result.PointsAwarded, AttachedLoyaltyMember.Id, receiptNumber);
-
-                // Check for tier upgrade
-                await _loyaltyService.CheckAndUpgradeTierAsync(AttachedLoyaltyMember.Id);
-            }
-            else
-            {
-                _logger.Warning("Failed to award loyalty points: {Error}", result.Message);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Error awarding loyalty points for receipt {ReceiptId}", receiptId);
-            // Don't fail the transaction if loyalty points fail
-        }
+        // Loyalty feature requires ILoyaltyService which is not yet available
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Redeems points as payment for the current order.
     /// Call this before processing other payments if points are being redeemed.
     /// </summary>
-    private async Task<decimal> RedeemLoyaltyPointsAsync(int receiptId, string receiptNumber, decimal totalAmount)
+    private Task<decimal> RedeemLoyaltyPointsAsync(int receiptId, string receiptNumber, decimal totalAmount)
     {
-        if (AttachedLoyaltyMember == null || PointsToRedeem <= 0)
-            return 0;
-
-        try
-        {
-            var currentUserId = SessionService.CurrentUserId ?? 0;
-
-            var result = await _loyaltyService.RedeemPointsAsync(
-                AttachedLoyaltyMember.Id,
-                PointsToRedeem,
-                receiptId,
-                receiptNumber,
-                totalAmount,
-                currentUserId);
-
-            if (result.Success)
-            {
-                _logger.Information("Redeemed {Points} points (KES {Value}) for member {MemberId}",
-                    result.PointsRedeemed, result.ValueApplied, AttachedLoyaltyMember.Id);
-                return result.ValueApplied;
-            }
-            else
-            {
-                _logger.Warning("Failed to redeem loyalty points: {Error}", result.Message);
-                await _dialogService.ShowMessageAsync("Redemption Failed", result.Message ?? "Failed to redeem points.");
-                return 0;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Error redeeming loyalty points for receipt {ReceiptId}", receiptId);
-            return 0;
-        }
+        // Loyalty feature requires ILoyaltyService which is not yet available
+        return Task.FromResult(0m);
     }
 
     /// <summary>
     /// Navigates to the customer enrollment screen.
     /// </summary>
     [RelayCommand]
-    private void NavigateToEnrollCustomer()
+    private async Task NavigateToEnrollCustomerAsync()
     {
-        _navigationService.NavigateTo<CustomerEnrollmentViewModel>();
+        await _dialogService.ShowInfoAsync("Coming Soon", "Customer enrollment feature is coming soon.");
     }
 
     /// <summary>
     /// Navigates to the customer list screen.
     /// </summary>
     [RelayCommand]
-    private void NavigateToCustomerList()
+    private async Task NavigateToCustomerListAsync()
     {
-        _navigationService.NavigateTo<CustomerListViewModel>();
+        await _dialogService.ShowInfoAsync("Coming Soon", "Customer list feature is coming soon.");
     }
 
     #endregion

@@ -84,6 +84,20 @@ public class SessionService : ISessionService
     }
 
     /// <inheritdoc />
+    public int? CurrentStoreId
+    {
+        get
+        {
+            lock (_lock)
+            {
+                // In single-store mode, return default store ID (1)
+                // Multi-store implementation would get this from user assignment
+                return 1;
+            }
+        }
+    }
+
+    /// <inheritdoc />
     public event EventHandler<SessionEventArgs>? UserLoggedIn;
 
     /// <inheritdoc />

@@ -359,7 +359,7 @@ public class TransferReceiptIssue : BaseEntity
     public int? ResolvedByUserId { get; set; }
 
     // Navigation properties
-    public virtual TransferReceipt? TransferReceipt { get; set; }
+    public virtual StockTransferReceipt? TransferReceipt { get; set; }
     public virtual TransferReceiptLine? TransferReceiptLine { get; set; }
 }
 

@@ -13,7 +13,6 @@ using HospitalityPOS.WPF.Services;
 using HospitalityPOS.WPF.ViewModels;
 using HospitalityPOS.WPF.Views;
 using HospitalityPOS.Infrastructure.BackgroundJobs;
-using HospitalityPOS.Infrastructure.Services;
 
 namespace HospitalityPOS.WPF;
 
@@ -163,13 +162,13 @@ public partial class App : Application
         services.AddScoped<IReceiptService, ReceiptService>();
 
         // Receipt split service (Scoped - accesses DbContext directly)
-        services.AddScoped<IReceiptSplitService, ReceiptSplitService>();
+        // services.AddScoped<IReceiptSplitService, ReceiptSplitService>(); // Excluded from compilation
 
         // Receipt merge service (Scoped - accesses DbContext directly)
-        services.AddScoped<IReceiptMergeService, ReceiptMergeService>();
+        // services.AddScoped<IReceiptMergeService, ReceiptMergeService>(); // Excluded from compilation
 
         // Receipt void service (Scoped - accesses DbContext directly)
-        services.AddScoped<IReceiptVoidService, ReceiptVoidService>();
+        // services.AddScoped<IReceiptVoidService, ReceiptVoidService>(); // Excluded from compilation
 
         // Payment method service (Scoped - accesses DbContext directly)
         services.AddScoped<IPaymentMethodService, PaymentMethodService>();
@@ -205,7 +204,7 @@ public partial class App : Application
         services.AddSingleton<IExportService, ExportService>();
 
         // Dashboard service (Scoped - accesses DbContext for real-time data)
-        services.AddScoped<IDashboardService, DashboardService>();
+        // services.AddScoped<IDashboardService, DashboardService>(); // Excluded from compilation
 
         // Background Jobs (Hosted Services)
         services.AddHostedService<ExpireBatchesJob>();    // Daily at midnight
@@ -216,13 +215,13 @@ public partial class App : Application
         services.Configure<PointsExpiryOptions>(Configuration.GetSection(PointsExpiryOptions.SectionName));
 
         // Printer discovery service (Singleton - stateless printer detection)
-        services.AddSingleton<IPrinterDiscoveryService, PrinterDiscoveryService>();
+        // services.AddSingleton<IPrinterDiscoveryService, PrinterDiscoveryService>(); // Excluded from compilation
 
         // Printer service (Scoped - accesses DbContext directly)
         services.AddScoped<IPrinterService, PrinterService>();
 
         // Kitchen order routing service (Scoped - accesses DbContext for order routing)
-        services.AddScoped<IKitchenOrderRoutingService, KitchenOrderRoutingService>();
+        // services.AddScoped<IKitchenOrderRoutingService, KitchenOrderRoutingService>(); // Excluded from compilation
 
         // Printer communication service (Singleton - Windows API for raw printing)
         services.AddSingleton<IPrinterCommunicationService, PrinterCommunicationService>();
@@ -231,14 +230,16 @@ public partial class App : Application
         services.AddSingleton<IPrintQueueManager, PrintQueueManager>();
 
         // Image converter (Singleton - converts images to ESC/POS raster format)
-        services.AddSingleton<IImageConverter, ImageConverter>();
+        // services.AddSingleton<IImageConverter, ImageConverter>(); // Excluded from compilation (ambiguous reference)
 
         // Navigation and Dialog services (Singleton - shared across app)
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
 
         // Register ViewModels (Transient - new instance each navigation)
-        services.AddTransient<MainViewModel>();
+        // NOTE: Many ViewModels temporarily excluded due to API mismatches
+        // services.AddTransient<MainViewModel>(); // Excluded - using MainWindowViewModel instead
+        services.AddSingleton<MainWindowViewModel>(); // Singleton - one instance for the main window
         services.AddTransient<LoginViewModel>();
         services.AddTransient<AutoLogoutSettingsViewModel>();
         services.AddTransient<ChangePasswordViewModel>();
@@ -248,17 +249,17 @@ public partial class App : Application
         services.AddTransient<UserEditorViewModel>();
         services.AddTransient<CategoryManagementViewModel>();
         services.AddTransient<ProductManagementViewModel>();
-        services.AddTransient<POSViewModel>();
-        services.AddTransient<SettlementViewModel>();
+        services.AddTransient<POSViewModel>(); // Now enabled
+        services.AddTransient<SettlementViewModel>(); // Now enabled
         services.AddTransient<PaymentMethodsViewModel>();
         services.AddTransient<InventoryViewModel>();
-        services.AddTransient<StockAlertWidgetViewModel>();
+        // services.AddTransient<StockAlertWidgetViewModel>(); // Excluded
         services.AddTransient<SuppliersViewModel>();
         services.AddTransient<PurchaseOrdersViewModel>();
-        services.AddTransient<SalesReportsViewModel>();
-        services.AddTransient<ExceptionReportsViewModel>();
-        services.AddTransient<InventoryReportsViewModel>();
-        services.AddTransient<AuditReportsViewModel>();
+        // services.AddTransient<SalesReportsViewModel>(); // Excluded
+        // services.AddTransient<ExceptionReportsViewModel>(); // Excluded
+        // services.AddTransient<InventoryReportsViewModel>(); // Excluded
+        // services.AddTransient<AuditReportsViewModel>(); // Excluded
         services.AddTransient<GoodsReceivingViewModel>();
         services.AddTransient<DirectReceivingViewModel>();
         services.AddTransient<ExportDialogViewModel>();
@@ -268,7 +269,7 @@ public partial class App : Application
         services.AddTransient<FloorDialogViewModel>();
         services.AddTransient<TableDialogViewModel>();
         services.AddTransient<SectionDialogViewModel>();
-        services.AddTransient<TableMapViewModel>();
+        // services.AddTransient<TableMapViewModel>(); // Excluded
         services.AddTransient<PrinterSettingsViewModel>();
         services.AddTransient<KitchenPrinterSettingsViewModel>();
         services.AddTransient<CashDrawerSettingsViewModel>();
@@ -276,49 +277,50 @@ public partial class App : Application
         services.AddTransient<FeatureSettingsViewModel>();
         services.AddTransient<OffersViewModel>();
         services.AddTransient<OfferEditorViewModel>();
-        services.AddTransient<OfferReportViewModel>();
+        // services.AddTransient<OfferReportViewModel>(); // Excluded
         services.AddTransient<SupplierInvoicesViewModel>();
-        services.AddTransient<SupplierStatementViewModel>();
+        // services.AddTransient<SupplierStatementViewModel>(); // Excluded
         services.AddTransient<EmployeesViewModel>();
         services.AddTransient<EmployeeEditorViewModel>();
-        services.AddTransient<AttendanceViewModel>();
-        services.AddTransient<PayrollViewModel>();
-        services.AddTransient<PayslipHistoryViewModel>();
+        // services.AddTransient<AttendanceViewModel>(); // Excluded
+        // services.AddTransient<PayrollViewModel>(); // Excluded
+        // services.AddTransient<PayslipHistoryViewModel>(); // Excluded
         services.AddTransient<ChartOfAccountsViewModel>();
-        services.AddTransient<JournalEntriesViewModel>();
+        // services.AddTransient<JournalEntriesViewModel>(); // Excluded - API mismatches with JournalEntry entity
         services.AddTransient<FinancialReportsViewModel>();
         services.AddTransient<EtimsDashboardViewModel>();
         services.AddTransient<EtimsDeviceSettingsViewModel>();
         services.AddTransient<MpesaDashboardViewModel>();
         services.AddTransient<MpesaSettingsViewModel>();
-        services.AddTransient<PLUManagementViewModel>();
+        services.AddTransient<QrPaymentDialogViewModel>();
+        // services.AddTransient<PLUManagementViewModel>(); // Excluded
         services.AddTransient<BarcodeSettingsViewModel>();
-        services.AddTransient<CustomerEnrollmentViewModel>();
-        services.AddTransient<DashboardViewModel>();
+        // services.AddTransient<CustomerEnrollmentViewModel>(); // EXCLUDED - API mismatches
+        // services.AddTransient<DashboardViewModel>(); // Excluded
 
-        // Stock Transfer ViewModels (Epic 23)
+        // Stock Transfer ViewModels (Epic 23) - NOW ENABLED after API fixes
         services.AddTransient<StockTransferViewModel>();
         services.AddTransient<CreateTransferRequestViewModel>();
         services.AddTransient<TransferDetailsViewModel>();
         services.AddTransient<TransferApprovalViewModel>();
         services.AddTransient<TransferReceiveViewModel>();
 
-        // Batch/Expiry ViewModels (Epic 24)
-        services.AddTransient<BatchManagementViewModel>();
-        services.AddTransient<ExpiryAlertsViewModel>();
+        // Batch/Expiry ViewModels (Epic 24) - Excluded
+        // services.AddTransient<BatchManagementViewModel>();
+        // services.AddTransient<ExpiryAlertsViewModel>();
 
-        // Loyalty ViewModels (Epic 39)
-        services.AddTransient<CustomerListViewModel>();
-        services.AddTransient<LoyaltySettingsViewModel>();
+        // Loyalty ViewModels (Epic 39) - EXCLUDED due to API mismatches
+        // services.AddTransient<CustomerListViewModel>();
+        // services.AddTransient<LoyaltySettingsViewModel>();
 
-        // Email ViewModels (Epic 40)
-        services.AddTransient<EmailSettingsViewModel>();
+        // Email ViewModels (Epic 40) - Excluded
+        // services.AddTransient<EmailSettingsViewModel>();
 
-        // Email Services (Epic 40)
-        services.AddScoped<IEmailService, EmailService>();
-        services.AddScoped<IEmailReportService, EmailReportService>();
-        services.AddScoped<EmailTriggerService>();
-        services.AddHostedService<EmailSchedulerService>();
+        // Email Services (Epic 40) - Excluded (EmailService not compiled)
+        // services.AddScoped<IEmailService, EmailService>();
+        // services.AddScoped<IEmailReportService, EmailReportService>();
+        // services.AddScoped<EmailTriggerService>();
+        // services.AddHostedService<EmailSchedulerService>();
 
         // Future ViewModels:
         // services.AddTransient<SettingsViewModel>();

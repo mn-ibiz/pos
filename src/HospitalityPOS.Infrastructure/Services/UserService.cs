@@ -366,7 +366,7 @@ public partial class UserService : IUserService
     /// <inheritdoc />
     public async Task<IReadOnlyList<User>> GetAllUsersAsync(bool includeInactive = false, CancellationToken cancellationToken = default)
     {
-        var query = _context.Users
+        IQueryable<User> query = _context.Users
             .AsNoTracking()
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role);

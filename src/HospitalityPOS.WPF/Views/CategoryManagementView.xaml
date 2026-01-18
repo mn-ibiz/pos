@@ -96,15 +96,20 @@
                                                           Data="M 0 0 L 6 6 L 12 0"
                                                           Fill="#8888AA"
                                                           Stroke="#8888AA"
-                                                          StrokeThickness="1.5">
+                                                          StrokeThickness="1.5"
+                                                          RenderTransformOrigin="0.5,0.5">
                                                         <Path.RenderTransform>
-                                                            <RotateTransform x:Name="ExpandRotate" Angle="-90" CenterX="6" CenterY="3"/>
+                                                            <RotateTransform Angle="-90"/>
                                                         </Path.RenderTransform>
                                                     </Path>
                                                 </Border>
                                                 <ControlTemplate.Triggers>
                                                     <Trigger Property="IsChecked" Value="True">
-                                                        <Setter TargetName="ExpandRotate" Property="Angle" Value="0"/>
+                                                        <Setter TargetName="ExpandPath" Property="RenderTransform">
+                                                            <Setter.Value>
+                                                                <RotateTransform Angle="0"/>
+                                                            </Setter.Value>
+                                                        </Setter>
                                                     </Trigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
@@ -186,8 +191,7 @@
                     Style="{StaticResource ActionButton}"
                     Background="#FF9800"
                     Command="{Binding CreateSubcategoryCommand}"/>
-            <Button Style="{StaticResource ActionButton}"
-                    Command="{Binding ToggleActiveCommand}">
+            <Button Command="{Binding ToggleActiveCommand}">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource ActionButton}">
                         <Setter Property="Content" Value="Deactivate"/>

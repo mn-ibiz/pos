@@ -220,7 +220,7 @@
                             <DataGridTextColumn Header="Reason" Binding="{Binding ReasonName}" Width="200"/>
                             <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="80"/>
                             <DataGridTextColumn Header="Total Amount" Binding="{Binding TotalAmount, StringFormat='KSh {0:N2}'}" Width="150"/>
-                            <DataGridTextColumn Header="%" Binding="{Binding Percentage, StringFormat='{0:N1}%'}" Width="80"/>
+                            <DataGridTextColumn Header="%" Binding="{Binding Percentage, StringFormat='{}{0:N1}%'}" Width="80"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </StackPanel>
@@ -262,7 +262,7 @@
 
                             <StackPanel Grid.Column="3">
                                 <TextBlock Text="Discount Rate" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding DiscountReport.DiscountRate, StringFormat='{0:N1}%'}"
+                                <TextBlock Text="{Binding DiscountReport.DiscountRate, StringFormat='{}{0:N1}%'}"
                                            FontSize="24" FontWeight="Bold" Foreground="{StaticResource WarningBrush}"/>
                             </StackPanel>
                         </Grid>
@@ -311,7 +311,7 @@
                                     <DataGridTextColumn Header="Type" Binding="{Binding DiscountType}" Width="100"/>
                                     <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="60"/>
                                     <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat='KSh {0:N2}'}" Width="120"/>
-                                    <DataGridTextColumn Header="%" Binding="{Binding Percentage, StringFormat='{0:N1}%'}" Width="60"/>
+                                    <DataGridTextColumn Header="%" Binding="{Binding Percentage, StringFormat='{}{0:N1}%'}" Width="60"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </StackPanel>
@@ -330,7 +330,7 @@
                                     <DataGridTextColumn Header="User" Binding="{Binding UserName}" Width="120"/>
                                     <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="60"/>
                                     <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat='KSh {0:N2}'}" Width="120"/>
-                                    <DataGridTextColumn Header="%" Binding="{Binding Percentage, StringFormat='{0:N1}%'}" Width="60"/>
+                                    <DataGridTextColumn Header="%" Binding="{Binding Percentage, StringFormat='{}{0:N1}%'}" Width="60"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </StackPanel>

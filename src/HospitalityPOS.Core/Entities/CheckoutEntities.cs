@@ -116,6 +116,11 @@ public class SuspendedTransaction : BaseEntity
     public DateTime? ExpiresAt { get; set; }
 
     /// <summary>
+    /// Whether this suspended transaction is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
+
+    /// <summary>
     /// Applied loyalty member ID.
     /// </summary>
     public int? LoyaltyMemberId { get; set; }
@@ -339,6 +344,11 @@ public class CustomerDisplayConfig : BaseEntity
     /// </summary>
     public string LayoutTemplate { get; set; } = "Standard";
 
+    /// <summary>
+    /// Whether this configuration is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
+
     // Navigation properties
     public virtual Store Store { get; set; } = null!;
     public virtual ICollection<CustomerDisplayMessage> Messages { get; set; } = new List<CustomerDisplayMessage>();
@@ -377,7 +387,7 @@ public class CustomerDisplayMessage : BaseEntity
     /// <summary>
     /// Whether message is active.
     /// </summary>
-    public bool IsActive { get; set; } = true;
+    public new bool IsActive { get; set; } = true;
 
     /// <summary>
     /// Start date for display.
@@ -388,6 +398,11 @@ public class CustomerDisplayMessage : BaseEntity
     /// End date for display.
     /// </summary>
     public DateTime? EndDate { get; set; }
+
+    /// <summary>
+    /// Whether this message is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
 
     // Navigation properties
     public virtual CustomerDisplayConfig DisplayConfig { get; set; } = null!;
@@ -468,6 +483,11 @@ public class SplitPaymentConfig : BaseEntity
     /// </summary>
     public bool PrintSeparateReceipts { get; set; } = true;
 
+    /// <summary>
+    /// Whether this configuration is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
+
     // Navigation properties
     public virtual Store Store { get; set; } = null!;
 }
@@ -526,6 +546,11 @@ public class SplitPaymentSession : BaseEntity
     /// Session completion time.
     /// </summary>
     public DateTime? CompletedAt { get; set; }
+
+    /// <summary>
+    /// Whether this session is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
 
     // Navigation properties
     public virtual Receipt Receipt { get; set; } = null!;
@@ -647,6 +672,11 @@ public class QuickAmountButton : BaseEntity
     /// </summary>
     public string? PaymentMethod { get; set; }
 
+    /// <summary>
+    /// Whether this button is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
+
     // Navigation properties
     public virtual Store Store { get; set; } = null!;
 }
@@ -674,7 +704,7 @@ public class QuickAmountButtonSet : BaseEntity
     /// <summary>
     /// Whether this is the active set.
     /// </summary>
-    public bool IsActive { get; set; } = true;
+    public new bool IsActive { get; set; } = true;
 
     /// <summary>
     /// Payment method this set applies to.
@@ -685,6 +715,11 @@ public class QuickAmountButtonSet : BaseEntity
     /// Button IDs in this set (JSON array).
     /// </summary>
     public string? ButtonIds { get; set; }
+
+    /// <summary>
+    /// Whether this button set is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
 
     // Navigation properties
     public virtual Store Store { get; set; } = null!;

@@ -2,6 +2,7 @@ using System.Text.Json;
 using HospitalityPOS.Core.DTOs;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Interfaces;
+using SyncStatisticsDto = HospitalityPOS.Core.Interfaces.SyncStatisticsDto;
 
 namespace HospitalityPOS.Infrastructure.Services;
 

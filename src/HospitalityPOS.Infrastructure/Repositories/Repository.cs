@@ -124,4 +124,10 @@ public class Repository<T> : IRepository<T> where T : class, IEntity
 
         return await _dbSet.CountAsync(predicate, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc />
+    public virtual async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
 }

@@ -136,9 +136,9 @@ public class StoreProductDto
 }
 
 /// <summary>
-/// Sync status for a store.
+/// Sync status for a store in multi-store context.
 /// </summary>
-public class StoreSyncStatusDto
+public class MultiStoreStoreSyncStatusDto
 {
     public int StoreId { get; set; }
     public string StoreName { get; set; } = string.Empty;

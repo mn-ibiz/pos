@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using HospitalityPOS.Core.DTOs;
 using HospitalityPOS.Core.Entities;
+using HospitalityPOS.Core.Enums;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.WPF.Services;
 
@@ -18,6 +19,7 @@ public partial class CustomerListViewModel : ViewModelBase
     private readonly ILoyaltyService _loyaltyService;
     private readonly INavigationService _navigationService;
     private readonly IExportService _exportService;
+    private readonly ISessionService _sessionService;
 
     [ObservableProperty]
     private ObservableCollection<LoyaltyMemberDto> _members = new();
@@ -60,13 +62,19 @@ public partial class CustomerListViewModel : ViewModelBase
     public bool CanDeactivateMembers => HasPermission("Loyalty.Member.Deactivate");
     public bool CanExportData => HasPermission("Loyalty.Export");
 
-    public CustomerListViewModel(ILogger logger)
+    public CustomerListViewModel(
+        ILoyaltyService loyaltyService,
+        INavigationService navigationService,
+        IExportService exportService,
+        ISessionService sessionService,
+        ILogger logger)
         : base(logger)
     {
+        _loyaltyService = loyaltyService ?? throw new ArgumentNullException(nameof(loyaltyService));
+        _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
+        _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
+        _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         Title = "Loyalty Members";
-        _loyaltyService = App.Services.GetRequiredService<ILoyaltyService>();
-        _navigationService = App.Services.GetRequiredService<INavigationService>();
-        _exportService = App.Services.GetRequiredService<IExportService>();
     }
 
     [RelayCommand]
@@ -185,22 +193,22 @@ public partial class CustomerListViewModel : ViewModelBase
                       $"Tier: {SelectedMember.Tier}\n" +
                       $"Points Balance: {SelectedMember.PointsBalance:N0}\n" +
                       $"Lifetime Points: {SelectedMember.LifetimePoints:N0}\n" +
-                      $"Total Spend: KES {SelectedMember.TotalSpend:N2}\n" +
+                      $"Total Spend: KES {SelectedMember.LifetimeSpend:N2}\n" +
                       $"Visit Count: {SelectedMember.VisitCount}\n" +
                       $"Enrolled: {SelectedMember.EnrolledAt:d}\n" +
-                      $"Last Visit: {SelectedMember.LastVisitAt?.ToString("d") ?? "Never"}\n" +
+                      $"Last Visit: {SelectedMember.LastVisit?.ToString("d") ?? "Never"}\n" +
                       $"Status: {(SelectedMember.IsActive ? "Active" : "Inactive")}";
 
         if (analytics != null)
         {
-            details += $"\n\nAverage Transaction: KES {analytics.AverageTransactionValue:N2}";
+            details += $"\n\nAverage Transaction: KES {analytics.AverageBasket:N2}";
             details += $"\nEngagement Score: {analytics.EngagementScore}/100";
         }
 
         if (tierProgress != null && tierProgress.NextTier.HasValue)
         {
-            details += $"\n\nProgress to {tierProgress.NextTier}: {tierProgress.ProgressPercent:N0}%";
-            details += $"\nSpend needed: KES {tierProgress.SpendToNextTier:N0}";
+            details += $"\n\nProgress to {tierProgress.NextTier}: {tierProgress.NextTierProgress:N0}%";
+            details += $"\nSpend needed: KES {tierProgress.AmountToNextTier:N0}";
         }
 
         await DialogService.ShowMessageAsync("Member Details", details);
@@ -251,7 +259,7 @@ public partial class CustomerListViewModel : ViewModelBase
         {
             var result = await _loyaltyService.DeactivateMemberAsync(
                 SelectedMember.Id,
-                SessionService.CurrentUserId ?? 0);
+                _sessionService.CurrentUserId);
 
             if (result)
             {
@@ -278,7 +286,7 @@ public partial class CustomerListViewModel : ViewModelBase
         {
             var result = await _loyaltyService.ReactivateMemberAsync(
                 SelectedMember.Id,
-                SessionService.CurrentUserId ?? 0);
+                _sessionService.CurrentUserId);
 
             if (result)
             {
@@ -309,10 +317,10 @@ public partial class CustomerListViewModel : ViewModelBase
                 Tier = m.Tier.ToString(),
                 m.PointsBalance,
                 m.LifetimePoints,
-                m.TotalSpend,
+                m.LifetimeSpend,
                 m.VisitCount,
                 EnrolledAt = m.EnrolledAt.ToString("yyyy-MM-dd"),
-                LastVisitAt = m.LastVisitAt?.ToString("yyyy-MM-dd") ?? "",
+                LastVisit = m.LastVisit?.ToString("yyyy-MM-dd") ?? "",
                 Status = m.IsActive ? "Active" : "Inactive"
             });
 

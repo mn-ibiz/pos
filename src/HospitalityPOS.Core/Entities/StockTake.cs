@@ -8,6 +8,11 @@ namespace HospitalityPOS.Core.Entities;
 public class StockTake : BaseEntity
 {
     /// <summary>
+    /// Gets or sets the store ID.
+    /// </summary>
+    public int? StoreId { get; set; }
+
+    /// <summary>
     /// Gets or sets the unique stock take number (format: ST-yyyyMMdd-sequence).
     /// </summary>
     public string StockTakeNumber { get; set; } = string.Empty;
@@ -16,6 +21,7 @@ public class StockTake : BaseEntity
     /// Gets or sets when the stock take was started.
     /// </summary>
     public DateTime StartedAt { get; set; } = DateTime.UtcNow;
+    public DateTime StartDate { get => StartedAt; set => StartedAt = value; }
 
     /// <summary>
     /// Gets or sets when the stock take was completed/approved.

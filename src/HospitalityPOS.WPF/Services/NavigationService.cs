@@ -94,6 +94,12 @@ public class NavigationService : INavigationService
     }
 
     /// <inheritdoc />
+    public void NavigateBack()
+    {
+        GoBack();
+    }
+
+    /// <inheritdoc />
     public void ClearHistory()
     {
         _navigationHistory.Clear();

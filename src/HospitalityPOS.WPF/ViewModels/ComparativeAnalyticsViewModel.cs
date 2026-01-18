@@ -151,15 +151,15 @@ public partial class ComparativeAnalyticsViewModel : ViewModelBase, INavigationA
     #region Navigation
 
     /// <inheritdoc />
-    public async Task OnNavigatedToAsync(object? parameter = null)
+    public void OnNavigatedTo(object? parameter)
     {
-        await LoadAnalyticsAsync();
+        _ = LoadAnalyticsAsync();
     }
 
     /// <inheritdoc />
-    public Task OnNavigatedFromAsync()
+    public void OnNavigatedFrom()
     {
-        return Task.CompletedTask;
+        // No cleanup needed
     }
 
     #endregion

@@ -11,11 +11,13 @@
     <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
     <converters:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter" />
 
-    <!-- Permission-based Converters -->
+    <!-- Permission-based Converters (excluded - PermissionConverters.cs not compiled) -->
+    <!--
     <converters:PermissionToVisibilityConverter x:Key="PermissionToVisibilityConverter" />
     <converters:AnyPermissionToVisibilityConverter x:Key="AnyPermissionToVisibilityConverter" />
     <converters:PermissionToEnabledConverter x:Key="PermissionToEnabledConverter" />
     <converters:PermissionAndBindingEnabledConverter x:Key="PermissionAndBindingEnabledConverter" />
+    -->
 
     <!-- Stock Status Converters -->
     <converters:ProductToStockStatusConverter x:Key="ProductToStockStatusConverter" />

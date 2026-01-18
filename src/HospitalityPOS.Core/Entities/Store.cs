@@ -9,6 +9,7 @@ public class Store : BaseEntity
     /// Unique store code for identification (e.g., "STR001").
     /// </summary>
     public string StoreCode { get; set; } = string.Empty;
+    public string Code { get => StoreCode; set => StoreCode = value; }
 
     /// <summary>
     /// Store name for display.
@@ -34,6 +35,7 @@ public class Store : BaseEntity
     /// Store phone number.
     /// </summary>
     public string? PhoneNumber { get; set; }
+    public string? Phone { get => PhoneNumber; set => PhoneNumber = value; }
 
     /// <summary>
     /// Store email address.

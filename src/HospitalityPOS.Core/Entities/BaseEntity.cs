@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using HospitalityPOS.Core.Interfaces;
 
 namespace HospitalityPOS.Core.Entities;
@@ -18,6 +19,9 @@ public abstract class BaseEntity : IEntity, ISoftDeletable, IAuditable
 
     /// <inheritdoc />
     public DateTime? UpdatedAt { get; set; }
+
+    [NotMapped]
+    public DateTime? ModifiedAt { get => UpdatedAt; set => UpdatedAt = value; }
 
     /// <inheritdoc />
     public int? CreatedByUserId { get; set; }

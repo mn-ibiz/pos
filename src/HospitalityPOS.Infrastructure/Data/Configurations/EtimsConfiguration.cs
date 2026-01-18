@@ -108,10 +108,10 @@ public class EtimsInvoiceConfiguration : IEntityTypeConfiguration<EtimsInvoice>
         builder.Property(e => e.QrCode)
             .HasMaxLength(500);
 
-        builder.HasOne(e => e.Receipt)
-            .WithMany()
-            .HasForeignKey(e => e.ReceiptId)
-            .OnDelete(DeleteBehavior.Restrict);
+        // Receipt FK explicitly ignored - EF generates tables alphabetically causing FK issues
+        // The ReceiptId column exists as a plain int column without a database-level FK constraint
+        builder.Property(e => e.ReceiptId)
+            .HasColumnName("ReceiptId");
 
         builder.HasOne(e => e.Device)
             .WithMany()

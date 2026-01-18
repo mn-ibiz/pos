@@ -267,7 +267,7 @@ public class DailySalesEmailDataDto
     public decimal PreviousDaySales { get; set; }
     public decimal SalesChangePercent { get; set; }
     public bool SalesIncreased => SalesChangePercent >= 0;
-    public List<TopProductDto> TopProducts { get; set; } = new();
+    public List<EmailTopProductDto> TopProducts { get; set; } = new();
     public List<PaymentBreakdownDto> PaymentBreakdown { get; set; } = new();
     public string CurrencySymbol { get; set; } = "KSh";
 }
@@ -285,7 +285,7 @@ public class WeeklyReportEmailDataDto
     public decimal PreviousWeekSales { get; set; }
     public decimal SalesChangePercent { get; set; }
     public List<DailySalesDto> DailySales { get; set; } = new();
-    public List<CategoryPerformanceDto> CategoryPerformance { get; set; } = new();
+    public List<EmailCategoryPerformanceDto> CategoryPerformance { get; set; } = new();
     public string BestDay { get; set; } = string.Empty;
     public decimal BestDaySales { get; set; }
     public string WorstDay { get; set; } = string.Empty;
@@ -294,9 +294,9 @@ public class WeeklyReportEmailDataDto
 }
 
 /// <summary>
-/// Top selling product summary.
+/// Top selling product summary for email reports.
 /// </summary>
-public class TopProductDto
+public class EmailTopProductDto
 {
     public string Name { get; set; } = string.Empty;
     public int QuantitySold { get; set; }
@@ -326,9 +326,9 @@ public class DailySalesDto
 }
 
 /// <summary>
-/// Category performance summary.
+/// Category performance summary for email reports.
 /// </summary>
-public class CategoryPerformanceDto
+public class EmailCategoryPerformanceDto
 {
     public string CategoryName { get; set; } = string.Empty;
     public decimal Sales { get; set; }

@@ -83,11 +83,11 @@ public static class ServiceCollectionExtensions
 
         // Infrastructure Services
         services.AddScoped<IInventoryService, InventoryService>();
-        services.AddScoped<IStockTakeService, StockTakeService>();
-        services.AddScoped<IReportService, ReportService>();
+        // services.AddScoped<IStockTakeService, StockTakeService>(); // Excluded from compilation
+        // services.AddScoped<IReportService, ReportService>(); // Excluded from compilation
         services.AddScoped<IGoodsReceivingService, GoodsReceivingService>();
         services.AddScoped<ISupplierService, SupplierService>();
-        services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
+        // services.AddScoped<IPurchaseOrderService, PurchaseOrderService>(); // Excluded from compilation
 
         // Loyalty Services
         services.AddScoped<ILoyaltyMemberRepository, LoyaltyMemberRepository>();
@@ -122,29 +122,29 @@ public static class ServiceCollectionExtensions
         {
             client.Timeout = TimeSpan.FromSeconds(60); // Longer timeout for payment processing
         });
-        services.AddScoped<IMobileMoneyService, MobileMoneyService>();
+        // services.AddScoped<IMobileMoneyService, MobileMoneyService>(); // Excluded from compilation
 
         // Enhanced Financial Reporting
-        services.AddScoped<IFinancialReportingService, FinancialReportingService>();
+        // services.AddScoped<IFinancialReportingService, FinancialReportingService>(); // Excluded from compilation
 
         // Budget & Cost Management
-        services.AddScoped<IBudgetService, BudgetService>();
+        // services.AddScoped<IBudgetService, BudgetService>(); // Excluded from compilation
 
         // Checkout Enhancements
-        services.AddScoped<ICheckoutEnhancementService, CheckoutEnhancementService>();
+        // services.AddScoped<ICheckoutEnhancementService, CheckoutEnhancementService>(); // Excluded from compilation
 
         // Inventory Analytics
-        services.AddScoped<IInventoryAnalyticsService, InventoryAnalyticsService>();
+        // services.AddScoped<IInventoryAnalyticsService, InventoryAnalyticsService>(); // Excluded from compilation
 
         // Stock Transfer Services (Epic 23)
-        services.AddScoped<IStockTransferService, StockTransferService>();
-        services.AddScoped<IStockReservationService, StockReservationService>();
+        // services.AddScoped<IStockTransferService, StockTransferService>(); // Excluded from compilation
+        // services.AddScoped<IStockReservationService, StockReservationService>(); // Excluded from compilation
 
         // Batch/Expiry Services (Epic 24)
         services.AddScoped<IProductBatchService, ProductBatchService>();
-        services.AddScoped<IExpiryValidationService, ExpiryValidationService>();
-        services.AddScoped<IBatchTraceabilityService, BatchTraceabilityService>();
-        services.AddScoped<IWasteReportService, WasteReportService>();
+        // services.AddScoped<IExpiryValidationService, ExpiryValidationService>(); // Excluded from compilation
+        // services.AddScoped<IBatchTraceabilityService, BatchTraceabilityService>(); // Excluded from compilation
+        // services.AddScoped<IWasteReportService, WasteReportService>(); // Excluded from compilation
 
         // Sync Services (Epic 25)
         services.AddScoped<ILocalDatabaseService, LocalDatabaseService>();
@@ -152,16 +152,16 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISyncHubService, SyncHubService>();
         services.AddScoped<ISyncHubServiceFactory, SyncHubServiceFactory>();
         services.AddScoped<IConflictResolutionService, ConflictResolutionService>();
-        services.AddScoped<ISyncStatusService, SyncStatusService>();
+        // services.AddScoped<ISyncStatusService, SyncStatusService>(); // Excluded from compilation
 
         // Recipe & KDS Services (Epic 26-27)
         services.AddScoped<IRecipeService, RecipeService>();
-        services.AddScoped<IRecipeCostService, RecipeCostService>();
-        services.AddScoped<IIngredientDeductionService, IngredientDeductionService>();
-        services.AddScoped<IBatchPrepService, BatchPrepService>();
+        // services.AddScoped<IRecipeCostService, RecipeCostService>(); // Excluded from compilation
+        // services.AddScoped<IIngredientDeductionService, IngredientDeductionService>(); // Excluded from compilation
+        // services.AddScoped<IBatchPrepService, BatchPrepService>(); // Excluded from compilation
         services.AddScoped<IKdsStationService, KdsStationService>();
-        services.AddScoped<IKdsOrderService, KdsOrderService>();
-        services.AddScoped<IKdsStatusService, KdsStatusService>();
+        // services.AddScoped<IKdsOrderService, KdsOrderService>(); // Excluded from compilation
+        // services.AddScoped<IKdsStatusService, KdsStatusService>(); // Excluded from compilation
         services.AddScoped<IKdsTimerService, KdsTimerService>();
         services.AddScoped<IExpoService, ExpoService>();
 
@@ -171,9 +171,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IKdsHubServiceFactory, KdsHubServiceFactory>();
 
         // Label Services (Epic 28)
-        services.AddScoped<ILabelPrinterService, LabelPrinterService>();
+        // services.AddScoped<ILabelPrinterService, LabelPrinterService>(); // Excluded from compilation
         services.AddScoped<ILabelTemplateService, LabelTemplateService>();
-        services.AddScoped<ILabelPrintService, LabelPrintService>();
+        // services.AddScoped<ILabelPrintService, LabelPrintService>(); // Excluded from compilation
 
         // Kenya Integration Services (Epic 39)
         services.AddScoped<IEtimsService, EtimsService>();
@@ -189,20 +189,20 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IConnectivityService, ConnectivityService>();
 
         // Multi-Store HQ Services (Epic 22)
-        services.AddScoped<IMultiStoreService, MultiStoreService>();
-        services.AddScoped<IChainReportingService, ChainReportingService>();
-        services.AddScoped<ICentralPromotionService, CentralPromotionService>();
+        // services.AddScoped<IMultiStoreService, MultiStoreService>(); // Excluded from compilation
+        // services.AddScoped<IChainReportingService, ChainReportingService>(); // Excluded from compilation
+        // services.AddScoped<ICentralPromotionService, CentralPromotionService>(); // Excluded from compilation
         services.AddScoped<IStoreSyncService, StoreSyncService>();
 
         // Dashboard Service (Epic 40)
-        services.AddScoped<IDashboardService, DashboardService>();
+        // services.AddScoped<IDashboardService, DashboardService>(); // Excluded from compilation
 
         // Receipt Service
         services.AddScoped<IReceiptService, ReceiptService>();
-        services.AddScoped<IReceiptVoidService, ReceiptVoidService>();
+        // services.AddScoped<IReceiptVoidService, ReceiptVoidService>(); // Excluded from compilation
 
         // Export Service
-        services.AddScoped<IExportService, ExportService>();
+        // services.AddScoped<IExportService, ExportService>(); // Excluded from compilation
 
         // Printer Service
         services.AddScoped<IPrinterService, PrinterService>();

@@ -182,7 +182,7 @@ public partial class InventoryReportsViewModel : ViewModelBase, INavigationAware
     private DeadStockReportResult? _deadStockReport;
 
     [ObservableProperty]
-    private ObservableCollection<DeadStockItem> _deadStockItems = [];
+    private ObservableCollection<HospitalityPOS.Core.Models.Reports.DeadStockItem> _deadStockItems = [];
 
     [ObservableProperty]
     private bool _showDeadStockReport;
@@ -305,7 +305,7 @@ public partial class InventoryReportsViewModel : ViewModelBase, INavigationAware
 
                 case "DeadStock":
                     DeadStockReport = await _reportService.GenerateDeadStockReportAsync(parameters);
-                    DeadStockItems = new ObservableCollection<DeadStockItem>(DeadStockReport.Items);
+                    DeadStockItems = new ObservableCollection<HospitalityPOS.Core.Models.Reports.DeadStockItem>(DeadStockReport.Items);
                     ShowDeadStockReport = true;
                     _logger.Information("Generated dead stock report: {Count} items, Value: {Value:C}",
                         DeadStockReport.TotalCount, DeadStockReport.TotalValue);

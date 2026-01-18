@@ -57,6 +57,11 @@ public class StockValuationConfig : BaseEntity
     /// </summary>
     public DateTime? LastStandardCostCalculation { get; set; }
 
+    /// <summary>
+    /// Whether this configuration is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
+
     // Navigation properties
     public virtual Store Store { get; set; } = null!;
 }
@@ -110,6 +115,11 @@ public class StockValuationSnapshot : BaseEntity
     /// Notes.
     /// </summary>
     public string? Notes { get; set; }
+
+    /// <summary>
+    /// Whether this snapshot is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
 
     // Navigation properties
     public virtual Store Store { get; set; } = null!;
@@ -246,6 +256,11 @@ public class ReorderRule : BaseEntity
     /// </summary>
     public decimal? AverageDailySales { get; set; }
 
+    /// <summary>
+    /// Whether this rule is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
+
     // Navigation properties
     public virtual Store Store { get; set; } = null!;
     public virtual Product Product { get; set; } = null!;
@@ -326,6 +341,11 @@ public class ReorderSuggestion : BaseEntity
     /// Notes.
     /// </summary>
     public string? Notes { get; set; }
+
+    /// <summary>
+    /// Whether this suggestion has been deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
 
     // Navigation properties
     public virtual Store Store { get; set; } = null!;
@@ -442,6 +462,11 @@ public class ShrinkageRecord : BaseEntity
     /// Department ID (if applicable).
     /// </summary>
     public int? DepartmentId { get; set; }
+
+    /// <summary>
+    /// Whether this record is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
 
     // Navigation properties
     public virtual Store Store { get; set; } = null!;
@@ -614,6 +639,11 @@ public class DeadStockItem : BaseEntity
     /// </summary>
     public string? Notes { get; set; }
 
+    /// <summary>
+    /// Whether this item is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
+
     // Navigation properties
     public virtual Store Store { get; set; } = null!;
     public virtual Product Product { get; set; } = null!;
@@ -678,6 +708,11 @@ public class DeadStockConfig : BaseEntity
     /// Send alerts for new dead stock.
     /// </summary>
     public bool SendAlerts { get; set; } = true;
+
+    /// <summary>
+    /// Whether this configuration is soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
 
     // Navigation properties
     public virtual Store Store { get; set; } = null!;

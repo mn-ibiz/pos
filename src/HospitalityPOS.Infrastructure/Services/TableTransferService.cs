@@ -82,7 +82,7 @@ public class TableTransferService : ITableTransferService
             // Transfer receipt ownership if exists
             if (table.CurrentReceipt != null)
             {
-                table.CurrentReceipt.UserId = request.NewWaiterId;
+                table.CurrentReceipt.OwnerId = request.NewWaiterId;
                 table.CurrentReceipt.UpdatedAt = DateTime.UtcNow;
                 table.CurrentReceipt.UpdatedByUserId = request.TransferredByUserId;
             }

@@ -79,13 +79,37 @@ public partial class TransferApprovalViewModel : ViewModelBase
     {
         await ExecuteAsync(async () =>
         {
-            Transfer = await _transferService.GetTransferRequestByIdAsync(_transferId);
+            var request = await _transferService.GetTransferRequestAsync(_transferId);
 
-            if (Transfer == null)
+            if (request == null)
             {
                 ErrorMessage = "Transfer request not found.";
                 return;
             }
+
+            // Map to TransferRequestDetailDto
+            Transfer = new TransferRequestDetailDto
+            {
+                Id = request.Id,
+                RequestNumber = request.RequestNumber,
+                RequestingStoreId = request.RequestingStoreId,
+                RequestingStoreName = request.RequestingStoreName,
+                SourceLocationId = request.SourceLocationId,
+                SourceLocationName = request.SourceLocationName,
+                Status = request.Status,
+                Priority = request.Priority,
+                RequestedDeliveryDate = request.RequestedDeliveryDate,
+                Lines = request.Lines.Select(l => new TransferLineDetailDto
+                {
+                    Id = l.Id,
+                    ProductId = l.ProductId,
+                    ProductName = l.ProductName,
+                    ProductSku = l.ProductSku,
+                    RequestedQuantity = l.RequestedQuantity,
+                    SourceAvailableStock = l.SourceAvailableStock,
+                    UnitCost = l.UnitCost
+                }).ToList()
+            };
 
             Title = $"Approve: {Transfer.RequestNumber}";
 
@@ -97,7 +121,7 @@ public partial class TransferApprovalViewModel : ViewModelBase
                     LineId = line.Id,
                     ProductId = line.ProductId,
                     ProductName = line.ProductName,
-                    ProductSKU = line.ProductSKU,
+                    ProductSKU = line.ProductSku,
                     RequestedQuantity = line.RequestedQuantity,
                     SourceAvailableStock = line.SourceAvailableStock,
                     UnitCost = line.UnitCost,
@@ -158,13 +182,12 @@ public partial class TransferApprovalViewModel : ViewModelBase
 
         await ExecuteAsync(async () =>
         {
-            var approval = new TransferApprovalDto
+            var approval = new ApproveTransferRequestDto
             {
-                TransferRequestId = _transferId,
-                ApprovedByUserId = SessionService.CurrentUserId,
+                RequestId = _transferId,
                 ExpectedDeliveryDate = ExpectedDeliveryDate,
                 ApprovalNotes = ApprovalNotes,
-                LineApprovals = LineItems.Select(l => new LineApprovalDto
+                Lines = LineItems.Select(l => new ApproveLineDto
                 {
                     LineId = l.LineId,
                     ApprovedQuantity = l.ApprovedQuantity,
@@ -172,9 +195,9 @@ public partial class TransferApprovalViewModel : ViewModelBase
                 }).ToList()
             };
 
-            var result = await _transferService.ApproveTransferRequestAsync(approval);
+            var result = await _transferService.ApproveRequestAsync(approval, SessionService.CurrentUserId);
 
-            if (result)
+            if (result != null)
             {
                 await DialogService.ShowMessageAsync("Success", "Transfer request processed successfully.");
                 _navigationService.NavigateTo<StockTransferViewModel>();

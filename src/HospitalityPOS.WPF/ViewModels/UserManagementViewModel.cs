@@ -17,7 +17,6 @@ public partial class UserManagementViewModel : ViewModelBase, INavigationAware
     private readonly ISessionService _sessionService;
     private readonly INavigationService _navigationService;
     private readonly IDialogService _dialogService;
-    private readonly ILogger _logger;
 
     [ObservableProperty]
     private ObservableCollection<User> _users = [];
@@ -44,13 +43,12 @@ public partial class UserManagementViewModel : ViewModelBase, INavigationAware
         ISessionService sessionService,
         INavigationService navigationService,
         IDialogService dialogService,
-        ILogger logger)
+        ILogger logger) : base(logger)
     {
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <inheritdoc />

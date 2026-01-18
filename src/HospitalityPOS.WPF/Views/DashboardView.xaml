@@ -358,7 +358,7 @@
                     </StackPanel>
                     <TextBlock Text="{Binding LowStockAlerts.TotalCount}"
                                Style="{StaticResource ValueStyle}" />
-                    <TextBlock Text="{Binding LowStockAlerts.OutOfStockCount, StringFormat='{0} out of stock'}"
+                    <TextBlock Text="{Binding LowStockAlerts.OutOfStockCount, StringFormat='{}{0} out of stock'}"
                                Foreground="#F44336"
                                FontSize="12"
                                Margin="0,8,0,0" />
@@ -632,7 +632,7 @@
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                     <TextBlock Text="Low Stock" Foreground="White" FontWeight="SemiBold" />
-                                    <TextBlock Text="{Binding LowStockAlerts.OutOfStockCount, StringFormat='{0} out of stock'}"
+                                    <TextBlock Text="{Binding LowStockAlerts.OutOfStockCount, StringFormat='{}{0} out of stock'}"
                                                Foreground="#8888AA" FontSize="12" />
                                 </StackPanel>
                                 <TextBlock Grid.Column="2"
@@ -666,7 +666,7 @@
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                     <TextBlock Text="Expiring Soon" Foreground="White" FontWeight="SemiBold" />
-                                    <TextBlock Text="{Binding ExpiryAlerts.ExpiredCount, StringFormat='{0} already expired'}"
+                                    <TextBlock Text="{Binding ExpiryAlerts.ExpiredCount, StringFormat='{}{0} already expired'}"
                                                Foreground="#8888AA" FontSize="12" />
                                 </StackPanel>
                                 <TextBlock Grid.Column="2"

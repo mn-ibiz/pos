@@ -17,10 +17,13 @@
         Background="#1E1E2E">
 
     <Window.Resources>
-        <vm:ViewModelLocator x:Key="Locator" />
+        <!-- <vm:ViewModelLocator x:Key="Locator" /> --> <!-- Excluded from compilation -->
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
         <!-- ViewModel to View mappings -->
+        <DataTemplate DataType="{x:Type vm:SetupWizardViewModel}">
+            <views:SetupWizardView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:LoginViewModel}">
             <views:LoginView />
         </DataTemplate>
@@ -48,6 +51,7 @@
         <DataTemplate DataType="{x:Type vm:ProductManagementViewModel}">
             <views:ProductManagementView />
         </DataTemplate>
+        <!-- POSViewModel and SettlementViewModel now enabled -->
         <DataTemplate DataType="{x:Type vm:POSViewModel}">
             <views:POSView />
         </DataTemplate>
@@ -60,6 +64,18 @@
         <DataTemplate DataType="{x:Type vm:InventoryViewModel}">
             <inventoryViews:InventoryView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SuppliersViewModel}">
+            <views:SuppliersView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:EmployeesViewModel}">
+            <views:EmployeesView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:EmployeeEditorViewModel}">
+            <views:EmployeeEditorView />
+        </DataTemplate>
+        <!-- JournalEntriesViewModel still excluded -->
+        <!-- Loyalty ViewModels EXCLUDED - API mismatches with Customer entity -->
+        <!--
         <DataTemplate DataType="{x:Type vm:CustomerEnrollmentViewModel}">
             <views:CustomerEnrollmentView />
         </DataTemplate>
@@ -69,11 +85,15 @@
         <DataTemplate DataType="{x:Type vm:LoyaltySettingsViewModel}">
             <views:LoyaltySettingsView />
         </DataTemplate>
+        -->
     </Window.Resources>
 
+    <!-- DataContext set in code-behind -->
+    <!--
     <Window.DataContext>
         <Binding Source="{StaticResource Locator}" Path="Main" />
     </Window.DataContext>
+    -->
 
     <Grid>
         <Grid.RowDefinitions>

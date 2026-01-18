@@ -168,15 +168,15 @@ public partial class AuditReportsViewModel : ViewModelBase, INavigationAware
     #region INavigationAware
 
     /// <inheritdoc />
-    public async Task OnNavigatedToAsync(object? parameter)
+    public void OnNavigatedTo(object? parameter)
     {
-        await LoadFiltersAsync();
+        _ = LoadFiltersAsync();
     }
 
     /// <inheritdoc />
-    public Task OnNavigatedFromAsync()
+    public void OnNavigatedFrom()
     {
-        return Task.CompletedTask;
+        // No cleanup needed
     }
 
     #endregion
@@ -338,7 +338,7 @@ public partial class AuditReportsViewModel : ViewModelBase, INavigationAware
                     "Export Complete",
                     $"Report exported successfully to:\n{dialogViewModel.FilePath}");
 
-                Logger.Information("Audit report exported to {FilePath}", dialogViewModel.FilePath);
+                _logger.Information("Audit report exported to {FilePath}", dialogViewModel.FilePath);
             }
         }, "Preparing export...");
     }
@@ -406,7 +406,7 @@ public partial class AuditReportsViewModel : ViewModelBase, INavigationAware
         }
         catch (Exception ex)
         {
-            Logger.Warning(ex, "Failed to load filters for audit reports");
+            _logger.Warning(ex, "Failed to load filters for audit reports");
         }
     }
 
