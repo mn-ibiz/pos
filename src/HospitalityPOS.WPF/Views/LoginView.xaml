@@ -116,226 +116,308 @@
             </StackPanel>
         </Border>
 
-        <!-- Main content -->
-        <Grid MaxWidth="500" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+        <!-- Main content - centered login card -->
+        <Border VerticalAlignment="Center" HorizontalAlignment="Center"
+                Background="#252538" CornerRadius="16" Padding="48,40"
+                BorderBrush="#3D3D5C" BorderThickness="1"
+                MinWidth="450">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <!-- Logo and Title -->
-            <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,40">
-                <Border Width="100" Height="100"
-                        Background="#6C63FF"
-                        CornerRadius="50"
-                        Margin="0,0,0,20">
-                    <TextBlock Text="POS"
-                               FontSize="32"
+                <!-- Logo and Title -->
+                <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,36">
+                    <Border Width="80" Height="80"
+                            CornerRadius="40"
+                            Margin="0,0,0,16">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#6C63FF" Offset="0"/>
+                                <GradientStop Color="#4CAF50" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <TextBlock Text="&#xE7BF;" FontFamily="Segoe MDL2 Assets"
+                                   FontSize="36"
+                                   Foreground="White"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock FontSize="28"
                                FontWeight="Bold"
                                Foreground="White"
+                               HorizontalAlignment="Center">
+                        <Run Text="ProNet" Foreground="#6C63FF"/><Run Text=" POS" Foreground="White"/>
+                    </TextBlock>
+                    <TextBlock Text="Sign in to continue"
+                               FontSize="14"
+                               Foreground="#9CA3AF"
                                HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-                </Border>
-                <TextBlock Text="ProNet POS"
-                           FontSize="24"
-                           FontWeight="SemiBold"
-                           Foreground="White"
-                           HorizontalAlignment="Center"/>
-            </StackPanel>
+                               Margin="0,8,0,0"/>
+                </StackPanel>
 
-            <!-- Username/Password Mode -->
-            <StackPanel Grid.Row="1"
-                        Visibility="{Binding IsPinMode, Converter={StaticResource BoolToVisibility}, ConverterParameter=Invert}">
-                <!-- Username -->
-                <TextBlock Text="Username"
-                           Foreground="#A0A0B0"
-                           FontSize="14"
-                           Margin="0,0,0,8"/>
-                <TextBox Style="{StaticResource InputTextBox}"
-                         Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
-                         KeyDown="UsernameTextBox_KeyDown"/>
+                <!-- Username/Password Mode -->
+                <StackPanel Grid.Row="1" Width="360"
+                            Visibility="{Binding IsPinMode, Converter={StaticResource BoolToVisibility}, ConverterParameter=Invert}">
 
-                <!-- Password -->
-                <TextBlock Text="Password"
-                           Foreground="#A0A0B0"
-                           FontSize="14"
-                           Margin="0,20,0,8"/>
-                <PasswordBox x:Name="PasswordBox"
-                             Style="{StaticResource InputPasswordBox}"
-                             PasswordChanged="PasswordBox_PasswordChanged"
-                             KeyDown="PasswordBox_KeyDown"/>
+                    <!-- Username Field -->
+                    <TextBlock Text="USERNAME"
+                               Foreground="#9CA3AF"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,8"/>
+                    <Border Background="#1E1E2E" CornerRadius="8" BorderBrush="#3D3D5C" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="48"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="18" Foreground="#6B7280"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="1"
+                                     Style="{StaticResource InputTextBox}"
+                                     Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                                     KeyDown="UsernameTextBox_KeyDown"
+                                     BorderThickness="0"
+                                     Background="Transparent"/>
+                        </Grid>
+                    </Border>
 
-                <!-- Login Button -->
-                <Button Style="{StaticResource PrimaryButton}"
-                        Content="LOGIN"
-                        Margin="0,30,0,0"
-                        Command="{Binding LoginCommand}"/>
+                    <!-- Password Field -->
+                    <TextBlock Text="PASSWORD"
+                               Foreground="#9CA3AF"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Margin="0,20,0,8"/>
+                    <Border Background="#1E1E2E" CornerRadius="8" BorderBrush="#3D3D5C" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="48"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="18" Foreground="#6B7280"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <PasswordBox x:Name="PasswordBox" Grid.Column="1"
+                                         Style="{StaticResource InputPasswordBox}"
+                                         PasswordChanged="PasswordBox_PasswordChanged"
+                                         KeyDown="PasswordBox_KeyDown"
+                                         BorderThickness="0"
+                                         Background="Transparent"/>
+                        </Grid>
+                    </Border>
 
-                <!-- Error message -->
-                <TextBlock Text="{Binding ErrorMessage}"
-                           Foreground="#FF6B6B"
-                           FontSize="14"
-                           TextWrapping="Wrap"
-                           Margin="0,16,0,0"
-                           Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}"/>
+                    <!-- Error message -->
+                    <Border Background="#3D1C1C" CornerRadius="6" Padding="12,10" Margin="0,16,0,0"
+                            Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE783;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="14" Foreground="#EF4444" VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding ErrorMessage}"
+                                       Foreground="#FCA5A5"
+                                       FontSize="13"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
 
-                <!-- Switch to PIN mode -->
-                <Button Style="{StaticResource TouchButton}"
-                        Content="Use PIN Instead"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Margin="0,20,0,0"
-                        Command="{Binding ToggleModeCommand}"/>
+                    <!-- Login Button -->
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Margin="0,24,0,0"
+                            Height="52"
+                            Command="{Binding LoginCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8A7;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="18" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="SIGN IN" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
 
-                <!-- Test credentials button (dev only) -->
-                <Button Style="{StaticResource TouchButton}"
-                        Content="Fill Test Credentials"
-                        Background="#4B5563"
-                        BorderThickness="0"
-                        FontSize="12"
-                        MinHeight="36"
-                        Margin="0,8,0,0"
-                        Click="FillTestCredentials_Click"
-                        ToolTip="Fills admin / Admin@123"/>
-            </StackPanel>
+                    <!-- Switch to PIN mode -->
+                    <Button Style="{StaticResource TouchButton}"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Margin="0,16,0,0"
+                            Command="{Binding ToggleModeCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8D7;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="16" Foreground="#9CA3AF" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Use PIN Instead" Foreground="#9CA3AF" FontSize="14"/>
+                        </StackPanel>
+                    </Button>
 
-            <!-- PIN Mode -->
-            <StackPanel Grid.Row="1"
-                        Visibility="{Binding IsPinMode, Converter={StaticResource BoolToVisibility}}">
+                    <!-- Test credentials button (dev only) -->
+                    <Button Style="{StaticResource TouchButton}"
+                            Background="#374151"
+                            BorderThickness="0"
+                            FontSize="12"
+                            MinHeight="36"
+                            Margin="0,8,0,0"
+                            Click="FillTestCredentials_Click"
+                            ToolTip="Fills admin / Admin@123">
+                        <TextBlock Text="Fill Test Credentials (admin)" Foreground="#9CA3AF" FontSize="12"/>
+                    </Button>
+                </StackPanel>
 
-                <!-- Quick Login Users -->
-                <ItemsControl ItemsSource="{Binding QuickLoginUsers}"
-                              HorizontalAlignment="Center"
-                              Margin="0,0,0,20">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel HorizontalAlignment="Center"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button Style="{StaticResource UserAvatarButton}"
-                                    Command="{Binding DataContext.SelectUserCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                    CommandParameter="{Binding}">
-                                <StackPanel>
-                                    <Border Width="50" Height="50"
-                                            Background="#4E4E6E"
-                                            CornerRadius="25"
-                                            Margin="0,0,0,8">
-                                        <TextBlock Text="{Binding FullName[0]}"
-                                                   FontSize="20"
-                                                   FontWeight="Bold"
+                <!-- PIN Mode -->
+                <StackPanel Grid.Row="1" Width="320"
+                            Visibility="{Binding IsPinMode, Converter={StaticResource BoolToVisibility}}">
+
+                    <!-- Quick Login Users -->
+                    <ItemsControl ItemsSource="{Binding QuickLoginUsers}"
+                                  HorizontalAlignment="Center"
+                                  Margin="0,0,0,24">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel HorizontalAlignment="Center"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Style="{StaticResource UserAvatarButton}"
+                                        Command="{Binding DataContext.SelectUserCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}">
+                                    <StackPanel>
+                                        <Border Width="56" Height="56"
+                                                CornerRadius="28"
+                                                Margin="0,0,0,8">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#6C63FF" Offset="0"/>
+                                                    <GradientStop Color="#4E4E6E" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <TextBlock Text="{Binding FullName[0]}"
+                                                       FontSize="22"
+                                                       FontWeight="Bold"
+                                                       Foreground="White"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding FullName}"
+                                                   FontSize="12"
                                                    Foreground="White"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"/>
-                                    </Border>
-                                    <TextBlock Text="{Binding FullName}"
-                                               FontSize="12"
-                                               Foreground="White"
-                                               TextTrimming="CharacterEllipsis"
-                                               MaxWidth="70"
-                                               HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </Button>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                                                   TextTrimming="CharacterEllipsis"
+                                                   MaxWidth="75"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
-                <!-- PIN Display -->
-                <TextBlock Text="Enter PIN"
-                           Foreground="#A0A0B0"
-                           FontSize="14"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,8"/>
-                <Border Background="#2E2E4E"
-                        CornerRadius="8"
-                        Padding="20,10"
-                        HorizontalAlignment="Center"
-                        MinWidth="200">
-                    <TextBlock Text="{Binding PinDisplay}"
-                               FontSize="32"
-                               FontWeight="Bold"
-                               Foreground="White"
+                    <!-- PIN Display -->
+                    <TextBlock Text="ENTER PIN"
+                               Foreground="#9CA3AF"
+                               FontSize="12"
+                               FontWeight="SemiBold"
                                HorizontalAlignment="Center"
-                               MinWidth="120"
-                               TextAlignment="Center"/>
-                </Border>
+                               Margin="0,0,0,12"/>
+                    <Border Background="#1E1E2E"
+                            CornerRadius="10"
+                            Padding="24,16"
+                            BorderBrush="#3D3D5C"
+                            BorderThickness="1"
+                            HorizontalAlignment="Center"
+                            MinWidth="220">
+                        <TextBlock Text="{Binding PinDisplay}"
+                                   FontSize="36"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   HorizontalAlignment="Center"
+                                   MinWidth="140"
+                                   TextAlignment="Center"
+                                   FontFamily="Consolas"/>
+                    </Border>
 
-                <!-- Numeric Keypad -->
-                <Grid HorizontalAlignment="Center" Margin="0,20,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                    <!-- Numeric Keypad -->
+                    <Grid HorizontalAlignment="Center" Margin="0,24,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Row 1: 1, 2, 3 -->
-                    <Button Grid.Row="0" Grid.Column="0" Style="{StaticResource NumPadButton}" Content="1"
-                            Command="{Binding AddPinDigitCommand}" CommandParameter="1"/>
-                    <Button Grid.Row="0" Grid.Column="1" Style="{StaticResource NumPadButton}" Content="2"
-                            Command="{Binding AddPinDigitCommand}" CommandParameter="2"/>
-                    <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource NumPadButton}" Content="3"
-                            Command="{Binding AddPinDigitCommand}" CommandParameter="3"/>
+                        <!-- Row 1: 1, 2, 3 -->
+                        <Button Grid.Row="0" Grid.Column="0" Style="{StaticResource NumPadButton}" Content="1"
+                                Command="{Binding AddPinDigitCommand}" CommandParameter="1"/>
+                        <Button Grid.Row="0" Grid.Column="1" Style="{StaticResource NumPadButton}" Content="2"
+                                Command="{Binding AddPinDigitCommand}" CommandParameter="2"/>
+                        <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource NumPadButton}" Content="3"
+                                Command="{Binding AddPinDigitCommand}" CommandParameter="3"/>
 
-                    <!-- Row 2: 4, 5, 6 -->
-                    <Button Grid.Row="1" Grid.Column="0" Style="{StaticResource NumPadButton}" Content="4"
-                            Command="{Binding AddPinDigitCommand}" CommandParameter="4"/>
-                    <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource NumPadButton}" Content="5"
-                            Command="{Binding AddPinDigitCommand}" CommandParameter="5"/>
-                    <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource NumPadButton}" Content="6"
-                            Command="{Binding AddPinDigitCommand}" CommandParameter="6"/>
+                        <!-- Row 2: 4, 5, 6 -->
+                        <Button Grid.Row="1" Grid.Column="0" Style="{StaticResource NumPadButton}" Content="4"
+                                Command="{Binding AddPinDigitCommand}" CommandParameter="4"/>
+                        <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource NumPadButton}" Content="5"
+                                Command="{Binding AddPinDigitCommand}" CommandParameter="5"/>
+                        <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource NumPadButton}" Content="6"
+                                Command="{Binding AddPinDigitCommand}" CommandParameter="6"/>
 
-                    <!-- Row 3: 7, 8, 9 -->
-                    <Button Grid.Row="2" Grid.Column="0" Style="{StaticResource NumPadButton}" Content="7"
-                            Command="{Binding AddPinDigitCommand}" CommandParameter="7"/>
-                    <Button Grid.Row="2" Grid.Column="1" Style="{StaticResource NumPadButton}" Content="8"
-                            Command="{Binding AddPinDigitCommand}" CommandParameter="8"/>
-                    <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource NumPadButton}" Content="9"
-                            Command="{Binding AddPinDigitCommand}" CommandParameter="9"/>
+                        <!-- Row 3: 7, 8, 9 -->
+                        <Button Grid.Row="2" Grid.Column="0" Style="{StaticResource NumPadButton}" Content="7"
+                                Command="{Binding AddPinDigitCommand}" CommandParameter="7"/>
+                        <Button Grid.Row="2" Grid.Column="1" Style="{StaticResource NumPadButton}" Content="8"
+                                Command="{Binding AddPinDigitCommand}" CommandParameter="8"/>
+                        <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource NumPadButton}" Content="9"
+                                Command="{Binding AddPinDigitCommand}" CommandParameter="9"/>
 
-                    <!-- Row 4: CLR, 0, OK -->
-                    <Button Grid.Row="3" Grid.Column="0" Style="{StaticResource NumPadButton}" Content="CLR"
-                            FontSize="16" Background="#E74C3C"
-                            Command="{Binding ClearPinCommand}"/>
-                    <Button Grid.Row="3" Grid.Column="1" Style="{StaticResource NumPadButton}" Content="0"
-                            Command="{Binding AddPinDigitCommand}" CommandParameter="0"/>
-                    <Button Grid.Row="3" Grid.Column="2" Style="{StaticResource NumPadButton}" Content="OK"
-                            FontSize="16" Background="#4CAF50"
-                            Command="{Binding LoginByPinCommand}"/>
-                </Grid>
+                        <!-- Row 4: CLR, 0, OK -->
+                        <Button Grid.Row="3" Grid.Column="0" Style="{StaticResource NumPadButton}" Content="CLR"
+                                FontSize="14" Background="#EF4444"
+                                Command="{Binding ClearPinCommand}"/>
+                        <Button Grid.Row="3" Grid.Column="1" Style="{StaticResource NumPadButton}" Content="0"
+                                Command="{Binding AddPinDigitCommand}" CommandParameter="0"/>
+                        <Button Grid.Row="3" Grid.Column="2" Style="{StaticResource NumPadButton}" Content="OK"
+                                FontSize="14" Background="#22C55E"
+                                Command="{Binding LoginByPinCommand}"/>
+                    </Grid>
 
-                <!-- Error message -->
-                <TextBlock Text="{Binding ErrorMessage}"
-                           Foreground="#FF6B6B"
-                           FontSize="14"
-                           TextWrapping="Wrap"
-                           Margin="0,16,0,0"
+                    <!-- Error message -->
+                    <Border Background="#3D1C1C" CornerRadius="6" Padding="12,10" Margin="0,16,0,0"
+                            Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="&#xE783;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="14" Foreground="#EF4444" VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding ErrorMessage}"
+                                       Foreground="#FCA5A5"
+                                       FontSize="13"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Switch to username/password mode -->
+                    <Button Style="{StaticResource TouchButton}"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Margin="0,20,0,0"
+                            Command="{Binding ToggleModeCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8AB;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="16" Foreground="#9CA3AF" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Use Username/Password" Foreground="#9CA3AF" FontSize="14"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <!-- Version info -->
+                <TextBlock Grid.Row="2"
+                           Text="Version 1.0.0"
+                           Foreground="#4B5563"
+                           FontSize="11"
                            HorizontalAlignment="Center"
-                           Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}"/>
-
-                <!-- Switch to username/password mode -->
-                <Button Style="{StaticResource TouchButton}"
-                        Content="Use Username/Password Instead"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Margin="0,20,0,0"
-                        Command="{Binding ToggleModeCommand}"/>
-            </StackPanel>
-
-            <!-- Version info -->
-            <TextBlock Grid.Row="2"
-                       Text="Version 1.0.0"
-                       Foreground="#606070"
-                       FontSize="12"
-                       HorizontalAlignment="Center"
-                       Margin="0,40,0,0"/>
-        </Grid>
+                           Margin="0,32,0,0"/>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>
