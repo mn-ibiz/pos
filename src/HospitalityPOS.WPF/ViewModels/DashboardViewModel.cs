@@ -288,7 +288,8 @@ public partial class DashboardViewModel : ViewModelBase, INavigationAware
     [RelayCommand]
     private void ViewExpiryAlerts()
     {
-        _navigationService.NavigateTo<Views.Inventory.BatchExpiryView>();
+        // Navigate to inventory view - expiry alerts shown there
+        _navigationService.NavigateTo<Views.Inventory.InventoryView>();
     }
 
     /// <summary>

@@ -45,7 +45,8 @@
   <!-- Temporarily exclude ViewModels with API mismatches -->
   <ItemGroup>
     <Compile Remove="ViewModels\ViewModelLocator.cs" />
-    <Compile Remove="ViewModels\MainViewModel.cs" />
+    <!-- MainViewModel now enabled for sidebar navigation -->
+    <!-- <Compile Remove="ViewModels\MainViewModel.cs" /> -->
     <!-- POSViewModel and SettlementViewModel now enabled -->
     <Compile Remove="ViewModels\TableMapViewModel.cs" />
     <Compile Remove="ViewModels\PayrollViewModel.cs" />
@@ -79,7 +80,8 @@
     <!-- <Compile Remove="ViewModels\AuditReportsViewModel.cs" /> -->
     <Compile Remove="ViewModels\CurrencyPaymentViewModel.cs" />
     <Compile Remove="ViewModels\ComparativeAnalyticsViewModel.cs" />
-    <Compile Remove="ViewModels\DashboardViewModel.cs" />
+    <!-- DashboardViewModel now enabled for sidebar navigation -->
+    <!-- <Compile Remove="ViewModels\DashboardViewModel.cs" /> -->
     <Compile Remove="ViewModels\CustomerDisplayViewModel.cs" />
     <Compile Remove="ViewModels\StockAlertWidgetViewModel.cs" />
     <!-- <Compile Remove="ViewModels\ExceptionReportsViewModel.cs" /> -->
@@ -93,8 +95,9 @@
     <!-- <Page Remove="Views\MpesaSettingsView.xaml" /> -->
     <Compile Remove="Views\PLUManagementView.xaml.cs" />
     <Page Remove="Views\PLUManagementView.xaml" />
-    <Compile Remove="Views\SalesReportsView.xaml.cs" />
-    <Page Remove="Views\SalesReportsView.xaml" />
+    <!-- SalesReportsView now enabled for sidebar navigation -->
+    <!-- <Compile Remove="Views\SalesReportsView.xaml.cs" /> -->
+    <!-- <Page Remove="Views\SalesReportsView.xaml" /> -->
     <Compile Remove="Views\AttendanceView.xaml.cs" />
     <Page Remove="Views\AttendanceView.xaml" />
     <Compile Remove="Views\CurrencyPaymentDialog.xaml.cs" />

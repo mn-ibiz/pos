@@ -58,13 +58,61 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     /// Gets a value indicating whether a work period is currently open.
     /// </summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsWorkPeriodClosed))]
     private bool _isWorkPeriodOpen;
+
+    /// <summary>
+    /// Gets a value indicating whether a work period is closed.
+    /// </summary>
+    public bool IsWorkPeriodClosed => !IsWorkPeriodOpen;
+
+    /// <summary>
+    /// Gets or sets whether the sidebar should be shown.
+    /// </summary>
+    [ObservableProperty]
+    private bool _showSidebar;
+
+    /// <summary>
+    /// Gets or sets the current page title for breadcrumb display.
+    /// </summary>
+    [ObservableProperty]
+    private string _currentPageTitle = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the user's initials for avatar display.
+    /// </summary>
+    [ObservableProperty]
+    private string _userInitials = "?";
+
+    /// <summary>
+    /// Gets or sets the current user's role name.
+    /// </summary>
+    [ObservableProperty]
+    private string _currentUserRole = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the register name.
+    /// </summary>
+    [ObservableProperty]
+    private string _registerName = "POS-001";
+
+    /// <summary>
+    /// Gets or sets whether there are low stock alerts.
+    /// </summary>
+    [ObservableProperty]
+    private bool _hasLowStockAlert;
+
+    /// <summary>
+    /// Gets or sets the count of low stock items.
+    /// </summary>
+    [ObservableProperty]
+    private int _lowStockCount;
 
     /// <summary>
     /// Gets the application title.
     /// </summary>
     [ObservableProperty]
-    private string _applicationTitle = "Hospitality POS System";
+    private string _applicationTitle = "ProNet POS";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -123,15 +171,56 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private async void OnUserLoggedIn(object? sender, SessionEventArgs e)
     {
         CurrentUserName = e.User?.FullName ?? "Unknown User";
+        CurrentUserRole = e.User?.UserRoles?.FirstOrDefault()?.Role?.Name ?? "User";
+        UserInitials = GetInitials(CurrentUserName);
+        ShowSidebar = true;
         _logger.Information("User logged in: {UserName}", CurrentUserName);
 
         // Refresh work period status when user logs in
         await RefreshWorkPeriodStatusAsync();
+
+        // Check low stock alerts
+        await RefreshLowStockAlertsAsync();
+    }
+
+    private static string GetInitials(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+            return "?";
+
+        var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+            return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+        if (parts.Length == 1 && parts[0].Length >= 2)
+            return parts[0][..2].ToUpper();
+        return parts.Length == 1 ? parts[0][0].ToString().ToUpper() : "?";
+    }
+
+    private async Task RefreshLowStockAlertsAsync()
+    {
+        try
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var productService = scope.ServiceProvider.GetService<IProductService>();
+            if (productService is not null)
+            {
+                var lowStockProducts = await productService.GetLowStockProductsAsync();
+                LowStockCount = lowStockProducts.Count();
+                HasLowStockAlert = LowStockCount > 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "Failed to refresh low stock alerts");
+        }
     }
 
     private void OnUserLoggedOut(object? sender, SessionEventArgs e)
     {
         CurrentUserName = "Not Logged In";
+        CurrentUserRole = string.Empty;
+        UserInitials = "?";
+        ShowSidebar = false;
         CloseWarningDialog();
         _logger.Information("User logged out. Reason: {Reason}", e.Reason);
     }
@@ -214,7 +303,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     private void UpdateWorkPeriodDuration()
     {
-        if (_currentWorkPeriod is null || _currentWorkPeriod.Status != WorkPeriodStatus.Open)
+        if (_currentWorkPeriod is null || _currentWorkPeriod.Status != Core.Enums.WorkPeriodStatus.Open)
         {
             WorkPeriodStatus = "Not Started";
             IsWorkPeriodOpen = false;
@@ -461,7 +550,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     {
         await _dialogService.ShowMessageAsync(
             "About",
-            "Hospitality POS System\nVersion 1.0.0\n\n.NET 10 | WPF | SQL Server Express");
+            "ProNet POS\nVersion 1.0.0\n\n.NET 10 | WPF | SQL Server Express");
     }
 
     /// <summary>
@@ -554,15 +643,112 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        // Check permission for order creation
-        if (!HasPermission(PermissionNames.Orders.Create))
+        // Check permission for sales creation
+        if (!HasPermission(PermissionNames.Sales.Create))
         {
-            _logger.Warning("User lacks permission to create orders");
-            await _dialogService.ShowErrorAsync("Access Denied", "You do not have permission to create orders.");
+            _logger.Warning("User lacks permission to create sales");
+            await _dialogService.ShowErrorAsync("Access Denied", "You do not have permission to create sales.");
             return;
         }
 
         _navigationService.NavigateTo<POSViewModel>();
+        CurrentPageTitle = "Point of Sale";
+    }
+
+    /// <summary>
+    /// Navigates to the dashboard screen.
+    /// </summary>
+    [RelayCommand]
+    private void NavigateToDashboard()
+    {
+        _navigationService.NavigateTo<DashboardViewModel>();
+        CurrentPageTitle = "Dashboard";
+    }
+
+    /// <summary>
+    /// Navigates to the suppliers screen.
+    /// </summary>
+    [RelayCommand]
+    private void NavigateToSuppliers()
+    {
+        _navigationService.NavigateTo<SuppliersViewModel>();
+        CurrentPageTitle = "Suppliers";
+    }
+
+    /// <summary>
+    /// Navigates to the employees screen.
+    /// </summary>
+    [RelayCommand]
+    private void NavigateToEmployees()
+    {
+        _navigationService.NavigateTo<EmployeesViewModel>();
+        CurrentPageTitle = "Employees";
+    }
+
+    /// <summary>
+    /// Navigates to the goods receiving screen.
+    /// </summary>
+    [RelayCommand]
+    private void NavigateToGoodsReceiving()
+    {
+        _navigationService.NavigateTo<GoodsReceivingViewModel>();
+        CurrentPageTitle = "Receive Stock";
+    }
+
+    /// <summary>
+    /// Navigates to the purchase orders screen.
+    /// </summary>
+    [RelayCommand]
+    private void NavigateToPurchaseOrders()
+    {
+        _navigationService.NavigateTo<PurchaseOrdersViewModel>();
+        CurrentPageTitle = "Purchase Orders";
+    }
+
+    /// <summary>
+    /// Navigates to the sales reports screen.
+    /// </summary>
+    [RelayCommand]
+    private void NavigateToSalesReports()
+    {
+        _navigationService.NavigateTo<SalesReportsViewModel>();
+        CurrentPageTitle = "Sales Reports";
+    }
+
+    /// <summary>
+    /// Navigates to the inventory reports screen.
+    /// </summary>
+    [RelayCommand]
+    private void NavigateToInventoryReports()
+    {
+        _navigationService.NavigateTo<InventoryReportsViewModel>();
+        CurrentPageTitle = "Inventory Reports";
+    }
+
+    /// <summary>
+    /// Navigates to the payment methods screen.
+    /// </summary>
+    [RelayCommand]
+    private void NavigateToPaymentMethods()
+    {
+        _navigationService.NavigateTo<PaymentMethodsViewModel>();
+        CurrentPageTitle = "Payment Methods";
+    }
+
+    /// <summary>
+    /// Logs out the current user.
+    /// </summary>
+    [RelayCommand]
+    private async Task LogoutAsync()
+    {
+        var confirmed = await _dialogService.ShowConfirmationAsync(
+            "Logout",
+            "Are you sure you want to logout?");
+
+        if (confirmed)
+        {
+            _sessionService.ClearSession(LogoutReason.UserInitiated);
+        }
     }
 
     /// <summary>

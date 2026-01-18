@@ -126,4 +126,178 @@
         <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
     </Style>
 
+    <!-- Sidebar Navigation Styles -->
+
+    <!-- Sidebar Container -->
+    <Style x:Key="SidebarStyle" TargetType="Border">
+        <Setter Property="Background" Value="#1A1A2E" />
+        <Setter Property="Width" Value="260" />
+    </Style>
+
+    <!-- Sidebar Menu Item Button -->
+    <Style x:Key="SidebarMenuItemStyle" TargetType="Button">
+        <Setter Property="Height" Value="48" />
+        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderThickness="3,0,0,0"
+                            BorderBrush="Transparent"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#252542" />
+                            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+                        </Trigger>
+                        <Trigger Property="Tag" Value="Selected">
+                            <Setter TargetName="border" Property="Background" Value="#2D2D50" />
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Sidebar Sub Menu Item -->
+    <Style x:Key="SidebarSubMenuItemStyle" TargetType="Button" BasedOn="{StaticResource SidebarMenuItemStyle}">
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Padding" Value="48,0,16,0" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <!-- Sidebar Group Header -->
+    <Style x:Key="SidebarGroupHeaderStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="#555577" />
+        <Setter Property="Margin" Value="16,16,16,8" />
+    </Style>
+
+    <!-- Sidebar Logo/Brand Area -->
+    <Style x:Key="SidebarBrandStyle" TargetType="Border">
+        <Setter Property="Background" Value="#16162B" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Height" Value="64" />
+    </Style>
+
+    <!-- Badge Style -->
+    <Style x:Key="MenuBadgeStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource DangerBrush}" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="MinWidth" Value="20" />
+        <Setter Property="Height" Value="20" />
+        <Setter Property="Padding" Value="6,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+
+    <!-- Content Area Header -->
+    <Style x:Key="ContentHeaderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource BackgroundMediumBrush}" />
+        <Setter Property="Padding" Value="24,16" />
+    </Style>
+
+    <!-- Page Title -->
+    <Style x:Key="PageTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    </Style>
+
+    <!-- KPI Card Style -->
+    <Style x:Key="KpiCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource BackgroundMediumBrush}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="20" />
+        <Setter Property="MinWidth" Value="200" />
+    </Style>
+
+    <!-- KPI Value -->
+    <Style x:Key="KpiValueStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="32" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    </Style>
+
+    <!-- KPI Label -->
+    <Style x:Key="KpiLabelStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="Margin" Value="0,4,0,0" />
+    </Style>
+
+    <!-- Alert Item Style -->
+    <Style x:Key="AlertItemStyle" TargetType="Border">
+        <Setter Property="Background" Value="#252542" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="Margin" Value="0,4" />
+    </Style>
+
+    <!-- Quick Action Button -->
+    <Style x:Key="QuickActionButtonStyle" TargetType="Button" BasedOn="{StaticResource TouchButtonStyle}">
+        <Setter Property="MinWidth" Value="140" />
+        <Setter Property="MinHeight" Value="80" />
+        <Setter Property="Background" Value="{StaticResource BackgroundLightBrush}" />
+        <Setter Property="Margin" Value="4" />
+    </Style>
+
+    <!-- Data Grid Header Style -->
+    <Style x:Key="ModernDataGridHeaderStyle" TargetType="DataGridColumnHeader">
+        <Setter Property="Background" Value="{StaticResource BackgroundMediumBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="BorderBrush" Value="{StaticResource BackgroundLightBrush}" />
+    </Style>
+
+    <!-- Data Grid Row Style -->
+    <Style x:Key="ModernDataGridRowStyle" TargetType="DataGridRow">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="BorderBrush" Value="#2A2A45" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#252542" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="#2D2D50" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Status Badge Styles -->
+    <Style x:Key="StatusBadgeOkStyle" TargetType="Border">
+        <Setter Property="Background" Value="#1B3D1B" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="8,4" />
+    </Style>
+
+    <Style x:Key="StatusBadgeWarningStyle" TargetType="Border">
+        <Setter Property="Background" Value="#3D3D1B" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="8,4" />
+    </Style>
+
+    <Style x:Key="StatusBadgeDangerStyle" TargetType="Border">
+        <Setter Property="Background" Value="#3D1B1B" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="8,4" />
+    </Style>
+
 </ResourceDictionary>

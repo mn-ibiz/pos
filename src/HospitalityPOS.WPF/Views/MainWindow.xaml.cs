@@ -36,11 +36,23 @@ public partial class MainWindow : Window
         WindowState = WindowState == WindowState.Maximized
             ? WindowState.Normal
             : WindowState.Maximized;
+        UpdateMaximizeButtonContent();
+    }
+
+    private void UpdateMaximizeButtonContent()
+    {
+        // Use Segoe MDL2 Assets glyphs: E923 = Restore, E739 = Maximize
+        MaximizeButton.Content = WindowState == WindowState.Maximized ? "\uE923" : "\uE739";
     }
 
     private void MinimizeButton_Click(object sender, RoutedEventArgs e)
     {
         WindowState = WindowState.Minimized;
+    }
+
+    private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+    {
+        ToggleWindowState();
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)

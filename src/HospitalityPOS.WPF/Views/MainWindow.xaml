@@ -13,11 +13,10 @@
         Width="1024"
         WindowState="Maximized"
         WindowStyle="None"
-        ResizeMode="NoResize"
+        ResizeMode="CanResizeWithGrip"
         Background="#1E1E2E">
 
     <Window.Resources>
-        <!-- <vm:ViewModelLocator x:Key="Locator" /> --> <!-- Excluded from compilation -->
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
         <!-- ViewModel to View mappings -->
@@ -51,7 +50,6 @@
         <DataTemplate DataType="{x:Type vm:ProductManagementViewModel}">
             <views:ProductManagementView />
         </DataTemplate>
-        <!-- POSViewModel and SettlementViewModel now enabled -->
         <DataTemplate DataType="{x:Type vm:POSViewModel}">
             <views:POSView />
         </DataTemplate>
@@ -73,27 +71,25 @@
         <DataTemplate DataType="{x:Type vm:EmployeeEditorViewModel}">
             <views:EmployeeEditorView />
         </DataTemplate>
-        <!-- JournalEntriesViewModel still excluded -->
-        <!-- Loyalty ViewModels EXCLUDED - API mismatches with Customer entity -->
-        <!--
-        <DataTemplate DataType="{x:Type vm:CustomerEnrollmentViewModel}">
-            <views:CustomerEnrollmentView />
+        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+            <views:DashboardView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:CustomerListViewModel}">
-            <views:CustomerListView />
+        <DataTemplate DataType="{x:Type vm:SalesReportsViewModel}">
+            <views:SalesReportsView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:LoyaltySettingsViewModel}">
-            <views:LoyaltySettingsView />
+        <DataTemplate DataType="{x:Type vm:InventoryReportsViewModel}">
+            <views:InventoryReportsView />
         </DataTemplate>
-        -->
+        <DataTemplate DataType="{x:Type vm:GoodsReceivingViewModel}">
+            <views:GoodsReceivingView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:DirectReceivingViewModel}">
+            <views:DirectReceivingView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PurchaseOrdersViewModel}">
+            <views:PurchaseOrdersView />
+        </DataTemplate>
     </Window.Resources>
-
-    <!-- DataContext set in code-behind -->
-    <!--
-    <Window.DataContext>
-        <Binding Source="{StaticResource Locator}" Path="Main" />
-    </Window.DataContext>
-    -->
 
     <Grid>
         <Grid.RowDefinitions>
@@ -104,99 +100,427 @@
 
         <!-- Title Bar -->
         <Border Grid.Row="0"
-                Background="#2D2D44"
-                Padding="16,8"
+                Background="#16162B"
+                Padding="0"
                 MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-            <Grid>
+            <Grid Height="40">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0"
-                           Text="{Binding ApplicationTitle}"
-                           FontSize="18"
-                           FontWeight="SemiBold"
-                           Foreground="White"
-                           VerticalAlignment="Center" />
+                <!-- Brand/Logo Area -->
+                <StackPanel Grid.Column="0"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="16,0">
+                    <TextBlock Text="PRONET"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource PrimaryBrush}"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="POS"
+                               FontSize="18"
+                               FontWeight="Light"
+                               Foreground="White"
+                               VerticalAlignment="Center"
+                               Margin="4,0,0,0" />
+                </StackPanel>
 
-                <StackPanel Grid.Column="1"
+                <!-- Center: Page Title / Breadcrumb -->
+                <TextBlock Grid.Column="1"
+                           Text="{Binding CurrentPageTitle}"
+                           FontSize="14"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           VerticalAlignment="Center"
+                           Margin="16,0" />
+
+                <!-- Window Controls -->
+                <StackPanel Grid.Column="2"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right">
-                    <Button Content="—"
-                            Width="44"
-                            Height="36"
+                    <Button Content="&#xE949;"
+                            FontFamily="Segoe MDL2 Assets"
+                            Width="46"
+                            Height="40"
                             Background="Transparent"
-                            Foreground="White"
+                            Foreground="#8888AA"
                             BorderThickness="0"
-                            FontSize="14"
+                            FontSize="10"
                             Cursor="Hand"
                             Click="MinimizeButton_Click" />
-                    <Button Content="✕"
-                            Width="44"
-                            Height="36"
+                    <Button x:Name="MaximizeButton"
+                            Content="&#xE739;"
+                            FontFamily="Segoe MDL2 Assets"
+                            Width="46"
+                            Height="40"
                             Background="Transparent"
-                            Foreground="White"
+                            Foreground="#8888AA"
                             BorderThickness="0"
-                            FontSize="14"
+                            FontSize="10"
                             Cursor="Hand"
-                            Click="CloseButton_Click" />
+                            Click="MaximizeButton_Click" />
+                    <Button Content="&#xE106;"
+                            FontFamily="Segoe MDL2 Assets"
+                            Width="46"
+                            Height="40"
+                            Background="Transparent"
+                            Foreground="#8888AA"
+                            BorderThickness="0"
+                            FontSize="10"
+                            Cursor="Hand"
+                            Click="CloseButton_Click">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#E81123" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- Main Content Area - Hosts the current view -->
-        <Grid Grid.Row="1" Background="#1E1E2E">
-            <!-- ContentControl for navigation - displays the current ViewModel's view -->
-            <ContentControl Content="{Binding CurrentView}" />
+        <!-- Main Content Area with Sidebar -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-            <!-- Default welcome content (shown when CurrentView is null) -->
-            <StackPanel x:Name="WelcomePanel"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center">
-                <StackPanel.Style>
-                    <Style TargetType="StackPanel">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding CurrentView}" Value="{x:Null}">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                        <Setter Property="Visibility" Value="Collapsed" />
-                    </Style>
-                </StackPanel.Style>
-                <TextBlock Text="Welcome to Hospitality POS"
-                           FontSize="32"
-                           FontWeight="Light"
-                           Foreground="#8888AA"
-                           HorizontalAlignment="Center" />
-                <TextBlock Text="System Initializing..."
-                           FontSize="16"
-                           Foreground="#666688"
-                           HorizontalAlignment="Center"
-                           Margin="0,16,0,0" />
-            </StackPanel>
+            <!-- Sidebar Navigation -->
+            <Border Grid.Column="0"
+                    Background="#1A1A2E"
+                    Width="260"
+                    Visibility="{Binding ShowSidebar, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-            <!-- Busy Indicator Overlay -->
-            <Border Background="#80000000"
-                    Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
-                <StackPanel VerticalAlignment="Center"
+                    <!-- Navigation Menu -->
+                    <ScrollViewer Grid.Row="0"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel>
+                            <!-- Main Navigation Group -->
+                            <TextBlock Text="MAIN"
+                                       Style="{StaticResource SidebarGroupHeaderStyle}" />
+
+                            <!-- Dashboard -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToDashboardCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE80F;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Dashboard" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Point of Sale -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToPOSCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE7BF;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Point of Sale" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Inventory Group -->
+                            <TextBlock Text="INVENTORY"
+                                       Style="{StaticResource SidebarGroupHeaderStyle}" />
+
+                            <!-- Stock Levels -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToInventoryCommand}">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE7B8;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                        <TextBlock Text="Stock Levels" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <!-- Low Stock Badge -->
+                                    <Border Style="{StaticResource MenuBadgeStyle}"
+                                            Visibility="{Binding HasLowStockAlert, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            Margin="0,0,8,0">
+                                        <TextBlock Text="{Binding LowStockCount}"
+                                                   Foreground="White"
+                                                   FontSize="11"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center" />
+                                    </Border>
+                                </Grid>
+                            </Button>
+
+                            <!-- Receive Stock -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToGoodsReceivingCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE7AC;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Receive Stock" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Purchase Orders -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToPurchaseOrdersCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Purchase Orders" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Suppliers -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToSuppliersCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE779;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Suppliers" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Workday Group -->
+                            <TextBlock Text="WORKDAY"
+                                       Style="{StaticResource SidebarGroupHeaderStyle}" />
+
+                            <!-- Open/Close Day -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding OpenWorkPeriodCommand}"
+                                    Visibility="{Binding IsWorkPeriodClosed, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" Foreground="{StaticResource SuccessBrush}" />
+                                    <TextBlock Text="Open Day" Margin="12,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource SuccessBrush}" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding CloseWorkPeriodCommand}"
+                                    Visibility="{Binding IsWorkPeriodOpen, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" Foreground="{StaticResource WarningBrush}" />
+                                    <TextBlock Text="Close Day" Margin="12,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource WarningBrush}" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- X-Report -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding GenerateXReportCommand}"
+                                    IsEnabled="{Binding IsWorkPeriodOpen}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE9F9;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="X-Report" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Reports Group -->
+                            <TextBlock Text="REPORTS"
+                                       Style="{StaticResource SidebarGroupHeaderStyle}" />
+
+                            <!-- Sales Reports -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToSalesReportsCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Sales Reports" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Inventory Reports -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToInventoryReportsCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE9F9;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Inventory Reports" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Management Group -->
+                            <TextBlock Text="MANAGEMENT"
+                                       Style="{StaticResource SidebarGroupHeaderStyle}" />
+
+                            <!-- Products -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToProductManagementCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE7BF;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Products" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Categories -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToCategoryManagementCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE74C;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Categories" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Employees -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToEmployeesCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE716;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Employees" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Users -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToUserManagementCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Users" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Roles -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToRoleManagementCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8D7;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Roles &amp; Permissions" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Settings Group -->
+                            <TextBlock Text="SETTINGS"
+                                       Style="{StaticResource SidebarGroupHeaderStyle}" />
+
+                            <!-- Payment Methods -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToPaymentMethodsCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8C7;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Payment Methods" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- User Section at Bottom -->
+                    <Border Grid.Row="1"
+                            Background="#16162B"
+                            Padding="16,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- User Avatar -->
+                            <Border Grid.Column="0"
+                                    Width="40"
+                                    Height="40"
+                                    CornerRadius="20"
+                                    Background="{StaticResource PrimaryBrush}">
+                                <TextBlock Text="{Binding UserInitials}"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Foreground="White"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+
+                            <!-- User Info -->
+                            <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding CurrentUserName}"
+                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding CurrentUserRole}"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="11" />
+                            </StackPanel>
+
+                            <!-- Logout Button -->
+                            <Button Grid.Column="2"
+                                    Content="&#xE8BB;"
+                                    FontFamily="Segoe MDL2 Assets"
+                                    FontSize="16"
+                                    Width="36"
+                                    Height="36"
+                                    Background="Transparent"
+                                    Foreground="{StaticResource TextSecondaryBrush}"
+                                    BorderThickness="0"
+                                    Cursor="Hand"
+                                    ToolTip="Logout"
+                                    Command="{Binding LogoutCommand}">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Main Content Area -->
+            <Grid Grid.Column="1" Background="#1E1E2E">
+                <!-- ContentControl for navigation - displays the current ViewModel's view -->
+                <ContentControl Content="{Binding CurrentView}" />
+
+                <!-- Default welcome content (shown when CurrentView is null) -->
+                <StackPanel x:Name="WelcomePanel"
+                            VerticalAlignment="Center"
                             HorizontalAlignment="Center">
-                    <ProgressBar IsIndeterminate="True"
-                                 Width="200"
-                                 Height="4"
-                                 Foreground="#4CAF50" />
-                    <TextBlock Text="{Binding BusyMessage}"
-                               Foreground="White"
-                               FontSize="14"
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CurrentView}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </Style>
+                    </StackPanel.Style>
+                    <TextBlock Text="Welcome to ProNet POS"
+                               FontSize="32"
+                               FontWeight="Light"
+                               Foreground="#8888AA"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="System Initializing..."
+                               FontSize="16"
+                               Foreground="#666688"
                                HorizontalAlignment="Center"
                                Margin="0,16,0,0" />
                 </StackPanel>
-            </Border>
+
+                <!-- Busy Indicator Overlay -->
+                <Border Background="#80000000"
+                        Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel VerticalAlignment="Center"
+                                HorizontalAlignment="Center">
+                        <ProgressBar IsIndeterminate="True"
+                                     Width="200"
+                                     Height="4"
+                                     Foreground="#4CAF50" />
+                        <TextBlock Text="{Binding BusyMessage}"
+                                   Foreground="White"
+                                   FontSize="14"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,16,0,0" />
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Grid>
 
         <!-- Status Bar -->
         <Border Grid.Row="2"
-                Background="#2D2D44"
+                Background="#16162B"
                 Padding="16,8">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -210,7 +534,7 @@
                 <!-- Work Period Status with Indicator -->
                 <Border Grid.Column="0"
                         CornerRadius="4"
-                        Padding="8,4"
+                        Padding="10,6"
                         Margin="0,0,16,0"
                         VerticalAlignment="Center">
                     <Border.Style>
@@ -224,7 +548,7 @@
                         </Style>
                     </Border.Style>
                     <StackPanel Orientation="Horizontal">
-                        <Ellipse Width="10" Height="10" Margin="0,0,8,0" VerticalAlignment="Center">
+                        <Ellipse Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center">
                             <Ellipse.Style>
                                 <Style TargetType="Ellipse">
                                     <Setter Property="Fill" Value="#666666" />
@@ -236,7 +560,7 @@
                                 </Style>
                             </Ellipse.Style>
                         </Ellipse>
-                        <TextBlock VerticalAlignment="Center">
+                        <TextBlock VerticalAlignment="Center" FontSize="12">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Foreground" Value="#8888AA" />
@@ -247,7 +571,7 @@
                                     </Style.Triggers>
                                 </Style>
                             </TextBlock.Style>
-                            <Run Text="Work Period: " FontWeight="SemiBold" />
+                            <Run Text="Workday: " FontWeight="SemiBold" />
                             <Run Text="{Binding WorkPeriodStatus, Mode=OneWay}" />
                         </TextBlock>
                     </StackPanel>
@@ -262,18 +586,22 @@
                 <!-- Spacer -->
                 <TextBlock Grid.Column="2" />
 
+                <!-- Register Info -->
                 <TextBlock Grid.Column="3"
                            Foreground="#8888AA"
                            VerticalAlignment="Center"
+                           FontSize="12"
                            Margin="0,0,24,0">
-                    <Run Text="User: " />
-                    <Run Text="{Binding CurrentUserName}" />
+                    <Run Text="Register: " />
+                    <Run Text="{Binding RegisterName}" FontWeight="SemiBold" />
                 </TextBlock>
 
+                <!-- Current Time -->
                 <TextBlock Grid.Column="4"
-                           Text="{Binding CurrentTime, StringFormat='{}{0:HH:mm:ss}'}"
+                           Text="{Binding CurrentTime, StringFormat='{}{0:ddd, MMM d | HH:mm:ss}'}"
                            Foreground="#8888AA"
-                           VerticalAlignment="Center" />
+                           VerticalAlignment="Center"
+                           FontSize="12" />
             </Grid>
         </Border>
     </Grid>
