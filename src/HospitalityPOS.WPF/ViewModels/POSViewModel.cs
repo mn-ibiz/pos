@@ -31,6 +31,7 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     private readonly IOfferService _offerService;
     private readonly IUiShellService _uiShellService;
     private readonly IBarcodeService _barcodeService;
+    private readonly IMpesaService? _mpesaService;
 
     private const int ItemsPerPage = 15;
     private const decimal TaxRate = 0.16m; // Kenya VAT 16%
@@ -349,7 +350,8 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         IKitchenPrintService kitchenPrintService,
         IOfferService offerService,
         IUiShellService uiShellService,
-        IBarcodeService barcodeService)
+        IBarcodeService barcodeService,
+        IMpesaService? mpesaService = null)
         : base(logger)
     {
         _productService = productService ?? throw new ArgumentNullException(nameof(productService));
@@ -365,6 +367,7 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         _offerService = offerService ?? throw new ArgumentNullException(nameof(offerService));
         _uiShellService = uiShellService ?? throw new ArgumentNullException(nameof(uiShellService));
         _barcodeService = barcodeService ?? throw new ArgumentNullException(nameof(barcodeService));
+        _mpesaService = mpesaService; // Optional - may not be configured
 
         Title = IsSupermarketMode ? "Point of Sale - Retail" : "Point of Sale";
     }
@@ -1625,6 +1628,181 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     {
         // Void receipt feature requires IReceiptVoidService which is not yet available
         await _dialogService.ShowInfoAsync("Coming Soon", "Void receipt feature is coming soon.");
+    }
+
+    /// <summary>
+    /// Shows the held orders panel (alias for ToggleHeldOrdersPanel).
+    /// </summary>
+    [RelayCommand]
+    private async Task ShowHeldOrdersAsync()
+    {
+        await ToggleHeldOrdersPanelAsync();
+    }
+
+    /// <summary>
+    /// Shows the loyalty panel (alias for ToggleLoyaltyPanel).
+    /// </summary>
+    [RelayCommand]
+    private async Task ShowLoyaltyPanelAsync()
+    {
+        await ToggleLoyaltyPanelAsync();
+    }
+
+    /// <summary>
+    /// Prints the current order and proceeds to settlement.
+    /// </summary>
+    [RelayCommand]
+    private async Task PrintOrderAsync()
+    {
+        if (!OrderItems.Any())
+        {
+            await _dialogService.ShowWarningAsync("Empty Order", "Please add items to the order before printing.");
+            return;
+        }
+
+        // Submit order first if not already saved
+        if (!CurrentOrderId.HasValue)
+        {
+            await SubmitOrderAsync();
+        }
+
+        // Navigate to settlement
+        if (CurrentReceiptId.HasValue)
+        {
+            await SettleReceiptAsync();
+        }
+    }
+
+    /// <summary>
+    /// Applies a discount to the entire order.
+    /// </summary>
+    [RelayCommand]
+    private async Task ApplyOrderDiscountAsync()
+    {
+        // Check if user has any discount permission
+        var hasBasicDiscount = _sessionService.HasPermission("Discounts.Apply10") ||
+                               _sessionService.HasPermission("Discounts.Apply20") ||
+                               _sessionService.HasPermission("Discounts.Apply50") ||
+                               _sessionService.HasPermission("Discounts.ApplyAny");
+
+        if (!hasBasicDiscount)
+        {
+            await _dialogService.ShowWarningAsync("Permission Denied", "You do not have permission to apply discounts.");
+            return;
+        }
+
+        if (!OrderItems.Any())
+        {
+            await _dialogService.ShowWarningAsync("Empty Order", "Please add items to the order before applying a discount.");
+            return;
+        }
+
+        var result = await _dialogService.ShowInputAsync(
+            "Apply Order Discount",
+            "Enter discount percentage for the entire order (0-100):",
+            "");
+
+        if (result is not null && decimal.TryParse(result, out var percent))
+        {
+            // Validate discount percentage
+            percent = Math.Clamp(percent, 0, 100);
+
+            // Check permission level for discount amount
+            if (percent > 50 && !_sessionService.HasPermission("Discounts.ApplyAny"))
+            {
+                await _dialogService.ShowWarningAsync("Permission Denied", "You can only apply discounts up to 50%.");
+                return;
+            }
+            else if (percent > 20 && !_sessionService.HasPermission("Discounts.Apply50") &&
+                     !_sessionService.HasPermission("Discounts.ApplyAny"))
+            {
+                await _dialogService.ShowWarningAsync("Permission Denied", "You can only apply discounts up to 20%.");
+                return;
+            }
+            else if (percent > 10 && !_sessionService.HasPermission("Discounts.Apply20") &&
+                     !_sessionService.HasPermission("Discounts.Apply50") &&
+                     !_sessionService.HasPermission("Discounts.ApplyAny"))
+            {
+                await _dialogService.ShowWarningAsync("Permission Denied", "You can only apply discounts up to 10%.");
+                return;
+            }
+
+            // Apply discount to all items
+            foreach (var item in OrderItems)
+            {
+                item.DiscountPercent = percent;
+                item.DiscountAmount = 0; // Clear fixed amount when using percentage
+            }
+
+            RecalculateOrderTotals();
+            _logger.Information("Applied {DiscountPercent}% discount to entire order", percent);
+        }
+    }
+
+    /// <summary>
+    /// Initiates M-Pesa STK push payment using the dedicated dialog.
+    /// </summary>
+    [RelayCommand]
+    private async Task InitiateMpesaPaymentAsync()
+    {
+        if (!OrderItems.Any())
+        {
+            await _dialogService.ShowWarningAsync("Empty Order", "Please add items to the order before processing payment.");
+            return;
+        }
+
+        // Submit order first if not already saved
+        if (!CurrentOrderId.HasValue)
+        {
+            await SubmitOrderAsync();
+        }
+
+        // Get the account reference (receipt or order number)
+        var accountReference = CurrentReceiptNumber ?? CurrentOrderNumber ?? $"POS-{DateTime.Now:yyyyMMddHHmmss}";
+
+        // Show M-Pesa payment dialog
+        var dialog = new Views.Dialogs.MpesaPaymentDialog(
+            OrderTotal,
+            accountReference,
+            _mpesaService,
+            _logger)
+        {
+            Owner = Application.Current.MainWindow
+        };
+
+        var result = dialog.ShowDialog();
+
+        if (result == true)
+        {
+            if (dialog.UsedCash)
+            {
+                // User chose to use cash instead - navigate to settlement
+                _logger.Information("User chose cash payment instead of M-Pesa");
+                if (CurrentReceiptId.HasValue)
+                {
+                    await SettleReceiptAsync();
+                }
+            }
+            else if (dialog.PaymentSuccessful)
+            {
+                // M-Pesa payment was successful
+                _logger.Information("M-Pesa payment completed successfully. Receipt: {MpesaReceipt}, Phone: {Phone}",
+                    dialog.MpesaReceiptNumber, dialog.PhoneNumber);
+
+                await _dialogService.ShowMessageAsync("Payment Successful",
+                    $"M-Pesa payment received!\n\n" +
+                    $"Amount: KSh {OrderTotal:N2}\n" +
+                    $"M-Pesa Receipt: {dialog.MpesaReceiptNumber}\n\n" +
+                    "Thank you for your payment.");
+
+                // Clear current order after successful payment
+                ClearCurrentOrder();
+            }
+        }
+        else
+        {
+            _logger.Debug("M-Pesa payment dialog was cancelled");
+        }
     }
 
     #endregion
