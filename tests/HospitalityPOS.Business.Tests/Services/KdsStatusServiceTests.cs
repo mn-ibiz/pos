@@ -19,6 +19,7 @@ public class KdsStatusServiceTests
     private readonly Mock<IRepository<KdsOrderItem>> _kdsOrderItemRepoMock;
     private readonly Mock<IRepository<KdsOrderStatusLog>> _statusLogRepoMock;
     private readonly Mock<IRepository<KdsStation>> _stationRepoMock;
+    private readonly Mock<IRepository<KdsDisplaySettings>> _displaySettingsRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ILogger<KdsStatusService>> _loggerMock;
     private readonly KdsStatusService _service;
@@ -29,6 +30,7 @@ public class KdsStatusServiceTests
         _kdsOrderItemRepoMock = new Mock<IRepository<KdsOrderItem>>();
         _statusLogRepoMock = new Mock<IRepository<KdsOrderStatusLog>>();
         _stationRepoMock = new Mock<IRepository<KdsStation>>();
+        _displaySettingsRepoMock = new Mock<IRepository<KdsDisplaySettings>>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _loggerMock = new Mock<ILogger<KdsStatusService>>();
 
@@ -37,6 +39,7 @@ public class KdsStatusServiceTests
             _kdsOrderItemRepoMock.Object,
             _statusLogRepoMock.Object,
             _stationRepoMock.Object,
+            _displaySettingsRepoMock.Object,
             _unitOfWorkMock.Object,
             _loggerMock.Object);
     }
@@ -51,6 +54,7 @@ public class KdsStatusServiceTests
             _kdsOrderItemRepoMock.Object,
             _statusLogRepoMock.Object,
             _stationRepoMock.Object,
+            _displaySettingsRepoMock.Object,
             _unitOfWorkMock.Object,
             _loggerMock.Object);
 
@@ -66,6 +70,7 @@ public class KdsStatusServiceTests
             null!,
             _statusLogRepoMock.Object,
             _stationRepoMock.Object,
+            _displaySettingsRepoMock.Object,
             _unitOfWorkMock.Object,
             _loggerMock.Object);
 

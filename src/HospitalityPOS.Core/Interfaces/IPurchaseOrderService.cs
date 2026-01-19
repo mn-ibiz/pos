@@ -164,4 +164,13 @@ public interface IPurchaseOrderService
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of matching purchase orders.</returns>
     Task<IReadOnlyList<PurchaseOrder>> SearchPurchaseOrdersAsync(string searchTerm, bool includeItems = false, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Duplicates an existing purchase order, creating a new draft PO with the same items.
+    /// </summary>
+    /// <param name="purchaseOrderId">The ID of the PO to duplicate.</param>
+    /// <param name="createdByUserId">The ID of the user creating the duplicate.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The newly created duplicate purchase order.</returns>
+    Task<PurchaseOrder> DuplicatePurchaseOrderAsync(int purchaseOrderId, int createdByUserId, CancellationToken cancellationToken = default);
 }

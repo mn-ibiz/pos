@@ -17,7 +17,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.0")
+                .HasAnnotation("ProductVersion", "10.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -146,7 +146,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         {
                             Id = 1,
                             Code = "DMG",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 59, DateTimeKind.Utc).AddTicks(3091),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 574, DateTimeKind.Utc).AddTicks(2239),
                             DisplayOrder = 1,
                             IsActive = true,
                             IsDecrease = true,
@@ -158,7 +158,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         {
                             Id = 2,
                             Code = "EXP",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 59, DateTimeKind.Utc).AddTicks(4949),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 574, DateTimeKind.Utc).AddTicks(4012),
                             DisplayOrder = 2,
                             IsActive = true,
                             IsDecrease = true,
@@ -170,7 +170,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         {
                             Id = 3,
                             Code = "WST",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 59, DateTimeKind.Utc).AddTicks(4952),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 574, DateTimeKind.Utc).AddTicks(4015),
                             DisplayOrder = 3,
                             IsActive = true,
                             IsDecrease = true,
@@ -182,7 +182,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         {
                             Id = 4,
                             Code = "THF",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 59, DateTimeKind.Utc).AddTicks(4954),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 574, DateTimeKind.Utc).AddTicks(4018),
                             DisplayOrder = 4,
                             IsActive = true,
                             IsDecrease = true,
@@ -194,7 +194,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         {
                             Id = 5,
                             Code = "FND",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 59, DateTimeKind.Utc).AddTicks(4956),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 574, DateTimeKind.Utc).AddTicks(4019),
                             DisplayOrder = 5,
                             IsActive = true,
                             IsDecrease = false,
@@ -206,7 +206,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         {
                             Id = 6,
                             Code = "COR",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 59, DateTimeKind.Utc).AddTicks(4957),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 574, DateTimeKind.Utc).AddTicks(4021),
                             DisplayOrder = 6,
                             IsActive = true,
                             IsDecrease = true,
@@ -218,7 +218,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         {
                             Id = 7,
                             Code = "TRI",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 59, DateTimeKind.Utc).AddTicks(4959),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 574, DateTimeKind.Utc).AddTicks(4023),
                             DisplayOrder = 7,
                             IsActive = true,
                             IsDecrease = false,
@@ -230,7 +230,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         {
                             Id = 8,
                             Code = "TRO",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 59, DateTimeKind.Utc).AddTicks(4960),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 574, DateTimeKind.Utc).AddTicks(4024),
                             DisplayOrder = 8,
                             IsActive = true,
                             IsDecrease = true,
@@ -242,7 +242,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         {
                             Id = 9,
                             Code = "OTH",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 59, DateTimeKind.Utc).AddTicks(4962),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 574, DateTimeKind.Utc).AddTicks(4026),
                             DisplayOrder = 99,
                             IsActive = true,
                             IsDecrease = true,
@@ -5192,6 +5192,52 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                     b.ToTable("KOTSettings", (string)null);
                 });
 
+            modelBuilder.Entity("HospitalityPOS.Core.Entities.LoginAudit", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("DeviceInfo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FailureReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsLogout")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MachineName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("SessionDurationMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Success")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("LoginAudits");
+                });
+
             modelBuilder.Entity("HospitalityPOS.Core.Entities.LowStockAlertConfig", b =>
                 {
                     b.Property<int>("Id")
@@ -7008,7 +7054,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                             Id = 1,
                             BackgroundColor = "#4CAF50",
                             Code = "CASH",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 152, DateTimeKind.Utc).AddTicks(4964),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 675, DateTimeKind.Utc).AddTicks(196),
                             Description = "Cash payment",
                             DisplayOrder = 1,
                             IsActive = true,
@@ -7023,7 +7069,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                             Id = 2,
                             BackgroundColor = "#00C853",
                             Code = "MPESA",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 152, DateTimeKind.Utc).AddTicks(7355),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 675, DateTimeKind.Utc).AddTicks(2663),
                             Description = "Safaricom M-Pesa mobile money",
                             DisplayOrder = 2,
                             IsActive = true,
@@ -7041,7 +7087,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                             Id = 3,
                             BackgroundColor = "#FF5722",
                             Code = "AIRTEL",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 152, DateTimeKind.Utc).AddTicks(8152),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 675, DateTimeKind.Utc).AddTicks(3427),
                             Description = "Airtel Money mobile payment",
                             DisplayOrder = 3,
                             IsActive = true,
@@ -7059,7 +7105,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                             Id = 4,
                             BackgroundColor = "#2196F3",
                             Code = "CREDIT_CARD",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 152, DateTimeKind.Utc).AddTicks(8157),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 675, DateTimeKind.Utc).AddTicks(3432),
                             Description = "Credit card payment",
                             DisplayOrder = 4,
                             IsActive = true,
@@ -7077,7 +7123,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                             Id = 5,
                             BackgroundColor = "#9C27B0",
                             Code = "DEBIT_CARD",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 152, DateTimeKind.Utc).AddTicks(8160),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 675, DateTimeKind.Utc).AddTicks(3435),
                             Description = "Debit card payment",
                             DisplayOrder = 5,
                             IsActive = true,
@@ -7095,7 +7141,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                             Id = 6,
                             BackgroundColor = "#607D8B",
                             Code = "BANK_TRANSFER",
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 152, DateTimeKind.Utc).AddTicks(8163),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 675, DateTimeKind.Utc).AddTicks(3438),
                             Description = "Bank transfer or RTGS",
                             DisplayOrder = 6,
                             IsActive = false,
@@ -12738,6 +12784,9 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(10)")
                         .HasDefaultValue("Ksh");
 
+                    b.Property<decimal>("DefaultTaxRate")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<bool>("EnableAccounting")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -12823,6 +12872,9 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<string>("KraPinNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Mode")
                         .HasColumnType("int");
 
@@ -12840,6 +12892,9 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("VatRegistrationNumber")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -13753,7 +13808,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 310, DateTimeKind.Utc).AddTicks(6280),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 849, DateTimeKind.Utc).AddTicks(9628),
                             DisplayOrder = 1,
                             IsActive = true,
                             Name = "Customer complaint",
@@ -13762,7 +13817,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 310, DateTimeKind.Utc).AddTicks(7370),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 850, DateTimeKind.Utc).AddTicks(578),
                             DisplayOrder = 2,
                             IsActive = true,
                             Name = "Wrong order",
@@ -13771,7 +13826,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 310, DateTimeKind.Utc).AddTicks(7373),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 850, DateTimeKind.Utc).AddTicks(580),
                             DisplayOrder = 3,
                             IsActive = true,
                             Name = "Item unavailable",
@@ -13780,7 +13835,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 310, DateTimeKind.Utc).AddTicks(7374),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 850, DateTimeKind.Utc).AddTicks(582),
                             DisplayOrder = 4,
                             IsActive = true,
                             Name = "Duplicate transaction",
@@ -13789,7 +13844,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 310, DateTimeKind.Utc).AddTicks(7375),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 850, DateTimeKind.Utc).AddTicks(583),
                             DisplayOrder = 5,
                             IsActive = true,
                             Name = "Test transaction",
@@ -13798,7 +13853,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         new
                         {
                             Id = 6,
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 310, DateTimeKind.Utc).AddTicks(7377),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 850, DateTimeKind.Utc).AddTicks(584),
                             DisplayOrder = 6,
                             IsActive = true,
                             Name = "System error",
@@ -13807,7 +13862,7 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         new
                         {
                             Id = 7,
-                            CreatedAt = new DateTime(2026, 1, 18, 12, 31, 10, 310, DateTimeKind.Utc).AddTicks(7378),
+                            CreatedAt = new DateTime(2026, 1, 19, 18, 58, 20, 850, DateTimeKind.Utc).AddTicks(585),
                             DisplayOrder = 99,
                             IsActive = true,
                             Name = "Other",
@@ -15285,6 +15340,16 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Printer");
+                });
+
+            modelBuilder.Entity("HospitalityPOS.Core.Entities.LoginAudit", b =>
+                {
+                    b.HasOne("HospitalityPOS.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HospitalityPOS.Core.Entities.LowStockAlertConfig", b =>

@@ -52,6 +52,7 @@ public class POSDbContext : DbContext
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<ProductOffer> ProductOffers => Set<ProductOffer>();
+    public DbSet<ProductFavorite> ProductFavorites => Set<ProductFavorite>();
     #endregion
 
     #region Orders & Receipts
@@ -139,6 +140,7 @@ public class POSDbContext : DbContext
 
     #region System
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<LoginAudit> LoginAudits => Set<LoginAudit>();
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
     public DbSet<SystemConfiguration> SystemConfigurations => Set<SystemConfiguration>();
     #endregion

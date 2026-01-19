@@ -107,6 +107,7 @@ public partial class App : Application
         // User and Session services
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<ILoginAuditService, LoginAuditService>();
         services.AddSingleton<ISessionService, SessionService>();
         services.AddSingleton<IAutoLogoutService, AutoLogoutService>();
 
@@ -204,7 +205,10 @@ public partial class App : Application
         services.AddSingleton<IExportService, ExportService>();
 
         // Dashboard service (Scoped - accesses DbContext for real-time data)
-        // services.AddScoped<IDashboardService, DashboardService>(); // Excluded from compilation
+        services.AddScoped<IDashboardService, DashboardService>();
+
+        // System health service (Scoped - checks database and system resources)
+        services.AddScoped<ISystemHealthService, SystemHealthService>();
 
         // Background Jobs (Hosted Services)
         services.AddHostedService<ExpireBatchesJob>();    // Daily at midnight
@@ -256,10 +260,11 @@ public partial class App : Application
         // services.AddTransient<StockAlertWidgetViewModel>(); // Excluded
         services.AddTransient<SuppliersViewModel>();
         services.AddTransient<PurchaseOrdersViewModel>();
-        // services.AddTransient<SalesReportsViewModel>(); // Excluded
-        // services.AddTransient<ExceptionReportsViewModel>(); // Excluded
-        // services.AddTransient<InventoryReportsViewModel>(); // Excluded
-        // services.AddTransient<AuditReportsViewModel>(); // Excluded
+        services.AddTransient<SalesReportsViewModel>();
+        services.AddTransient<ExceptionReportsViewModel>();
+        services.AddTransient<InventoryReportsViewModel>();
+        services.AddTransient<AuditReportsViewModel>();
+        services.AddTransient<LoginAuditViewModel>();
         services.AddTransient<GoodsReceivingViewModel>();
         services.AddTransient<DirectReceivingViewModel>();
         services.AddTransient<ExportDialogViewModel>();
@@ -274,6 +279,8 @@ public partial class App : Application
         services.AddTransient<KitchenPrinterSettingsViewModel>();
         services.AddTransient<CashDrawerSettingsViewModel>();
         services.AddTransient<SetupWizardViewModel>();
+        services.AddTransient<OrganizationSettingsViewModel>();
+        services.AddSingleton<CashierShellViewModel>(); // Singleton - one instance for cashier shell
         services.AddTransient<FeatureSettingsViewModel>();
         services.AddTransient<OffersViewModel>();
         services.AddTransient<OfferEditorViewModel>();
@@ -296,7 +303,7 @@ public partial class App : Application
         // services.AddTransient<PLUManagementViewModel>(); // Excluded
         services.AddTransient<BarcodeSettingsViewModel>();
         // services.AddTransient<CustomerEnrollmentViewModel>(); // EXCLUDED - API mismatches
-        // services.AddTransient<DashboardViewModel>(); // Excluded
+        services.AddTransient<DashboardViewModel>();
 
         // Stock Transfer ViewModels (Epic 23) - NOW ENABLED after API fixes
         services.AddTransient<StockTransferViewModel>();
@@ -313,14 +320,15 @@ public partial class App : Application
         // services.AddTransient<CustomerListViewModel>();
         // services.AddTransient<LoyaltySettingsViewModel>();
 
-        // Email ViewModels (Epic 40) - Excluded
+        // Email ViewModels (Epic 40) - Excluded due to API mismatches
         // services.AddTransient<EmailSettingsViewModel>();
 
-        // Email Services (Epic 40) - Excluded (EmailService not compiled)
-        // services.AddScoped<IEmailService, EmailService>();
+        // Email Services (Epic 40)
+        services.AddScoped<IEmailService, EmailService>();
+        // EmailReportService excluded due to API mismatches - use EmailService directly for sending
         // services.AddScoped<IEmailReportService, EmailReportService>();
-        // services.AddScoped<EmailTriggerService>();
-        // services.AddHostedService<EmailSchedulerService>();
+        // services.AddScoped<EmailTriggerService>(); // Enable when trigger service is needed
+        // services.AddHostedService<EmailSchedulerService>(); // Enable for background scheduled emails
 
         // Future ViewModels:
         // services.AddTransient<SettingsViewModel>();

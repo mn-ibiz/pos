@@ -211,7 +211,7 @@ public class DashboardService : IDashboardService
             .Include(p => p.Receipt)
             .Include(p => p.PaymentMethod)
             .Where(p => p.Receipt.Status == ReceiptStatus.Settled)
-            .Where(p => p.PaidAt >= today && p.PaidAt < tomorrow);
+            .Where(p => p.PaymentDate >= today && p.PaymentDate < tomorrow);
 
         // Apply store filter if specified
         if (storeId.HasValue)
@@ -345,7 +345,7 @@ public class DashboardService : IDashboardService
                     ProductName = p.Name,
                     ProductCode = p.Code,
                     CurrentStock = p.Inventory!.CurrentStock,
-                    MinimumStock = p.MinimumStockLevel,
+                    MinimumStock = p.MinimumStockLevel ?? 0,
                     IsOutOfStock = p.Inventory.CurrentStock <= 0
                 })
                 .ToList()
@@ -410,7 +410,7 @@ public class DashboardService : IDashboardService
                 .Select(b => new ExpiringItemDto
                 {
                     BatchId = b.Id,
-                    ProductName = b.Product.Name,
+                    ProductName = b.Product?.Name ?? "Unknown Product",
                     BatchNumber = b.BatchNumber,
                     ExpiryDate = b.ExpiryDate!.Value,
                     DaysUntilExpiry = (b.ExpiryDate!.Value - today).Days,

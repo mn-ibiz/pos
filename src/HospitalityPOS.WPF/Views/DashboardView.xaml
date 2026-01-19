@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:HospitalityPOS.WPF.ViewModels"
+             xmlns:oxy="http://oxyplot.org/wpf"
              mc:Ignorable="d"
              d:DesignHeight="900" d:DesignWidth="1600"
              Background="#1E1E2E">
@@ -297,44 +298,80 @@
 
             <!-- Total Sales Card -->
             <Border Grid.Column="0" Style="{StaticResource KpiCardStyle}" Margin="0,0,12,0">
-                <StackPanel>
-                    <TextBlock Text="Today's Sales" Style="{StaticResource LabelStyle}" />
-                    <TextBlock Text="{Binding SalesSummary.TotalSales, StringFormat='KES {0:N0}'}"
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Today's Sales" Style="{StaticResource LabelStyle}" />
+                    <TextBlock Grid.Row="1" Text="{Binding SalesSummary.TotalSales, StringFormat='KES {0:N0}'}"
                                Style="{StaticResource ValueStyle}" />
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <!-- Sparkline -->
+                    <oxy:PlotView Grid.Row="2"
+                                  Model="{Binding SalesSparkline}"
+                                  Height="40"
+                                  Margin="0,4,0,0"
+                                  Background="Transparent" />
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,4,0,0">
                         <TextBlock Text="{Binding SalesTrendDisplay}"
                                    Foreground="{Binding IsSalesTrendPositive, Converter={StaticResource BoolToColorConverter}, FallbackValue=#4CAF50}" />
                         <TextBlock Text=" vs yesterday" Foreground="#8888AA" />
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Border>
 
             <!-- Transactions Card -->
             <Border Grid.Column="1" Style="{StaticResource KpiCardStyle}" Margin="6,0">
-                <StackPanel>
-                    <TextBlock Text="Transactions" Style="{StaticResource LabelStyle}" />
-                    <TextBlock Text="{Binding SalesSummary.TransactionCount}"
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Transactions" Style="{StaticResource LabelStyle}" />
+                    <TextBlock Grid.Row="1" Text="{Binding SalesSummary.TransactionCount}"
                                Style="{StaticResource ValueStyle}" />
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <!-- Sparkline -->
+                    <oxy:PlotView Grid.Row="2"
+                                  Model="{Binding OrdersSparkline}"
+                                  Height="40"
+                                  Margin="0,4,0,0"
+                                  Background="Transparent" />
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,4,0,0">
                         <TextBlock Text="{Binding Comparison.TransactionVsYesterdayPercent, StringFormat='{}{0:+0;-0}%'}"
                                    Foreground="#8888AA" />
                         <TextBlock Text=" vs yesterday" Foreground="#8888AA" />
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Border>
 
             <!-- Average Ticket Card -->
             <Border Grid.Column="2" Style="{StaticResource KpiCardStyle}" Margin="6,0">
-                <StackPanel>
-                    <TextBlock Text="Avg Ticket" Style="{StaticResource LabelStyle}" />
-                    <TextBlock Text="{Binding SalesSummary.AverageTicket, StringFormat='KES {0:N0}'}"
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Avg Ticket" Style="{StaticResource LabelStyle}" />
+                    <TextBlock Grid.Row="1" Text="{Binding SalesSummary.AverageTicket, StringFormat='KES {0:N0}'}"
                                Style="{StaticResource ValueStyle}" />
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <!-- Sparkline -->
+                    <oxy:PlotView Grid.Row="2"
+                                  Model="{Binding AvgTicketSparkline}"
+                                  Height="40"
+                                  Margin="0,4,0,0"
+                                  Background="Transparent" />
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,4,0,0">
                         <TextBlock Text="{Binding Comparison.AvgTicketVsYesterdayPercent, StringFormat='{}{0:+0;-0}%'}"
                                    Foreground="#8888AA" />
                         <TextBlock Text=" vs yesterday" Foreground="#8888AA" />
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Border>
 
             <!-- Low Stock Alert Card -->
@@ -642,6 +679,83 @@
                                            Foreground="#F44336"
                                            VerticalAlignment="Center" />
                             </Grid>
+                        </Border>
+
+                        <!-- Low Stock Items List (Top 5) -->
+                        <Border Background="#2D2D44" CornerRadius="4" Padding="8" Margin="0,0,0,8"
+                                Visibility="{Binding LowStockAlerts.TotalCount, Converter={StaticResource GreaterThanZeroToVisibility}, FallbackValue=Collapsed}">
+                            <StackPanel>
+                                <TextBlock Text="Items Needing Attention" Foreground="#9CA3AF" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                <ItemsControl ItemsSource="{Binding LowStockAlerts.Items}" MaxHeight="150">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#252538" CornerRadius="4" Padding="8,6" Margin="0,0,0,4"
+                                                    Cursor="Hand">
+                                                <Border.InputBindings>
+                                                    <MouseBinding MouseAction="LeftClick"
+                                                                  Command="{Binding DataContext.ViewProductDetailsCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                  CommandParameter="{Binding ProductId}" />
+                                                </Border.InputBindings>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+                                                    <TextBlock Text="{Binding ProductName}" Foreground="White" FontSize="12"
+                                                               TextTrimming="CharacterEllipsis" ToolTip="{Binding ProductName}"/>
+                                                    <!-- Stock Level Indicator -->
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding CurrentStock, StringFormat='{}{0:N0}'}"
+                                                                   FontSize="12" FontWeight="Bold" VerticalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Foreground" Value="#F59E0B"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsOutOfStock}" Value="True">
+                                                                            <Setter Property="Foreground" Value="#EF4444"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                        <TextBlock Text=" / " Foreground="#6B7280" FontSize="10" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding MinimumStock, StringFormat='{}{0:N0}'}"
+                                                                   Foreground="#6B7280" FontSize="10" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                    <!-- Out of Stock Badge -->
+                                                    <Border Grid.Row="1" Grid.ColumnSpan="2"
+                                                            Visibility="{Binding IsOutOfStock, Converter={StaticResource BoolToVisConverter}}"
+                                                            Background="#EF4444" CornerRadius="2" Padding="4,1" HorizontalAlignment="Left" Margin="0,4,0,0">
+                                                        <TextBlock Text="OUT OF STOCK" Foreground="White" FontSize="8" FontWeight="Bold"/>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <!-- View All Button -->
+                                <Button Content="View All Low Stock Items" Margin="0,8,0,0"
+                                        Background="#3D3D5C" Foreground="#9CA3AF" FontSize="11" Height="28"
+                                        BorderThickness="0" Cursor="Hand"
+                                        Command="{Binding ViewInventoryCommand}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#4B5563"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </StackPanel>
                         </Border>
 
                         <!-- Expiry Alert (only if batch tracking enabled) -->

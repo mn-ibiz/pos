@@ -19,6 +19,7 @@ public class AuditReportsViewModelTests
     private readonly Mock<IReportPrintService> _reportPrintServiceMock;
     private readonly Mock<IUserService> _userServiceMock;
     private readonly Mock<INavigationService> _navigationServiceMock;
+    private readonly Mock<IExportService> _exportServiceMock;
     private readonly Mock<ILogger> _loggerMock;
 
     public AuditReportsViewModelTests()
@@ -27,6 +28,7 @@ public class AuditReportsViewModelTests
         _reportPrintServiceMock = new Mock<IReportPrintService>();
         _userServiceMock = new Mock<IUserService>();
         _navigationServiceMock = new Mock<INavigationService>();
+        _exportServiceMock = new Mock<IExportService>();
         _loggerMock = new Mock<ILogger>();
 
         // Setup default returns
@@ -45,6 +47,7 @@ public class AuditReportsViewModelTests
             _reportPrintServiceMock.Object,
             _userServiceMock.Object,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
             _loggerMock.Object);
     }
 
@@ -74,6 +77,7 @@ public class AuditReportsViewModelTests
             _reportPrintServiceMock.Object,
             _userServiceMock.Object,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
             _loggerMock.Object);
 
         // Assert
@@ -90,6 +94,7 @@ public class AuditReportsViewModelTests
             null!,
             _userServiceMock.Object,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
             _loggerMock.Object);
 
         // Assert
@@ -106,6 +111,7 @@ public class AuditReportsViewModelTests
             _reportPrintServiceMock.Object,
             null!,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
             _loggerMock.Object);
 
         // Assert
@@ -122,6 +128,7 @@ public class AuditReportsViewModelTests
             _reportPrintServiceMock.Object,
             _userServiceMock.Object,
             null!,
+            _exportServiceMock.Object,
             _loggerMock.Object);
 
         // Assert
@@ -540,7 +547,7 @@ public class AuditReportsViewModelTests
     #region OnNavigatedToAsync Tests
 
     [Fact]
-    public async Task OnNavigatedToAsync_ShouldLoadUsersAndActions()
+    public async Task OnNavigatedTo_ShouldLoadUsersAndActions()
     {
         // Arrange
         var viewModel = CreateViewModel();
@@ -558,8 +565,11 @@ public class AuditReportsViewModelTests
             .Setup(s => s.GetDistinctAuditActionsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(actions);
 
-        // Act
-        await viewModel.OnNavigatedToAsync(null);
+        // Act - OnNavigatedTo triggers async loading
+        viewModel.OnNavigatedTo(null);
+
+        // Allow time for async loading to complete
+        await Task.Delay(100);
 
         // Assert
         viewModel.Users.Should().HaveCount(2);

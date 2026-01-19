@@ -503,6 +503,63 @@ public class PurchaseOrderService : IPurchaseOrderService
             .ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
+    public async Task<PurchaseOrder> DuplicatePurchaseOrderAsync(int purchaseOrderId, int createdByUserId, CancellationToken cancellationToken = default)
+    {
+        // Get the source PO with items
+        var sourcePO = await _context.PurchaseOrders
+            .AsNoTracking()
+            .Include(po => po.PurchaseOrderItems)
+            .FirstOrDefaultAsync(po => po.Id == purchaseOrderId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (sourcePO is null)
+        {
+            throw new InvalidOperationException($"Purchase order with ID {purchaseOrderId} not found.");
+        }
+
+        // Create new PO as Draft
+        var newPO = new PurchaseOrder
+        {
+            SupplierId = sourcePO.SupplierId,
+            OrderDate = DateTime.UtcNow,
+            ExpectedDate = null, // User should set a new expected date
+            Status = PurchaseOrderStatus.Draft,
+            PaymentStatus = PaymentStatus.Unpaid,
+            CreatedByUserId = createdByUserId,
+            Notes = $"Duplicated from {sourcePO.PONumber}"
+        };
+
+        // Generate new PO number
+        newPO.PONumber = await GeneratePONumberAsync(newPO.OrderDate, cancellationToken).ConfigureAwait(false);
+
+        // Copy items
+        foreach (var sourceItem in sourcePO.PurchaseOrderItems)
+        {
+            var newItem = new PurchaseOrderItem
+            {
+                ProductId = sourceItem.ProductId,
+                OrderedQuantity = sourceItem.OrderedQuantity,
+                ReceivedQuantity = 0, // Reset received qty
+                UnitCost = sourceItem.UnitCost,
+                TotalCost = sourceItem.OrderedQuantity * sourceItem.UnitCost,
+                Notes = sourceItem.Notes
+            };
+            newPO.PurchaseOrderItems.Add(newItem);
+        }
+
+        // Calculate totals
+        CalculateTotals(newPO);
+
+        // Save
+        _context.PurchaseOrders.Add(newPO);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        _logger.Information("Duplicated purchase order {SourcePO} to {NewPO}", sourcePO.PONumber, newPO.PONumber);
+
+        return newPO;
+    }
+
     /// <summary>
     /// Calculates and updates the totals for a purchase order.
     /// </summary>

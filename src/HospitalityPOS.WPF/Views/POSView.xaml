@@ -18,19 +18,23 @@
         <!-- F3 = Hold Order -->
         <KeyBinding Key="F3" Command="{Binding HoldOrderAsyncCommand}"/>
         <!-- F4 = Recall Held Orders -->
-        <KeyBinding Key="F4" Command="{Binding ShowHeldOrdersCommand}"/>
-        <!-- F5 = Customer/Loyalty Lookup -->
-        <KeyBinding Key="F5" Command="{Binding ShowLoyaltyPanelCommand}"/>
-        <!-- F6 = Void Last Item -->
-        <KeyBinding Key="F6" Command="{Binding VoidLastItemCommand}"/>
-        <!-- F7 = Price Check (placeholder) -->
-        <KeyBinding Key="F7" Command="{Binding PriceCheckCommand}"/>
+        <KeyBinding Key="F4" Command="{Binding ShowHeldOrdersAsyncCommand}"/>
+        <!-- F5 = Cash Payment -->
+        <KeyBinding Key="F5" Command="{Binding SubmitOrderAsyncCommand}"/>
+        <!-- F6 = M-Pesa Payment -->
+        <KeyBinding Key="F6" Command="{Binding InitiateMpesaPaymentAsyncCommand}"/>
+        <!-- F7 = Card Payment -->
+        <KeyBinding Key="F7" Command="{Binding CardPaymentCommand}"/>
         <!-- F8 = Clear/New Transaction -->
         <KeyBinding Key="F8" Command="{Binding ClearOrderCommand}"/>
-        <!-- F11 = Cash Payment -->
+        <!-- F9 = General Payment (same as Cash) -->
+        <KeyBinding Key="F9" Command="{Binding SubmitOrderAsyncCommand}"/>
+        <!-- F10 = Void Last Item -->
+        <KeyBinding Key="F10" Command="{Binding VoidLastItemCommand}"/>
+        <!-- F11 = Print Receipt -->
         <KeyBinding Key="F11" Command="{Binding PrintOrderAsyncCommand}"/>
-        <!-- F12 = Card Payment (placeholder) -->
-        <KeyBinding Key="F12" Command="{Binding CardPaymentCommand}"/>
+        <!-- F12 = Customer/Loyalty Lookup -->
+        <KeyBinding Key="F12" Command="{Binding ShowLoyaltyPanelCommand}"/>
         <!-- Escape = Cancel/Back -->
         <KeyBinding Key="Escape" Command="{Binding GoBackCommand}"/>
         <!-- Delete = Remove selected item -->
@@ -41,6 +45,8 @@
         <!-- Minus = Decrease quantity -->
         <KeyBinding Key="OemMinus" Command="{Binding DecreaseSelectedQuantityCommand}"/>
         <KeyBinding Key="Subtract" Command="{Binding DecreaseSelectedQuantityCommand}"/>
+        <!-- ? = Show Keyboard Shortcuts Help -->
+        <KeyBinding Key="OemQuestion" Modifiers="Shift" Command="{Binding ShowKeyboardShortcutsCommand}"/>
     </UserControl.InputBindings>
 
     <UserControl.Resources>
@@ -216,7 +222,7 @@
             <!-- Main 3-Column Layout -->
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="140" MinWidth="120"/>
+                    <ColumnDefinition Width="180" MinWidth="160"/>
                     <ColumnDefinition Width="*" MinWidth="400"/>
                     <ColumnDefinition Width="380" MinWidth="340"/>
                 </Grid.ColumnDefinitions>
@@ -314,16 +320,18 @@
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Search Bar -->
+                        <!-- Search Bar with Real-Time Dropdown -->
                         <Border Grid.Row="0" Background="#252538" Padding="12,10">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
@@ -331,7 +339,7 @@
                                 <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="20"
                                            Foreground="#22C55E" VerticalAlignment="Center" Margin="0,0,10,0"/>
 
-                                <!-- Search Input -->
+                                <!-- Search Input with Dropdown -->
                                 <Grid Grid.Column="1">
                                     <TextBox x:Name="RetailBarcodeInput"
                                              Text="{Binding BarcodeInput, UpdateSourceTrigger=PropertyChanged}"
@@ -343,9 +351,11 @@
                                              Padding="12,8"
                                              FontSize="16"
                                              FontWeight="Medium"
-                                             VerticalContentAlignment="Center">
+                                             VerticalContentAlignment="Center"
+                                             PreviewKeyDown="SearchInput_PreviewKeyDown">
                                         <TextBox.InputBindings>
-                                            <KeyBinding Key="Enter" Command="{Binding SearchBarcodeCommand}"/>
+                                            <KeyBinding Key="Enter" Command="{Binding ProcessSearchEnterCommand}"/>
+                                            <KeyBinding Key="Escape" Command="{Binding CloseSearchDropdownCommand}"/>
                                         </TextBox.InputBindings>
                                     </TextBox>
                                     <TextBlock Text="Scan barcode or type product name (F1)..."
@@ -365,6 +375,136 @@
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
+
+                                    <!-- Search Results Dropdown -->
+                                    <Popup x:Name="SearchDropdown"
+                                           PlacementTarget="{Binding ElementName=RetailBarcodeInput}"
+                                           Placement="Bottom"
+                                           StaysOpen="False"
+                                           AllowsTransparency="True"
+                                           PopupAnimation="Fade"
+                                           IsOpen="{Binding IsSearchDropdownOpen, Mode=TwoWay}">
+                                        <Border Background="#2D2D44"
+                                                BorderBrush="#22C55E"
+                                                BorderThickness="1"
+                                                CornerRadius="0,0,8,8"
+                                                Width="{Binding ElementName=RetailBarcodeInput, Path=ActualWidth}"
+                                                MaxHeight="320">
+                                            <Grid>
+                                                <!-- Loading Indicator -->
+                                                <StackPanel Orientation="Horizontal" Margin="12,10"
+                                                            Visibility="{Binding IsSearching, Converter={StaticResource BoolToVisibility}}">
+                                                    <ProgressBar IsIndeterminate="True" Width="100" Height="3" Foreground="#22C55E"/>
+                                                    <TextBlock Text="Searching..." Foreground="#9CA3AF" FontSize="12" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                                </StackPanel>
+
+                                                <!-- Results List -->
+                                                <ListBox x:Name="SearchResultsList"
+                                                         ItemsSource="{Binding SearchResults}"
+                                                         SelectedItem="{Binding SelectedSearchResult, Mode=TwoWay}"
+                                                         Background="Transparent"
+                                                         BorderThickness="0"
+                                                         MaxHeight="300"
+                                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                         Visibility="{Binding IsSearching, Converter={StaticResource InverseBoolToVisibility}}"
+                                                         PreviewMouseLeftButtonUp="SearchResultsList_PreviewMouseLeftButtonUp">
+                                                    <ListBox.ItemContainerStyle>
+                                                        <Style TargetType="ListBoxItem">
+                                                            <Setter Property="Background" Value="Transparent"/>
+                                                            <Setter Property="Padding" Value="10,8"/>
+                                                            <Setter Property="Cursor" Value="Hand"/>
+                                                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                                                                Padding="{TemplateBinding Padding}"
+                                                                                BorderBrush="#3D3D5C" BorderThickness="0,0,0,1">
+                                                                            <ContentPresenter/>
+                                                                        </Border>
+                                                                        <ControlTemplate.Triggers>
+                                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                                <Setter TargetName="Bd" Property="Background" Value="#3D3D5C"/>
+                                                                            </Trigger>
+                                                                            <Trigger Property="IsSelected" Value="True">
+                                                                                <Setter TargetName="Bd" Property="Background" Value="#22C55E"/>
+                                                                            </Trigger>
+                                                                        </ControlTemplate.Triggers>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Style>
+                                                    </ListBox.ItemContainerStyle>
+                                                    <ListBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="44"/>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="55"/>
+                                                                    <ColumnDefinition Width="75"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <!-- Product Image Thumbnail -->
+                                                                <Border Width="36" Height="36" CornerRadius="4" Background="#3D3D5C" Margin="0,0,8,0">
+                                                                    <Grid>
+                                                                        <TextBlock Text="&#xE8B9;" FontFamily="Segoe MDL2 Assets"
+                                                                                   FontSize="14" Foreground="#6B7280"
+                                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                        <Image Source="{Binding ImagePath}" Stretch="UniformToFill"
+                                                                               Visibility="{Binding HasImage, Converter={StaticResource BoolToVisibility}}"/>
+                                                                        <!-- Out of Stock indicator -->
+                                                                        <Border Background="#CC000000" CornerRadius="4"
+                                                                                Visibility="{Binding IsOutOfStock, Converter={StaticResource BoolToVisibility}}">
+                                                                            <TextBlock Text="OUT" Foreground="#EF4444" FontSize="8" FontWeight="Bold"
+                                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                        </Border>
+                                                                    </Grid>
+                                                                </Border>
+
+                                                                <!-- Product Info -->
+                                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{Binding Name}" Foreground="White" FontSize="13"
+                                                                               FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
+                                                                    <TextBlock Text="{Binding Code}" Foreground="#9CA3AF" FontSize="10"/>
+                                                                </StackPanel>
+
+                                                                <!-- Stock -->
+                                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="11">
+                                                                    <TextBlock.Style>
+                                                                        <Style TargetType="TextBlock">
+                                                                            <Setter Property="Text" Value="{Binding CurrentStock, StringFormat='{}{0:N0}'}"/>
+                                                                            <Setter Property="Foreground" Value="#22C55E"/>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding IsOutOfStock}" Value="True">
+                                                                                    <Setter Property="Text" Value="OUT"/>
+                                                                                    <Setter Property="Foreground" Value="#EF4444"/>
+                                                                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding IsLowStock}" Value="True">
+                                                                                    <Setter Property="Foreground" Value="#F59E0B"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
+
+                                                                <!-- Price -->
+                                                                <TextBlock Grid.Column="3" Text="{Binding Price, StringFormat='KSh {0:N0}'}"
+                                                                           Foreground="#F59E0B" FontSize="12" FontWeight="SemiBold"
+                                                                           VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ListBox.ItemTemplate>
+                                                </ListBox>
+
+                                                <!-- No Results Message -->
+                                                <TextBlock Text="No products found" Foreground="#6B7280" FontSize="13"
+                                                           HorizontalAlignment="Center" Margin="12,16"
+                                                           Visibility="{Binding HasNoSearchResults, Converter={StaticResource BoolToVisibility}}"/>
+                                            </Grid>
+                                        </Border>
+                                    </Popup>
                                 </Grid>
 
                                 <!-- Search Button -->
@@ -378,7 +518,7 @@
                                         Height="38"
                                         BorderThickness="0"
                                         Margin="8,0,0,0"
-                                        Command="{Binding SearchBarcodeCommand}"
+                                        Command="{Binding ProcessSearchEnterCommand}"
                                         Cursor="Hand"
                                         ToolTip="Search / Lookup (Enter)">
                                     <Button.Template>
@@ -389,11 +529,143 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
+
+                                <!-- Keyboard Shortcuts Help Button -->
+                                <Button Grid.Column="3"
+                                        Content="&#xE897;"
+                                        FontFamily="Segoe MDL2 Assets"
+                                        FontSize="16"
+                                        Background="#3D3D5C"
+                                        Foreground="#9CA3AF"
+                                        Width="38"
+                                        Height="38"
+                                        BorderThickness="0"
+                                        Margin="4,0,0,0"
+                                        Command="{Binding ShowKeyboardShortcutsCommand}"
+                                        Cursor="Hand"
+                                        ToolTip="Keyboard Shortcuts (Shift+?)">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="4">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="#4D4D6C"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </Grid>
+                        </Border>
+
+                        <!-- Favorites Panel (Collapsible) -->
+                        <Border Grid.Row="1" Background="#1A1A2E" BorderBrush="#3D3D5C" BorderThickness="0,0,0,1"
+                                Visibility="{Binding HasFavorites, Converter={StaticResource BoolToVisibility}}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Favorites Header (Clickable to toggle) -->
+                                <Border Grid.Row="0" Background="#252538" Padding="10,6" Cursor="Hand"
+                                        MouseLeftButtonUp="FavoritesHeader_Click">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="&#xE735;" FontFamily="Segoe MDL2 Assets" Foreground="#F59E0B"
+                                                   FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <TextBlock Grid.Column="1" Text="QUICK FAVORITES" Foreground="#9CA3AF"
+                                                   FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" FontFamily="Segoe MDL2 Assets" Foreground="#6B7280" FontSize="12"
+                                                   VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="&#xE70D;"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsFavoritesPanelExpanded}" Value="False">
+                                                            <Setter Property="Text" Value="&#xE70E;"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Favorites Items -->
+                                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                                              Visibility="{Binding IsFavoritesPanelExpanded, Converter={StaticResource BoolToVisibility}}"
+                                              MaxHeight="100">
+                                    <ItemsControl ItemsSource="{Binding Favorites}" Margin="6,6">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Margin="3" Cursor="Hand"
+                                                        Command="{Binding DataContext.AddFavoriteToOrderAsyncCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        IsEnabled="{Binding IsInStock}">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border x:Name="border" Background="#2D2D44" BorderBrush="#F59E0B"
+                                                                    BorderThickness="2" CornerRadius="8" Padding="6">
+                                                                <Grid Width="70" Height="60">
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="36"/>
+                                                                        <RowDefinition Height="*"/>
+                                                                    </Grid.RowDefinitions>
+                                                                    <!-- Product Image -->
+                                                                    <Border Grid.Row="0" Background="#3D3D5C" CornerRadius="4" ClipToBounds="True">
+                                                                        <Grid>
+                                                                            <TextBlock Text="&#xE8B9;" FontFamily="Segoe MDL2 Assets"
+                                                                                       FontSize="16" Foreground="#6B7280"
+                                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                            <Image Source="{Binding ImagePath}" Stretch="UniformToFill"
+                                                                                   Visibility="{Binding HasImage, Converter={StaticResource BoolToVisibility}}"/>
+                                                                            <!-- Out of Stock -->
+                                                                            <Border Background="#CC000000" CornerRadius="4"
+                                                                                    Visibility="{Binding IsOutOfStock, Converter={StaticResource BoolToVisibility}}">
+                                                                                <TextBlock Text="OUT" Foreground="#EF4444" FontSize="8" FontWeight="Bold"
+                                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                        </Grid>
+                                                                    </Border>
+                                                                    <!-- Product Name -->
+                                                                    <TextBlock Grid.Row="1" Text="{Binding Name}" Foreground="White"
+                                                                               FontSize="9" FontWeight="Medium" TextTrimming="CharacterEllipsis"
+                                                                               TextWrapping="Wrap" MaxHeight="20" VerticalAlignment="Center"
+                                                                               HorizontalAlignment="Center" TextAlignment="Center" Margin="0,2,0,0"/>
+                                                                </Grid>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsPressed" Value="True">
+                                                                    <Setter TargetName="border" Property="Background" Value="#4D4D6C"/>
+                                                                </Trigger>
+                                                                <Trigger Property="IsEnabled" Value="False">
+                                                                    <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
                             </Grid>
                         </Border>
 
                         <!-- Product Grid with Pagination -->
-                        <Grid Grid.Row="1">
+                        <Grid Grid.Row="2">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
@@ -455,23 +727,81 @@
                                                     </Grid.RowDefinitions>
 
                                                     <!-- Product Image or Placeholder -->
-                                                    <Border Grid.Row="0" Background="#3D3D5C" CornerRadius="6,6,0,0">
+                                                    <Border Grid.Row="0" Background="#3D3D5C" CornerRadius="6,6,0,0" ClipToBounds="True">
                                                         <Grid>
+                                                            <!-- Placeholder Icon (shows when no image) -->
                                                             <TextBlock Text="&#xE8B9;" FontFamily="Segoe MDL2 Assets" FontSize="24"
                                                                        Foreground="#6B7280" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <!-- Product Image -->
                                                             <Image Source="{Binding ImagePath}" Stretch="UniformToFill"
-                                                                   Visibility="{Binding ImagePath.Length, Converter={StaticResource BoolToVisibility}}"/>
+                                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                                   Visibility="{Binding HasImage, Converter={StaticResource BoolToVisibility}}"/>
                                                             <!-- Offer Badge -->
                                                             <Border Background="#EF4444" CornerRadius="0,6,0,4" Padding="3,1"
                                                                     HorizontalAlignment="Right" VerticalAlignment="Top"
                                                                     Visibility="{Binding HasActiveOffer, Converter={StaticResource BoolToVisibility}}">
                                                                 <TextBlock Text="OFFER" Foreground="White" FontWeight="Bold" FontSize="8"/>
                                                             </Border>
+                                                            <!-- Low Stock Warning Badge -->
+                                                            <Border Background="#F59E0B" CornerRadius="4,0,4,0" Padding="3,1"
+                                                                    HorizontalAlignment="Left" VerticalAlignment="Top"
+                                                                    Visibility="{Binding IsLowStock, Converter={StaticResource BoolToVisibility}}">
+                                                                <TextBlock Text="LOW" Foreground="White" FontWeight="Bold" FontSize="7"/>
+                                                            </Border>
                                                             <!-- Out of Stock Overlay -->
                                                             <Border Background="#CC000000" CornerRadius="6,6,0,0"
                                                                     Visibility="{Binding IsOutOfStock, Converter={StaticResource BoolToVisibility}}">
-                                                                <TextBlock Text="OUT" Foreground="#EF4444" FontWeight="Bold" FontSize="14"
-                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                                    <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets"
+                                                                               FontSize="16" Foreground="#EF4444" HorizontalAlignment="Center"/>
+                                                                    <TextBlock Text="OUT" Foreground="#EF4444" FontWeight="Bold" FontSize="10"/>
+                                                                </StackPanel>
+                                                            </Border>
+                                                            <!-- Favorite Toggle Button -->
+                                                            <Button HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="2,0,0,2"
+                                                                    Width="20" Height="20" Cursor="Hand"
+                                                                    Command="{Binding DataContext.ToggleFavoriteAsyncCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                    CommandParameter="{Binding}" ToolTip="Toggle Favorite">
+                                                                <Button.Template>
+                                                                    <ControlTemplate TargetType="Button">
+                                                                        <Border Background="#80000000" CornerRadius="3">
+                                                                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                                                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                                <TextBlock.Style>
+                                                                                    <Style TargetType="TextBlock">
+                                                                                        <Setter Property="Text" Value="&#xE734;"/>
+                                                                                        <Setter Property="Foreground" Value="#9CA3AF"/>
+                                                                                        <Style.Triggers>
+                                                                                            <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                                                                                <Setter Property="Text" Value="&#xE735;"/>
+                                                                                                <Setter Property="Foreground" Value="#F59E0B"/>
+                                                                                            </DataTrigger>
+                                                                                        </Style.Triggers>
+                                                                                    </Style>
+                                                                                </TextBlock.Style>
+                                                                            </TextBlock>
+                                                                        </Border>
+                                                                    </ControlTemplate>
+                                                                </Button.Template>
+                                                            </Button>
+                                                            <!-- Profit Margin Badge -->
+                                                            <Border Background="#80000000" CornerRadius="3" Padding="3,1" Margin="0,0,2,2"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                                                    ToolTip="Profit Margin"
+                                                                    Visibility="{Binding HasCostPrice, Converter={StaticResource BoolToVisibility}}">
+                                                                <TextBlock FontSize="8" FontWeight="Bold">
+                                                                    <TextBlock.Style>
+                                                                        <Style TargetType="TextBlock">
+                                                                            <Setter Property="Text" Value="{Binding ProfitMarginPercent, StringFormat='{}{0:N0}%'}"/>
+                                                                            <Setter Property="Foreground" Value="#22C55E"/>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding IsProfitable}" Value="False">
+                                                                                    <Setter Property="Foreground" Value="#EF4444"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
                                                             </Border>
                                                         </Grid>
                                                     </Border>
@@ -500,7 +830,7 @@
                         </Grid>
 
                         <!-- Numeric Keypad (Bottom of Center Column) -->
-                        <Border Grid.Row="2" Background="#252538" Padding="8">
+                        <Border Grid.Row="3" Background="#252538" Padding="8">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -632,6 +962,72 @@
                             </Grid>
                         </Border>
 
+                        <!-- Customer Section (Between Header and Items) -->
+                        <Border Grid.Row="0" Background="#252538" Padding="8,6" Margin="0,0,0,0"
+                                VerticalAlignment="Bottom" Height="36">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Customer Icon/Button -->
+                                <Button Content="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                        Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                        Command="{Binding ToggleLoyaltyPanelAsyncCommand}" ToolTip="Search Customer (F12)"
+                                        VerticalAlignment="Center">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Foreground" Value="#6B7280"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasLoyaltyMember}" Value="True">
+                                                    <Setter Property="Foreground" Value="#22C55E"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <!-- Customer Info or "Add Customer" Text -->
+                                <Grid Grid.Column="1" Margin="8,0">
+                                    <!-- No Customer -->
+                                    <TextBlock Text="No customer assigned" Foreground="#6B7280" FontSize="11"
+                                               VerticalAlignment="Center"
+                                               Visibility="{Binding HasLoyaltyMember, Converter={StaticResource InverseBoolToVisibility}}"/>
+                                    <!-- Customer Assigned -->
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                                Visibility="{Binding HasLoyaltyMember, Converter={StaticResource BoolToVisibility}}">
+                                        <TextBlock Text="{Binding AttachedLoyaltyMember.Name, FallbackValue='Customer'}"
+                                                   Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+                                        <TextBlock Text=" | " Foreground="#4B5563" FontSize="11"/>
+                                        <TextBlock Text="{Binding AttachedLoyaltyMember.PointsBalance, StringFormat='{}{0:N0} pts'}"
+                                                   Foreground="#22C55E" FontSize="11"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- Clear Customer Button -->
+                                <Button Grid.Column="2" Content="&#xE711;" FontFamily="Segoe MDL2 Assets"
+                                        Background="Transparent" Foreground="#6B7280" FontSize="10"
+                                        BorderThickness="0" Cursor="Hand" Width="24" Height="24"
+                                        Command="{Binding DetachLoyaltyMemberCommand}" ToolTip="Clear Customer"
+                                        Visibility="{Binding HasLoyaltyMember, Converter={StaticResource BoolToVisibility}}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="Transparent" CornerRadius="4">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Foreground" Value="#EF4444"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </Grid>
+                        </Border>
+
                         <!-- Order Items List -->
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                             <Grid>
@@ -644,20 +1040,51 @@
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*"/>
                                                         <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
                                                     <Grid.RowDefinitions>
                                                         <RowDefinition Height="Auto"/>
                                                         <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
                                                     </Grid.RowDefinitions>
 
-                                                    <!-- Product Name -->
-                                                    <TextBlock Text="{Binding ProductName}" Foreground="White" FontSize="13" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
+                                                    <!-- Product Name with Note Indicator -->
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding ProductName}" Foreground="White" FontSize="13" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
+                                                        <!-- Note Indicator -->
+                                                        <TextBlock Text="&#xE70B;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#F59E0B"
+                                                                   Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="{Binding Notes}"
+                                                                   Visibility="{Binding HasNotes, Converter={StaticResource BoolToVisibility}}"/>
+                                                    </StackPanel>
+
+                                                    <!-- Note Button -->
+                                                    <Button Grid.Column="1" Content="&#xE70B;" FontFamily="Segoe MDL2 Assets"
+                                                            Foreground="#9CA3AF" Width="24" Height="24" FontSize="11" BorderThickness="0" Cursor="Hand"
+                                                            Command="{Binding DataContext.EditItemNotesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}" VerticalAlignment="Center" Margin="4,0" ToolTip="Add/Edit Notes">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border x:Name="border" Background="Transparent" CornerRadius="4">
+                                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter TargetName="border" Property="Background" Value="#3D3D5C"/>
+                                                                        <Setter Property="Foreground" Value="#F59E0B"/>
+                                                                    </Trigger>
+                                                                    <DataTrigger Binding="{Binding HasNotes}" Value="True">
+                                                                        <Setter Property="Foreground" Value="#F59E0B"/>
+                                                                    </DataTrigger>
+                                                                </ControlTemplate.Triggers>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
+                                                    </Button>
 
                                                     <!-- Delete Button -->
-                                                    <Button Grid.Column="1" Grid.RowSpan="2" Content="&#xE74D;" FontFamily="Segoe MDL2 Assets"
+                                                    <Button Grid.Column="2" Grid.RowSpan="2" Content="&#xE74D;" FontFamily="Segoe MDL2 Assets"
                                                             Background="#EF4444" Foreground="White" Width="28" Height="28" FontSize="11" BorderThickness="0" Cursor="Hand"
                                                             Command="{Binding DataContext.RemoveOrderItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                            CommandParameter="{Binding}" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                            CommandParameter="{Binding}" VerticalAlignment="Center" Margin="4,0,0,0">
                                                         <Button.Template>
                                                             <ControlTemplate TargetType="Button">
                                                                 <Border Background="{TemplateBinding Background}" CornerRadius="4">
@@ -708,6 +1135,22 @@
                                                         <!-- Line Total -->
                                                         <TextBlock Grid.Column="2" Text="{Binding LineTotal, StringFormat='KSh {0:N2}'}" Foreground="#22C55E" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                                     </Grid>
+
+                                                    <!-- Notes Display Row -->
+                                                    <Border Grid.Row="2" Grid.ColumnSpan="3" Background="#1E1E2E" CornerRadius="4" Padding="6,4" Margin="0,6,0,0"
+                                                            Visibility="{Binding HasNotes, Converter={StaticResource BoolToVisibility}}">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock Text="&#xE70B;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                                                       Foreground="#F59E0B" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                            <TextBlock Grid.Column="1" Text="{Binding Notes}" Foreground="#D1D5DB"
+                                                                       FontSize="11" FontStyle="Italic" TextTrimming="CharacterEllipsis"
+                                                                       VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </Border>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
@@ -742,6 +1185,19 @@
                                 <Grid>
                                     <TextBlock Text="TOTAL:" Foreground="White" FontSize="16" FontWeight="Bold"/>
                                     <TextBlock Text="{Binding OrderTotal, StringFormat='KSh {0:N2}'}" Foreground="#22C55E" FontSize="22" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                </Grid>
+                                <!-- Profit Margin (visible when cost data available) -->
+                                <Grid Margin="0,6,0,0" Visibility="{Binding HasOrderProfit, Converter={StaticResource BoolToVisibility}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" Foreground="#6366F1" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Margin:" Foreground="#6366F1" FontSize="11"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding OrderProfit, StringFormat='KSh {0:N2}'}" Foreground="#6366F1" FontSize="11" FontWeight="Medium"/>
+                                        <TextBlock Text=" (" Foreground="#6B7280" FontSize="10"/>
+                                        <TextBlock Text="{Binding OrderProfitPercent, StringFormat='{}{0:N1}%'}" Foreground="#6366F1" FontSize="10" FontWeight="Medium"/>
+                                        <TextBlock Text=")" Foreground="#6B7280" FontSize="10"/>
+                                    </StackPanel>
                                 </Grid>
                             </StackPanel>
                         </Border>
@@ -794,6 +1250,22 @@
                                         <TextBlock Text="CARD (F7)" VerticalAlignment="Center"/>
                                     </Button>
                                 </Grid>
+
+                                <!-- Split Payment Button -->
+                                <Button Background="#6366F1" Foreground="White" Height="40" Margin="0,8,0,0" FontSize="12" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand"
+                                        Command="{Binding OpenSplitPaymentCommand}" ToolTip="Split Payment - Pay with multiple methods">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE8AB;" FontFamily="Segoe MDL2 Assets" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <TextBlock Text="SPLIT PAYMENT" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </Border>
                     </Grid>
@@ -809,7 +1281,7 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="F1-Search | F2-Discount | F3-Hold | F4-Recall | F5-Cash | F6-M-Pesa | F7-Card | F8-Clear"
+                    <TextBlock Text="F1-Search | F2-Discount | F3-Hold | F4-Recall | F5/F9-Cash | F6-M-Pesa | F7-Card | F8-Clear | F10-Void"
                                Foreground="#6B7280" FontSize="10"/>
                     <TextBlock Grid.Column="2" Text="{Binding CurrentTime, StringFormat='{}{0:HH:mm}'}" Foreground="#9CA3AF" FontSize="11" Margin="0,0,16,0"/>
                     <StackPanel Grid.Column="3" Orientation="Horizontal">
@@ -919,6 +1391,134 @@
                                 Visibility="{Binding HeldOrders.Count, Converter={StaticResource InverseBoolToVisibility}}">
                         <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="32" Foreground="#4B5563" HorizontalAlignment="Center"/>
                         <TextBlock Text="No held orders" Foreground="#6B7280" FontSize="12" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Border>
+
+        <!-- Customer Search Panel Overlay -->
+        <Border Background="#80000000"
+                Visibility="{Binding IsLoyaltyPanelVisible, Converter={StaticResource BoolToVisibility}}"
+                MouseDown="CustomerSearchOverlay_MouseDown">
+            <Border Background="#252538"
+                    CornerRadius="12"
+                    Width="420"
+                    MaxHeight="450"
+                    Margin="0,80"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    MouseDown="CustomerSearchPanel_MouseDown">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <Border Grid.Row="0" Background="#1E1E2E" CornerRadius="12,12,0,0" Padding="16,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#22C55E"
+                                       VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Grid.Column="1" Text="Search Customer" Foreground="White" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <Button Grid.Column="2" Content="&#xE711;" FontFamily="Segoe MDL2 Assets" Background="Transparent" Foreground="#9CA3AF"
+                                    Width="32" Height="32" BorderThickness="0" Cursor="Hand"
+                                    Command="{Binding ToggleLoyaltyPanelAsyncCommand}">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Search Box -->
+                    <Border Grid.Row="1" Background="#2D2D44" Padding="12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Text="{Binding LoyaltySearchPhone, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="#1E1E2E" Foreground="White" CaretBrush="White"
+                                     BorderThickness="0" Padding="10,8" FontSize="14"
+                                     VerticalAlignment="Center">
+                                <TextBox.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="6,0,0,6"/>
+                                    </Style>
+                                </TextBox.Resources>
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Return" Command="{Binding SearchLoyaltyMemberAsyncCommand}"/>
+                                </TextBox.InputBindings>
+                            </TextBox>
+                            <Button Grid.Column="1" Content="Search" Background="#22C55E" Foreground="White"
+                                    Padding="16,8" FontSize="13" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand"
+                                    Command="{Binding SearchLoyaltyMemberAsyncCommand}">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="0,6,6,0" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#16A34A"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Search Results -->
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" MaxHeight="280">
+                        <ItemsControl ItemsSource="{Binding LoyaltySearchResults}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#2D2D44" BorderBrush="#3D3D5C" BorderThickness="0,0,0,1" Padding="12,10" Cursor="Hand">
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick"
+                                                          Command="{Binding DataContext.AttachLoyaltyMemberAsyncCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                          CommandParameter="{Binding}"/>
+                                        </Border.InputBindings>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name, TargetNullValue='Unknown Customer'}" Foreground="White" FontSize="14" FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding PhoneNumber}" Foreground="#9CA3AF" FontSize="11"/>
+                                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                    <Border Background="#22C55E" CornerRadius="3" Padding="6,2" Margin="0,0,6,0">
+                                                        <TextBlock Text="{Binding TierName}" Foreground="White" FontSize="9" FontWeight="Bold"/>
+                                                    </Border>
+                                                    <TextBlock Text="{Binding PointsBalance, StringFormat='{}{0:N0} points'}" Foreground="#F59E0B" FontSize="11" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="&#xE76C;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                       Foreground="#22C55E" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!-- Empty State for Search Results -->
+                    <StackPanel Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                Visibility="{Binding LoyaltySearchResults.Count, Converter={StaticResource InverseBoolToVisibility}}">
+                        <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="32" Foreground="#4B5563" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Search by name or phone" Foreground="#6B7280" FontSize="12" HorizontalAlignment="Center" Margin="0,8,0,0"/>
                     </StackPanel>
                 </Grid>
             </Border>

@@ -549,6 +549,33 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
+
+                    <!-- Actions Column -->
+                    <DataGridTemplateColumn Header="Actions" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="History"
+                                        Background="#3B82F6"
+                                        Foreground="White"
+                                        FontSize="11"
+                                        FontWeight="SemiBold"
+                                        Padding="10,4"
+                                        Cursor="Hand"
+                                        Command="{Binding DataContext.ViewStockHistoryCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    CornerRadius="4"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
@@ -605,6 +632,226 @@
                     <Run Text="Selected: "/>
                     <Run Text="{Binding SelectedProduct.ProductName, Mode=OneWay, FallbackValue='None'}"/>
                 </TextBlock>
+            </Grid>
+        </Border>
+
+        <!-- Stock History Slide-in Panel -->
+        <Border Grid.Row="0" Grid.RowSpan="6"
+                HorizontalAlignment="Right"
+                Width="450"
+                Background="#252538"
+                Visibility="{Binding IsHistoryPanelVisible, Converter={StaticResource BoolToVisibility}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Panel Header -->
+                <Border Grid.Row="0"
+                        Background="#1E1E2E"
+                        Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Stock Movement History"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="White"/>
+                            <TextBlock Text="{Binding SelectedProduct.ProductName}"
+                                       FontSize="14"
+                                       Foreground="#8888AA"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Content="X"
+                                Background="Transparent"
+                                Foreground="#8888AA"
+                                FontSize="18"
+                                FontWeight="Bold"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                Command="{Binding CloseHistoryPanelCommand}"
+                                Width="36"
+                                Height="36"/>
+                    </Grid>
+                </Border>
+
+                <!-- Date Filter -->
+                <Border Grid.Row="1"
+                        Background="#2D2D44"
+                        Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <TextBlock Text="From" Foreground="#8888AA" FontSize="11" Margin="0,0,0,4"/>
+                            <DatePicker SelectedDate="{Binding HistoryStartDate}"
+                                        Background="#353550"
+                                        Foreground="White"
+                                        BorderBrush="#4E4E6E"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Column="1" Text="to" Foreground="#8888AA" VerticalAlignment="Bottom" Margin="4,0,4,8"/>
+
+                        <StackPanel Grid.Column="2" Margin="8,0,8,0">
+                            <TextBlock Text="To" Foreground="#8888AA" FontSize="11" Margin="0,0,0,4"/>
+                            <DatePicker SelectedDate="{Binding HistoryEndDate}"
+                                        Background="#353550"
+                                        Foreground="White"
+                                        BorderBrush="#4E4E6E"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="3"
+                                Content="Apply"
+                                Background="#3B82F6"
+                                Foreground="White"
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                Padding="12,8"
+                                Cursor="Hand"
+                                VerticalAlignment="Bottom"
+                                Command="{Binding LoadStockHistoryCommand}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}"
+                                            CornerRadius="6"
+                                            Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- Movement List -->
+                <Border Grid.Row="2" Padding="8">
+                    <Grid>
+                        <!-- Loading -->
+                        <StackPanel VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"
+                                    Visibility="{Binding IsHistoryLoading, Converter={StaticResource BoolToVisibility}}">
+                            <ProgressBar IsIndeterminate="True" Width="100" Height="4" Foreground="#4CAF50"/>
+                            <TextBlock Text="Loading history..." Foreground="#8888AA" FontSize="12" Margin="0,8,0,0"/>
+                        </StackPanel>
+
+                        <!-- Empty State -->
+                        <TextBlock Text="No stock movements found for this period."
+                                   Foreground="#6E6E8E"
+                                   FontSize="14"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding StockMovements.Count, Converter={StaticResource InverseBoolToVisibility}}"/>
+
+                        <!-- Movements List -->
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      Visibility="{Binding IsHistoryLoading, Converter={StaticResource InverseBoolToVisibility}}">
+                            <ItemsControl ItemsSource="{Binding StockMovements}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#2D2D44"
+                                                CornerRadius="8"
+                                                Padding="12"
+                                                Margin="4,4">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Icon -->
+                                                <Border Grid.Column="0"
+                                                        Width="36"
+                                                        Height="36"
+                                                        CornerRadius="18"
+                                                        Margin="0,0,12,0">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="#1B5E20"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsIncoming}" Value="False">
+                                                                    <Setter Property="Background" Value="#7F1D1D"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding MovementIcon}"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="16"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="#22C55E"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsIncoming}" Value="False">
+                                                                        <Setter Property="Foreground" Value="#EF4444"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+
+                                                <!-- Details -->
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding MovementTypeDisplay}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="White"/>
+                                                    <TextBlock FontSize="12" Foreground="#8888AA" Margin="0,2,0,0">
+                                                        <Run Text="{Binding ReferenceDisplay}"/>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding DateDisplay}"
+                                                               FontSize="11"
+                                                               Foreground="#6E6E8E"
+                                                               Margin="0,2,0,0"/>
+                                                </StackPanel>
+
+                                                <!-- Quantity -->
+                                                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                    <TextBlock Text="{Binding QuantityDisplay}"
+                                                               FontSize="16"
+                                                               FontWeight="Bold"
+                                                               HorizontalAlignment="Right">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="#22C55E"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsIncoming}" Value="False">
+                                                                        <Setter Property="Foreground" Value="#EF4444"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <TextBlock FontSize="11" Foreground="#6E6E8E" HorizontalAlignment="Right">
+                                                        <Run Text="{Binding PreviousStock, StringFormat=N0}"/>
+                                                        <Run Text=" → "/>
+                                                        <Run Text="{Binding NewStock, StringFormat=N0}"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
             </Grid>
         </Border>
     </Grid>

@@ -18,6 +18,9 @@ public class SalesReportsViewModelTests
     private readonly Mock<IReportService> _reportServiceMock;
     private readonly Mock<IReportPrintService> _reportPrintServiceMock;
     private readonly Mock<INavigationService> _navigationServiceMock;
+    private readonly Mock<IExportService> _exportServiceMock;
+    private readonly Mock<ISessionService> _sessionServiceMock;
+    private readonly Func<ExportDialogViewModel> _exportDialogFactory;
     private readonly Mock<ILogger> _loggerMock;
 
     public SalesReportsViewModelTests()
@@ -25,6 +28,9 @@ public class SalesReportsViewModelTests
         _reportServiceMock = new Mock<IReportService>();
         _reportPrintServiceMock = new Mock<IReportPrintService>();
         _navigationServiceMock = new Mock<INavigationService>();
+        _exportServiceMock = new Mock<IExportService>();
+        _sessionServiceMock = new Mock<ISessionService>();
+        _exportDialogFactory = () => new Mock<ExportDialogViewModel>().Object;
         _loggerMock = new Mock<ILogger>();
     }
 
@@ -34,6 +40,9 @@ public class SalesReportsViewModelTests
             _reportServiceMock.Object,
             _reportPrintServiceMock.Object,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
+            _sessionServiceMock.Object,
+            _exportDialogFactory,
             _loggerMock.Object);
     }
 
@@ -62,6 +71,9 @@ public class SalesReportsViewModelTests
             null!,
             _reportPrintServiceMock.Object,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
+            _sessionServiceMock.Object,
+            _exportDialogFactory,
             _loggerMock.Object);
 
         // Assert
@@ -77,6 +89,9 @@ public class SalesReportsViewModelTests
             _reportServiceMock.Object,
             null!,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
+            _sessionServiceMock.Object,
+            _exportDialogFactory,
             _loggerMock.Object);
 
         // Assert
@@ -92,6 +107,9 @@ public class SalesReportsViewModelTests
             _reportServiceMock.Object,
             _reportPrintServiceMock.Object,
             null!,
+            _exportServiceMock.Object,
+            _sessionServiceMock.Object,
+            _exportDialogFactory,
             _loggerMock.Object);
 
         // Assert

@@ -372,6 +372,45 @@ public partial class SalesReportsViewModel : ViewModelBase, INavigationAware
     }
 
     /// <summary>
+    /// Sets the date range to last week (Monday to Sunday).
+    /// </summary>
+    [RelayCommand]
+    private void SetLastWeek()
+    {
+        var today = DateTime.Today;
+        var dayOfWeek = (int)today.DayOfWeek;
+        var thisSunday = today.AddDays(-dayOfWeek);
+        var lastMonday = thisSunday.AddDays(-6);
+        FromDate = lastMonday;
+        ToDate = thisSunday;
+    }
+
+    /// <summary>
+    /// Sets the date range to last month.
+    /// </summary>
+    [RelayCommand]
+    private void SetLastMonth()
+    {
+        var today = DateTime.Today;
+        var firstOfThisMonth = new DateTime(today.Year, today.Month, 1);
+        var lastOfPreviousMonth = firstOfThisMonth.AddDays(-1);
+        var firstOfPreviousMonth = new DateTime(lastOfPreviousMonth.Year, lastOfPreviousMonth.Month, 1);
+        FromDate = firstOfPreviousMonth;
+        ToDate = lastOfPreviousMonth;
+    }
+
+    /// <summary>
+    /// Sets the date range to year to date.
+    /// </summary>
+    [RelayCommand]
+    private void SetYearToDate()
+    {
+        var today = DateTime.Today;
+        FromDate = new DateTime(today.Year, 1, 1);
+        ToDate = today;
+    }
+
+    /// <summary>
     /// Navigates back to the previous view.
     /// </summary>
     [RelayCommand]

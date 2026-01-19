@@ -47,6 +47,7 @@
     <Compile Remove="Services\BudgetService.cs" />
     <Compile Remove="Services\ReportService.cs" />
     <Compile Remove="Services\FinancialReportingService.cs" />
+    <!-- EmailReportService has too many API mismatches to fix quickly -->
     <Compile Remove="Services\EmailReportService.cs" />
     <Compile Remove="Services\BatchPrepService.cs" />
     <Compile Remove="Services\StockTransferService.cs" />
@@ -55,7 +56,6 @@
     <Compile Remove="Services\RecipeCostService.cs" />
     <Compile Remove="Services\MultiStoreService.cs" />
     <Compile Remove="Services\LabelPrintService.cs" />
-    <Compile Remove="Services\DashboardService.cs" />
     <Compile Remove="Services\CheckoutEnhancementService.cs" />
     <Compile Remove="Services\ComparativeAnalyticsService.cs" />
     <Compile Remove="Services\ExpiryValidationService.cs" />
@@ -73,8 +73,9 @@
     <Compile Remove="Services\KdsStatusService.cs" />
     <Compile Remove="Services\IngredientDeductionService.cs" />
     <Compile Remove="Services\KitchenOrderRoutingService.cs" />
-    <Compile Remove="Services\EmailService.cs" />
-    <Compile Remove="Data\Configurations\EmailConfiguration.cs" />
+    <!-- Email services enabled for Phase 3 -->
+    <!-- <Compile Remove="Services\EmailService.cs" /> -->
+    <!-- <Compile Remove="Data\Configurations\EmailConfiguration.cs" /> -->
     <Compile Remove="Services\PrintReceiptService.cs" />
     <Compile Remove="Printing\ImageConverter.cs" />
     <Compile Remove="Services\BatchTraceabilityService.cs" />

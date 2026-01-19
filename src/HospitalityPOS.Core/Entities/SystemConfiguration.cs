@@ -57,6 +57,11 @@ public class SystemConfiguration
     public string? BusinessEmail { get; set; }
 
     /// <summary>
+    /// Gets or sets the path to the business logo image.
+    /// </summary>
+    public string? LogoPath { get; set; }
+
+    /// <summary>
     /// Gets or sets the business tax registration number (legacy field).
     /// </summary>
     public string? TaxRegistrationNumber { get; set; }

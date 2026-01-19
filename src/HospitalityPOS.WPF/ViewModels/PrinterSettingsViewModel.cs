@@ -64,6 +64,18 @@ public partial class PrinterSettingsViewModel : ViewModelBase
     private int _cutFeedLines = 3;
 
     [ObservableProperty]
+    private int _receiptCopies = 1;
+
+    [ObservableProperty]
+    private bool _autoPrintOnSettlement = true;
+
+    [ObservableProperty]
+    private string _footerMessage = "Thank you for your business!";
+
+    [ObservableProperty]
+    private bool _printCustomerCopy;
+
+    [ObservableProperty]
     private bool _isWindowsDriver = true;
 
     [ObservableProperty]
@@ -182,6 +194,10 @@ public partial class PrinterSettingsViewModel : ViewModelBase
             PrintLogo = printer.Settings.PrintLogo;
             BeepOnPrint = printer.Settings.BeepOnPrint;
             CutFeedLines = printer.Settings.CutFeedLines;
+            ReceiptCopies = printer.Settings.ReceiptCopies;
+            AutoPrintOnSettlement = printer.Settings.AutoPrintOnSettlement;
+            FooterMessage = printer.Settings.FooterMessage ?? "Thank you for your business!";
+            PrintCustomerCopy = printer.Settings.PrintCustomerCopy;
         }
         else
         {
@@ -192,6 +208,10 @@ public partial class PrinterSettingsViewModel : ViewModelBase
             PrintLogo = true;
             BeepOnPrint = false;
             CutFeedLines = 3;
+            ReceiptCopies = 1;
+            AutoPrintOnSettlement = true;
+            FooterMessage = "Thank you for your business!";
+            PrintCustomerCopy = false;
         }
 
         ClearStatusMessage();
@@ -212,6 +232,10 @@ public partial class PrinterSettingsViewModel : ViewModelBase
         PrintLogo = true;
         BeepOnPrint = false;
         CutFeedLines = 3;
+        ReceiptCopies = 1;
+        AutoPrintOnSettlement = true;
+        FooterMessage = "Thank you for your business!";
+        PrintCustomerCopy = false;
     }
 
     #endregion
@@ -498,6 +522,10 @@ public partial class PrinterSettingsViewModel : ViewModelBase
         printer.Settings.PrintLogo = PrintLogo;
         printer.Settings.BeepOnPrint = BeepOnPrint;
         printer.Settings.CutFeedLines = CutFeedLines;
+        printer.Settings.ReceiptCopies = ReceiptCopies;
+        printer.Settings.AutoPrintOnSettlement = AutoPrintOnSettlement;
+        printer.Settings.FooterMessage = FooterMessage;
+        printer.Settings.PrintCustomerCopy = PrintCustomerCopy;
     }
 
     private void ShowStatusMessage(string message, bool isSuccess)

@@ -71,6 +71,26 @@ public class PrinterSettings
     public int PrintDensity { get; set; } = 7;
 
     /// <summary>
+    /// Gets or sets the number of receipt copies to print.
+    /// </summary>
+    public int ReceiptCopies { get; set; } = 1;
+
+    /// <summary>
+    /// Gets or sets whether to auto-print on order settlement.
+    /// </summary>
+    public bool AutoPrintOnSettlement { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the receipt footer message.
+    /// </summary>
+    public string FooterMessage { get; set; } = "Thank you for your business!";
+
+    /// <summary>
+    /// Gets or sets whether to print a customer copy.
+    /// </summary>
+    public bool PrintCustomerCopy { get; set; }
+
+    /// <summary>
     /// Gets or sets the associated printer.
     /// </summary>
     public Printer Printer { get; set; } = null!;

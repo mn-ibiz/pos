@@ -478,7 +478,7 @@ public class QrMenuService : IQrMenuService
 
         if (_configuration.MinimumOrderAmount > 0)
         {
-            var total = CalculateOrderTotal(request.Items);
+            var total = CalculateOrderTotal(request.Items ?? []);
             if (total < _configuration.MinimumOrderAmount)
             {
                 errors.Add($"Minimum order amount is {_configuration.CurrencySymbol} {_configuration.MinimumOrderAmount:N0}");

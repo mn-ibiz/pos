@@ -343,6 +343,34 @@ public class WorkPeriodService : IWorkPeriodService
         // Calculate expected cash
         var expectedCash = await CalculateExpectedCashAsync(workPeriodId, cancellationToken).ConfigureAwait(false);
 
+        // Hourly sales breakdown
+        var hourlySales = settledReceipts
+            .GroupBy(r => r.SettledAt?.ToLocalTime().Hour ?? r.CreatedAt.ToLocalTime().Hour)
+            .Select(g => new HourlySalesSummary
+            {
+                Hour = g.Key,
+                HourLabel = FormatHourLabel(g.Key),
+                TransactionCount = g.Count(),
+                TotalAmount = g.Sum(r => r.TotalAmount)
+            })
+            .OrderBy(h => h.Hour)
+            .ToList();
+
+        // Fill in missing hours with zero values for complete chart
+        var allHourlySales = Enumerable.Range(0, 24)
+            .Select(hour =>
+            {
+                var existing = hourlySales.FirstOrDefault(h => h.Hour == hour);
+                return existing ?? new HourlySalesSummary
+                {
+                    Hour = hour,
+                    HourLabel = FormatHourLabel(hour),
+                    TransactionCount = 0,
+                    TotalAmount = 0
+                };
+            })
+            .ToList();
+
         var xReport = new XReport
         {
             // Header
@@ -371,6 +399,7 @@ public class WorkPeriodService : IWorkPeriodService
             SalesByCategory = salesByCategory,
             SalesByPaymentMethod = salesByPaymentMethod,
             SalesByUser = salesByUser,
+            HourlySales = allHourlySales,
 
             // Transaction Stats
             TransactionCount = transactionCount,
@@ -627,6 +656,17 @@ public class WorkPeriodService : IWorkPeriodService
             .Where(r => r.Status == ReceiptStatus.Open || r.Status == ReceiptStatus.Pending)
             .CountAsync(cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    private static string FormatHourLabel(int hour)
+    {
+        return hour switch
+        {
+            0 => "12 AM",
+            12 => "12 PM",
+            _ when hour < 12 => $"{hour} AM",
+            _ => $"{hour - 12} PM"
+        };
     }
 
     private async Task<string> GetSystemSettingAsync(string key, string defaultValue, CancellationToken cancellationToken)

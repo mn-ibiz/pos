@@ -1,0 +1,453 @@
+<Window x:Class="HospitalityPOS.WPF.Views.Dialogs.ReceiptPreviewDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
+        mc:Ignorable="d"
+        Title="Receipt Preview"
+        Height="700"
+        Width="400"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+
+        <Style x:Key="ReceiptText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="Foreground" Value="#333333"/>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="#1E1E2E"
+            CornerRadius="12"
+            BorderBrush="#3D3D5C"
+            BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    Background="#252538"
+                    CornerRadius="12,12,0,0"
+                    Padding="20,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Receipt Preview"
+                                   FontSize="20"
+                                   FontWeight="SemiBold"
+                                   Foreground="White"/>
+                        <TextBlock Text="Review before printing"
+                                   FontSize="13"
+                                   Foreground="#8888AA"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="1"
+                            Content="X"
+                            Background="Transparent"
+                            Foreground="#8888AA"
+                            FontSize="18"
+                            FontWeight="Bold"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Command="{Binding CancelCommand}"
+                            Width="36"
+                            Height="36"/>
+                </Grid>
+            </Border>
+
+            <!-- Receipt Preview (Paper Style) -->
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          Padding="20">
+                <Border Background="White"
+                        CornerRadius="4"
+                        Padding="20"
+                        Width="300"
+                        HorizontalAlignment="Center">
+                    <StackPanel>
+                        <!-- Business Logo -->
+                        <Image Source="{Binding LogoImage}"
+                               Width="80"
+                               Height="80"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,8"
+                               Visibility="{Binding HasLogo, Converter={StaticResource BoolToVisibility}}"/>
+
+                        <!-- Business Header -->
+                        <TextBlock Text="{Binding BusinessName}"
+                                   Style="{StaticResource ReceiptText}"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   TextAlignment="Center"
+                                   Foreground="#000000"/>
+                        <TextBlock Text="{Binding BusinessAddress}"
+                                   Style="{StaticResource ReceiptText}"
+                                   FontSize="11"
+                                   TextAlignment="Center"
+                                   Visibility="{Binding BusinessAddress.Length, Converter={StaticResource BoolToVisibility}}"/>
+                        <TextBlock Style="{StaticResource ReceiptText}"
+                                   FontSize="11"
+                                   TextAlignment="Center">
+                            <Run Text="Tel: "/><Run Text="{Binding BusinessPhone}"/>
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource ReceiptText}"
+                                   FontSize="11"
+                                   TextAlignment="Center"
+                                   Visibility="{Binding KraPin.Length, Converter={StaticResource BoolToVisibility}}">
+                            <Run Text="KRA PIN: "/><Run Text="{Binding KraPin}"/>
+                        </TextBlock>
+
+                        <!-- Divider -->
+                        <TextBlock Text="================================"
+                                   Style="{StaticResource ReceiptText}"
+                                   FontSize="11"
+                                   TextAlignment="Center"
+                                   Margin="0,10"/>
+
+                        <!-- Receipt Info -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11">
+                                <Run Text="Receipt: "/><Run Text="{Binding ReceiptNumber}" FontWeight="SemiBold"/>
+                            </TextBlock>
+                            <TextBlock Grid.Row="0" Grid.Column="1"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Right"
+                                       Text="{Binding ReceiptDateTime, StringFormat='dd/MM/yyyy'}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11">
+                                <Run Text="Order: "/><Run Text="{Binding OrderNumber}"/>
+                            </TextBlock>
+                            <TextBlock Grid.Row="1" Grid.Column="1"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Right"
+                                       Text="{Binding ReceiptDateTime, StringFormat='HH:mm'}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11">
+                                <Run Text="Cashier: "/><Run Text="{Binding CashierName}"/>
+                            </TextBlock>
+                            <TextBlock Grid.Row="2" Grid.Column="1"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Right"
+                                       Visibility="{Binding HasTable, Converter={StaticResource BoolToVisibility}}">
+                                <Run Text="Table: "/><Run Text="{Binding TableName}"/>
+                            </TextBlock>
+                        </Grid>
+
+                        <!-- Customer -->
+                        <TextBlock Style="{StaticResource ReceiptText}"
+                                   FontSize="11"
+                                   Margin="0,0,0,8"
+                                   Visibility="{Binding HasCustomer, Converter={StaticResource BoolToVisibility}}">
+                            <Run Text="Customer: "/><Run Text="{Binding CustomerName}"/>
+                        </TextBlock>
+
+                        <!-- Divider -->
+                        <TextBlock Text="--------------------------------"
+                                   Style="{StaticResource ReceiptText}"
+                                   FontSize="11"
+                                   TextAlignment="Center"/>
+
+                        <!-- Items Header -->
+                        <Grid Margin="0,8,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="80"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="Item"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="Amount"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <!-- Items List -->
+                        <ItemsControl ItemsSource="{Binding Items}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,4,0,4">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="80"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding ProductName}"
+                                                       Style="{StaticResource ReceiptText}"
+                                                       FontSize="11"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding LineTotal, StringFormat='{}{0:N2}'}"
+                                                       Style="{StaticResource ReceiptText}"
+                                                       FontSize="11"
+                                                       HorizontalAlignment="Right"/>
+                                        </Grid>
+                                        <TextBlock Text="{Binding QuantityDisplay}"
+                                                   Style="{StaticResource ReceiptText}"
+                                                   FontSize="10"
+                                                   Foreground="#666666"
+                                                   Margin="8,0,0,0"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Divider -->
+                        <TextBlock Text="--------------------------------"
+                                   Style="{StaticResource ReceiptText}"
+                                   FontSize="11"
+                                   TextAlignment="Center"
+                                   Margin="0,8"/>
+
+                        <!-- Totals -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="Subtotal:"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Subtotal, StringFormat='KSh {0:N2}'}"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <!-- Discount -->
+                        <Grid Margin="0,4"
+                              Visibility="{Binding HasDiscount, Converter={StaticResource BoolToVisibility}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11"
+                                       Foreground="#D32F2F">
+                                <Run Text="Discount"/><Run Text="{Binding DiscountDescription, StringFormat=' ({0})'}"/>:
+                            </TextBlock>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding DiscountAmount, StringFormat='-KSh {0:N2}'}"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Right"
+                                       Foreground="#D32F2F"/>
+                        </Grid>
+
+                        <!-- Tax -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="VAT (16%):"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding TaxAmount, StringFormat='KSh {0:N2}'}"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <!-- Total -->
+                        <Grid Margin="0,8,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="TOTAL:"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="14"
+                                       FontWeight="Bold"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Total, StringFormat='KSh {0:N2}'}"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <!-- Divider -->
+                        <TextBlock Text="================================"
+                                   Style="{StaticResource ReceiptText}"
+                                   FontSize="11"
+                                   TextAlignment="Center"
+                                   Margin="0,8"/>
+
+                        <!-- Payment Info -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11">
+                                <Run Text="Paid by: "/><Run Text="{Binding PaymentMethod}" FontWeight="SemiBold"/>
+                            </TextBlock>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding AmountTendered, StringFormat='KSh {0:N2}'}"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <!-- Change -->
+                        <Grid Margin="0,4"
+                              Visibility="{Binding HasChange, Converter={StaticResource BoolToVisibility}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="Change:"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding ChangeDue, StringFormat='KSh {0:N2}'}"
+                                       Style="{StaticResource ReceiptText}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <!-- M-Pesa Reference -->
+                        <TextBlock Style="{StaticResource ReceiptText}"
+                                   FontSize="11"
+                                   Margin="0,4"
+                                   Visibility="{Binding HasMpesaReference, Converter={StaticResource BoolToVisibility}}">
+                            <Run Text="M-Pesa Ref: "/><Run Text="{Binding MpesaReference}" FontWeight="SemiBold"/>
+                        </TextBlock>
+
+                        <!-- Divider -->
+                        <TextBlock Text="================================"
+                                   Style="{StaticResource ReceiptText}"
+                                   FontSize="11"
+                                   TextAlignment="Center"
+                                   Margin="0,12,0,8"/>
+
+                        <!-- Footer -->
+                        <TextBlock Text="{Binding FooterMessage}"
+                                   Style="{StaticResource ReceiptText}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   TextAlignment="Center"/>
+                        <TextBlock Text="Goods once sold cannot be returned"
+                                   Style="{StaticResource ReceiptText}"
+                                   FontSize="9"
+                                   TextAlignment="Center"
+                                   Foreground="#666666"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+            </ScrollViewer>
+
+            <!-- Footer Buttons -->
+            <Border Grid.Row="2"
+                    Background="#252538"
+                    CornerRadius="0,0,12,12"
+                    Padding="20,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            Content="Cancel"
+                            Background="#4E4E6E"
+                            Foreground="White"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Height="44"
+                            Margin="0,0,8,0"
+                            Cursor="Hand"
+                            Command="{Binding CancelCommand}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}"
+                                        CornerRadius="8">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <Button Grid.Column="1"
+                            Background="#4CAF50"
+                            Foreground="White"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Height="44"
+                            Margin="8,0,0,0"
+                            Cursor="Hand"
+                            Command="{Binding PrintCommand}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}"
+                                        CornerRadius="8">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="&#xE749;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="16"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,8,0"/>
+                                        <TextBlock Text="Print Receipt"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

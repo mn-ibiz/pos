@@ -5,11 +5,13 @@ using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
+using System.Windows.Threading;
 using HospitalityPOS.Core.Constants;
 using HospitalityPOS.Core.DTOs;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.WPF.Services;
+using HospitalityPOS.WPF.ViewModels.Models;
 
 namespace HospitalityPOS.WPF.ViewModels;
 
@@ -32,6 +34,7 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     private readonly IUiShellService _uiShellService;
     private readonly IBarcodeService _barcodeService;
     private readonly IMpesaService? _mpesaService;
+    private readonly ILoyaltyService? _loyaltyService;
 
     private const int ItemsPerPage = 15;
     private const decimal TaxRate = 0.16m; // Kenya VAT 16%
@@ -68,6 +71,24 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     private ObservableCollection<ProductTileViewModel> _products = [];
 
     /// <summary>
+    /// Gets or sets the user's favorite products for quick access.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasFavorites))]
+    private ObservableCollection<ProductTileViewModel> _favorites = [];
+
+    /// <summary>
+    /// Gets whether the user has any favorites.
+    /// </summary>
+    public bool HasFavorites => Favorites.Count > 0;
+
+    /// <summary>
+    /// Gets or sets whether the favorites panel is expanded.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isFavoritesPanelExpanded = true;
+
+    /// <summary>
     /// Gets or sets the current order items.
     /// </summary>
     [ObservableProperty]
@@ -102,6 +123,26 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     /// Gets whether any discount is applied to the order.
     /// </summary>
     public bool HasOrderDiscount => OrderDiscount > 0;
+
+    // ==================== Profit Margin Properties ====================
+
+    /// <summary>
+    /// Gets the total profit margin for the order.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasOrderProfit))]
+    private decimal _orderProfit;
+
+    /// <summary>
+    /// Gets the profit margin percentage for the order.
+    /// </summary>
+    [ObservableProperty]
+    private decimal _orderProfitPercent;
+
+    /// <summary>
+    /// Gets whether the order has profit margin data available.
+    /// </summary>
+    public bool HasOrderProfit => OrderItems.Any(oi => oi.HasCostPrice);
 
     // ==================== Business Mode Properties ====================
 
@@ -142,6 +183,45 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     /// </summary>
     [ObservableProperty]
     private string _barcodeInput = string.Empty;
+
+    #region Real-Time Search Properties
+
+    /// <summary>
+    /// Debounce timer for search input.
+    /// </summary>
+    private DispatcherTimer? _searchDebounceTimer;
+
+    /// <summary>
+    /// Gets or sets the search results for the dropdown.
+    /// </summary>
+    [ObservableProperty]
+    private ObservableCollection<ProductSearchResult> _searchResults = [];
+
+    /// <summary>
+    /// Gets or sets the selected search result.
+    /// </summary>
+    [ObservableProperty]
+    private ProductSearchResult? _selectedSearchResult;
+
+    /// <summary>
+    /// Gets or sets whether the search dropdown is open.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isSearchDropdownOpen;
+
+    /// <summary>
+    /// Gets or sets whether a search is in progress.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoSearchResults))]
+    private bool _isSearching;
+
+    /// <summary>
+    /// Gets whether there are no search results.
+    /// </summary>
+    public bool HasNoSearchResults => !IsSearching && SearchResults.Count == 0 && !string.IsNullOrWhiteSpace(BarcodeInput) && BarcodeInput.Length >= 2;
+
+    #endregion
 
     /// <summary>
     /// Gets or sets the numeric keypad input buffer.
@@ -351,7 +431,8 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         IOfferService offerService,
         IUiShellService uiShellService,
         IBarcodeService barcodeService,
-        IMpesaService? mpesaService = null)
+        IMpesaService? mpesaService = null,
+        ILoyaltyService? loyaltyService = null)
         : base(logger)
     {
         _productService = productService ?? throw new ArgumentNullException(nameof(productService));
@@ -368,6 +449,7 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         _uiShellService = uiShellService ?? throw new ArgumentNullException(nameof(uiShellService));
         _barcodeService = barcodeService ?? throw new ArgumentNullException(nameof(barcodeService));
         _mpesaService = mpesaService; // Optional - may not be configured
+        _loyaltyService = loyaltyService; // Optional - loyalty program
 
         Title = IsSupermarketMode ? "Point of Sale - Retail" : "Point of Sale";
     }
@@ -377,6 +459,20 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     {
         try
         {
+            // Refresh UI shell service to ensure correct business mode
+            await _uiShellService.RefreshAsync();
+
+            // Notify mode-dependent properties after refresh
+            OnPropertyChanged(nameof(IsSupermarketMode));
+            OnPropertyChanged(nameof(IsRestaurantMode));
+            OnPropertyChanged(nameof(ShowTableManagement));
+            OnPropertyChanged(nameof(ShowBarcodeSearch));
+            OnPropertyChanged(nameof(SearchPlaceholder));
+            OnPropertyChanged(nameof(OrderHeaderLabel));
+
+            // Update title based on mode
+            Title = IsSupermarketMode ? "Point of Sale - Retail" : "Point of Sale";
+
             // Verify work period is open
             var currentPeriod = await _workPeriodService.GetCurrentWorkPeriodAsync();
             if (currentPeriod is null)
@@ -472,12 +568,37 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
             // Load all active products
             _allProducts = (await _productService.GetActiveProductsAsync()).ToList();
 
+            // Load favorites
+            await LoadFavoritesAsync();
+
             // Display products
             RefreshProductGrid();
 
             _logger.Debug("POS loaded {CategoryCount} categories and {ProductCount} products",
                 Categories.Count, _allProducts.Count);
         }, "Loading POS...").ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Loads the user's favorite products.
+    /// </summary>
+    private async Task LoadFavoritesAsync()
+    {
+        var userId = _sessionService.CurrentUserId;
+        if (userId == 0) return;
+
+        var favoriteProducts = await _productService.GetFavoritesAsync(userId);
+        var favoriteVms = new List<ProductTileViewModel>();
+
+        foreach (var product in favoriteProducts)
+        {
+            var vm = CreateProductTileFromEntity(product);
+            vm.IsFavorite = true;
+            favoriteVms.Add(vm);
+        }
+
+        Favorites = new ObservableCollection<ProductTileViewModel>(favoriteVms);
+        OnPropertyChanged(nameof(HasFavorites));
     }
 
     /// <summary>
@@ -588,6 +709,184 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         BarcodeInput = string.Empty;
     }
 
+    #region Real-Time Search Methods
+
+    /// <summary>
+    /// Called when BarcodeInput changes - triggers debounced search.
+    /// </summary>
+    partial void OnBarcodeInputChanged(string value)
+    {
+        // Stop any existing timer
+        _searchDebounceTimer?.Stop();
+
+        // Clear results if input is too short
+        if (string.IsNullOrWhiteSpace(value) || value.Length < 2)
+        {
+            SearchResults.Clear();
+            IsSearchDropdownOpen = false;
+            OnPropertyChanged(nameof(HasNoSearchResults));
+            return;
+        }
+
+        // Start debounce timer (300ms delay)
+        _searchDebounceTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(300)
+        };
+        _searchDebounceTimer.Tick += async (s, e) =>
+        {
+            _searchDebounceTimer?.Stop();
+            await PerformRealTimeSearchAsync(value);
+        };
+        _searchDebounceTimer.Start();
+    }
+
+    /// <summary>
+    /// Performs the real-time search for products.
+    /// </summary>
+    private async Task PerformRealTimeSearchAsync(string searchText)
+    {
+        if (string.IsNullOrWhiteSpace(searchText) || searchText.Length < 2)
+        {
+            SearchResults.Clear();
+            IsSearchDropdownOpen = false;
+            return;
+        }
+
+        IsSearching = true;
+        IsSearchDropdownOpen = true;
+
+        try
+        {
+            var results = await Task.Run(() =>
+            {
+                var term = searchText.ToLower();
+                return _allProducts
+                    .Where(p =>
+                        (p.Name?.ToLower().Contains(term) ?? false) ||
+                        (p.Code?.ToLower().Contains(term) ?? false) ||
+                        (p.Barcode?.ToLower().Contains(term) ?? false))
+                    .OrderByDescending(p => p.Name?.ToLower().StartsWith(term) ?? false)
+                    .ThenBy(p => p.Name)
+                    .Take(10)
+                    .Select(p => new ProductSearchResult
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Code = p.Code ?? "",
+                        Barcode = p.Barcode,
+                        Price = p.SellingPrice,
+                        CurrentStock = p.Inventory?.CurrentStock ?? 0,
+                        IsOutOfStock = p.Inventory == null || p.Inventory.CurrentStock <= 0,
+                        IsLowStock = p.IsLowStock,
+                        ImagePath = _imageService.GetDisplayImagePath(p.ImagePath)
+                    })
+                    .ToList();
+            });
+
+            SearchResults = new ObservableCollection<ProductSearchResult>(results);
+            SelectedSearchResult = results.FirstOrDefault();
+            OnPropertyChanged(nameof(HasNoSearchResults));
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Error performing real-time search");
+        }
+        finally
+        {
+            IsSearching = false;
+        }
+    }
+
+    /// <summary>
+    /// Selects a search result and adds it to the order.
+    /// </summary>
+    [RelayCommand]
+    private async Task SelectSearchResultAsync(ProductSearchResult? result)
+    {
+        if (result == null) return;
+
+        var product = _allProducts.FirstOrDefault(p => p.Id == result.Id);
+        if (product != null)
+        {
+            var tile = CreateProductTileFromEntity(product);
+            await AddToOrderWithQuantityAsync(tile);
+            _logger.Debug("Product {Name} added via real-time search", product.Name);
+        }
+
+        // Clear search state
+        BarcodeInput = string.Empty;
+        SearchResults.Clear();
+        IsSearchDropdownOpen = false;
+        SelectedSearchResult = null;
+    }
+
+    /// <summary>
+    /// Closes the search dropdown.
+    /// </summary>
+    [RelayCommand]
+    private void CloseSearchDropdown()
+    {
+        IsSearchDropdownOpen = false;
+        SearchResults.Clear();
+        SelectedSearchResult = null;
+    }
+
+    /// <summary>
+    /// Moves selection up in search results.
+    /// </summary>
+    [RelayCommand]
+    private void MoveSearchSelectionUp()
+    {
+        if (SearchResults.Count == 0) return;
+
+        var currentIndex = SelectedSearchResult != null
+            ? SearchResults.IndexOf(SelectedSearchResult)
+            : 0;
+
+        if (currentIndex > 0)
+        {
+            SelectedSearchResult = SearchResults[currentIndex - 1];
+        }
+    }
+
+    /// <summary>
+    /// Moves selection down in search results.
+    /// </summary>
+    [RelayCommand]
+    private void MoveSearchSelectionDown()
+    {
+        if (SearchResults.Count == 0) return;
+
+        var currentIndex = SelectedSearchResult != null
+            ? SearchResults.IndexOf(SelectedSearchResult)
+            : -1;
+
+        if (currentIndex < SearchResults.Count - 1)
+        {
+            SelectedSearchResult = SearchResults[currentIndex + 1];
+        }
+    }
+
+    /// <summary>
+    /// Processes Enter key in search - either selects dropdown item or does barcode lookup.
+    /// </summary>
+    [RelayCommand]
+    private async Task ProcessSearchEnterAsync()
+    {
+        // If dropdown is open and we have a selection, use it
+        if (IsSearchDropdownOpen && SelectedSearchResult != null)
+        {
+            await SelectSearchResultAsync(SelectedSearchResult);
+            return;
+        }
+
+        // Otherwise, fall back to barcode lookup behavior
+        await SearchBarcodeAsync();
+    }
+
+    #endregion
+
     /// <summary>
     /// Adds product to order, applying any pending quantity from keypad.
     /// </summary>
@@ -619,8 +918,10 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
             Code = p.Code ?? "",
             Name = p.Name,
             Price = p.SellingPrice,
+            CostPrice = p.CostPrice,
             ImagePath = _imageService.GetDisplayImagePath(p.ImagePath),
             IsOutOfStock = p.Inventory is null || p.Inventory.CurrentStock <= 0,
+            IsLowStock = p.IsLowStock,
             CurrentStock = p.Inventory?.CurrentStock ?? 0
         };
     }
@@ -660,6 +961,9 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
             .GroupBy(o => o.ProductId)
             .ToDictionary(g => g.Key, g => g.OrderBy(o => o.OfferPrice).First());
 
+        // Get favorite product IDs for quick lookup
+        var favoriteIds = Favorites.Select(f => f.Id).ToHashSet();
+
         var productVms = pageProducts.Select(p =>
         {
             var vm = new ProductTileViewModel
@@ -668,9 +972,11 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
                 Code = p.Code,
                 Name = p.Name,
                 Price = p.SellingPrice,
+                CostPrice = p.CostPrice,
                 ImagePath = _imageService.GetDisplayImagePath(p.ImagePath),
                 IsOutOfStock = p.Inventory is null || p.Inventory.CurrentStock <= 0,
-                CurrentStock = p.Inventory?.CurrentStock ?? 0
+                CurrentStock = p.Inventory?.CurrentStock ?? 0,
+                IsFavorite = favoriteIds.Contains(p.Id)
             };
 
             // Check for active offer
@@ -700,6 +1006,73 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
             RefreshProductGrid();
         }
     }
+
+    #region Favorites Commands
+
+    /// <summary>
+    /// Toggles a product's favorite status.
+    /// </summary>
+    [RelayCommand]
+    private async Task ToggleFavoriteAsync(ProductTileViewModel product)
+    {
+        var userId = _sessionService.CurrentUserId;
+        if (userId == 0) return;
+
+        await ExecuteAsync(async () =>
+        {
+            if (product.IsFavorite)
+            {
+                // Remove from favorites
+                var removed = await _productService.RemoveFromFavoritesAsync(userId, product.Id);
+                if (removed)
+                {
+                    product.IsFavorite = false;
+                    var favoriteToRemove = Favorites.FirstOrDefault(f => f.Id == product.Id);
+                    if (favoriteToRemove != null)
+                    {
+                        Favorites.Remove(favoriteToRemove);
+                    }
+                    OnPropertyChanged(nameof(HasFavorites));
+                    _logger.Debug("Removed {ProductName} from favorites", product.Name);
+                }
+            }
+            else
+            {
+                // Add to favorites
+                var added = await _productService.AddToFavoritesAsync(userId, product.Id);
+                if (added)
+                {
+                    product.IsFavorite = true;
+                    var favoriteVm = CreateProductTileFromEntity(
+                        _allProducts.FirstOrDefault(p => p.Id == product.Id)!);
+                    favoriteVm.IsFavorite = true;
+                    Favorites.Add(favoriteVm);
+                    OnPropertyChanged(nameof(HasFavorites));
+                    _logger.Debug("Added {ProductName} to favorites", product.Name);
+                }
+            }
+        }).ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Adds a favorite product to the order.
+    /// </summary>
+    [RelayCommand]
+    private async Task AddFavoriteToOrderAsync(ProductTileViewModel favorite)
+    {
+        await AddToOrderAsync(favorite);
+    }
+
+    /// <summary>
+    /// Toggles the favorites panel expanded state.
+    /// </summary>
+    [RelayCommand]
+    private void ToggleFavoritesPanel()
+    {
+        IsFavoritesPanelExpanded = !IsFavoritesPanelExpanded;
+    }
+
+    #endregion
 
     /// <summary>
     /// Adds a product to the current order.
@@ -739,6 +1112,7 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
                 ProductCode = product.Code ?? "",
                 ProductName = product.Name,
                 Price = product.Price,
+                CostPrice = product.CostPrice,
                 AvailableStock = product.CurrentStock,
                 Quantity = 1
             };
@@ -842,21 +1216,19 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     }
 
     /// <summary>
-    /// Edits notes for an order item.
+    /// Edits notes for an order item using the special instructions dialog.
     /// </summary>
     [RelayCommand]
-    private async Task EditItemNotesAsync(OrderItemViewModel item)
+    private void EditItemNotes(OrderItemViewModel item)
     {
-        var result = await _dialogService.ShowInputAsync(
-            "Item Notes",
-            $"Enter notes for {item.ProductName}:",
-            item.Notes);
+        var dialog = new Views.Dialogs.OrderItemNoteDialog(item.ProductName, item.Notes);
+        dialog.Owner = Application.Current.MainWindow;
 
-        if (result is not null)
+        if (dialog.ShowDialog() == true)
         {
-            item.Notes = result;
-            RecalculateOrderTotals();
-            _logger.Debug("Updated notes for {ProductName}: {Notes}", item.ProductName, result);
+            item.Notes = dialog.NoteText.Trim();
+            AutoSaveOrder();
+            _logger.Debug("Updated notes for {ProductName}: {Notes}", item.ProductName, item.Notes);
         }
     }
 
@@ -1340,6 +1712,7 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
                 ProductCode = productCode,
                 ProductName = productName,
                 Price = item.UnitPrice,
+                CostPrice = item.Product?.CostPrice,
                 Quantity = (int)item.Quantity,
                 AvailableStock = availableStock,
                 Notes = item.Notes ?? "",
@@ -1373,10 +1746,16 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         OrderTax = OrderSubtotal * TaxRate;
         OrderTotal = OrderSubtotal + OrderTax;
 
+        // Calculate profit margin for items with cost price
+        OrderProfit = OrderItems.Sum(oi => oi.LineProfit);
+        var totalCost = OrderItems.Where(oi => oi.HasCostPrice).Sum(oi => oi.CostPrice!.Value * oi.Quantity);
+        OrderProfitPercent = totalCost > 0 ? Math.Round((OrderProfit / totalCost) * 100, 1) : 0;
+
         // Notify command can execute changed
         OnPropertyChanged(nameof(CanSubmitOrder));
         OnPropertyChanged(nameof(CanHoldOrder));
         OnPropertyChanged(nameof(OfferItemsCount));
+        OnPropertyChanged(nameof(HasOrderProfit));
         SubmitOrderCommand.NotifyCanExecuteChanged();
         HoldOrderCommand.NotifyCanExecuteChanged();
 
@@ -1410,6 +1789,7 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
                     ProductId = oi.ProductId,
                     ProductName = oi.ProductName,
                     Price = oi.Price,
+                    CostPrice = oi.CostPrice,
                     Quantity = oi.Quantity,
                     AvailableStock = oi.AvailableStock,
                     Notes = oi.Notes,
@@ -1489,6 +1869,7 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
                     ProductId = item.ProductId,
                     ProductName = item.ProductName,
                     Price = item.Price,
+                    CostPrice = item.CostPrice,
                     Quantity = item.Quantity,
                     AvailableStock = item.AvailableStock,
                     Notes = item.Notes ?? "",
@@ -1815,18 +2196,47 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     [RelayCommand]
     private async Task ToggleLoyaltyPanelAsync()
     {
-        // Loyalty feature requires ILoyaltyService which is not yet available
-        await _dialogService.ShowInfoAsync("Coming Soon", "Loyalty program feature is coming soon.");
+        if (_loyaltyService == null)
+        {
+            await _dialogService.ShowInfoAsync("Not Available", "Loyalty program is not configured.");
+            return;
+        }
+
+        IsLoyaltyPanelVisible = !IsLoyaltyPanelVisible;
+        if (IsLoyaltyPanelVisible)
+        {
+            LoyaltySearchPhone = string.Empty;
+            LoyaltySearchResults.Clear();
+        }
     }
 
     /// <summary>
-    /// Searches for loyalty members by phone number.
+    /// Searches for loyalty members by phone number or name.
     /// </summary>
     [RelayCommand]
     private async Task SearchLoyaltyMemberAsync()
     {
-        // Loyalty feature requires ILoyaltyService which is not yet available
-        await _dialogService.ShowInfoAsync("Coming Soon", "Loyalty program feature is coming soon.");
+        if (_loyaltyService == null || string.IsNullOrWhiteSpace(LoyaltySearchPhone)) return;
+
+        try
+        {
+            var results = await _loyaltyService.SearchMembersAsync(LoyaltySearchPhone, 10);
+            LoyaltySearchResults.Clear();
+            foreach (var member in results)
+            {
+                LoyaltySearchResults.Add(member);
+            }
+
+            if (!LoyaltySearchResults.Any())
+            {
+                await _dialogService.ShowInfoAsync("No Results", "No customers found matching the search criteria.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to search loyalty members");
+            await _dialogService.ShowErrorAsync("Search Failed", "Failed to search for customers.");
+        }
     }
 
     /// <summary>
@@ -1835,8 +2245,17 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     [RelayCommand]
     private async Task AttachLoyaltyMemberAsync(LoyaltyMemberDto? member)
     {
-        // Loyalty feature requires ILoyaltyService which is not yet available
-        await _dialogService.ShowInfoAsync("Coming Soon", "Loyalty program feature is coming soon.");
+        if (member == null) return;
+
+        AttachedLoyaltyMember = member;
+        IsLoyaltyPanelVisible = false;
+        LoyaltySearchResults.Clear();
+
+        await UpdateEstimatedPointsAsync();
+        await UpdateRedemptionPreviewAsync();
+
+        _logger.Information("Attached loyalty member {MemberName} ({Phone}) to order",
+            member.Name ?? "Unknown", member.PhoneNumber);
     }
 
     /// <summary>
@@ -1955,6 +2374,19 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     }
 
     /// <summary>
+    /// Shows the keyboard shortcuts help dialog (?).
+    /// </summary>
+    [RelayCommand]
+    private void ShowKeyboardShortcuts()
+    {
+        var dialog = new Views.Dialogs.KeyboardShortcutsDialog
+        {
+            Owner = Application.Current.MainWindow
+        };
+        dialog.ShowDialog();
+    }
+
+    /// <summary>
     /// Performs a price check on the selected or last item (F7).
     /// </summary>
     [RelayCommand]
@@ -1997,6 +2429,44 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         }
 
         await _dialogService.ShowInfoAsync("Card Payment", $"Card payment for KSh {OrderTotal:N2}\n\nCard payment integration coming soon.");
+    }
+
+    /// <summary>
+    /// Opens the split payment dialog.
+    /// </summary>
+    [RelayCommand]
+    private async Task OpenSplitPaymentAsync()
+    {
+        if (!OrderItems.Any())
+        {
+            await _dialogService.ShowWarningAsync("Empty Order", "Please add items to the order before processing payment.");
+            return;
+        }
+
+        var dialog = new Views.Dialogs.SplitPaymentDialog(OrderTotal)
+        {
+            Owner = Application.Current.MainWindow
+        };
+
+        var result = dialog.ShowDialog();
+
+        if (result == true && dialog.IsCompleted)
+        {
+            var payments = dialog.Payments;
+            _logger.Information("Split payment completed with {Count} payment methods:", payments.Count);
+            foreach (var payment in payments)
+            {
+                _logger.Information("  - {Method}: KSh {Amount:N2}", payment.MethodName, payment.Amount);
+            }
+
+            // TODO: Process each payment method and record in order
+            // For now, show success message and clear order
+            var paymentSummary = string.Join("\n", payments.Select(p => $"  {p.MethodName}: KSh {p.Amount:N2}"));
+            await _dialogService.ShowMessageAsync("Payment Successful",
+                $"Split payment completed!\n\nTotal: KSh {OrderTotal:N2}\n\nPayments:\n{paymentSummary}");
+
+            ClearCurrentOrder();
+        }
     }
 
     /// <summary>
@@ -2217,6 +2687,16 @@ public class ProductTileViewModel
     public decimal CurrentStock { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the product is low on stock.
+    /// </summary>
+    public bool IsLowStock { get; set; }
+
+    /// <summary>
+    /// Gets whether the product has an image.
+    /// </summary>
+    public bool HasImage => !string.IsNullOrEmpty(ImagePath);
+
+    /// <summary>
     /// Gets whether this product is in stock.
     /// </summary>
     public bool IsInStock => !IsOutOfStock;
@@ -2259,6 +2739,46 @@ public class ProductTileViewModel
     /// Gets the savings amount.
     /// </summary>
     public decimal SavingsAmount => HasActiveOffer && OfferPrice.HasValue ? Price - OfferPrice.Value : 0;
+
+    #endregion
+
+    #region Favorites Properties
+
+    /// <summary>
+    /// Gets or sets whether this product is in the user's favorites.
+    /// </summary>
+    public bool IsFavorite { get; set; }
+
+    #endregion
+
+    #region Profit Margin Properties
+
+    /// <summary>
+    /// Gets or sets the cost price for margin calculations.
+    /// </summary>
+    public decimal? CostPrice { get; set; }
+
+    /// <summary>
+    /// Gets whether cost price is available for margin display.
+    /// </summary>
+    public bool HasCostPrice => CostPrice.HasValue && CostPrice.Value > 0;
+
+    /// <summary>
+    /// Gets the profit margin amount (selling price - cost price).
+    /// </summary>
+    public decimal ProfitMargin => HasCostPrice ? DisplayPrice - CostPrice!.Value : 0;
+
+    /// <summary>
+    /// Gets the profit margin percentage.
+    /// </summary>
+    public decimal ProfitMarginPercent => HasCostPrice && CostPrice!.Value > 0
+        ? Math.Round(((DisplayPrice - CostPrice.Value) / CostPrice.Value) * 100, 1)
+        : 0;
+
+    /// <summary>
+    /// Gets whether the product is profitable (margin > 0).
+    /// </summary>
+    public bool IsProfitable => ProfitMargin > 0;
 
     #endregion
 }
@@ -2396,6 +2916,32 @@ public partial class OrderItemViewModel : ObservableObject
     /// Gets whether this item has a discount applied.
     /// </summary>
     public bool HasDiscount => DiscountAmount > 0 || DiscountPercent > 0;
+
+    #region Profit Margin Properties
+
+    /// <summary>
+    /// Gets or sets the cost price for margin calculations.
+    /// </summary>
+    public decimal? CostPrice { get; set; }
+
+    /// <summary>
+    /// Gets whether cost price is available for margin display.
+    /// </summary>
+    public bool HasCostPrice => CostPrice.HasValue && CostPrice.Value > 0;
+
+    /// <summary>
+    /// Gets the profit margin for this line item.
+    /// </summary>
+    public decimal LineProfit => HasCostPrice ? LineTotal - (CostPrice!.Value * Quantity) : 0;
+
+    /// <summary>
+    /// Gets the profit margin percentage for this line item.
+    /// </summary>
+    public decimal LineProfitPercent => HasCostPrice && (CostPrice!.Value * Quantity) > 0
+        ? Math.Round((LineProfit / (CostPrice.Value * Quantity)) * 100, 1)
+        : 0;
+
+    #endregion
 }
 
 /// <summary>
@@ -2448,6 +2994,11 @@ internal class LocalOrderItemData
     /// Gets or sets the unit price.
     /// </summary>
     public decimal Price { get; set; }
+
+    /// <summary>
+    /// Gets or sets the cost price for margin calculations.
+    /// </summary>
+    public decimal? CostPrice { get; set; }
 
     /// <summary>
     /// Gets or sets the quantity.

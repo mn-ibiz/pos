@@ -55,8 +55,8 @@ public class NavigationService : INavigationService
         // Resolve the new ViewModel
         var viewModel = _serviceProvider.GetRequiredService<TViewModel>();
 
-        // If ViewModel supports parameters, pass them
-        if (viewModel is INavigationAware navigationAware && parameter is not null)
+        // Always call OnNavigatedTo if ViewModel supports it (even with null parameter)
+        if (viewModel is INavigationAware navigationAware)
         {
             navigationAware.OnNavigatedTo(parameter);
         }

@@ -14,6 +14,7 @@ namespace HospitalityPOS.WPF.ViewModels;
 public partial class LoginViewModel : ViewModelBase, INavigationAware
 {
     private readonly IUserService _userService;
+    private readonly ILoginAuditService _loginAuditService;
     private readonly ISessionService _sessionService;
     private readonly INavigationService _navigationService;
     private readonly IDialogService _dialogService;
@@ -72,18 +73,21 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
     /// </summary>
     /// <param name="logger">The logger.</param>
     /// <param name="userService">The user service.</param>
+    /// <param name="loginAuditService">The login audit service.</param>
     /// <param name="sessionService">The session service.</param>
     /// <param name="navigationService">The navigation service.</param>
     /// <param name="dialogService">The dialog service.</param>
     public LoginViewModel(
         ILogger logger,
         IUserService userService,
+        ILoginAuditService loginAuditService,
         ISessionService sessionService,
         INavigationService navigationService,
         IDialogService dialogService)
         : base(logger)
     {
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+        _loginAuditService = loginAuditService ?? throw new ArgumentNullException(nameof(loginAuditService));
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
@@ -123,6 +127,10 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
             {
                 var remainingTime = await _userService.GetLockoutRemainingTimeAsync(Username).ConfigureAwait(true);
                 var minutes = (int)Math.Ceiling(remainingTime.TotalMinutes);
+
+                // Record locked account attempt
+                await _loginAuditService.RecordLoginAttemptAsync(null, Username, false, "Account locked").ConfigureAwait(true);
+
                 await _dialogService.ShowErrorAsync(
                     "Account Locked",
                     $"This account is locked. Please try again in {minutes} minute(s).")
@@ -134,12 +142,18 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
 
             if (user is null)
             {
+                // Record failed login attempt
+                await _loginAuditService.RecordLoginAttemptAsync(null, Username, false, "Invalid credentials").ConfigureAwait(true);
+
                 await _dialogService.ShowErrorAsync(
                     "Login Failed",
                     "Invalid username or password. Please try again.")
                     .ConfigureAwait(true);
                 return;
             }
+
+            // Record successful login
+            await _loginAuditService.RecordLoginAttemptAsync(user.Id, user.Username, true).ConfigureAwait(true);
 
             await CompleteLoginAsync(user).ConfigureAwait(true);
         }, "Authenticating...").ConfigureAwait(true);
@@ -162,6 +176,10 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
 
             if (user is null)
             {
+                // Record failed PIN login attempt
+                var pinUsername = SelectedUser?.Username ?? "[PIN]";
+                await _loginAuditService.RecordLoginAttemptAsync(null, pinUsername, false, "Invalid PIN").ConfigureAwait(true);
+
                 await _dialogService.ShowErrorAsync(
                     "Login Failed",
                     "PIN not recognized. Please try again or use username and password.")
@@ -169,6 +187,9 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
                 ClearPin();
                 return;
             }
+
+            // Record successful PIN login
+            await _loginAuditService.RecordLoginAttemptAsync(user.Id, user.Username, true).ConfigureAwait(true);
 
             await CompleteLoginAsync(user).ConfigureAwait(true);
         }, "Authenticating...").ConfigureAwait(true);
@@ -275,8 +296,19 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
             return;
         }
 
-        // Navigate to the main POS screen
-        _navigationService.NavigateTo<POSViewModel>();
+        // Route based on user role:
+        // - Admin/Manager/Supervisor: Full UI with sidebar (Dashboard)
+        // - Cashier/Waiter only: Dedicated cashier shell (CashierShellViewModel)
+        if (MainWindowViewModel.IsCashierOnlyRole(user))
+        {
+            _logger.Information("User {Username} is cashier-only, navigating to CashierShell", user.Username);
+            _navigationService.NavigateTo<CashierShellViewModel>();
+        }
+        else
+        {
+            _logger.Information("User {Username} has admin/manager role, navigating to Dashboard", user.Username);
+            _navigationService.NavigateTo<DashboardViewModel>();
+        }
     }
 
     private async Task LoadQuickLoginUsersAsync()

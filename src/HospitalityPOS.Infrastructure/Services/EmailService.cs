@@ -189,7 +189,7 @@ public partial class EmailService : IEmailService
                 useStartTls ? SecureSocketOptions.StartTls : SecureSocketOptions.None;
 
             await client.ConnectAsync(host, port, options, cancellationToken);
-            var banner = client.Greeting;
+            var banner = "Connected successfully"; // Server greeting not exposed in MailKit 4.x
 
             if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
             {

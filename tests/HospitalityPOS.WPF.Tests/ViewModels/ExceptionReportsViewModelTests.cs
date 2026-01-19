@@ -19,6 +19,7 @@ public class ExceptionReportsViewModelTests
     private readonly Mock<IReportPrintService> _reportPrintServiceMock;
     private readonly Mock<IUserService> _userServiceMock;
     private readonly Mock<INavigationService> _navigationServiceMock;
+    private readonly Mock<IExportService> _exportServiceMock;
     private readonly Mock<ILogger> _loggerMock;
 
     public ExceptionReportsViewModelTests()
@@ -27,6 +28,7 @@ public class ExceptionReportsViewModelTests
         _reportPrintServiceMock = new Mock<IReportPrintService>();
         _userServiceMock = new Mock<IUserService>();
         _navigationServiceMock = new Mock<INavigationService>();
+        _exportServiceMock = new Mock<IExportService>();
         _loggerMock = new Mock<ILogger>();
     }
 
@@ -37,6 +39,7 @@ public class ExceptionReportsViewModelTests
             _reportPrintServiceMock.Object,
             _userServiceMock.Object,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
             _loggerMock.Object);
     }
 
@@ -66,6 +69,7 @@ public class ExceptionReportsViewModelTests
             _reportPrintServiceMock.Object,
             _userServiceMock.Object,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
             _loggerMock.Object);
 
         // Assert
@@ -82,6 +86,7 @@ public class ExceptionReportsViewModelTests
             null!,
             _userServiceMock.Object,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
             _loggerMock.Object);
 
         // Assert
@@ -98,6 +103,7 @@ public class ExceptionReportsViewModelTests
             _reportPrintServiceMock.Object,
             null!,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
             _loggerMock.Object);
 
         // Assert
@@ -114,6 +120,7 @@ public class ExceptionReportsViewModelTests
             _reportPrintServiceMock.Object,
             _userServiceMock.Object,
             null!,
+            _exportServiceMock.Object,
             _loggerMock.Object);
 
         // Assert

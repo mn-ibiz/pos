@@ -19,6 +19,7 @@ public class InventoryReportsViewModelTests
     private readonly Mock<IReportPrintService> _reportPrintServiceMock;
     private readonly Mock<ICategoryService> _categoryServiceMock;
     private readonly Mock<INavigationService> _navigationServiceMock;
+    private readonly Mock<IExportService> _exportServiceMock;
     private readonly Mock<ILogger> _loggerMock;
 
     public InventoryReportsViewModelTests()
@@ -27,6 +28,7 @@ public class InventoryReportsViewModelTests
         _reportPrintServiceMock = new Mock<IReportPrintService>();
         _categoryServiceMock = new Mock<ICategoryService>();
         _navigationServiceMock = new Mock<INavigationService>();
+        _exportServiceMock = new Mock<IExportService>();
         _loggerMock = new Mock<ILogger>();
     }
 
@@ -37,6 +39,7 @@ public class InventoryReportsViewModelTests
             _reportPrintServiceMock.Object,
             _categoryServiceMock.Object,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
             _loggerMock.Object);
     }
 
@@ -66,6 +69,7 @@ public class InventoryReportsViewModelTests
             _reportPrintServiceMock.Object,
             _categoryServiceMock.Object,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
             _loggerMock.Object);
 
         // Assert
@@ -82,6 +86,7 @@ public class InventoryReportsViewModelTests
             null!,
             _categoryServiceMock.Object,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
             _loggerMock.Object);
 
         // Assert
@@ -98,6 +103,7 @@ public class InventoryReportsViewModelTests
             _reportPrintServiceMock.Object,
             null!,
             _navigationServiceMock.Object,
+            _exportServiceMock.Object,
             _loggerMock.Object);
 
         // Assert
@@ -114,6 +120,7 @@ public class InventoryReportsViewModelTests
             _reportPrintServiceMock.Object,
             _categoryServiceMock.Object,
             null!,
+            _exportServiceMock.Object,
             _loggerMock.Object);
 
         // Assert
@@ -341,7 +348,7 @@ public class InventoryReportsViewModelTests
             DaysThreshold = 60,
             Items =
             [
-                new DeadStockItem
+                new HospitalityPOS.Core.Models.Reports.DeadStockItem
                 {
                     ProductId = 1,
                     ProductCode = "P001",

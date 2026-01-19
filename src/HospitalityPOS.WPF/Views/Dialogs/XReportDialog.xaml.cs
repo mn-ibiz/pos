@@ -1,6 +1,9 @@
 using System.Windows;
 using System.Windows.Documents;
 using HospitalityPOS.Core.Models.Reports;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
 
 namespace HospitalityPOS.WPF.Views.Dialogs;
 
@@ -84,6 +87,9 @@ public partial class XReportDialog : Window
             NoUserSalesText.Visibility = Visibility.Visible;
         }
 
+        // Hourly Sales Chart
+        SetupHourlySalesChart();
+
         // Transaction Statistics
         TransactionCountText.Text = _report.TransactionCount.ToString();
         AverageValueText.Text = $"KSh {_report.AverageTransactionValue:N2}";
@@ -111,6 +117,85 @@ public partial class XReportDialog : Window
         var hours = (int)duration.TotalHours;
         var minutes = duration.Minutes;
         return $"{hours}h {minutes:D2}m";
+    }
+
+    private void SetupHourlySalesChart()
+    {
+        if (_report.HourlySales == null || _report.HourlySales.Count == 0)
+        {
+            NoHourlySalesText.Visibility = Visibility.Visible;
+            HourlySalesChart.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        // Check if there's any actual sales data
+        var hasData = _report.HourlySales.Any(h => h.TotalAmount > 0);
+        if (!hasData)
+        {
+            NoHourlySalesText.Visibility = Visibility.Visible;
+            HourlySalesChart.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var model = new PlotModel
+        {
+            Background = OxyColors.Transparent,
+            PlotAreaBorderColor = OxyColor.FromRgb(74, 74, 106), // #4A4A6A
+            TextColor = OxyColor.FromRgb(136, 136, 170), // #8888AA
+        };
+
+        // X-axis: Hours
+        var categoryAxis = new CategoryAxis
+        {
+            Position = AxisPosition.Bottom,
+            Key = "Hours",
+            TickStyle = OxyPlot.Axes.TickStyle.None,
+            MajorGridlineStyle = LineStyle.None,
+            TextColor = OxyColor.FromRgb(136, 136, 170),
+            AxislineColor = OxyColor.FromRgb(74, 74, 106),
+            GapWidth = 0.2
+        };
+
+        // Only show labels for hours with sales or key hours
+        foreach (var hourData in _report.HourlySales)
+        {
+            var label = hourData.Hour % 3 == 0 ? hourData.HourLabel.Replace(" AM", "a").Replace(" PM", "p") : "";
+            categoryAxis.Labels.Add(label);
+        }
+
+        model.Axes.Add(categoryAxis);
+
+        // Y-axis: Amount
+        var valueAxis = new LinearAxis
+        {
+            Position = AxisPosition.Left,
+            Minimum = 0,
+            TickStyle = OxyPlot.Axes.TickStyle.None,
+            MajorGridlineStyle = LineStyle.Solid,
+            MajorGridlineColor = OxyColor.FromRgb(61, 61, 92), // #3D3D5C
+            TextColor = OxyColor.FromRgb(136, 136, 170),
+            AxislineColor = OxyColor.FromRgb(74, 74, 106),
+            StringFormat = "KSh #,0"
+        };
+        model.Axes.Add(valueAxis);
+
+        // Bar series for sales
+        var barSeries = new BarSeries
+        {
+            FillColor = OxyColor.FromRgb(76, 175, 80), // #4CAF50
+            StrokeColor = OxyColor.FromRgb(56, 142, 60),
+            StrokeThickness = 1,
+            BarWidth = 0.8
+        };
+
+        foreach (var hourData in _report.HourlySales)
+        {
+            barSeries.Items.Add(new BarItem { Value = (double)hourData.TotalAmount });
+        }
+
+        model.Series.Add(barSeries);
+
+        HourlySalesChart.Model = model;
     }
 
     private void PrintButton_Click(object sender, RoutedEventArgs e)

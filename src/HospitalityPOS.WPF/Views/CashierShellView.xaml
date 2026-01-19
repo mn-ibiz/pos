@@ -1,0 +1,356 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.CashierShellView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:HospitalityPOS.WPF.ViewModels"
+             xmlns:views="clr-namespace:HospitalityPOS.WPF.Views"
+             xmlns:controls="clr-namespace:HospitalityPOS.WPF.Controls"
+             xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="768" d:DesignWidth="1366"
+             Background="#1E1E2E">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:PinMaskConverter x:Key="PinMaskConverter"/>
+        <converters:NullToCollapsedConverter x:Key="NullToCollapsedConverter"/>
+
+        <!-- Inverse Boolean to Visibility -->
+        <Style x:Key="InverseBoolToVisibility" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Visible"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ViewModel to View mappings for content -->
+        <DataTemplate DataType="{x:Type vm:POSViewModel}">
+            <views:POSView />
+        </DataTemplate>
+
+        <!-- Compact Header Button Style -->
+        <Style x:Key="HeaderButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#9CA3AF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#2D2D44"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3D3D5C"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- PIN Button Style -->
+        <Style x:Key="PinButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="70"/>
+            <Setter Property="Height" Value="70"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3D3D5C"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#22C55E"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48"/>  <!-- Compact Header -->
+            <RowDefinition Height="*"/>   <!-- Main Content (POS) -->
+            <RowDefinition Height="32"/>  <!-- Compact Status Bar -->
+        </Grid.RowDefinitions>
+
+        <!-- Compact Header - Microsoft RMS Style -->
+        <Border Grid.Row="0" Background="#16162B">
+            <Grid Margin="12,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>  <!-- Business Name -->
+                    <ColumnDefinition Width="*"/>     <!-- Center Space -->
+                    <ColumnDefinition Width="Auto"/>  <!-- Status -->
+                    <ColumnDefinition Width="Auto"/>  <!-- User Info -->
+                    <ColumnDefinition Width="Auto"/>  <!-- Actions -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Business Name / Logo -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding BusinessName}"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="White"/>
+                </StackPanel>
+
+                <!-- Work Period Status - Center -->
+                <Border Grid.Column="2"
+                        CornerRadius="4"
+                        Padding="10,4"
+                        Margin="16,0"
+                        VerticalAlignment="Center">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="#1E1E2E"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsWorkPeriodOpen}" Value="True">
+                                    <Setter Property="Background" Value="#1B3D1B"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center">
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Setter Property="Fill" Value="#666666"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsWorkPeriodOpen}" Value="True">
+                                            <Setter Property="Fill" Value="#4CAF50"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
+                        </Ellipse>
+                        <TextBlock Text="{Binding WorkPeriodStatus}"
+                                   FontSize="12"
+                                   VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#8888AA"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsWorkPeriodOpen}" Value="True">
+                                            <Setter Property="Foreground" Value="#4CAF50"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Current User -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <Border Width="32" Height="32" CornerRadius="16" Background="#22C55E" Margin="0,0,8,0">
+                        <TextBlock Text="{Binding UserInitials}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="White"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="{Binding CurrentUserName}"
+                               FontSize="13"
+                               Foreground="White"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Action Buttons -->
+                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Lock Button -->
+                    <Button Style="{StaticResource HeaderButtonStyle}"
+                            Command="{Binding LockScreenCommand}"
+                            ToolTip="Lock Screen (F12)">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="14" VerticalAlignment="Center"/>
+                            <TextBlock Text="Lock" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Logout Button -->
+                    <Button Style="{StaticResource HeaderButtonStyle}"
+                            Command="{Binding LogoutCommand}"
+                            ToolTip="Logout">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="14" VerticalAlignment="Center" Foreground="#EF4444"/>
+                            <TextBlock Text="Logout" Margin="6,0,0,0" VerticalAlignment="Center" Foreground="#EF4444"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area - Full POS View -->
+        <Grid Grid.Row="1" Background="#1E1E2E">
+            <ContentControl Content="{Binding CurrentView}"/>
+        </Grid>
+
+        <!-- Compact Status Bar - Microsoft RMS Style -->
+        <Border Grid.Row="2" Background="#16162B" Padding="12,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Keyboard Shortcuts Hint -->
+                <TextBlock Grid.Column="0"
+                           Text="F1-Search  F2-Discount  F5-Cash  F6-M-Pesa  F10-Void"
+                           Foreground="#6B7280"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+
+                <!-- Spacer -->
+                <TextBlock Grid.Column="1"/>
+
+                <!-- Register -->
+                <TextBlock Grid.Column="2"
+                           Foreground="#9CA3AF"
+                           FontSize="11"
+                           VerticalAlignment="Center"
+                           Margin="0,0,24,0">
+                    <Run Text="Register: "/>
+                    <Run Text="{Binding RegisterName}" FontWeight="SemiBold"/>
+                </TextBlock>
+
+                <!-- Clock -->
+                <TextBlock Grid.Column="3"
+                           Text="{Binding CurrentTime, StringFormat='{}{0:HH:mm:ss}'}"
+                           Foreground="#9CA3AF"
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Lock Screen Overlay -->
+        <Border Grid.RowSpan="3"
+                Background="#E6000000"
+                Visibility="{Binding IsLocked, Converter={StaticResource BoolToVisibility}}">
+            <Grid>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <!-- Lock Icon -->
+                    <Border Width="80" Height="80" CornerRadius="40"
+                            Background="#2D2D44" Margin="0,0,0,24">
+                        <TextBlock Text="&#xE72E;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="36"
+                                   Foreground="#22C55E"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Title -->
+                    <TextBlock Text="Screen Locked"
+                               FontSize="24"
+                               FontWeight="SemiBold"
+                               Foreground="White"
+                               HorizontalAlignment="Center"/>
+
+                    <TextBlock Text="Enter your PIN to unlock"
+                               FontSize="14"
+                               Foreground="#9CA3AF"
+                               HorizontalAlignment="Center"
+                               Margin="0,8,0,24"/>
+
+                    <!-- PIN Display -->
+                    <Border Background="#2D2D44"
+                            CornerRadius="8"
+                            Padding="32,16"
+                            Margin="0,0,0,16"
+                            MinWidth="200">
+                        <TextBlock Text="{Binding UnlockPin, Converter={StaticResource PinMaskConverter}, FallbackValue='****'}"
+                                   FontSize="32"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   HorizontalAlignment="Center"
+                                   FontFamily="Consolas"/>
+                    </Border>
+
+                    <!-- Error Message -->
+                    <TextBlock Text="{Binding UnlockError}"
+                               Foreground="#EF4444"
+                               FontSize="13"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,16"
+                               Visibility="{Binding UnlockError, Converter={StaticResource NullToCollapsedConverter}}"/>
+
+                    <!-- PIN Keypad -->
+                    <Grid HorizontalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Row="0" Grid.Column="0" Content="1" Style="{StaticResource PinButtonStyle}" Click="PinButton_Click"/>
+                        <Button Grid.Row="0" Grid.Column="1" Content="2" Style="{StaticResource PinButtonStyle}" Click="PinButton_Click"/>
+                        <Button Grid.Row="0" Grid.Column="2" Content="3" Style="{StaticResource PinButtonStyle}" Click="PinButton_Click"/>
+
+                        <Button Grid.Row="1" Grid.Column="0" Content="4" Style="{StaticResource PinButtonStyle}" Click="PinButton_Click"/>
+                        <Button Grid.Row="1" Grid.Column="1" Content="5" Style="{StaticResource PinButtonStyle}" Click="PinButton_Click"/>
+                        <Button Grid.Row="1" Grid.Column="2" Content="6" Style="{StaticResource PinButtonStyle}" Click="PinButton_Click"/>
+
+                        <Button Grid.Row="2" Grid.Column="0" Content="7" Style="{StaticResource PinButtonStyle}" Click="PinButton_Click"/>
+                        <Button Grid.Row="2" Grid.Column="1" Content="8" Style="{StaticResource PinButtonStyle}" Click="PinButton_Click"/>
+                        <Button Grid.Row="2" Grid.Column="2" Content="9" Style="{StaticResource PinButtonStyle}" Click="PinButton_Click"/>
+
+                        <Button Grid.Row="3" Grid.Column="0" Content="C" Style="{StaticResource PinButtonStyle}" Click="ClearPin_Click"
+                                Foreground="#EF4444"/>
+                        <Button Grid.Row="3" Grid.Column="1" Content="0" Style="{StaticResource PinButtonStyle}" Click="PinButton_Click"/>
+                        <Button Grid.Row="3" Grid.Column="2" Style="{StaticResource PinButtonStyle}" Click="BackspacePin_Click">
+                            <TextBlock Text="&#xE94F;" FontFamily="Segoe MDL2 Assets" FontSize="20"/>
+                        </Button>
+                    </Grid>
+
+                    <!-- Switch User Option -->
+                    <TextBlock Margin="0,24,0,0" HorizontalAlignment="Center">
+                        <Hyperlink Foreground="#22C55E" TextDecorations="None"
+                                   Command="{Binding LogoutCommand}">
+                            Switch User
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

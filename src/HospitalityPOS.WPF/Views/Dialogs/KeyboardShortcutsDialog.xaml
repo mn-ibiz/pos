@@ -1,0 +1,257 @@
+<Window x:Class="HospitalityPOS.WPF.Views.Dialogs.KeyboardShortcutsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Keyboard Shortcuts"
+        Width="500"
+        Height="600"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="ToolWindow"
+        ResizeMode="NoResize"
+        Background="#1E1E2E">
+
+    <Window.InputBindings>
+        <KeyBinding Key="Escape" Command="{x:Static ApplicationCommands.Close}"/>
+    </Window.InputBindings>
+
+    <Window.CommandBindings>
+        <CommandBinding Command="{x:Static ApplicationCommands.Close}" Executed="CloseCommand_Executed"/>
+    </Window.CommandBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2D2D44" Padding="20,16">
+            <StackPanel>
+                <TextBlock Text="Keyboard Shortcuts"
+                           Foreground="White"
+                           FontSize="20"
+                           FontWeight="SemiBold"/>
+                <TextBlock Text="Quick reference for POS operations"
+                           Foreground="#9CA3AF"
+                           FontSize="13"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Shortcuts List -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20,12">
+            <StackPanel>
+                <!-- Transaction Section -->
+                <TextBlock Text="TRANSACTION" Foreground="#22C55E" FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="F5" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Complete Sale (Cash Payment)" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="F6" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="M-Pesa Payment" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="F7" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Card Payment" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="F8" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Clear / New Transaction" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="F11" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Print Receipt" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Order Management Section -->
+                <TextBlock Text="ORDER MANAGEMENT" Foreground="#22C55E" FontWeight="Bold" FontSize="12" Margin="0,8,0,8"/>
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="F3" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Hold / Park Order" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="F4" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Recall Held Orders" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="F10" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Void Last Item" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="Delete" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Remove Selected Item" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Item Operations Section -->
+                <TextBlock Text="ITEM OPERATIONS" Foreground="#22C55E" FontWeight="Bold" FontSize="12" Margin="0,8,0,8"/>
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="F1" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Focus Search / Barcode Input" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="F2" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Apply Order Discount" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="+ / =" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Increase Quantity" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="- / _" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Decrease Quantity" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Customer Section -->
+                <TextBlock Text="CUSTOMER" Foreground="#22C55E" FontWeight="Bold" FontSize="12" Margin="0,8,0,8"/>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="F12" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Customer / Loyalty Lookup" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Navigation Section -->
+                <TextBlock Text="NAVIGATION" Foreground="#22C55E" FontWeight="Bold" FontSize="12" Margin="0,8,0,8"/>
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="Esc" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Cancel / Go Back" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#3D3D5C" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                        <TextBlock Text="?" Foreground="White" FontWeight="Bold" FontFamily="Consolas"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Show This Help" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="#2D2D44" Padding="20,12">
+            <Grid>
+                <TextBlock Text="Press Esc to close"
+                           Foreground="#9CA3AF"
+                           FontSize="12"
+                           VerticalAlignment="Center"/>
+                <Button Content="Close"
+                        HorizontalAlignment="Right"
+                        Width="100"
+                        Height="36"
+                        Background="#22C55E"
+                        Foreground="White"
+                        FontWeight="SemiBold"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Click="CloseButton_Click"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

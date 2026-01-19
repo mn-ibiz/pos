@@ -152,7 +152,7 @@ public class SyncHubService : ISyncHubService
             {
                 if (!string.IsNullOrEmpty(_configuration.AccessToken))
                 {
-                    options.AccessTokenProvider = () => Task.FromResult(_configuration.AccessToken);
+                    options.AccessTokenProvider = () => Task.FromResult<string?>(_configuration.AccessToken);
                 }
             })
             .WithAutomaticReconnect(new SignalRRetryPolicy(_configuration));

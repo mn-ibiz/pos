@@ -53,6 +53,30 @@ public partial class GoodsReceivingViewModel : ViewModelBase, INavigationAware
     private string _notes = string.Empty;
 
     /// <summary>
+    /// Gets or sets the barcode input for scanning.
+    /// </summary>
+    [ObservableProperty]
+    private string _barcodeInput = string.Empty;
+
+    /// <summary>
+    /// Gets or sets whether scan mode is enabled.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isScanModeEnabled = true;
+
+    /// <summary>
+    /// Gets or sets the last scan status message.
+    /// </summary>
+    [ObservableProperty]
+    private string _scanStatusMessage = string.Empty;
+
+    /// <summary>
+    /// Gets or sets whether the last scan was successful.
+    /// </summary>
+    [ObservableProperty]
+    private bool _lastScanSuccess;
+
+    /// <summary>
     /// Gets the count of items to receive.
     /// </summary>
     public int ItemsToReceiveCount => Items.Count(i => i.ReceivedQuantity > 0);
@@ -136,6 +160,7 @@ public partial class GoodsReceivingViewModel : ViewModelBase, INavigationAware
                     ProductId = poItem.ProductId,
                     ProductName = poItem.Product?.Name ?? "Unknown",
                     ProductCode = poItem.Product?.Code ?? "",
+                    Barcode = poItem.Product?.Barcode,
                     OrderedQuantity = poItem.OrderedQuantity,
                     PreviouslyReceived = poItem.ReceivedQuantity,
                     RemainingQuantity = remainingQuantity,
@@ -197,6 +222,72 @@ public partial class GoodsReceivingViewModel : ViewModelBase, INavigationAware
 
         RecalculateTotal();
         OnPropertyChanged(nameof(ItemsToReceiveCount));
+    }
+
+    /// <summary>
+    /// Processes a scanned barcode to find and increment item quantity.
+    /// </summary>
+    [RelayCommand]
+    private void ProcessBarcode()
+    {
+        if (string.IsNullOrWhiteSpace(BarcodeInput))
+        {
+            return;
+        }
+
+        var barcode = BarcodeInput.Trim();
+        BarcodeInput = string.Empty; // Clear for next scan
+
+        if (SelectedPurchaseOrder == null)
+        {
+            ScanStatusMessage = "Please select a Purchase Order first";
+            LastScanSuccess = false;
+            return;
+        }
+
+        // Find item by barcode or product code
+        var matchedItem = Items.FirstOrDefault(i =>
+            string.Equals(i.Barcode, barcode, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(i.ProductCode, barcode, StringComparison.OrdinalIgnoreCase));
+
+        if (matchedItem == null)
+        {
+            ScanStatusMessage = $"Product '{barcode}' not found in this PO";
+            LastScanSuccess = false;
+            _logger.Warning("Barcode scan failed: {Barcode} not found in PO {PONumber}",
+                barcode, SelectedPurchaseOrder.PONumber);
+            return;
+        }
+
+        // Check if we can receive more
+        if (matchedItem.ReceivedQuantity >= matchedItem.RemainingQuantity)
+        {
+            ScanStatusMessage = $"{matchedItem.ProductName} - Already fully received";
+            LastScanSuccess = false;
+            return;
+        }
+
+        // Increment received quantity by 1
+        matchedItem.ReceivedQuantity += 1;
+
+        ScanStatusMessage = $"{matchedItem.ProductName} - Qty: {matchedItem.ReceivedQuantity}";
+        LastScanSuccess = true;
+
+        RecalculateTotal();
+        OnPropertyChanged(nameof(ItemsToReceiveCount));
+
+        _logger.Information("Barcode scan success: {Barcode} -> {Product}, Qty: {Qty}",
+            barcode, matchedItem.ProductName, matchedItem.ReceivedQuantity);
+    }
+
+    /// <summary>
+    /// Toggles scan mode on/off.
+    /// </summary>
+    [RelayCommand]
+    private void ToggleScanMode()
+    {
+        IsScanModeEnabled = !IsScanModeEnabled;
+        ScanStatusMessage = IsScanModeEnabled ? "Scan mode enabled" : "Scan mode disabled";
     }
 
     /// <summary>
@@ -289,6 +380,11 @@ public partial class GRNItemViewModel : ObservableObject
     /// Gets or sets the product code.
     /// </summary>
     public string ProductCode { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the product barcode.
+    /// </summary>
+    public string? Barcode { get; set; }
 
     /// <summary>
     /// Gets or sets the ordered quantity.

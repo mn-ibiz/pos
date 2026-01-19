@@ -145,10 +145,64 @@
                 <Border Style="{StaticResource DividerStyle}" />
 
                 <!-- Cash Drawer Reconciliation -->
-                <TextBlock Text="CASH DRAWER RECONCILIATION" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,12" />
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="CASH DRAWER RECONCILIATION" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
 
-                <!-- Expected Cash Breakdown -->
-                <Grid>
+                    <!-- Blind Count Toggle -->
+                    <ToggleButton x:Name="BlindCountToggle"
+                                  Grid.Column="1"
+                                  IsChecked="False"
+                                  Cursor="Hand"
+                                  Click="BlindCountToggle_Click">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border x:Name="border"
+                                                    Background="#3D3D5C"
+                                                    CornerRadius="4"
+                                                    Padding="12,6">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock x:Name="icon"
+                                                               Text="&#xE7B3;"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="12"
+                                                               Foreground="#8888AA"
+                                                               VerticalAlignment="Center"
+                                                               Margin="0,0,6,0"/>
+                                                    <TextBlock x:Name="text"
+                                                               Text="Blind Count"
+                                                               Foreground="#8888AA"
+                                                               FontSize="11"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="#F59E0B"/>
+                                                    <Setter TargetName="icon" Property="Foreground" Value="White"/>
+                                                    <Setter TargetName="icon" Property="Text" Value="&#xE890;"/>
+                                                    <Setter TargetName="text" Property="Foreground" Value="White"/>
+                                                    <Setter TargetName="text" Property="Text" Value="Blind Count ON"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+                </Grid>
+
+                <!-- Expected Cash Breakdown (Hidden in Blind Count Mode) -->
+                <Grid x:Name="ExpectedCashSection">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -180,7 +234,144 @@
 
                 <!-- Cash Count Entry -->
                 <TextBlock Text="ACTUAL CASH COUNT" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,8" />
-                <TextBlock Text="Enter the total amount of cash in the drawer:"
+
+                <!-- Denomination Counting Toggle -->
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Count by denomination for accuracy:"
+                               Style="{StaticResource LabelStyle}"/>
+                    <Button x:Name="ToggleDenominationsButton"
+                            Grid.Column="1"
+                            Content="Show Counter"
+                            Background="#3D3D5C"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Padding="12,4"
+                            FontSize="11"
+                            Cursor="Hand"
+                            Click="ToggleDenominations_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+
+                <!-- Denomination Counting Grid (Initially Collapsed) -->
+                <Border x:Name="DenominationGrid"
+                        Background="#1E1E2E"
+                        CornerRadius="6"
+                        Padding="12"
+                        Margin="0,0,0,12"
+                        Visibility="Collapsed">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="80"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="24"/>
+                            <RowDefinition Height="36"/>
+                            <RowDefinition Height="36"/>
+                            <RowDefinition Height="36"/>
+                            <RowDefinition Height="36"/>
+                            <RowDefinition Height="36"/>
+                            <RowDefinition Height="36"/>
+                            <RowDefinition Height="36"/>
+                            <RowDefinition Height="36"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Headers -->
+                        <TextBlock Text="NOTE/COIN" Foreground="#6B7280" FontSize="10" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="COUNT" Foreground="#6B7280" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="SUBTOTAL" Foreground="#6B7280" FontSize="10" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+
+                        <!-- KSh 1,000 -->
+                        <TextBlock Grid.Row="1" Text="KSh 1,000" Foreground="White" FontSize="12" VerticalAlignment="Center"/>
+                        <TextBox x:Name="D1000Count" Grid.Row="1" Grid.Column="1" Text="0" TextChanged="DenominationChanged"
+                                 Background="#2D2D44" Foreground="White" BorderThickness="0" Width="60" Height="28"
+                                 HorizontalAlignment="Center" TextAlignment="Center" FontSize="14" VerticalContentAlignment="Center"/>
+                        <TextBlock x:Name="D1000Total" Grid.Row="1" Grid.Column="2" Text="0" Foreground="#22C55E" FontSize="12"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas"/>
+
+                        <!-- KSh 500 -->
+                        <TextBlock Grid.Row="2" Text="KSh 500" Foreground="White" FontSize="12" VerticalAlignment="Center"/>
+                        <TextBox x:Name="D500Count" Grid.Row="2" Grid.Column="1" Text="0" TextChanged="DenominationChanged"
+                                 Background="#2D2D44" Foreground="White" BorderThickness="0" Width="60" Height="28"
+                                 HorizontalAlignment="Center" TextAlignment="Center" FontSize="14" VerticalContentAlignment="Center"/>
+                        <TextBlock x:Name="D500Total" Grid.Row="2" Grid.Column="2" Text="0" Foreground="#22C55E" FontSize="12"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas"/>
+
+                        <!-- KSh 200 -->
+                        <TextBlock Grid.Row="3" Text="KSh 200" Foreground="White" FontSize="12" VerticalAlignment="Center"/>
+                        <TextBox x:Name="D200Count" Grid.Row="3" Grid.Column="1" Text="0" TextChanged="DenominationChanged"
+                                 Background="#2D2D44" Foreground="White" BorderThickness="0" Width="60" Height="28"
+                                 HorizontalAlignment="Center" TextAlignment="Center" FontSize="14" VerticalContentAlignment="Center"/>
+                        <TextBlock x:Name="D200Total" Grid.Row="3" Grid.Column="2" Text="0" Foreground="#22C55E" FontSize="12"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas"/>
+
+                        <!-- KSh 100 -->
+                        <TextBlock Grid.Row="4" Text="KSh 100" Foreground="White" FontSize="12" VerticalAlignment="Center"/>
+                        <TextBox x:Name="D100Count" Grid.Row="4" Grid.Column="1" Text="0" TextChanged="DenominationChanged"
+                                 Background="#2D2D44" Foreground="White" BorderThickness="0" Width="60" Height="28"
+                                 HorizontalAlignment="Center" TextAlignment="Center" FontSize="14" VerticalContentAlignment="Center"/>
+                        <TextBlock x:Name="D100Total" Grid.Row="4" Grid.Column="2" Text="0" Foreground="#22C55E" FontSize="12"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas"/>
+
+                        <!-- KSh 50 -->
+                        <TextBlock Grid.Row="5" Text="KSh 50" Foreground="White" FontSize="12" VerticalAlignment="Center"/>
+                        <TextBox x:Name="D50Count" Grid.Row="5" Grid.Column="1" Text="0" TextChanged="DenominationChanged"
+                                 Background="#2D2D44" Foreground="White" BorderThickness="0" Width="60" Height="28"
+                                 HorizontalAlignment="Center" TextAlignment="Center" FontSize="14" VerticalContentAlignment="Center"/>
+                        <TextBlock x:Name="D50Total" Grid.Row="5" Grid.Column="2" Text="0" Foreground="#22C55E" FontSize="12"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas"/>
+
+                        <!-- KSh 20 -->
+                        <TextBlock Grid.Row="6" Text="KSh 20" Foreground="White" FontSize="12" VerticalAlignment="Center"/>
+                        <TextBox x:Name="D20Count" Grid.Row="6" Grid.Column="1" Text="0" TextChanged="DenominationChanged"
+                                 Background="#2D2D44" Foreground="White" BorderThickness="0" Width="60" Height="28"
+                                 HorizontalAlignment="Center" TextAlignment="Center" FontSize="14" VerticalContentAlignment="Center"/>
+                        <TextBlock x:Name="D20Total" Grid.Row="6" Grid.Column="2" Text="0" Foreground="#22C55E" FontSize="12"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas"/>
+
+                        <!-- KSh 10 -->
+                        <TextBlock Grid.Row="7" Text="KSh 10" Foreground="White" FontSize="12" VerticalAlignment="Center"/>
+                        <TextBox x:Name="D10Count" Grid.Row="7" Grid.Column="1" Text="0" TextChanged="DenominationChanged"
+                                 Background="#2D2D44" Foreground="White" BorderThickness="0" Width="60" Height="28"
+                                 HorizontalAlignment="Center" TextAlignment="Center" FontSize="14" VerticalContentAlignment="Center"/>
+                        <TextBlock x:Name="D10Total" Grid.Row="7" Grid.Column="2" Text="0" Foreground="#22C55E" FontSize="12"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas"/>
+
+                        <!-- Coins -->
+                        <TextBlock Grid.Row="8" Text="Coins" Foreground="White" FontSize="12" VerticalAlignment="Center"/>
+                        <TextBox x:Name="CoinsAmount" Grid.Row="8" Grid.Column="1" Text="0" TextChanged="DenominationChanged"
+                                 Background="#2D2D44" Foreground="White" BorderThickness="0" Width="60" Height="28"
+                                 HorizontalAlignment="Center" TextAlignment="Center" FontSize="14" VerticalContentAlignment="Center"/>
+                        <TextBlock Grid.Row="8" Grid.Column="2" Text="(amount)" Foreground="#6B7280" FontSize="10"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
+
+                        <!-- Grand Total from Denominations -->
+                        <Border Grid.Row="9" Grid.ColumnSpan="3" Background="#252538" CornerRadius="4" Padding="8" Margin="0,8,0,0">
+                            <Grid>
+                                <TextBlock Text="COUNTED TOTAL" Foreground="White" FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="DenominationGrandTotal" Text="KSh 0" Foreground="#22C55E"
+                                           FontSize="16" FontWeight="Bold" FontFamily="Consolas"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Direct Cash Entry (always visible) -->
+                <TextBlock Text="Or enter total directly:"
                            Style="{StaticResource LabelStyle}"
                            Margin="0,0,0,8" />
 

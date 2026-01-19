@@ -607,4 +607,126 @@ public class ProductService : IProductService
             .CountAsync(p => p.CategoryId == categoryId, cancellationToken)
             .ConfigureAwait(false);
     }
+
+    #region Favorites
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Product>> GetFavoritesAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var favoriteProductIds = await _context.ProductFavorites
+            .AsNoTracking()
+            .Where(f => f.UserId == userId)
+            .OrderBy(f => f.DisplayOrder)
+            .Select(f => f.ProductId)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (favoriteProductIds.Count == 0)
+            return Array.Empty<Product>();
+
+        var products = await _context.Products
+            .AsNoTracking()
+            .Where(p => favoriteProductIds.Contains(p.Id) && p.IsActive)
+            .Include(p => p.Category)
+            .Include(p => p.Inventory)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        // Maintain the display order
+        return products
+            .OrderBy(p => favoriteProductIds.IndexOf(p.Id))
+            .ToList();
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> AddToFavoritesAsync(int userId, int productId, CancellationToken cancellationToken = default)
+    {
+        // Check if already a favorite
+        var exists = await _context.ProductFavorites
+            .AnyAsync(f => f.UserId == userId && f.ProductId == productId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (exists)
+            return false;
+
+        // Check if product exists
+        var productExists = await _context.Products
+            .AnyAsync(p => p.Id == productId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!productExists)
+            return false;
+
+        // Get the max display order for this user
+        var maxOrder = await _context.ProductFavorites
+            .Where(f => f.UserId == userId)
+            .MaxAsync(f => (int?)f.DisplayOrder, cancellationToken)
+            .ConfigureAwait(false) ?? 0;
+
+        var favorite = new ProductFavorite
+        {
+            UserId = userId,
+            ProductId = productId,
+            DisplayOrder = maxOrder + 1,
+            CreatedAt = DateTime.UtcNow,
+            CreatedByUserId = userId
+        };
+
+        await _context.ProductFavorites.AddAsync(favorite, cancellationToken).ConfigureAwait(false);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        _logger.Information("Product {ProductId} added to favorites for user {UserId}", productId, userId);
+        return true;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> RemoveFromFavoritesAsync(int userId, int productId, CancellationToken cancellationToken = default)
+    {
+        var favorite = await _context.ProductFavorites
+            .FirstOrDefaultAsync(f => f.UserId == userId && f.ProductId == productId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (favorite is null)
+            return false;
+
+        _context.ProductFavorites.Remove(favorite);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        _logger.Information("Product {ProductId} removed from favorites for user {UserId}", productId, userId);
+        return true;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> IsFavoriteAsync(int userId, int productId, CancellationToken cancellationToken = default)
+    {
+        return await _context.ProductFavorites
+            .AnyAsync(f => f.UserId == userId && f.ProductId == productId, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task UpdateFavoriteOrderAsync(int userId, IEnumerable<int> productIds, CancellationToken cancellationToken = default)
+    {
+        var productIdList = productIds.ToList();
+        var favorites = await _context.ProductFavorites
+            .Where(f => f.UserId == userId && productIdList.Contains(f.ProductId))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        for (var i = 0; i < productIdList.Count; i++)
+        {
+            var favorite = favorites.FirstOrDefault(f => f.ProductId == productIdList[i]);
+            if (favorite != null)
+            {
+                favorite.DisplayOrder = i + 1;
+                favorite.UpdatedAt = DateTime.UtcNow;
+                favorite.UpdatedByUserId = userId;
+            }
+        }
+
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        _logger.Information("Favorites order updated for user {UserId}", userId);
+    }
+
+    #endregion
 }

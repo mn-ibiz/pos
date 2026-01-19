@@ -92,6 +92,70 @@ public partial class CloseWorkPeriodDialog : Window
         UpdateVarianceDisplay();
     }
 
+    private void ToggleDenominations_Click(object sender, RoutedEventArgs e)
+    {
+        if (DenominationGrid.Visibility == Visibility.Collapsed)
+        {
+            DenominationGrid.Visibility = Visibility.Visible;
+            ToggleDenominationsButton.Content = "Hide Counter";
+        }
+        else
+        {
+            DenominationGrid.Visibility = Visibility.Collapsed;
+            ToggleDenominationsButton.Content = "Show Counter";
+        }
+    }
+
+    private void DenominationChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+    {
+        RecalculateDenominations();
+    }
+
+    private void RecalculateDenominations()
+    {
+        decimal total = 0;
+
+        total += ParseAndUpdateDenomination(D1000Count, D1000Total, 1000);
+        total += ParseAndUpdateDenomination(D500Count, D500Total, 500);
+        total += ParseAndUpdateDenomination(D200Count, D200Total, 200);
+        total += ParseAndUpdateDenomination(D100Count, D100Total, 100);
+        total += ParseAndUpdateDenomination(D50Count, D50Total, 50);
+        total += ParseAndUpdateDenomination(D20Count, D20Total, 20);
+        total += ParseAndUpdateDenomination(D10Count, D10Total, 10);
+
+        // Coins are entered as amount directly
+        if (decimal.TryParse(CoinsAmount?.Text ?? "0", NumberStyles.Any, CultureInfo.InvariantCulture, out var coins) && coins >= 0)
+        {
+            total += coins;
+        }
+
+        if (DenominationGrandTotal != null)
+        {
+            DenominationGrandTotal.Text = $"KSh {total:N0}";
+        }
+
+        // Update the main cash count input with the calculated total
+        if (CashCountInput != null && DenominationGrid?.Visibility == Visibility.Visible)
+        {
+            CashCountInput.Text = total.ToString("N2");
+        }
+    }
+
+    private decimal ParseAndUpdateDenomination(System.Windows.Controls.TextBox? countBox, System.Windows.Controls.TextBlock? totalBlock, decimal denomination)
+    {
+        if (countBox == null || totalBlock == null) return 0;
+
+        if (int.TryParse(countBox.Text, out int count) && count >= 0)
+        {
+            var subtotal = count * denomination;
+            totalBlock.Text = subtotal.ToString("N0");
+            return subtotal;
+        }
+
+        totalBlock.Text = "0";
+        return 0;
+    }
+
     private void UpdateVarianceDisplay()
     {
         if (!decimal.TryParse(CashCountInput.Text.Replace(",", ""), NumberStyles.Any, CultureInfo.InvariantCulture, out var cashCount))
@@ -185,5 +249,37 @@ public partial class CloseWorkPeriodDialog : Window
     {
         DialogResult = false;
         Close();
+    }
+
+    private void BlindCountToggle_Click(object sender, RoutedEventArgs e)
+    {
+        var isBlindMode = BlindCountToggle.IsChecked == true;
+
+        // Hide expected cash breakdown in blind mode
+        ExpectedCashSection.Visibility = isBlindMode ? Visibility.Collapsed : Visibility.Visible;
+
+        // Hide variance display in blind mode (will show after submission)
+        VarianceGrid.Visibility = isBlindMode ? Visibility.Collapsed : Visibility.Visible;
+
+        // Clear the cash count input when entering blind mode so cashier starts fresh
+        if (isBlindMode)
+        {
+            CashCountInput.Text = "0.00";
+
+            // Also reset denomination counters
+            if (D1000Count != null) D1000Count.Text = "0";
+            if (D500Count != null) D500Count.Text = "0";
+            if (D200Count != null) D200Count.Text = "0";
+            if (D100Count != null) D100Count.Text = "0";
+            if (D50Count != null) D50Count.Text = "0";
+            if (D20Count != null) D20Count.Text = "0";
+            if (D10Count != null) D10Count.Text = "0";
+            if (CoinsAmount != null) CoinsAmount.Text = "0";
+        }
+        else
+        {
+            // When exiting blind mode, restore expected cash as default
+            CashCountInput.Text = _expectedCash.ToString("N2");
+        }
     }
 }

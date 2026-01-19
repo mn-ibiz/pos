@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
+using HospitalityPOS.Core.DTOs;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Enums;
 using HospitalityPOS.Core.Interfaces;
@@ -19,6 +21,9 @@ public partial class PurchaseOrdersViewModel : ViewModelBase, INavigationAware
     private readonly INavigationService _navigationService;
     private readonly IDialogService _dialogService;
     private readonly ISessionService _sessionService;
+    private readonly IEmailService _emailService;
+    private readonly ISystemConfigurationService _configurationService;
+    private readonly IInventoryAnalyticsService? _inventoryAnalyticsService;
 
     [ObservableProperty]
     private ObservableCollection<PurchaseOrder> _purchaseOrders = [];
@@ -53,6 +58,21 @@ public partial class PurchaseOrdersViewModel : ViewModelBase, INavigationAware
     [ObservableProperty]
     private int _partiallyReceivedCount;
 
+    [ObservableProperty]
+    private int _overdueCount;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasReorderSuggestions))]
+    private ObservableCollection<ReorderSuggestion> _reorderSuggestions = [];
+
+    [ObservableProperty]
+    private bool _isSuggestionsPanelExpanded = true;
+
+    /// <summary>
+    /// Gets whether there are any reorder suggestions.
+    /// </summary>
+    public bool HasReorderSuggestions => ReorderSuggestions.Count > 0;
+
     private IReadOnlyList<PurchaseOrder> _allPurchaseOrders = [];
 
     /// <summary>
@@ -77,6 +97,9 @@ public partial class PurchaseOrdersViewModel : ViewModelBase, INavigationAware
         INavigationService navigationService,
         IDialogService dialogService,
         ISessionService sessionService,
+        IEmailService emailService,
+        ISystemConfigurationService configurationService,
+        IInventoryAnalyticsService? inventoryAnalyticsService,
         ILogger logger) : base(logger)
     {
         _purchaseOrderService = purchaseOrderService ?? throw new ArgumentNullException(nameof(purchaseOrderService));
@@ -84,6 +107,9 @@ public partial class PurchaseOrdersViewModel : ViewModelBase, INavigationAware
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
+        _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
+        _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
+        _inventoryAnalyticsService = inventoryAnalyticsService;
 
         Title = "Purchase Orders";
     }
@@ -150,6 +176,16 @@ public partial class PurchaseOrdersViewModel : ViewModelBase, INavigationAware
                 DraftCount = await _purchaseOrderService.GetCountByStatusAsync(PurchaseOrderStatus.Draft).ConfigureAwait(true);
                 SentCount = await _purchaseOrderService.GetCountByStatusAsync(PurchaseOrderStatus.Sent).ConfigureAwait(true);
                 PartiallyReceivedCount = await _purchaseOrderService.GetCountByStatusAsync(PurchaseOrderStatus.PartiallyReceived).ConfigureAwait(true);
+
+                // Calculate overdue count (POs with expected date in the past and not complete/cancelled)
+                OverdueCount = _allPurchaseOrders.Count(po =>
+                    po.ExpectedDate.HasValue &&
+                    po.ExpectedDate.Value.Date < DateTime.Today &&
+                    po.Status != PurchaseOrderStatus.Complete &&
+                    po.Status != PurchaseOrderStatus.Cancelled);
+
+                // Load reorder suggestions
+                await LoadReorderSuggestionsAsync().ConfigureAwait(true);
 
                 ApplyFilter();
             }
@@ -338,6 +374,256 @@ public partial class PurchaseOrdersViewModel : ViewModelBase, INavigationAware
     }
 
     /// <summary>
+    /// Duplicates the selected purchase order.
+    /// </summary>
+    [RelayCommand]
+    private async Task DuplicatePurchaseOrderAsync()
+    {
+        if (SelectedPurchaseOrder is null)
+        {
+            return;
+        }
+
+        var confirm = await _dialogService.ShowConfirmationAsync(
+            "Duplicate Purchase Order",
+            $"Create a new draft PO with the same items as {SelectedPurchaseOrder.PONumber}?").ConfigureAwait(true);
+
+        if (!confirm)
+        {
+            return;
+        }
+
+        await ExecuteAsync(async () =>
+        {
+            var currentUserId = _sessionService.CurrentUserId;
+            var newPO = await _purchaseOrderService.DuplicatePurchaseOrderAsync(SelectedPurchaseOrder.Id, currentUserId).ConfigureAwait(true);
+
+            await LoadDataAsync().ConfigureAwait(true);
+
+            await _dialogService.ShowMessageAsync("Success",
+                $"Created duplicate purchase order {newPO.PONumber} from {SelectedPurchaseOrder.PONumber}.").ConfigureAwait(true);
+        }, "Duplicating purchase order...").ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Emails the purchase order to the supplier.
+    /// </summary>
+    [RelayCommand]
+    private async Task EmailPurchaseOrderAsync()
+    {
+        if (SelectedPurchaseOrder is null)
+        {
+            return;
+        }
+
+        // Check if supplier has an email
+        if (string.IsNullOrEmpty(SelectedPurchaseOrder.Supplier?.Email))
+        {
+            await _dialogService.ShowErrorAsync("No Email",
+                $"Supplier {SelectedPurchaseOrder.Supplier?.Name} does not have an email address configured.").ConfigureAwait(true);
+            return;
+        }
+
+        // Check if email is configured
+        var isConfigured = await _emailService.IsConfiguredAsync().ConfigureAwait(true);
+        if (!isConfigured)
+        {
+            await _dialogService.ShowErrorAsync("Email Not Configured",
+                "Email service is not configured. Please configure SMTP settings first.").ConfigureAwait(true);
+            return;
+        }
+
+        var confirm = await _dialogService.ShowConfirmationAsync(
+            "Email Purchase Order",
+            $"Send PO {SelectedPurchaseOrder.PONumber} to {SelectedPurchaseOrder.Supplier.Email}?").ConfigureAwait(true);
+
+        if (!confirm)
+        {
+            return;
+        }
+
+        await ExecuteAsync(async () =>
+        {
+            // Get business info for the email header
+            var config = await _configurationService.GetConfigurationAsync().ConfigureAwait(true);
+            if (config is null)
+            {
+                await _dialogService.ShowErrorAsync("Configuration Error",
+                    "System configuration not found. Please configure business settings first.").ConfigureAwait(true);
+                return;
+            }
+
+            // Generate email content
+            var htmlContent = GeneratePurchaseOrderEmailHtml(SelectedPurchaseOrder, config);
+            var plainTextContent = GeneratePurchaseOrderEmailPlainText(SelectedPurchaseOrder, config);
+
+            var message = new EmailMessageDto
+            {
+                ToAddresses = [SelectedPurchaseOrder.Supplier.Email],
+                Subject = $"Purchase Order {SelectedPurchaseOrder.PONumber} from {config.BusinessName}",
+                HtmlBody = htmlContent,
+                PlainTextBody = plainTextContent,
+                ReportType = EmailReportType.Custom
+            };
+
+            var result = await _emailService.SendEmailAsync(message).ConfigureAwait(true);
+
+            if (result.Success)
+            {
+                await _dialogService.ShowMessageAsync("Success",
+                    $"Purchase order emailed to {SelectedPurchaseOrder.Supplier.Email}.").ConfigureAwait(true);
+
+                // Update PO notes to record the email was sent
+                SelectedPurchaseOrder.Notes = string.IsNullOrEmpty(SelectedPurchaseOrder.Notes)
+                    ? $"Emailed to supplier on {DateTime.Now:yyyy-MM-dd HH:mm}"
+                    : $"{SelectedPurchaseOrder.Notes}\nEmailed to supplier on {DateTime.Now:yyyy-MM-dd HH:mm}";
+
+                await _purchaseOrderService.UpdatePurchaseOrderAsync(SelectedPurchaseOrder).ConfigureAwait(true);
+            }
+            else
+            {
+                await _dialogService.ShowErrorAsync("Email Failed",
+                    $"Failed to send email: {result.ErrorMessage}").ConfigureAwait(true);
+            }
+        }, "Sending email...").ConfigureAwait(true);
+    }
+
+    private static string GeneratePurchaseOrderEmailHtml(PurchaseOrder po, SystemConfiguration config)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("<!DOCTYPE html>");
+        sb.AppendLine("<html><head><style>");
+        sb.AppendLine("body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }");
+        sb.AppendLine(".header { background-color: #2196F3; color: white; padding: 20px; text-align: center; }");
+        sb.AppendLine(".content { padding: 20px; }");
+        sb.AppendLine("table { width: 100%; border-collapse: collapse; margin: 20px 0; }");
+        sb.AppendLine("th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }");
+        sb.AppendLine("th { background-color: #f5f5f5; }");
+        sb.AppendLine(".total { font-weight: bold; font-size: 1.1em; }");
+        sb.AppendLine(".footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 0.9em; }");
+        sb.AppendLine("</style></head><body>");
+
+        // Header
+        sb.AppendLine("<div class='header'>");
+        sb.AppendLine($"<h1>Purchase Order</h1>");
+        sb.AppendLine($"<h2>{po.PONumber}</h2>");
+        sb.AppendLine("</div>");
+
+        // Content
+        sb.AppendLine("<div class='content'>");
+
+        // Business info
+        sb.AppendLine($"<p><strong>From:</strong> {config.BusinessName}</p>");
+        if (!string.IsNullOrEmpty(config.BusinessAddress))
+            sb.AppendLine($"<p>{config.BusinessAddress}</p>");
+        if (!string.IsNullOrEmpty(config.BusinessPhone))
+            sb.AppendLine($"<p>Phone: {config.BusinessPhone}</p>");
+        if (!string.IsNullOrEmpty(config.BusinessEmail))
+            sb.AppendLine($"<p>Email: {config.BusinessEmail}</p>");
+
+        sb.AppendLine("<hr/>");
+
+        // PO Details
+        sb.AppendLine($"<p><strong>Order Date:</strong> {po.OrderDate:yyyy-MM-dd}</p>");
+        if (po.ExpectedDate.HasValue)
+            sb.AppendLine($"<p><strong>Expected Delivery:</strong> {po.ExpectedDate.Value:yyyy-MM-dd}</p>");
+        sb.AppendLine($"<p><strong>Status:</strong> {po.Status}</p>");
+
+        // Items table
+        sb.AppendLine("<h3>Order Items</h3>");
+        sb.AppendLine("<table>");
+        sb.AppendLine("<tr><th>#</th><th>Product</th><th>Quantity</th><th>Unit Cost</th><th>Total</th></tr>");
+
+        var itemNum = 1;
+        foreach (var item in po.PurchaseOrderItems)
+        {
+            sb.AppendLine($"<tr>");
+            sb.AppendLine($"<td>{itemNum}</td>");
+            sb.AppendLine($"<td>{item.Product?.Name ?? "Unknown"}</td>");
+            sb.AppendLine($"<td>{item.OrderedQuantity}</td>");
+            sb.AppendLine($"<td>{config.CurrencySymbol} {item.UnitCost:N2}</td>");
+            sb.AppendLine($"<td>{config.CurrencySymbol} {item.TotalCost:N2}</td>");
+            sb.AppendLine("</tr>");
+            itemNum++;
+        }
+
+        sb.AppendLine("</table>");
+
+        // Totals
+        sb.AppendLine("<table style='width: 300px; margin-left: auto;'>");
+        sb.AppendLine($"<tr><td>Subtotal:</td><td style='text-align: right;'>{config.CurrencySymbol} {po.SubTotal:N2}</td></tr>");
+        sb.AppendLine($"<tr><td>Tax ({config.DefaultTaxRate}%):</td><td style='text-align: right;'>{config.CurrencySymbol} {po.TaxAmount:N2}</td></tr>");
+        sb.AppendLine($"<tr class='total'><td>Total:</td><td style='text-align: right;'>{config.CurrencySymbol} {po.TotalAmount:N2}</td></tr>");
+        sb.AppendLine("</table>");
+
+        // Notes
+        if (!string.IsNullOrEmpty(po.Notes))
+        {
+            sb.AppendLine($"<h3>Notes</h3>");
+            sb.AppendLine($"<p>{po.Notes}</p>");
+        }
+
+        // Footer
+        sb.AppendLine("<div class='footer'>");
+        sb.AppendLine($"<p>This purchase order was generated by {config.BusinessName}.</p>");
+        sb.AppendLine($"<p>Generated on {DateTime.Now:yyyy-MM-dd HH:mm}</p>");
+        sb.AppendLine("</div>");
+
+        sb.AppendLine("</div></body></html>");
+        return sb.ToString();
+    }
+
+    private static string GeneratePurchaseOrderEmailPlainText(PurchaseOrder po, SystemConfiguration config)
+    {
+        var sb = new StringBuilder();
+
+        sb.AppendLine("PURCHASE ORDER");
+        sb.AppendLine($"PO Number: {po.PONumber}");
+        sb.AppendLine(new string('-', 50));
+
+        sb.AppendLine($"\nFrom: {config.BusinessName}");
+        if (!string.IsNullOrEmpty(config.BusinessAddress))
+            sb.AppendLine(config.BusinessAddress);
+        if (!string.IsNullOrEmpty(config.BusinessPhone))
+            sb.AppendLine($"Phone: {config.BusinessPhone}");
+        if (!string.IsNullOrEmpty(config.BusinessEmail))
+            sb.AppendLine($"Email: {config.BusinessEmail}");
+
+        sb.AppendLine(new string('-', 50));
+
+        sb.AppendLine($"\nOrder Date: {po.OrderDate:yyyy-MM-dd}");
+        if (po.ExpectedDate.HasValue)
+            sb.AppendLine($"Expected Delivery: {po.ExpectedDate.Value:yyyy-MM-dd}");
+        sb.AppendLine($"Status: {po.Status}");
+
+        sb.AppendLine("\nORDER ITEMS:");
+        sb.AppendLine(new string('-', 50));
+
+        var itemNum = 1;
+        foreach (var item in po.PurchaseOrderItems)
+        {
+            sb.AppendLine($"{itemNum}. {item.Product?.Name ?? "Unknown"}");
+            sb.AppendLine($"   Qty: {item.OrderedQuantity} @ {config.CurrencySymbol} {item.UnitCost:N2} = {config.CurrencySymbol} {item.TotalCost:N2}");
+            itemNum++;
+        }
+
+        sb.AppendLine(new string('-', 50));
+        sb.AppendLine($"Subtotal: {config.CurrencySymbol} {po.SubTotal:N2}");
+        sb.AppendLine($"Tax ({config.DefaultTaxRate}%): {config.CurrencySymbol} {po.TaxAmount:N2}");
+        sb.AppendLine($"TOTAL: {config.CurrencySymbol} {po.TotalAmount:N2}");
+
+        if (!string.IsNullOrEmpty(po.Notes))
+        {
+            sb.AppendLine($"\nNotes:\n{po.Notes}");
+        }
+
+        sb.AppendLine(new string('-', 50));
+        sb.AppendLine($"Generated on {DateTime.Now:yyyy-MM-dd HH:mm}");
+
+        return sb.ToString();
+    }
+
+    /// <summary>
     /// Clears the supplier filter.
     /// </summary>
     [RelayCommand]
@@ -393,4 +679,116 @@ public partial class PurchaseOrdersViewModel : ViewModelBase, INavigationAware
             _ => status.Value.ToString()
         };
     }
+
+    #region Reorder Suggestions
+
+    /// <summary>
+    /// Loads reorder suggestions from analytics service.
+    /// </summary>
+    private async Task LoadReorderSuggestionsAsync()
+    {
+        if (_inventoryAnalyticsService == null) return;
+
+        try
+        {
+            var storeId = _sessionService.CurrentStoreId ?? 1;
+            var suggestions = await _inventoryAnalyticsService.GetPendingReorderSuggestionsAsync(storeId).ConfigureAwait(true);
+
+            ReorderSuggestions.Clear();
+            foreach (var suggestion in suggestions.Take(10)) // Limit to top 10
+            {
+                ReorderSuggestions.Add(suggestion);
+            }
+            OnPropertyChanged(nameof(HasReorderSuggestions));
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "Failed to load reorder suggestions");
+        }
+    }
+
+    /// <summary>
+    /// Toggles the suggestions panel visibility.
+    /// </summary>
+    [RelayCommand]
+    private void ToggleSuggestionsPanel()
+    {
+        IsSuggestionsPanelExpanded = !IsSuggestionsPanelExpanded;
+    }
+
+    /// <summary>
+    /// Creates a purchase order from selected suggestions.
+    /// </summary>
+    [RelayCommand]
+    private async Task CreatePoFromSuggestionsAsync()
+    {
+        if (_inventoryAnalyticsService == null || ReorderSuggestions.Count == 0) return;
+
+        var confirm = await _dialogService.ShowConfirmationAsync(
+            "Create Purchase Orders",
+            $"Create purchase orders from {ReorderSuggestions.Count} suggestions? Items will be grouped by supplier.");
+
+        if (!confirm) return;
+
+        await ExecuteAsync(async () =>
+        {
+            var storeId = _sessionService.CurrentStoreId ?? 1;
+            var suggestionIds = ReorderSuggestions.Select(s => s.Id).ToList();
+
+            var result = await _inventoryAnalyticsService.ConvertSuggestionsToPurchaseOrdersAsync(storeId, suggestionIds);
+
+            if (result.PurchaseOrdersCreated > 0)
+            {
+                await _dialogService.ShowInfoAsync(
+                    "Purchase Orders Created",
+                    $"Created {result.PurchaseOrdersCreated} purchase order(s) with total value KSh {result.TotalOrderValue:N2}.");
+
+                await LoadDataAsync().ConfigureAwait(true);
+            }
+            else
+            {
+                await _dialogService.ShowWarningAsync(
+                    "No Orders Created",
+                    "No purchase orders were created. Check if suppliers are assigned to products.");
+            }
+        }, "Creating purchase orders...").ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Dismisses a single reorder suggestion.
+    /// </summary>
+    [RelayCommand]
+    private async Task DismissSuggestionAsync(ReorderSuggestion suggestion)
+    {
+        if (_inventoryAnalyticsService == null) return;
+
+        try
+        {
+            await _inventoryAnalyticsService.RejectReorderSuggestionAsync(suggestion.Id, "Dismissed by user");
+            ReorderSuggestions.Remove(suggestion);
+            OnPropertyChanged(nameof(HasReorderSuggestions));
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to dismiss suggestion {SuggestionId}", suggestion.Id);
+        }
+    }
+
+    /// <summary>
+    /// Refreshes reorder suggestions.
+    /// </summary>
+    [RelayCommand]
+    private async Task RefreshSuggestionsAsync()
+    {
+        if (_inventoryAnalyticsService == null) return;
+
+        await ExecuteAsync(async () =>
+        {
+            var storeId = _sessionService.CurrentStoreId ?? 1;
+            await _inventoryAnalyticsService.GenerateReorderSuggestionsAsync(storeId).ConfigureAwait(true);
+            await LoadReorderSuggestionsAsync().ConfigureAwait(true);
+        }, "Refreshing suggestions...").ConfigureAwait(true);
+    }
+
+    #endregion
 }

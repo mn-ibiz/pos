@@ -198,44 +198,174 @@
                 Margin="0,0,0,16"
                 Visibility="{Binding SelectedPurchaseOrder, Converter={StaticResource BoolToVisibility}}">
             <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                <StackPanel Grid.Column="0">
-                    <TextBlock Text="Supplier" Style="{StaticResource FormLabel}"/>
-                    <TextBlock Text="{Binding SelectedPurchaseOrder.Supplier.Name}"
-                               FontSize="16" FontWeight="SemiBold" Foreground="White"/>
-                </StackPanel>
+                <!-- PO Info Row -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="1">
-                    <TextBlock Text="Order Date" Style="{StaticResource FormLabel}"/>
-                    <TextBlock Text="{Binding SelectedPurchaseOrder.OrderDate, StringFormat='dd MMM yyyy'}"
-                               FontSize="14" Foreground="White"/>
-                </StackPanel>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Supplier" Style="{StaticResource FormLabel}"/>
+                        <TextBlock Text="{Binding SelectedPurchaseOrder.Supplier.Name}"
+                                   FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                    </StackPanel>
 
-                <StackPanel Grid.Column="2">
-                    <TextBlock Text="Expected Date" Style="{StaticResource FormLabel}"/>
-                    <TextBlock Text="{Binding SelectedPurchaseOrder.ExpectedDate, StringFormat='dd MMM yyyy', TargetNullValue='Not specified'}"
-                               FontSize="14" Foreground="White"/>
-                </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Order Date" Style="{StaticResource FormLabel}"/>
+                        <TextBlock Text="{Binding SelectedPurchaseOrder.OrderDate, StringFormat='dd MMM yyyy'}"
+                                   FontSize="14" Foreground="White"/>
+                    </StackPanel>
 
-                <Button Grid.Column="3"
-                        Content="Receive All"
-                        Style="{StaticResource ActionButton}"
-                        Background="#2196F3"
-                        Command="{Binding ReceiveAllCommand}"
-                        Margin="8,0"/>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Expected Date" Style="{StaticResource FormLabel}"/>
+                        <TextBlock Text="{Binding SelectedPurchaseOrder.ExpectedDate, StringFormat='dd MMM yyyy', TargetNullValue='Not specified'}"
+                                   FontSize="14" Foreground="White"/>
+                    </StackPanel>
 
-                <Button Grid.Column="4"
-                        Content="Clear All"
-                        Style="{StaticResource ActionButton}"
-                        Background="#4E4E6E"
-                        Command="{Binding ClearAllCommand}"/>
+                    <Button Grid.Column="3"
+                            Content="Receive All"
+                            Style="{StaticResource ActionButton}"
+                            Background="#2196F3"
+                            Command="{Binding ReceiveAllCommand}"
+                            Margin="8,0"/>
+
+                    <Button Grid.Column="4"
+                            Content="Clear All"
+                            Style="{StaticResource ActionButton}"
+                            Background="#4E4E6E"
+                            Command="{Binding ClearAllCommand}"/>
+                </Grid>
+
+                <!-- Barcode Scanning Row -->
+                <Border Grid.Row="1"
+                        Background="#1E1E2E"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,16,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Scan Mode Toggle -->
+                        <ToggleButton Grid.Column="0"
+                                      IsChecked="{Binding IsScanModeEnabled}"
+                                      Command="{Binding ToggleScanModeCommand}"
+                                      MinWidth="120"
+                                      MinHeight="44"
+                                      Margin="0,0,16,0"
+                                      Cursor="Hand">
+                            <ToggleButton.Style>
+                                <Style TargetType="ToggleButton">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border x:Name="border"
+                                                        Background="#4E4E6E"
+                                                        CornerRadius="8"
+                                                        Padding="16,8">
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                        <TextBlock x:Name="icon"
+                                                                   Text="&#xE894;"
+                                                                   FontFamily="Segoe MDL2 Assets"
+                                                                   FontSize="16"
+                                                                   Foreground="White"
+                                                                   VerticalAlignment="Center"
+                                                                   Margin="0,0,8,0"/>
+                                                        <TextBlock x:Name="text"
+                                                                   Text="Scan OFF"
+                                                                   Foreground="White"
+                                                                   FontWeight="SemiBold"/>
+                                                    </StackPanel>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsChecked" Value="True">
+                                                        <Setter TargetName="border" Property="Background" Value="#4CAF50"/>
+                                                        <Setter TargetName="text" Property="Text" Value="Scan ON"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ToggleButton.Style>
+                        </ToggleButton>
+
+                        <!-- Barcode Input -->
+                        <Grid Grid.Column="1" Margin="0,0,16,0">
+                            <TextBox x:Name="BarcodeInputBox"
+                                     Style="{StaticResource FormTextBox}"
+                                     Text="{Binding BarcodeInput, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsScanModeEnabled}">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Enter" Command="{Binding ProcessBarcodeCommand}"/>
+                                </TextBox.InputBindings>
+                            </TextBox>
+                            <TextBlock Text="Scan or enter barcode..."
+                                       Foreground="#666"
+                                       FontSize="14"
+                                       VerticalAlignment="Center"
+                                       Margin="16,0,0,0"
+                                       IsHitTestVisible="False"
+                                       Visibility="{Binding BarcodeInput, Converter={StaticResource InverseBoolToVisibility}}"/>
+                        </Grid>
+
+                        <!-- Scan Status -->
+                        <Border Grid.Column="2"
+                                MinWidth="300"
+                                Padding="12,8"
+                                CornerRadius="8"
+                                Margin="0,0,16,0">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#353550"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding LastScanSuccess}" Value="True">
+                                            <Setter Property="Background" Value="#1B5E20"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding LastScanSuccess}" Value="False">
+                                            <Setter Property="Background" Value="#353550"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="{Binding ScanStatusMessage, TargetNullValue='Ready to scan'}"
+                                       Foreground="White"
+                                       FontSize="14"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Scan Icon -->
+                        <Border Grid.Column="3"
+                                Background="#2196F3"
+                                CornerRadius="8"
+                                Width="44"
+                                Height="44"
+                                Cursor="Hand">
+                            <TextBlock Text="&#xE894;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="20"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                </Border>
             </Grid>
         </Border>
 
@@ -290,7 +420,8 @@
                     </Style>
                 </DataGrid.CellStyle>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code" Binding="{Binding ProductCode}" Width="100" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Code" Binding="{Binding ProductCode}" Width="90" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Barcode" Binding="{Binding Barcode}" Width="110" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Ordered" Width="90" IsReadOnly="True">
                         <DataGridTextColumn.Binding>

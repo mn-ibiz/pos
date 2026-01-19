@@ -98,6 +98,36 @@ public partial class InventoryViewModel : ViewModelBase, INavigationAware
     [ObservableProperty]
     private ProductStockViewModel? _selectedProduct;
 
+    /// <summary>
+    /// Gets or sets whether the stock history panel is visible.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isHistoryPanelVisible;
+
+    /// <summary>
+    /// Gets or sets the stock movements for the selected product.
+    /// </summary>
+    [ObservableProperty]
+    private ObservableCollection<StockMovementViewModel> _stockMovements = [];
+
+    /// <summary>
+    /// Gets or sets the history start date filter.
+    /// </summary>
+    [ObservableProperty]
+    private DateTime _historyStartDate = DateTime.Today.AddDays(-30);
+
+    /// <summary>
+    /// Gets or sets the history end date filter.
+    /// </summary>
+    [ObservableProperty]
+    private DateTime _historyEndDate = DateTime.Today;
+
+    /// <summary>
+    /// Gets or sets whether history is loading.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isHistoryLoading;
+
     #endregion
 
     /// <summary>
@@ -274,6 +304,79 @@ public partial class InventoryViewModel : ViewModelBase, INavigationAware
     private void GoBack()
     {
         _navigationService.GoBack();
+    }
+
+    /// <summary>
+    /// Views the stock history for the selected product.
+    /// </summary>
+    [RelayCommand]
+    private async Task ViewStockHistoryAsync()
+    {
+        if (SelectedProduct is null)
+        {
+            return;
+        }
+
+        IsHistoryPanelVisible = true;
+        await LoadStockHistoryAsync();
+    }
+
+    /// <summary>
+    /// Closes the stock history panel.
+    /// </summary>
+    [RelayCommand]
+    private void CloseHistoryPanel()
+    {
+        IsHistoryPanelVisible = false;
+        StockMovements.Clear();
+    }
+
+    /// <summary>
+    /// Loads stock history for the selected product.
+    /// </summary>
+    [RelayCommand]
+    private async Task LoadStockHistoryAsync()
+    {
+        if (SelectedProduct is null)
+        {
+            return;
+        }
+
+        IsHistoryLoading = true;
+        try
+        {
+            var movements = await _inventoryService.GetStockMovementsAsync(
+                SelectedProduct.ProductId,
+                HistoryStartDate,
+                HistoryEndDate.AddDays(1)); // Include end date
+
+            StockMovements = new ObservableCollection<StockMovementViewModel>(
+                movements.OrderByDescending(m => m.CreatedAt).Select(m => new StockMovementViewModel
+                {
+                    Id = m.Id,
+                    MovementType = m.MovementType,
+                    Quantity = m.Quantity,
+                    PreviousStock = m.PreviousStock,
+                    NewStock = m.NewStock,
+                    ReferenceType = m.ReferenceType,
+                    ReferenceId = m.ReferenceId,
+                    Reason = m.Reason,
+                    Notes = m.Notes,
+                    UserName = m.User?.FullName ?? "System",
+                    CreatedAt = m.CreatedAt
+                }));
+
+            _logger.Debug("Loaded {Count} stock movements for product {ProductId}",
+                StockMovements.Count, SelectedProduct.ProductId);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to load stock history for product {ProductId}", SelectedProduct.ProductId);
+        }
+        finally
+        {
+            IsHistoryLoading = false;
+        }
     }
 
     /// <summary>
@@ -587,4 +690,117 @@ public class CategoryDisplayItem
 
     /// <inheritdoc />
     public override string ToString() => DisplayName;
+}
+
+/// <summary>
+/// Represents a stock movement for display in the history panel.
+/// </summary>
+public class StockMovementViewModel
+{
+    /// <summary>
+    /// Gets or sets the movement ID.
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// Gets or sets the movement type.
+    /// </summary>
+    public MovementType MovementType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the quantity.
+    /// </summary>
+    public decimal Quantity { get; set; }
+
+    /// <summary>
+    /// Gets or sets the previous stock level.
+    /// </summary>
+    public decimal PreviousStock { get; set; }
+
+    /// <summary>
+    /// Gets or sets the new stock level.
+    /// </summary>
+    public decimal NewStock { get; set; }
+
+    /// <summary>
+    /// Gets or sets the reference type.
+    /// </summary>
+    public string? ReferenceType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the reference ID.
+    /// </summary>
+    public int? ReferenceId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the reason.
+    /// </summary>
+    public string? Reason { get; set; }
+
+    /// <summary>
+    /// Gets or sets the notes.
+    /// </summary>
+    public string? Notes { get; set; }
+
+    /// <summary>
+    /// Gets or sets the user name who made the movement.
+    /// </summary>
+    public string UserName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the creation date.
+    /// </summary>
+    public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// Gets the movement type display name.
+    /// </summary>
+    public string MovementTypeDisplay => MovementType switch
+    {
+        MovementType.Sale => "Sale",
+        MovementType.Purchase => "Purchase",
+        MovementType.PurchaseReceive => "Received",
+        MovementType.Adjustment => "Adjustment",
+        MovementType.StockTake => "Stock Take",
+        MovementType.Transfer => "Transfer",
+        MovementType.Void => "Void",
+        MovementType.Return => "Return",
+        MovementType.Waste => "Waste",
+        _ => MovementType.ToString()
+    };
+
+    /// <summary>
+    /// Gets the quantity display with sign.
+    /// </summary>
+    public string QuantityDisplay => MovementType switch
+    {
+        MovementType.Sale or MovementType.Waste or MovementType.Transfer => $"-{Quantity:N0}",
+        MovementType.PurchaseReceive or MovementType.Return or MovementType.Void => $"+{Quantity:N0}",
+        MovementType.Adjustment or MovementType.StockTake => NewStock > PreviousStock ? $"+{Math.Abs(Quantity):N0}" : $"-{Math.Abs(Quantity):N0}",
+        _ => $"{Quantity:N0}"
+    };
+
+    /// <summary>
+    /// Gets whether this is an incoming movement (increases stock).
+    /// </summary>
+    public bool IsIncoming => MovementType is MovementType.PurchaseReceive or MovementType.Return or MovementType.Void
+        || (MovementType == MovementType.Adjustment && NewStock > PreviousStock)
+        || (MovementType == MovementType.StockTake && NewStock > PreviousStock);
+
+    /// <summary>
+    /// Gets the movement icon.
+    /// </summary>
+    public string MovementIcon => IsIncoming ? "\uE74A" : "\uE74B"; // Up arrow or Down arrow
+
+    /// <summary>
+    /// Gets the reference display text.
+    /// </summary>
+    public string ReferenceDisplay => !string.IsNullOrEmpty(ReferenceType)
+        ? $"{ReferenceType} #{ReferenceId}"
+        : Reason ?? "-";
+
+    /// <summary>
+    /// Gets the date display.
+    /// </summary>
+    public string DateDisplay => CreatedAt.ToString("dd MMM yyyy HH:mm");
 }

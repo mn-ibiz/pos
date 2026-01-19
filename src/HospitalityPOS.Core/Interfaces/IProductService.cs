@@ -281,4 +281,51 @@ public interface IProductService
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The count of products in the category.</returns>
     Task<int> GetProductCountByCategoryAsync(int categoryId, CancellationToken cancellationToken = default);
+
+    #region Favorites
+
+    /// <summary>
+    /// Gets favorite products for a user.
+    /// </summary>
+    /// <param name="userId">The user ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>List of favorite products ordered by display order.</returns>
+    Task<IReadOnlyList<Product>> GetFavoritesAsync(int userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds a product to user's favorites.
+    /// </summary>
+    /// <param name="userId">The user ID.</param>
+    /// <param name="productId">The product ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if added successfully.</returns>
+    Task<bool> AddToFavoritesAsync(int userId, int productId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes a product from user's favorites.
+    /// </summary>
+    /// <param name="userId">The user ID.</param>
+    /// <param name="productId">The product ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if removed successfully.</returns>
+    Task<bool> RemoveFromFavoritesAsync(int userId, int productId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Checks if a product is in user's favorites.
+    /// </summary>
+    /// <param name="userId">The user ID.</param>
+    /// <param name="productId">The product ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if the product is a favorite.</returns>
+    Task<bool> IsFavoriteAsync(int userId, int productId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates the display order of favorites.
+    /// </summary>
+    /// <param name="userId">The user ID.</param>
+    /// <param name="productIds">Ordered list of product IDs.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task UpdateFavoriteOrderAsync(int userId, IEnumerable<int> productIds, CancellationToken cancellationToken = default);
+
+    #endregion
 }

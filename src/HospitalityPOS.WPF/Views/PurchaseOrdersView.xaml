@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:HospitalityPOS.WPF.ViewModels"
+             xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
              xmlns:enums="clr-namespace:HospitalityPOS.Core.Enums;assembly=HospitalityPOS.Core"
              mc:Ignorable="d"
              d:DesignHeight="700" d:DesignWidth="1200"
@@ -11,6 +12,8 @@
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
+        <converters:PurchaseOrderOverdueConverter x:Key="OverdueConverter"/>
+        <converters:OverdueDaysConverter x:Key="OverdueDaysConverter"/>
 
         <!-- Status Badge Style -->
         <Style x:Key="StatusBadgeStyle" TargetType="Border">
@@ -38,6 +41,7 @@
 
     <Grid Margin="24">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -117,7 +121,7 @@
                                Foreground="#2196F3"
                                HorizontalAlignment="Center" />
                 </StackPanel>
-                <StackPanel>
+                <StackPanel Margin="0,0,48,0">
                     <TextBlock Text="Partially Received"
                                FontSize="12"
                                Foreground="#8888AA"
@@ -126,6 +130,17 @@
                                FontSize="24"
                                FontWeight="Bold"
                                Foreground="#FF9800"
+                               HorizontalAlignment="Center" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="Overdue"
+                               FontSize="12"
+                               Foreground="#8888AA"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding OverdueCount}"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="#F44336"
                                HorizontalAlignment="Center" />
                 </StackPanel>
             </StackPanel>
@@ -220,8 +235,138 @@
                     Cursor="Hand" />
         </Grid>
 
+        <!-- Reorder Suggestions Panel (Collapsible) -->
+        <Border Grid.Row="3" Background="#252538" CornerRadius="8" Margin="0,0,0,16"
+                Visibility="{Binding HasReorderSuggestions, Converter={StaticResource BoolToVisConverter}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Suggestions Header -->
+                <Border Background="#3D3D5C" CornerRadius="8,8,0,0" Padding="12,8" Cursor="Hand"
+                        MouseLeftButtonUp="SuggestionsHeader_Click">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#22C55E"
+                                   VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="REORDER SUGGESTIONS" Foreground="White" FontWeight="Bold" FontSize="12"/>
+                            <Border Background="#22C55E" CornerRadius="10" Padding="8,2" Margin="10,0,0,0">
+                                <TextBlock Text="{Binding ReorderSuggestions.Count}" Foreground="White" FontSize="10" FontWeight="Bold"/>
+                            </Border>
+                        </StackPanel>
+                        <Button Grid.Column="2" Content="Create PO" Command="{Binding CreatePoFromSuggestionsCommand}"
+                                Background="#22C55E" Foreground="White" FontSize="11" Padding="12,4"
+                                BorderThickness="0" Cursor="Hand" Margin="0,0,8,0">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#16A34A"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        <TextBlock Grid.Column="3" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#9CA3AF"
+                                   VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="&#xE70D;"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsSuggestionsPanelExpanded}" Value="False">
+                                            <Setter Property="Text" Value="&#xE70E;"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </Border>
+
+                <!-- Suggestions List -->
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding ReorderSuggestions}" Margin="12,8,12,12"
+                              Visibility="{Binding IsSuggestionsPanelExpanded, Converter={StaticResource BoolToVisConverter}}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#2D2D44" CornerRadius="6" Padding="10,8" Margin="0,0,8,8" Width="220">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <!-- Product Name -->
+                                    <TextBlock Text="{Binding Product.Name, FallbackValue='Product'}" Foreground="White"
+                                               FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                    <!-- Dismiss Button -->
+                                    <Button Grid.Column="1" Content="&#xE711;" FontFamily="Segoe MDL2 Assets"
+                                            Foreground="#6B7280" FontSize="10" Background="Transparent" BorderThickness="0"
+                                            Cursor="Hand" Width="20" Height="20"
+                                            Command="{Binding DataContext.DismissSuggestionCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}" ToolTip="Dismiss">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="Transparent" CornerRadius="2">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                    <!-- Stock Info -->
+                                    <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,4,0,0">
+                                        <TextBlock Text="Stock: " Foreground="#6B7280" FontSize="10"/>
+                                        <TextBlock Text="{Binding CurrentStock, StringFormat=N0}" Foreground="#F59E0B" FontSize="10" FontWeight="Bold"/>
+                                        <TextBlock Text=" | Suggest: " Foreground="#6B7280" FontSize="10"/>
+                                        <TextBlock Text="{Binding SuggestedQuantity, StringFormat=N0}" Foreground="#22C55E" FontSize="10" FontWeight="Bold"/>
+                                    </StackPanel>
+                                    <!-- Priority Badge -->
+                                    <Border Grid.Row="2" Grid.ColumnSpan="2" Margin="0,6,0,0" HorizontalAlignment="Left"
+                                            CornerRadius="3" Padding="6,2">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#4B5563"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Priority}" Value="Critical">
+                                                        <Setter Property="Background" Value="#EF4444"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Priority}" Value="High">
+                                                        <Setter Property="Background" Value="#F59E0B"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding Priority}" Foreground="White" FontSize="9" FontWeight="Bold"/>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </Border>
+
         <!-- Purchase Orders List -->
-        <Border Grid.Row="3"
+        <Border Grid.Row="4"
                 Background="#2D2D44"
                 CornerRadius="12">
             <Grid>
@@ -301,9 +446,43 @@
                                             Binding="{Binding OrderDate, StringFormat='{}{0:yyyy-MM-dd}'}"
                                             Width="120" />
 
-                        <DataGridTextColumn Header="Expected"
-                                            Binding="{Binding ExpectedDate, StringFormat='{}{0:yyyy-MM-dd}'}"
-                                            Width="120" />
+                        <DataGridTemplateColumn Header="Expected" Width="180">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding ExpectedDate, StringFormat='{}{0:yyyy-MM-dd}'}"
+                                                   Foreground="White"
+                                                   VerticalAlignment="Center"/>
+                                        <!-- Overdue Warning Icon -->
+                                        <Border Margin="8,0,0,0"
+                                                Background="#F44336"
+                                                CornerRadius="3"
+                                                Padding="6,2"
+                                                VerticalAlignment="Center">
+                                            <Border.Visibility>
+                                                <MultiBinding Converter="{StaticResource OverdueConverter}">
+                                                    <Binding Path="ExpectedDate"/>
+                                                    <Binding Path="Status"/>
+                                                </MultiBinding>
+                                            </Border.Visibility>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="&#xE7BA;"
+                                                           FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="10"
+                                                           Foreground="White"
+                                                           VerticalAlignment="Center"/>
+                                                <TextBlock Text="OVERDUE"
+                                                           FontSize="9"
+                                                           FontWeight="Bold"
+                                                           Foreground="White"
+                                                           Margin="4,0,0,0"
+                                                           VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
                         <DataGridTemplateColumn Header="Status" Width="140">
                             <DataGridTemplateColumn.CellTemplate>
@@ -330,7 +509,7 @@
         </Border>
 
         <!-- Action Buttons -->
-        <Border Grid.Row="4"
+        <Border Grid.Row="5"
                 Background="#2D2D44"
                 CornerRadius="8"
                 Padding="16"
@@ -361,6 +540,33 @@
                         Margin="0,0,12,0"
                         Width="160"
                         Height="48" />
+
+                <Button Content="Duplicate PO"
+                        Command="{Binding DuplicatePurchaseOrderCommand}"
+                        IsEnabled="{Binding SelectedPurchaseOrder, Converter={StaticResource BoolToVisConverter}}"
+                        Background="#9C27B0"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Padding="24,12"
+                        FontSize="14"
+                        Cursor="Hand"
+                        Margin="0,0,12,0"
+                        Width="140"
+                        Height="48" />
+
+                <Button Content="Email PO"
+                        Command="{Binding EmailPurchaseOrderCommand}"
+                        IsEnabled="{Binding SelectedPurchaseOrder, Converter={StaticResource BoolToVisConverter}}"
+                        Background="#FF5722"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Padding="24,12"
+                        FontSize="14"
+                        Cursor="Hand"
+                        Margin="0,0,12,0"
+                        Width="120"
+                        Height="48"
+                        ToolTip="Email this PO to the supplier" />
 
                 <Button Content="Cancel PO"
                         Command="{Binding CancelPurchaseOrderCommand}"

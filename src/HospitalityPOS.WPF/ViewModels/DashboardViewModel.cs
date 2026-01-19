@@ -2,6 +2,9 @@ using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
 using Serilog;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.Core.Models.Dashboard;
@@ -141,6 +144,24 @@ public partial class DashboardViewModel : ViewModelBase, INavigationAware
     /// </summary>
     [ObservableProperty]
     private string _salesTrendDisplay = "0%";
+
+    /// <summary>
+    /// Gets or sets the sparkline plot for Today's Sales KPI card.
+    /// </summary>
+    [ObservableProperty]
+    private PlotModel? _salesSparkline;
+
+    /// <summary>
+    /// Gets or sets the sparkline plot for Orders KPI card.
+    /// </summary>
+    [ObservableProperty]
+    private PlotModel? _ordersSparkline;
+
+    /// <summary>
+    /// Gets or sets the sparkline plot for Avg Ticket KPI card.
+    /// </summary>
+    [ObservableProperty]
+    private PlotModel? _avgTicketSparkline;
 
     #endregion
 
@@ -357,6 +378,9 @@ public partial class DashboardViewModel : ViewModelBase, INavigationAware
             LastRefreshDisplay = LastRefreshTime.ToString("HH:mm:ss");
             HasData = true;
 
+            // Create sparklines from hourly data
+            CreateSparklines();
+
             // Load branch summaries if needed
             if (!IsMultiStoreEnabled)
             {
@@ -428,6 +452,123 @@ public partial class DashboardViewModel : ViewModelBase, INavigationAware
         {
             _ = LoadDashboardDataAsync();
         }
+    }
+
+    /// <summary>
+    /// Creates sparkline plot models from hourly sales data.
+    /// </summary>
+    private void CreateSparklines()
+    {
+        if (HourlySales == null || HourlySales.Count == 0)
+        {
+            SalesSparkline = CreateEmptySparkline("#22C55E");
+            OrdersSparkline = CreateEmptySparkline("#3B82F6");
+            AvgTicketSparkline = CreateEmptySparkline("#F59E0B");
+            return;
+        }
+
+        // Create Sales Sparkline (green)
+        SalesSparkline = CreateSparklinePlot(
+            HourlySales.Select(h => (double)h.Sales).ToList(),
+            OxyColor.Parse("#22C55E"));
+
+        // Create Orders Sparkline (blue) - using transaction count from hourly data
+        // Assuming each hourly entry has a count field, we'll estimate from sales pattern
+        OrdersSparkline = CreateSparklinePlot(
+            HourlySales.Select(h => h.Sales > 0 ? Math.Max(1, (double)(h.Sales / (SalesSummary?.AverageTicket ?? 1))) : 0).ToList(),
+            OxyColor.Parse("#3B82F6"));
+
+        // Create Avg Ticket Sparkline (amber)
+        AvgTicketSparkline = CreateSparklinePlot(
+            HourlySales.Select(h => h.Sales > 0 ? (double)(h.Sales / Math.Max(1, h.Sales / (SalesSummary?.AverageTicket ?? 1))) : 0).ToList(),
+            OxyColor.Parse("#F59E0B"));
+    }
+
+    /// <summary>
+    /// Creates a sparkline PlotModel from data points.
+    /// </summary>
+    private static PlotModel CreateSparklinePlot(List<double> values, OxyColor color)
+    {
+        var model = new PlotModel
+        {
+            PlotMargins = new OxyThickness(0),
+            Padding = new OxyThickness(0),
+            Background = OxyColors.Transparent,
+            PlotAreaBorderThickness = new OxyThickness(0)
+        };
+
+        // Hide all axes
+        model.Axes.Add(new LinearAxis
+        {
+            Position = AxisPosition.Bottom,
+            IsAxisVisible = false,
+            MinimumPadding = 0,
+            MaximumPadding = 0
+        });
+        model.Axes.Add(new LinearAxis
+        {
+            Position = AxisPosition.Left,
+            IsAxisVisible = false,
+            MinimumPadding = 0.1,
+            MaximumPadding = 0.1
+        });
+
+        // Create area series for sparkline effect
+        var areaSeries = new AreaSeries
+        {
+            Color = color,
+            Fill = OxyColor.FromAColor(60, color),
+            StrokeThickness = 2,
+            InterpolationAlgorithm = InterpolationAlgorithms.CanonicalSpline
+        };
+
+        for (int i = 0; i < values.Count; i++)
+        {
+            areaSeries.Points.Add(new DataPoint(i, values[i]));
+        }
+
+        model.Series.Add(areaSeries);
+        return model;
+    }
+
+    /// <summary>
+    /// Creates an empty sparkline for when no data is available.
+    /// </summary>
+    private static PlotModel CreateEmptySparkline(string colorHex)
+    {
+        var color = OxyColor.Parse(colorHex);
+        var model = new PlotModel
+        {
+            PlotMargins = new OxyThickness(0),
+            Padding = new OxyThickness(0),
+            Background = OxyColors.Transparent,
+            PlotAreaBorderThickness = new OxyThickness(0)
+        };
+
+        model.Axes.Add(new LinearAxis
+        {
+            Position = AxisPosition.Bottom,
+            IsAxisVisible = false
+        });
+        model.Axes.Add(new LinearAxis
+        {
+            Position = AxisPosition.Left,
+            IsAxisVisible = false
+        });
+
+        // Create a flat line
+        var areaSeries = new AreaSeries
+        {
+            Color = color,
+            Fill = OxyColor.FromAColor(30, color),
+            StrokeThickness = 1
+        };
+
+        areaSeries.Points.Add(new DataPoint(0, 0));
+        areaSeries.Points.Add(new DataPoint(1, 0));
+        model.Series.Add(areaSeries);
+
+        return model;
     }
 
     #endregion

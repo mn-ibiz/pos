@@ -117,7 +117,7 @@ public partial class UserManagementViewModel : ViewModelBase, INavigationAware
     [RelayCommand]
     private void CreateUser()
     {
-        _navigationService.NavigateTo<UserEditorViewModel>(null);
+        _navigationService.NavigateTo<UserEditorViewModel>();
     }
 
     /// <summary>

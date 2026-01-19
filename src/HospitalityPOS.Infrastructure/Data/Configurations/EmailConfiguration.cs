@@ -38,10 +38,6 @@ public class EmailConfigurationEntityConfiguration : IEntityTypeConfiguration<Em
         builder.Property(e => e.ReplyToAddress)
             .HasMaxLength(100);
 
-        builder.Property(e => e.TimeZone)
-            .HasMaxLength(50)
-            .HasDefaultValue("Africa/Nairobi");
-
         builder.HasOne(e => e.Store)
             .WithMany()
             .HasForeignKey(e => e.StoreId)

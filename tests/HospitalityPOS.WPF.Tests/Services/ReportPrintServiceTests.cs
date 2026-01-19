@@ -164,7 +164,7 @@ public class ReportPrintServiceTests
         [
             new CashierSalesReport
             {
-                CashierId = "user1",
+                UserId = 1,
                 CashierName = "John Doe",
                 TransactionCount = 30,
                 TotalSales = 6000m,
@@ -340,7 +340,7 @@ public class ReportPrintServiceTests
             {
                 StartDate = DateTime.Today,
                 EndDate = DateTime.Today,
-                GeneratedByUserId = "user1"
+                GeneratedByUserId = 1
             },
             Summary = new DailySalesSummary
             {

@@ -197,6 +197,34 @@
                             BorderThickness="0"
                             Padding="12,8"
                             FontSize="12"
+                            Cursor="Hand"
+                            Margin="0,0,4,0" />
+                    <Button Content="Last Week"
+                            Command="{Binding SetLastWeekCommand}"
+                            Background="#3D3D5C"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Padding="12,8"
+                            FontSize="12"
+                            Cursor="Hand"
+                            Margin="0,0,4,0" />
+                    <Button Content="Last Month"
+                            Command="{Binding SetLastMonthCommand}"
+                            Background="#3D3D5C"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Padding="12,8"
+                            FontSize="12"
+                            Cursor="Hand"
+                            Margin="0,0,4,0" />
+                    <Button Content="YTD"
+                            Command="{Binding SetYearToDateCommand}"
+                            Background="#8B5CF6"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Padding="12,8"
+                            FontSize="12"
+                            FontWeight="SemiBold"
                             Cursor="Hand" />
                 </StackPanel>
 

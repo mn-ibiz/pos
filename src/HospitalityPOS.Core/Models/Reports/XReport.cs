@@ -105,6 +105,11 @@ public class XReport
     /// </summary>
     public List<UserSalesSummary> SalesByUser { get; set; } = [];
 
+    /// <summary>
+    /// Gets or sets the hourly sales breakdown.
+    /// </summary>
+    public List<HourlySalesSummary> HourlySales { get; set; } = [];
+
     // Transaction Statistics
     /// <summary>
     /// Gets or sets the total number of transactions.
@@ -236,4 +241,30 @@ public class VoidSummary
     /// Gets or sets when the receipt was voided.
     /// </summary>
     public DateTime VoidedAt { get; set; }
+}
+
+/// <summary>
+/// Summary of sales for a specific hour.
+/// </summary>
+public class HourlySalesSummary
+{
+    /// <summary>
+    /// Gets or sets the hour (0-23).
+    /// </summary>
+    public int Hour { get; set; }
+
+    /// <summary>
+    /// Gets or sets the hour display label (e.g., "9 AM", "2 PM").
+    /// </summary>
+    public string HourLabel { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the number of transactions in this hour.
+    /// </summary>
+    public int TransactionCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total sales amount for this hour.
+    /// </summary>
+    public decimal TotalAmount { get; set; }
 }

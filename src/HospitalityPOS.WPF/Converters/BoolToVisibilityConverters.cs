@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media;
+using HospitalityPOS.Core.Enums;
 
 namespace HospitalityPOS.WPF.Converters;
 
@@ -207,5 +209,148 @@ public class EnumBooleanConverter : IValueConverter
         }
 
         return Binding.DoNothing;
+    }
+}
+
+/// <summary>
+/// Alias for NullToVisibilityConverter for simpler naming in XAML.
+/// </summary>
+public class NullToCollapsedConverter : NullToVisibilityConverter
+{
+}
+
+/// <summary>
+/// Converts a PIN string to masked display (shows bullets instead of digits).
+/// </summary>
+public class PinMaskConverter : IValueConverter
+{
+    /// <inheritdoc />
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is string pin && !string.IsNullOrEmpty(pin))
+        {
+            // Return bullets for each character
+            return new string('\u2022', pin.Length);
+        }
+        return string.Empty;
+    }
+
+    /// <inheritdoc />
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
+    }
+}
+
+/// <summary>
+/// Multi-value converter to determine if a Purchase Order is overdue.
+/// Values[0]: ExpectedDate (DateTime?)
+/// Values[1]: Status (PurchaseOrderStatus)
+/// Returns Visibility.Visible if overdue, Collapsed otherwise.
+/// </summary>
+public class PurchaseOrderOverdueConverter : IMultiValueConverter
+{
+    /// <inheritdoc />
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (values.Length < 2)
+        {
+            return Visibility.Collapsed;
+        }
+
+        var expectedDate = values[0] as DateTime?;
+        var status = values[1] is PurchaseOrderStatus s ? s : PurchaseOrderStatus.Draft;
+
+        // Check if overdue: expected date has passed and status is not Complete or Cancelled
+        var isOverdue = expectedDate.HasValue &&
+                        expectedDate.Value.Date < DateTime.Today &&
+                        status != PurchaseOrderStatus.Complete &&
+                        status != PurchaseOrderStatus.Cancelled;
+
+        return isOverdue ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <inheritdoc />
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
+    }
+}
+
+/// <summary>
+/// Multi-value converter that returns a background color based on overdue status.
+/// Values[0]: ExpectedDate (DateTime?)
+/// Values[1]: Status (PurchaseOrderStatus)
+/// Returns red-tinted color if overdue, transparent otherwise.
+/// </summary>
+public class PurchaseOrderOverdueBackgroundConverter : IMultiValueConverter
+{
+    /// <inheritdoc />
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (values.Length < 2)
+        {
+            return Brushes.Transparent;
+        }
+
+        var expectedDate = values[0] as DateTime?;
+        var status = values[1] is PurchaseOrderStatus s ? s : PurchaseOrderStatus.Draft;
+
+        // Check if overdue
+        var isOverdue = expectedDate.HasValue &&
+                        expectedDate.Value.Date < DateTime.Today &&
+                        status != PurchaseOrderStatus.Complete &&
+                        status != PurchaseOrderStatus.Cancelled;
+
+        if (isOverdue)
+        {
+            // Return a subtle red background for overdue rows
+            return new SolidColorBrush(Color.FromArgb(0x20, 0xF4, 0x43, 0x36)); // Semi-transparent red
+        }
+
+        return Brushes.Transparent;
+    }
+
+    /// <inheritdoc />
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
+    }
+}
+
+/// <summary>
+/// Converts a date to show how many days overdue it is.
+/// Returns empty string if not overdue.
+/// </summary>
+public class OverdueDaysConverter : IMultiValueConverter
+{
+    /// <inheritdoc />
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (values.Length < 2)
+        {
+            return string.Empty;
+        }
+
+        var expectedDate = values[0] as DateTime?;
+        var status = values[1] is PurchaseOrderStatus s ? s : PurchaseOrderStatus.Draft;
+
+        // Check if overdue
+        if (!expectedDate.HasValue ||
+            expectedDate.Value.Date >= DateTime.Today ||
+            status == PurchaseOrderStatus.Complete ||
+            status == PurchaseOrderStatus.Cancelled)
+        {
+            return string.Empty;
+        }
+
+        var daysOverdue = (DateTime.Today - expectedDate.Value.Date).Days;
+        return daysOverdue == 1 ? "1 day overdue" : $"{daysOverdue} days overdue";
+    }
+
+    /// <inheritdoc />
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
     }
 }

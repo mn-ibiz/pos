@@ -92,3 +92,32 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .OnDelete(DeleteBehavior.SetNull);
     }
 }
+
+public class ProductFavoriteConfiguration : IEntityTypeConfiguration<ProductFavorite>
+{
+    public void Configure(EntityTypeBuilder<ProductFavorite> builder)
+    {
+        builder.ToTable("ProductFavorites");
+
+        builder.HasKey(e => e.Id);
+
+        builder.Property(e => e.DisplayOrder)
+            .HasDefaultValue(0);
+
+        // Unique constraint: each user can only favorite a product once
+        builder.HasIndex(e => new { e.UserId, e.ProductId })
+            .IsUnique();
+
+        builder.HasIndex(e => e.UserId);
+
+        builder.HasOne(e => e.User)
+            .WithMany()
+            .HasForeignKey(e => e.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(e => e.Product)
+            .WithMany()
+            .HasForeignKey(e => e.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
