@@ -9,8 +9,8 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
         <Style x:Key="CardStyle" TargetType="Border">
-            <Setter Property="Background" Value="#FFFFFF"/>
-            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Padding" Value="16"/>
@@ -19,19 +19,19 @@
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#1B5E20"/>
+            <Setter Property="Foreground" Value="#6366F1"/>
             <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="#F5F5F5">
+    <Grid Background="#1E1E2E">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="#FFFFFF" Padding="16" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+        <Border Grid.Row="0" Background="#2D2D44" Padding="16" BorderBrush="#3D3D5C" BorderThickness="0,0,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -39,8 +39,8 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel>
-                    <TextBlock Text="Barcode &amp; Scale Settings" FontSize="24" FontWeight="Bold" Foreground="#1B5E20"/>
-                    <TextBlock Text="Configure weighted barcodes, scales, and barcode sequences" Foreground="#666" Margin="0,4,0,0"/>
+                    <TextBlock Text="Barcode &amp; Scale Settings" FontSize="24" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Configure weighted barcodes, scales, and barcode sequences" Foreground="#8888AA" Margin="0,4,0,0"/>
                 </StackPanel>
 
                 <Button Grid.Column="1" Content="Refresh" Command="{Binding LoadDataCommand}" Padding="16,8"/>
@@ -49,9 +49,9 @@
 
         <!-- Messages -->
         <StackPanel Grid.Row="0" VerticalAlignment="Bottom" Margin="16,0">
-            <TextBlock Text="{Binding ErrorMessage}" Foreground="#D32F2F" TextWrapping="Wrap"
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444" TextWrapping="Wrap"
                       Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisibility}}"/>
-            <TextBlock Text="{Binding SuccessMessage}" Foreground="#1B5E20" TextWrapping="Wrap"
+            <TextBlock Text="{Binding SuccessMessage}" Foreground="#22C55E" TextWrapping="Wrap"
                       Visibility="{Binding SuccessMessage, Converter={StaticResource BoolToVisibility}}"/>
         </StackPanel>
 
@@ -79,7 +79,8 @@
 
                         <DataGrid ItemsSource="{Binding WeightedConfigs}" SelectedItem="{Binding SelectedWeightedConfig}"
                                  AutoGenerateColumns="False" IsReadOnly="True" Height="150"
-                                 HeadersVisibility="Column" GridLinesVisibility="Horizontal" BorderThickness="0">
+                                 HeadersVisibility="Column" GridLinesVisibility="Horizontal" BorderThickness="0"
+                                 Background="#2D2D44" Foreground="White" HorizontalGridLinesBrush="#3D3D5C">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="100"/>
                                 <DataGridTextColumn Header="Prefix" Binding="{Binding Prefix}" Width="70"/>
@@ -94,9 +95,9 @@
 
                         <!-- Weighted Config Edit Form -->
                         <Border Visibility="{Binding IsEditingWeightedConfig, Converter={StaticResource BoolToVisibility}}"
-                               Background="#F9F9F9" CornerRadius="4" Padding="12" Margin="0,16,0,0">
+                               Background="#252538" CornerRadius="4" Padding="12" Margin="0,16,0,0">
                             <StackPanel>
-                                <TextBlock Text="Edit Configuration" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                <TextBlock Text="Edit Configuration" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
 
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -111,50 +112,50 @@
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,8">
-                                        <TextBlock Text="Name" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Name" FontSize="11" Foreground="#8888AA"/>
                                         <TextBox Text="{Binding EditWeightedName}" Padding="6,4"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,8">
-                                        <TextBlock Text="Prefix" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Prefix" FontSize="11" Foreground="#8888AA"/>
                                         <ComboBox ItemsSource="{Binding PrefixOptions}" SelectedItem="{Binding EditWeightedPrefix}" Padding="6,4"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,8">
-                                        <TextBlock Text="Article Start" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Article Start" FontSize="11" Foreground="#8888AA"/>
                                         <TextBox Text="{Binding EditArticleCodeStart}" Padding="6,4"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,8">
-                                        <TextBlock Text="Article Length" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Article Length" FontSize="11" Foreground="#8888AA"/>
                                         <TextBox Text="{Binding EditArticleCodeLength}" Padding="6,4"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,8">
-                                        <TextBlock Text="Value Start" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Value Start" FontSize="11" Foreground="#8888AA"/>
                                         <TextBox Text="{Binding EditValueStart}" Padding="6,4"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,8">
-                                        <TextBlock Text="Value Length" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Value Length" FontSize="11" Foreground="#8888AA"/>
                                         <TextBox Text="{Binding EditValueLength}" Padding="6,4"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,8,8">
-                                        <TextBlock Text="Decimals" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Decimals" FontSize="11" Foreground="#8888AA"/>
                                         <TextBox Text="{Binding EditValueDecimals}" Padding="6,4"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="3" Grid.Column="1" Margin="8,0,0,8" Orientation="Horizontal">
-                                        <CheckBox Content="Is Price" IsChecked="{Binding EditIsPrice}" Margin="0,16,16,0"/>
-                                        <CheckBox Content="Active" IsChecked="{Binding EditWeightedIsActive}" Margin="0,16,0,0"/>
+                                        <CheckBox Content="Is Price" IsChecked="{Binding EditIsPrice}" Foreground="White" Margin="0,16,16,0"/>
+                                        <CheckBox Content="Active" IsChecked="{Binding EditWeightedIsActive}" Foreground="White" Margin="0,16,0,0"/>
                                     </StackPanel>
                                 </Grid>
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
                                     <Button Content="Cancel" Command="{Binding CancelWeightedEditCommand}" Padding="8,4" Margin="0,0,8,0"/>
                                     <Button Content="Save" Command="{Binding SaveWeightedConfigCommand}" Padding="8,4"
-                                           Background="#1B5E20" Foreground="White" BorderThickness="0"/>
+                                           Background="#6366F1" Foreground="White" BorderThickness="0"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -172,7 +173,8 @@
 
                         <DataGrid ItemsSource="{Binding ScaleConfigs}" SelectedItem="{Binding SelectedScaleConfig}"
                                  AutoGenerateColumns="False" IsReadOnly="True" Height="150"
-                                 HeadersVisibility="Column" GridLinesVisibility="Horizontal" BorderThickness="0">
+                                 HeadersVisibility="Column" GridLinesVisibility="Horizontal" BorderThickness="0"
+                                 Background="#2D2D44" Foreground="White" HorizontalGridLinesBrush="#3D3D5C">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="100"/>
                                 <DataGridTextColumn Header="Type" Binding="{Binding ScaleType}" Width="80"/>
@@ -189,9 +191,9 @@
 
                         <!-- Scale Config Edit Form -->
                         <Border Visibility="{Binding IsEditingScaleConfig, Converter={StaticResource BoolToVisibility}}"
-                               Background="#F9F9F9" CornerRadius="4" Padding="12" Margin="0,16,0,0">
+                               Background="#252538" CornerRadius="4" Padding="12" Margin="0,16,0,0">
                             <StackPanel>
-                                <TextBlock Text="Edit Scale" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                <TextBlock Text="Edit Scale" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
 
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -206,42 +208,42 @@
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,8">
-                                        <TextBlock Text="Name" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Name" FontSize="11" Foreground="#8888AA"/>
                                         <TextBox Text="{Binding EditScaleName}" Padding="6,4"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,8">
-                                        <TextBlock Text="Type" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Type" FontSize="11" Foreground="#8888AA"/>
                                         <ComboBox ItemsSource="{Binding ScaleTypeOptions}" SelectedItem="{Binding EditScaleType}" Padding="6,4"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,8">
-                                        <TextBlock Text="Protocol" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Protocol" FontSize="11" Foreground="#8888AA"/>
                                         <ComboBox ItemsSource="{Binding ProtocolOptions}" SelectedItem="{Binding EditScaleProtocol}" Padding="6,4"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,8">
-                                        <TextBlock Text="Connection (COM/IP)" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Connection (COM/IP)" FontSize="11" Foreground="#8888AA"/>
                                         <TextBox Text="{Binding EditConnectionString}" Padding="6,4"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,8">
-                                        <TextBlock Text="Baud Rate" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Baud Rate" FontSize="11" Foreground="#8888AA"/>
                                         <TextBox Text="{Binding EditBaudRate}" Padding="6,4"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,8">
-                                        <TextBlock Text="Weight Unit" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Weight Unit" FontSize="11" Foreground="#8888AA"/>
                                         <ComboBox ItemsSource="{Binding WeightUnitOptions}" SelectedItem="{Binding EditWeightUnit}" Padding="6,4"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,8,8">
-                                        <TextBlock Text="Min Weight" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Min Weight" FontSize="11" Foreground="#8888AA"/>
                                         <TextBox Text="{Binding EditMinWeight}" Padding="6,4"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="3" Grid.Column="1" Margin="8,0,0,8">
-                                        <TextBlock Text="Max Weight" FontSize="11" Foreground="#666"/>
+                                        <TextBlock Text="Max Weight" FontSize="11" Foreground="#8888AA"/>
                                         <TextBox Text="{Binding EditMaxWeight}" Padding="6,4"/>
                                     </StackPanel>
                                 </Grid>
@@ -249,13 +251,13 @@
                                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                     <Button Content="Test Connection" Command="{Binding TestScaleConnectionCommand}" Padding="8,4" Margin="0,0,8,0"
                                            IsEnabled="{Binding IsTestingScale, Converter={StaticResource BoolToVisibility}, ConverterParameter=Invert}"/>
-                                    <TextBlock Text="{Binding ScaleTestResult}" VerticalAlignment="Center" Foreground="#666"/>
+                                    <TextBlock Text="{Binding ScaleTestResult}" VerticalAlignment="Center" Foreground="#8888AA"/>
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
                                     <Button Content="Cancel" Command="{Binding CancelScaleEditCommand}" Padding="8,4" Margin="0,0,8,0"/>
                                     <Button Content="Save" Command="{Binding SaveScaleConfigCommand}" Padding="8,4"
-                                           Background="#1B5E20" Foreground="White" BorderThickness="0"/>
+                                           Background="#6366F1" Foreground="White" BorderThickness="0"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -275,17 +277,17 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                <TextBlock Text="Prefix" FontSize="11" Foreground="#666"/>
+                                <TextBlock Text="Prefix" FontSize="11" Foreground="#8888AA"/>
                                 <TextBox Text="{Binding BarcodeSequence.Prefix}" Padding="8,6"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" Margin="8,0">
-                                <TextBlock Text="Last Sequence #" FontSize="11" Foreground="#666"/>
+                                <TextBlock Text="Last Sequence #" FontSize="11" Foreground="#8888AA"/>
                                 <TextBox Text="{Binding BarcodeSequence.LastSequenceNumber}" Padding="8,6"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2" Margin="8,0,0,0">
-                                <TextBlock Text="Sequence Digits" FontSize="11" Foreground="#666"/>
+                                <TextBlock Text="Sequence Digits" FontSize="11" Foreground="#8888AA"/>
                                 <TextBox Text="{Binding BarcodeSequence.SequenceDigits}" Padding="8,6"/>
                             </StackPanel>
                         </Grid>
@@ -294,7 +296,7 @@
                                Padding="12,6" HorizontalAlignment="Left" Margin="0,12,0,0"/>
 
                         <TextBlock Text="Internal barcodes are generated with format: Prefix + Sequence + Check Digit"
-                                  Foreground="#666" FontSize="11" Margin="0,12,0,0" TextWrapping="Wrap"/>
+                                  Foreground="#8888AA" FontSize="11" Margin="0,12,0,0" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
 
@@ -303,7 +305,7 @@
                     <StackPanel>
                         <TextBlock Text="Barcode Testing" Style="{StaticResource SectionHeaderStyle}"/>
 
-                        <TextBlock Text="Enter barcode to test lookup" FontSize="11" Foreground="#666" Margin="0,0,0,4"/>
+                        <TextBlock Text="Enter barcode to test lookup" FontSize="11" Foreground="#8888AA" Margin="0,0,0,4"/>
                         <TextBox Text="{Binding TestBarcodeInput, UpdateSourceTrigger=PropertyChanged}"
                                 Padding="10,8" Margin="0,0,0,12"/>
 
@@ -314,12 +316,12 @@
                                    Padding="12,6"/>
                         </StackPanel>
 
-                        <Border Background="#F5F5F5" CornerRadius="4" Padding="12"
+                        <Border Background="#252538" CornerRadius="4" Padding="12"
                                Visibility="{Binding TestBarcodeResult, Converter={StaticResource BoolToVisibility}}">
-                            <TextBlock Text="{Binding TestBarcodeResult}" TextWrapping="Wrap" FontFamily="Consolas"/>
+                            <TextBlock Text="{Binding TestBarcodeResult}" TextWrapping="Wrap" FontFamily="Consolas" Foreground="White"/>
                         </Border>
 
-                        <TextBlock Margin="0,16,0,0" Foreground="#666" FontSize="11" TextWrapping="Wrap">
+                        <TextBlock Margin="0,16,0,0" Foreground="#8888AA" FontSize="11" TextWrapping="Wrap">
                             <Run FontWeight="SemiBold">Weighted Barcode Format:</Run>
                             <LineBreak/>
                             Prefixes 20-22: Price embedded (e.g., 2012345001999)

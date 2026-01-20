@@ -21,13 +21,13 @@
         <!-- Form Label Style -->
         <Style x:Key="FormLabelStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Foreground" Value="#9CA3AF"/>
+            <Setter Property="Foreground" Value="#8888AA"/>
             <Setter Property="Margin" Value="0,0,0,6"/>
         </Style>
 
         <!-- Form TextBox Style -->
         <Style x:Key="FormTextBoxStyle" TargetType="TextBox">
-            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Background" Value="#1E1E2E"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="CaretBrush" Value="White"/>
             <Setter Property="BorderBrush" Value="#3D3D5C"/>
@@ -57,7 +57,7 @@
 
         <!-- ComboBox Style -->
         <Style x:Key="FormComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Background" Value="#1E1E2E"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#3D3D5C"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -136,7 +136,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="#252538" Padding="24,20">
+        <Border Grid.Row="0" Background="#2D2D44" Padding="24,20">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -150,7 +150,7 @@
                                Foreground="White"/>
                     <TextBlock Text="Manage your business information and configuration"
                                FontSize="13"
-                               Foreground="#9CA3AF"
+                               Foreground="#8888AA"
                                Margin="0,4,0,0"/>
                 </StackPanel>
 
@@ -182,6 +182,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -318,9 +319,80 @@
                              Style="{StaticResource FormTextBoxStyle}"/>
                 </StackPanel>
 
-                <!-- Business Mode Section -->
+                <!-- Theme Section -->
                 <Border Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1"
-                        Background="#252538"
+                        Background="#2D2D44"
+                        CornerRadius="8"
+                        Padding="20"
+                        Margin="0,8,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="Appearance" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,8"/>
+                            <TextBlock Text="Choose your preferred theme for the application"
+                                       FontSize="13"
+                                       Foreground="#8888AA"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+
+                        <!-- Theme Toggle -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0" Orientation="Horizontal">
+                            <Button Command="{Binding ToggleThemeCommand}"
+                                    Cursor="Hand"
+                                    BorderThickness="0">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="toggleBorder"
+                                                Background="#2D2D44"
+                                                CornerRadius="16"
+                                                Padding="4"
+                                                Width="56"
+                                                Height="32">
+                                            <Grid>
+                                                <!-- Toggle Indicator -->
+                                                <Border x:Name="indicator"
+                                                        Background="#22C55E"
+                                                        CornerRadius="12"
+                                                        Width="24"
+                                                        Height="24"
+                                                        HorizontalAlignment="Left">
+                                                    <TextBlock x:Name="icon"
+                                                               Text="&#xE706;"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="12"
+                                                               Foreground="White"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsDarkTheme}" Value="True">
+                                                <Setter TargetName="indicator" Property="HorizontalAlignment" Value="Right"/>
+                                                <Setter TargetName="indicator" Property="Background" Value="#6366F1"/>
+                                                <Setter TargetName="icon" Property="Text" Value="&#xE708;"/>
+                                            </DataTrigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            <TextBlock Text="{Binding ThemeDisplayText}"
+                                       Foreground="White"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"
+                                       Margin="12,0,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Business Mode Section -->
+                <Border Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="2"
+                        Background="#2D2D44"
                         CornerRadius="8"
                         Padding="20"
                         Margin="0,8,0,24">
@@ -338,20 +410,20 @@
                                        Foreground="White"/>
                             <TextBlock Text="{Binding ModeDescription}"
                                        FontSize="13"
-                                       Foreground="#9CA3AF"
+                                       Foreground="#8888AA"
                                        TextWrapping="Wrap"
                                        Margin="0,8,0,0"/>
                         </StackPanel>
 
                         <!-- Mode Selection -->
                         <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0">
-                            <TextBlock Text="Change Mode" Foreground="#9CA3AF" FontSize="11" Margin="0,0,0,8"/>
+                            <TextBlock Text="Change Mode" Foreground="#8888AA" FontSize="11" Margin="0,0,0,8"/>
                             <ComboBox ItemsSource="{Binding ModeOptions}"
                                       SelectedValue="{Binding SelectedMode}"
                                       SelectedValuePath="Mode"
                                       DisplayMemberPath="Title"
                                       Width="200"
-                                      Background="#2D2D44"
+                                      Background="#1E1E2E"
                                       Foreground="White"
                                       BorderBrush="#3D3D5C"
                                       Padding="12,8"/>
@@ -360,16 +432,16 @@
                 </Border>
 
                 <!-- Last Saved Info -->
-                <TextBlock Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="2"
+                <TextBlock Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="3"
                            Text="{Binding LastSavedInfo}"
-                           Foreground="#6B7280"
+                           Foreground="#555577"
                            FontSize="12"
                            Margin="0,0,0,16"/>
             </Grid>
         </ScrollViewer>
 
         <!-- Footer Actions -->
-        <Border Grid.Row="2" Background="#252538" Padding="24,16">
+        <Border Grid.Row="2" Background="#2D2D44" Padding="24,16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>

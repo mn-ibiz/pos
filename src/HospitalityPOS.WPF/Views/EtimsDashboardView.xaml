@@ -8,7 +8,7 @@
              d:DataContext="{d:DesignInstance Type=vm:EtimsDashboardViewModel}"
              d:DesignHeight="700" d:DesignWidth="1200">
 
-    <Grid>
+    <Grid Background="#1E1E2E">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -16,7 +16,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="#00695C" Padding="20">
+        <Border Grid.Row="0" Background="#16162B" Padding="20">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -27,7 +27,7 @@
                     <TextBlock Text="Kenya eTIMS Dashboard" FontSize="28" FontWeight="Bold" Foreground="White"/>
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                         <Ellipse Width="12" Height="12" Fill="{Binding StatusColor}" Margin="0,0,8,0"/>
-                        <TextBlock Text="{Binding StatusMessage}" FontSize="14" Foreground="#B3FFFFFF"/>
+                        <TextBlock Text="{Binding StatusMessage}" FontSize="14" Foreground="#8888AA"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -43,7 +43,7 @@
         </Border>
 
         <!-- Stats Cards -->
-        <Border Grid.Row="1" Background="#F5F5F5" Padding="15">
+        <Border Grid.Row="1" Background="#1E1E2E" Padding="15">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -54,44 +54,44 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Today Submitted -->
-                <Border Grid.Column="0" Background="White" CornerRadius="8" Margin="0,0,10,0" Padding="15">
+                <Border Grid.Column="0" Background="#2D2D44" CornerRadius="8" Margin="0,0,10,0" Padding="15" BorderBrush="#3D3D5C" BorderThickness="1">
                     <StackPanel>
-                        <TextBlock Text="Today Submitted" FontSize="12" Foreground="Gray"/>
+                        <TextBlock Text="Today Submitted" FontSize="12" Foreground="#8888AA"/>
                         <TextBlock Text="{Binding DashboardData.TodayInvoicesSubmitted, FallbackValue=0}"
-                                   FontSize="32" FontWeight="Bold" Foreground="#4CAF50"/>
-                        <TextBlock Text="invoices" FontSize="11" Foreground="Gray"/>
+                                   FontSize="32" FontWeight="Bold" Foreground="#22C55E"/>
+                        <TextBlock Text="invoices" FontSize="11" Foreground="#555577"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Today Pending -->
-                <Border Grid.Column="1" Background="White" CornerRadius="8" Margin="0,0,10,0" Padding="15">
+                <Border Grid.Column="1" Background="#2D2D44" CornerRadius="8" Margin="0,0,10,0" Padding="15" BorderBrush="#3D3D5C" BorderThickness="1">
                     <StackPanel>
-                        <TextBlock Text="Pending" FontSize="12" Foreground="Gray"/>
+                        <TextBlock Text="Pending" FontSize="12" Foreground="#8888AA"/>
                         <TextBlock Text="{Binding DashboardData.TodayInvoicesPending, FallbackValue=0}"
-                                   FontSize="32" FontWeight="Bold" Foreground="#FF9800"/>
-                        <TextBlock Text="in queue" FontSize="11" Foreground="Gray"/>
+                                   FontSize="32" FontWeight="Bold" Foreground="#F59E0B"/>
+                        <TextBlock Text="in queue" FontSize="11" Foreground="#555577"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Failed -->
-                <Border Grid.Column="2" Background="White" CornerRadius="8" Margin="0,0,10,0" Padding="15">
+                <Border Grid.Column="2" Background="#2D2D44" CornerRadius="8" Margin="0,0,10,0" Padding="15" BorderBrush="#3D3D5C" BorderThickness="1">
                     <StackPanel>
-                        <TextBlock Text="Failed" FontSize="12" Foreground="Gray"/>
+                        <TextBlock Text="Failed" FontSize="12" Foreground="#8888AA"/>
                         <TextBlock Text="{Binding DashboardData.FailedCount, FallbackValue=0}"
-                                   FontSize="32" FontWeight="Bold" Foreground="#F44336"/>
-                        <TextBlock Text="need retry" FontSize="11" Foreground="Gray"/>
+                                   FontSize="32" FontWeight="Bold" Foreground="#EF4444"/>
+                        <TextBlock Text="need retry" FontSize="11" Foreground="#555577"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Today Sales -->
-                <Border Grid.Column="3" Background="White" CornerRadius="8" Margin="0,0,10,0" Padding="15">
+                <Border Grid.Column="3" Background="#2D2D44" CornerRadius="8" Margin="0,0,10,0" Padding="15" BorderBrush="#3D3D5C" BorderThickness="1">
                     <StackPanel>
-                        <TextBlock Text="Today Sales" FontSize="12" Foreground="Gray"/>
-                        <TextBlock FontSize="24" FontWeight="Bold" Foreground="#1976D2">
+                        <TextBlock Text="Today Sales" FontSize="12" Foreground="#8888AA"/>
+                        <TextBlock FontSize="24" FontWeight="Bold" Foreground="#6366F1">
                             <Run Text="KES "/>
                             <Run Text="{Binding DashboardData.TodayTotalAmount, StringFormat=N0, FallbackValue=0}"/>
                         </TextBlock>
-                        <TextBlock FontSize="11" Foreground="Gray">
+                        <TextBlock FontSize="11" Foreground="#555577">
                             <Run Text="VAT: KES "/>
                             <Run Text="{Binding DashboardData.TodayTaxAmount, StringFormat=N0, FallbackValue=0}"/>
                         </TextBlock>
@@ -99,14 +99,14 @@
                 </Border>
 
                 <!-- Month Total -->
-                <Border Grid.Column="4" Background="White" CornerRadius="8" Padding="15">
+                <Border Grid.Column="4" Background="#2D2D44" CornerRadius="8" Padding="15" BorderBrush="#3D3D5C" BorderThickness="1">
                     <StackPanel>
-                        <TextBlock Text="This Month" FontSize="12" Foreground="Gray"/>
-                        <TextBlock FontSize="24" FontWeight="Bold" Foreground="#7B1FA2">
+                        <TextBlock Text="This Month" FontSize="12" Foreground="#8888AA"/>
+                        <TextBlock FontSize="24" FontWeight="Bold" Foreground="#A855F7">
                             <Run Text="KES "/>
                             <Run Text="{Binding DashboardData.MonthTotalSales, StringFormat=N0, FallbackValue=0}"/>
                         </TextBlock>
-                        <TextBlock FontSize="11" Foreground="Gray">
+                        <TextBlock FontSize="11" Foreground="#555577">
                             <Run Text="{Binding DashboardData.MonthInvoiceCount, FallbackValue=0}"/>
                             <Run Text=" invoices"/>
                         </TextBlock>
@@ -123,18 +123,14 @@
             </Grid.ColumnDefinitions>
 
             <!-- Recent Invoices -->
-            <Border Grid.Column="0" Background="White" CornerRadius="8" Margin="0,0,15,0">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                </Border.Effect>
-
+            <Border Grid.Column="0" Background="#2D2D44" CornerRadius="8" Margin="0,0,15,0" BorderBrush="#3D3D5C" BorderThickness="1">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Text="Today's Invoices" FontSize="18" FontWeight="SemiBold"
+                    <TextBlock Text="Today's Invoices" FontSize="18" FontWeight="SemiBold" Foreground="White"
                                Margin="15,15,15,10"/>
 
                     <DataGrid Grid.Row="1" ItemsSource="{Binding RecentInvoices}"
@@ -143,7 +139,12 @@
                               GridLinesVisibility="Horizontal"
                               HeadersVisibility="Column"
                               BorderThickness="0"
-                              RowHeight="40">
+                              RowHeight="40"
+                              Background="#2D2D44"
+                              Foreground="White"
+                              RowBackground="#2D2D44"
+                              AlternatingRowBackground="#252538"
+                              HorizontalGridLinesBrush="#3D3D5C">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Invoice #" Binding="{Binding InvoiceNumber}" Width="180"/>
                             <DataGridTextColumn Header="Time" Binding="{Binding InvoiceDate, StringFormat=HH:mm}" Width="60"/>
@@ -152,6 +153,7 @@
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="HorizontalAlignment" Value="Right"/>
+                                        <Setter Property="Foreground" Value="White"/>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
@@ -161,19 +163,19 @@
                                         <Border Padding="5,2" CornerRadius="3" HorizontalAlignment="Center">
                                             <Border.Style>
                                                 <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="#9E9E9E"/>
+                                                    <Setter Property="Background" Value="#555577"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding Status}" Value="Accepted">
-                                                            <Setter Property="Background" Value="#4CAF50"/>
+                                                            <Setter Property="Background" Value="#22C55E"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status}" Value="Pending">
-                                                            <Setter Property="Background" Value="#FF9800"/>
+                                                            <Setter Property="Background" Value="#F59E0B"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status}" Value="Failed">
-                                                            <Setter Property="Background" Value="#F44336"/>
+                                                            <Setter Property="Background" Value="#EF4444"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status}" Value="Rejected">
-                                                            <Setter Property="Background" Value="#F44336"/>
+                                                            <Setter Property="Background" Value="#EF4444"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -191,13 +193,9 @@
             <!-- Right Panel -->
             <StackPanel Grid.Column="1">
                 <!-- Device Info -->
-                <Border Background="White" CornerRadius="8" Padding="15" Margin="0,0,0,15">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                    </Border.Effect>
-
+                <Border Background="#2D2D44" CornerRadius="8" Padding="15" Margin="0,0,0,15" BorderBrush="#3D3D5C" BorderThickness="1">
                     <StackPanel>
-                        <TextBlock Text="Device Status" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                        <TextBlock Text="Device Status" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,10"/>
 
                         <Grid Visibility="{Binding IsDeviceSetup, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Grid.RowDefinitions>
@@ -210,33 +208,29 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="Serial:" Foreground="Gray" Margin="0,0,10,5"/>
+                            <TextBlock Text="Serial:" Foreground="#8888AA" Margin="0,0,10,5"/>
                             <TextBlock Grid.Column="1" Text="{Binding DashboardData.DeviceSerialNumber, FallbackValue=N/A}"
-                                       FontWeight="SemiBold"/>
+                                       FontWeight="SemiBold" Foreground="White"/>
 
-                            <TextBlock Grid.Row="1" Text="Status:" Foreground="Gray" Margin="0,0,10,5"/>
+                            <TextBlock Grid.Row="1" Text="Status:" Foreground="#8888AA" Margin="0,0,10,5"/>
                             <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DashboardData.DeviceStatus}"
-                                       FontWeight="SemiBold"/>
+                                       FontWeight="SemiBold" Foreground="White"/>
 
-                            <TextBlock Grid.Row="2" Text="Last Sync:" Foreground="Gray" Margin="0,0,10,0"/>
+                            <TextBlock Grid.Row="2" Text="Last Sync:" Foreground="#8888AA" Margin="0,0,10,0"/>
                             <TextBlock Grid.Row="2" Grid.Column="1"
-                                       Text="{Binding DashboardData.LastCommunication, StringFormat=g, FallbackValue=Never}"/>
+                                       Text="{Binding DashboardData.LastCommunication, StringFormat=g, FallbackValue=Never}" Foreground="White"/>
                         </Grid>
 
                         <TextBlock Text="No eTIMS device configured. Please set up a device in Settings."
-                                   Foreground="#F44336" TextWrapping="Wrap"
+                                   Foreground="#EF4444" TextWrapping="Wrap"
                                    Visibility="{Binding IsDeviceSetup, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Inverse}"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Queue Stats -->
-                <Border Background="White" CornerRadius="8" Padding="15" Margin="0,0,0,15">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                    </Border.Effect>
-
+                <Border Background="#2D2D44" CornerRadius="8" Padding="15" Margin="0,0,0,15" BorderBrush="#3D3D5C" BorderThickness="1">
                     <StackPanel>
-                        <TextBlock Text="Queue Status" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                        <TextBlock Text="Queue Status" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,10"/>
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -245,15 +239,15 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel>
-                                <TextBlock Text="Pending" FontSize="12" Foreground="Gray"/>
+                                <TextBlock Text="Pending" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding QueueStats.TotalPending, FallbackValue=0}"
-                                           FontSize="24" FontWeight="Bold" Foreground="#FF9800"/>
+                                           FontSize="24" FontWeight="Bold" Foreground="#F59E0B"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Failed" FontSize="12" Foreground="Gray"/>
+                                <TextBlock Text="Failed" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding QueueStats.TotalFailed, FallbackValue=0}"
-                                           FontSize="24" FontWeight="Bold" Foreground="#F44336"/>
+                                           FontSize="24" FontWeight="Bold" Foreground="#EF4444"/>
                             </StackPanel>
                         </Grid>
 
@@ -264,20 +258,16 @@
                 </Border>
 
                 <!-- Failed Invoices -->
-                <Border Background="White" CornerRadius="8" Padding="15"
+                <Border Background="#2D2D44" CornerRadius="8" Padding="15" BorderBrush="#3D3D5C" BorderThickness="1"
                         Visibility="{Binding FailedInvoices.Count, Converter={StaticResource NotZeroToVisibilityConverter}}">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                    </Border.Effect>
-
                     <StackPanel>
                         <TextBlock Text="Failed Submissions" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="#F44336" Margin="0,0,0,10"/>
+                                   Foreground="#EF4444" Margin="0,0,0,10"/>
 
                         <ItemsControl ItemsSource="{Binding FailedInvoices}" MaxHeight="200">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="0,5">
+                                    <Border BorderBrush="#3D3D5C" BorderThickness="0,0,0,1" Padding="0,5">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
@@ -285,13 +275,13 @@
                                             </Grid.ColumnDefinitions>
 
                                             <StackPanel>
-                                                <TextBlock Text="{Binding InvoiceNumber}" FontWeight="SemiBold" FontSize="12"/>
-                                                <TextBlock Text="{Binding ErrorMessage}" Foreground="#F44336"
+                                                <TextBlock Text="{Binding InvoiceNumber}" FontWeight="SemiBold" FontSize="12" Foreground="White"/>
+                                                <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444"
                                                            FontSize="11" TextTrimming="CharacterEllipsis"/>
                                             </StackPanel>
 
                                             <TextBlock Grid.Column="1" Text="{Binding TotalAmount, StringFormat=N2}"
-                                                       VerticalAlignment="Center"/>
+                                                       VerticalAlignment="Center" Foreground="White"/>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>

@@ -15,11 +15,11 @@
         <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
         <SolidColorBrush x:Key="AccentHoverBrush" Color="#059669"/>
 
-        <SolidColorBrush x:Key="CardBackground" Color="#2D2D3D"/>
+        <SolidColorBrush x:Key="CardBackground" Color="#2D2D44"/>
         <SolidColorBrush x:Key="InputBackground" Color="#1E1E2E"/>
-        <SolidColorBrush x:Key="BorderBrush" Color="#3D3D4D"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#3D3D5C"/>
         <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#A0A0B0"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#8888AA"/>
         <SolidColorBrush x:Key="TextMuted" Color="#6B7280"/>
         <SolidColorBrush x:Key="SuccessBrush" Color="#22C55E"/>
         <SolidColorBrush x:Key="WarningBrush" Color="#F59E0B"/>

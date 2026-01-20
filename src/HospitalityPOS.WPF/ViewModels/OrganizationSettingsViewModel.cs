@@ -8,6 +8,7 @@ using Serilog;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.WPF.Services;
+using ThemeMode = HospitalityPOS.Core.Enums.ThemeMode;
 
 namespace HospitalityPOS.WPF.ViewModels;
 
@@ -19,6 +20,7 @@ public partial class OrganizationSettingsViewModel : ViewModelBase, INavigationA
 {
     private readonly ISystemConfigurationService _configurationService;
     private readonly IDialogService _dialogService;
+    private readonly IThemeService _themeService;
 
     #region Observable Properties
 
@@ -82,6 +84,25 @@ public partial class OrganizationSettingsViewModel : ViewModelBase, INavigationA
     /// </summary>
     public bool HasNoLogo => LogoPreview == null;
 
+    [ObservableProperty]
+    private ThemeMode _selectedTheme;
+
+    /// <summary>
+    /// Gets whether dark theme is currently selected.
+    /// </summary>
+    public bool IsDarkTheme => SelectedTheme == ThemeMode.Dark;
+
+    /// <summary>
+    /// Gets the display text for the current theme.
+    /// </summary>
+    public string ThemeDisplayText => SelectedTheme switch
+    {
+        ThemeMode.Light => "Light",
+        ThemeMode.Dark => "Dark",
+        ThemeMode.System => "System",
+        _ => "Light"
+    };
+
     #endregion
 
     /// <summary>
@@ -122,14 +143,29 @@ public partial class OrganizationSettingsViewModel : ViewModelBase, INavigationA
             new[] { "All Features Enabled" })
     };
 
+    /// <summary>
+    /// Available theme options.
+    /// </summary>
+    public ObservableCollection<ThemeOption> ThemeOptions { get; } = new()
+    {
+        new ThemeOption(ThemeMode.Light, "Light", "Light background with dark text"),
+        new ThemeOption(ThemeMode.Dark, "Dark", "Dark background with light text"),
+        new ThemeOption(ThemeMode.System, "System", "Follow Windows theme setting")
+    };
+
     public OrganizationSettingsViewModel(
         ILogger logger,
         ISystemConfigurationService configurationService,
-        IDialogService dialogService)
+        IDialogService dialogService,
+        IThemeService themeService)
         : base(logger)
     {
         _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
+
+        // Initialize theme from service
+        SelectedTheme = _themeService.CurrentTheme;
 
         Title = "Organization Settings";
     }
@@ -402,5 +438,37 @@ public partial class OrganizationSettingsViewModel : ViewModelBase, INavigationA
             ModeDisplayName = option.Title;
             ModeDescription = option.Description;
         }
+    }
+
+    partial void OnSelectedThemeChanged(ThemeMode value)
+    {
+        _themeService.SetTheme(value);
+        OnPropertyChanged(nameof(IsDarkTheme));
+        OnPropertyChanged(nameof(ThemeDisplayText));
+        _ = _themeService.SaveThemePreferenceAsync();
+        _logger.Information("Theme changed to {Theme}", value);
+    }
+
+    [RelayCommand]
+    private void ToggleTheme()
+    {
+        SelectedTheme = SelectedTheme == ThemeMode.Light ? ThemeMode.Dark : ThemeMode.Light;
+    }
+}
+
+/// <summary>
+/// Represents a theme option for display in UI.
+/// </summary>
+public class ThemeOption
+{
+    public ThemeMode Mode { get; }
+    public string Title { get; }
+    public string Description { get; }
+
+    public ThemeOption(ThemeMode mode, string title, string description)
+    {
+        Mode = mode;
+        Title = title;
+        Description = description;
     }
 }

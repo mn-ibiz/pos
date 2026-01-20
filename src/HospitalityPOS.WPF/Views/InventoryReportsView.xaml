@@ -8,7 +8,7 @@
              d:DesignHeight="700" d:DesignWidth="1000"
              d:DataContext="{d:DesignInstance vm:InventoryReportsViewModel}">
 
-    <Grid Background="{StaticResource BackgroundBrush}">
+    <Grid Background="#1E1E2E">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -42,7 +42,7 @@
         </Border>
 
         <!-- Report Selection and Filters -->
-        <Border Grid.Row="1" Background="White" Padding="20" BorderThickness="0,0,0,1" BorderBrush="#E0E0E0">
+        <Border Grid.Row="1" Background="#2D2D44" Padding="20" BorderThickness="0,0,0,1" BorderBrush="#3D3D5C">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -61,7 +61,7 @@
 
                 <!-- Report Type -->
                 <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,0,20,0">
-                    <TextBlock Text="Report Type" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="Report Type" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                     <ComboBox ItemsSource="{Binding ReportTypes}"
                               SelectedItem="{Binding SelectedReportType}"
                               DisplayMemberPath="Name"
@@ -71,7 +71,7 @@
 
                 <!-- Category Filter -->
                 <StackPanel Grid.Column="1" Grid.Row="0" Margin="0,0,20,0">
-                    <TextBlock Text="Category" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="Category" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -96,7 +96,7 @@
                 <!-- Date Range (for Stock Movement) -->
                 <StackPanel Grid.Column="2" Grid.Row="0" Margin="0,0,15,0"
                             Visibility="{Binding ShowDateRange, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <TextBlock Text="From Date" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="From Date" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                     <DatePicker SelectedDate="{Binding FromDate}"
                                 Width="130"
                                 Height="35"/>
@@ -104,7 +104,7 @@
 
                 <StackPanel Grid.Column="3" Grid.Row="0" Margin="0,0,20,0"
                             Visibility="{Binding ShowDateRange, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <TextBlock Text="To Date" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="To Date" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                     <DatePicker SelectedDate="{Binding ToDate}"
                                 Width="130"
                                 Height="35"/>
@@ -113,7 +113,7 @@
                 <!-- Dead Stock Days Threshold -->
                 <StackPanel Grid.Column="4" Grid.Row="0" Margin="0,0,20,0"
                             Visibility="{Binding ShowDeadStockFilter, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <TextBlock Text="No Movement Days" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="No Movement Days" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                     <TextBox Text="{Binding DeadStockDays, UpdateSourceTrigger=PropertyChanged}"
                              Width="80"
                              Height="35"
@@ -125,6 +125,7 @@
                 <StackPanel Grid.Column="4" Grid.Row="0" Margin="0,0,20,0" VerticalAlignment="Bottom"
                             Visibility="{Binding ShowCurrentStockReport, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}">
                     <CheckBox Content="Include Out of Stock"
+                              Foreground="White"
                               IsChecked="{Binding IncludeOutOfStock}"
                               VerticalAlignment="Center"/>
                 </StackPanel>
@@ -167,7 +168,7 @@
                 <!-- No Report Message -->
                 <TextBlock Text="Select a report type and click 'Generate Report'"
                            FontSize="16"
-                           Foreground="#888"
+                           Foreground="#8888AA"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            Visibility="{Binding HasReport, Converter={StaticResource BoolToInverseVisibilityConverter}}"/>
@@ -178,7 +179,7 @@
                         <TextBlock Text="CURRENT STOCK REPORT" FontSize="18" FontWeight="Bold" Foreground="White"/>
                     </Border>
 
-                    <Border Background="White" Padding="15" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
+                    <Border Background="#2D2D44" Padding="15" BorderBrush="#3D3D5C" BorderThickness="1,0,1,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -189,28 +190,28 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Total SKUs" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding CurrentStockReport.TotalSkuCount}" FontSize="24" FontWeight="Bold"/>
+                                <TextBlock Text="Total SKUs" FontSize="12" Foreground="#8888AA"/>
+                                <TextBlock Text="{Binding CurrentStockReport.TotalSkuCount}" FontSize="24" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="In Stock" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="In Stock" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding CurrentStockReport.ItemsInStock}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Low Stock" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Low Stock" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding CurrentStockReport.LowStockCount}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource WarningBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="3">
-                                <TextBlock Text="Out of Stock" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Out of Stock" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding CurrentStockReport.OutOfStockCount}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource ErrorBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="4">
-                                <TextBlock Text="Total Value (Cost)" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding CurrentStockReport.TotalStockValue, StringFormat='KSh {0:N0}'}" FontSize="24" FontWeight="Bold"/>
+                                <TextBlock Text="Total Value (Cost)" FontSize="12" Foreground="#8888AA"/>
+                                <TextBlock Text="{Binding CurrentStockReport.TotalStockValue, StringFormat='KSh {0:N0}'}" FontSize="24" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -220,10 +221,11 @@
                               IsReadOnly="True"
                               HeadersVisibility="Column"
                               MaxHeight="400"
-                              Background="White"
+                              Background="#2D2D44"
+                              Foreground="White"
                               Margin="0,10,0,0"
                               GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#E0E0E0">
+                              HorizontalGridLinesBrush="#3D3D5C">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Code" Binding="{Binding ProductCode}" Width="80"/>
                             <DataGridTextColumn Header="Product Name" Binding="{Binding ProductName}" Width="200"/>
@@ -244,7 +246,7 @@
                         <TextBlock Text="LOW STOCK ALERT" FontSize="18" FontWeight="Bold" Foreground="White"/>
                     </Border>
 
-                    <Border Background="White" Padding="15" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
+                    <Border Background="#2D2D44" Padding="15" BorderBrush="#3D3D5C" BorderThickness="1,0,1,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -253,18 +255,18 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Critical (Out of Stock)" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Critical (Out of Stock)" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding LowStockReport.CriticalCount}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource ErrorBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Low Stock Items" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Low Stock Items" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding LowStockReport.LowStockCount}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource WarningBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Total Reorder Value" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding LowStockReport.TotalReorderValue, StringFormat='KSh {0:N0}'}" FontSize="28" FontWeight="Bold"/>
+                                <TextBlock Text="Total Reorder Value" FontSize="12" Foreground="#8888AA"/>
+                                <TextBlock Text="{Binding LowStockReport.TotalReorderValue, StringFormat='KSh {0:N0}'}" FontSize="28" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -274,10 +276,11 @@
                               IsReadOnly="True"
                               HeadersVisibility="Column"
                               MaxHeight="400"
-                              Background="White"
+                              Background="#2D2D44"
+                              Foreground="White"
                               Margin="0,10,0,0"
                               GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#E0E0E0">
+                              HorizontalGridLinesBrush="#3D3D5C">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Code" Binding="{Binding ProductCode}" Width="80"/>
                             <DataGridTextColumn Header="Product Name" Binding="{Binding ProductName}" Width="200"/>
@@ -298,7 +301,7 @@
                         <TextBlock Text="STOCK MOVEMENT REPORT" FontSize="18" FontWeight="Bold" Foreground="White"/>
                     </Border>
 
-                    <Border Background="White" Padding="15" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
+                    <Border Background="#2D2D44" Padding="15" BorderBrush="#3D3D5C" BorderThickness="1,0,1,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -308,23 +311,23 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Total Received" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Total Received" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding StockMovementReport.TotalReceived, StringFormat='{}{0:N0}'}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Total Sold/Out" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Total Sold/Out" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding StockMovementReport.TotalSold, StringFormat='{}{0:N0}'}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource ErrorBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Adjustments" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding StockMovementReport.TotalAdjusted, StringFormat='{}{0:N0}'}" FontSize="24" FontWeight="Bold"/>
+                                <TextBlock Text="Adjustments" FontSize="12" Foreground="#8888AA"/>
+                                <TextBlock Text="{Binding StockMovementReport.TotalAdjusted, StringFormat='{}{0:N0}'}" FontSize="24" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="3">
-                                <TextBlock Text="Net Movement" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding StockMovementReport.NetMovement, StringFormat='{}{0:N0}'}" FontSize="24" FontWeight="Bold"/>
+                                <TextBlock Text="Net Movement" FontSize="12" Foreground="#8888AA"/>
+                                <TextBlock Text="{Binding StockMovementReport.NetMovement, StringFormat='{}{0:N0}'}" FontSize="24" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -334,10 +337,11 @@
                               IsReadOnly="True"
                               HeadersVisibility="Column"
                               MaxHeight="400"
-                              Background="White"
+                              Background="#2D2D44"
+                              Foreground="White"
                               Margin="0,10,0,0"
                               GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#E0E0E0">
+                              HorizontalGridLinesBrush="#3D3D5C">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat='{}{0:dd/MM/yy}'}" Width="80"/>
                             <DataGridTextColumn Header="Time" Binding="{Binding TimeDisplay}" Width="60"/>
@@ -359,7 +363,7 @@
                         <TextBlock Text="STOCK VALUATION REPORT" FontSize="18" FontWeight="Bold" Foreground="White"/>
                     </Border>
 
-                    <Border Background="White" Padding="15" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
+                    <Border Background="#2D2D44" Padding="15" BorderBrush="#3D3D5C" BorderThickness="1,0,1,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -369,36 +373,37 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Total Cost Value" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding StockValuationReport.TotalCostValue, StringFormat='KSh {0:N0}'}" FontSize="24" FontWeight="Bold"/>
+                                <TextBlock Text="Total Cost Value" FontSize="12" Foreground="#8888AA"/>
+                                <TextBlock Text="{Binding StockValuationReport.TotalCostValue, StringFormat='KSh {0:N0}'}" FontSize="24" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Total Retail Value" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Total Retail Value" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding StockValuationReport.TotalRetailValue, StringFormat='KSh {0:N0}'}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Potential Profit" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Potential Profit" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding StockValuationReport.PotentialProfit, StringFormat='KSh {0:N0}'}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="3">
-                                <TextBlock Text="Margin %" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding StockValuationReport.MarginPercentage, StringFormat='{}{0:N1}%'}" FontSize="24" FontWeight="Bold"/>
+                                <TextBlock Text="Margin %" FontSize="12" Foreground="#8888AA"/>
+                                <TextBlock Text="{Binding StockValuationReport.MarginPercentage, StringFormat='{}{0:N1}%'}" FontSize="24" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
                         </Grid>
                     </Border>
 
-                    <TextBlock Text="Valuation by Category" FontSize="16" FontWeight="SemiBold" Margin="0,20,0,10"/>
+                    <TextBlock Text="Valuation by Category" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,20,0,10"/>
                     <DataGrid ItemsSource="{Binding CategoryValuations}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               HeadersVisibility="Column"
                               MaxHeight="350"
-                              Background="White"
+                              Background="#2D2D44"
+                              Foreground="White"
                               GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#E0E0E0">
+                              HorizontalGridLinesBrush="#3D3D5C">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Category" Binding="{Binding CategoryName}" Width="180"/>
                             <DataGridTextColumn Header="Items" Binding="{Binding ItemCount}" Width="70"/>
@@ -417,7 +422,7 @@
                         <TextBlock Text="DEAD STOCK REPORT" FontSize="18" FontWeight="Bold" Foreground="White"/>
                     </Border>
 
-                    <Border Background="White" Padding="15" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
+                    <Border Background="#2D2D44" Padding="15" BorderBrush="#3D3D5C" BorderThickness="1,0,1,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -426,18 +431,18 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Dead Stock Items" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Dead Stock Items" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding DeadStockReport.TotalCount}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource ErrorBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Total Value at Risk" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Total Value at Risk" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding DeadStockReport.TotalValue, StringFormat='KSh {0:N0}'}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource ErrorBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Days Threshold" FontSize="12" Foreground="#666"/>
-                                <TextBlock Text="{Binding DeadStockReport.DaysThreshold, StringFormat='{}{0} days'}" FontSize="28" FontWeight="Bold"/>
+                                <TextBlock Text="Days Threshold" FontSize="12" Foreground="#8888AA"/>
+                                <TextBlock Text="{Binding DeadStockReport.DaysThreshold, StringFormat='{}{0} days'}" FontSize="28" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -447,10 +452,11 @@
                               IsReadOnly="True"
                               HeadersVisibility="Column"
                               MaxHeight="400"
-                              Background="White"
+                              Background="#2D2D44"
+                              Foreground="White"
                               Margin="0,10,0,0"
                               GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#E0E0E0">
+                              HorizontalGridLinesBrush="#3D3D5C">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Code" Binding="{Binding ProductCode}" Width="80"/>
                             <DataGridTextColumn Header="Product Name" Binding="{Binding ProductName}" Width="200"/>
@@ -466,7 +472,7 @@
         </ScrollViewer>
 
         <!-- Footer with Actions -->
-        <Border Grid.Row="3" Background="White" Padding="20" BorderThickness="0,1,0,0" BorderBrush="#E0E0E0"
+        <Border Grid.Row="3" Background="#2D2D44" Padding="20" BorderThickness="0,1,0,0" BorderBrush="#3D3D5C"
                 Visibility="{Binding HasReport, Converter={StaticResource BoolToVisibilityConverter}}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -476,21 +482,21 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Generated: " Foreground="#666"/>
+                    <TextBlock Text="Generated: " Foreground="#8888AA"/>
                     <TextBlock Text="{Binding CurrentStockReport.GeneratedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
-                               Foreground="#666"
+                               Foreground="#8888AA"
                                Visibility="{Binding ShowCurrentStockReport, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     <TextBlock Text="{Binding LowStockReport.GeneratedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
-                               Foreground="#666"
+                               Foreground="#8888AA"
                                Visibility="{Binding ShowLowStockReport, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     <TextBlock Text="{Binding StockMovementReport.GeneratedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
-                               Foreground="#666"
+                               Foreground="#8888AA"
                                Visibility="{Binding ShowStockMovementReport, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     <TextBlock Text="{Binding StockValuationReport.GeneratedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
-                               Foreground="#666"
+                               Foreground="#8888AA"
                                Visibility="{Binding ShowStockValuationReport, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     <TextBlock Text="{Binding DeadStockReport.GeneratedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
-                               Foreground="#666"
+                               Foreground="#8888AA"
                                Visibility="{Binding ShowDeadStockReport, Converter={StaticResource BoolToVisibilityConverter}}"/>
                 </StackPanel>
 

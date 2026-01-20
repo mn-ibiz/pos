@@ -685,7 +685,7 @@
                         <Border Background="#2D2D44" CornerRadius="4" Padding="8" Margin="0,0,0,8"
                                 Visibility="{Binding LowStockAlerts.TotalCount, Converter={StaticResource GreaterThanZeroToVisibility}, FallbackValue=Collapsed}">
                             <StackPanel>
-                                <TextBlock Text="Items Needing Attention" Foreground="#9CA3AF" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                <TextBlock Text="Items Needing Attention" Foreground="#6B7280" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8"/>
                                 <ItemsControl ItemsSource="{Binding LowStockAlerts.Items}" MaxHeight="150">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
@@ -739,7 +739,7 @@
                                 </ItemsControl>
                                 <!-- View All Button -->
                                 <Button Content="View All Low Stock Items" Margin="0,8,0,0"
-                                        Background="#3D3D5C" Foreground="#9CA3AF" FontSize="11" Height="28"
+                                        Background="#3D3D5C" Foreground="#6B7280" FontSize="11" Height="28"
                                         BorderThickness="0" Cursor="Hand"
                                         Command="{Binding ViewInventoryCommand}">
                                     <Button.Template>
@@ -749,7 +749,7 @@
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#4B5563"/>
+                                                    <Setter Property="Background" Value="#3D3D5C"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>

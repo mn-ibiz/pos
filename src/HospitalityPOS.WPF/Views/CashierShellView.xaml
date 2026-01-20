@@ -53,7 +53,7 @@
         <!-- Compact Header Button Style -->
         <Style x:Key="HeaderButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#9CA3AF"/>
+            <Setter Property="Foreground" Value="#8888AA"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="12,8"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -70,10 +70,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#2D2D44"/>
+                                <Setter TargetName="border" Property="Background" Value="#252538"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#3D3D5C"/>
+                                <Setter TargetName="border" Property="Background" Value="#2D2D44"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -87,7 +87,7 @@
             <Setter Property="Height" Value="70"/>
             <Setter Property="FontSize" Value="24"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Background" Value="#252538"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -103,7 +103,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#3D3D5C"/>
+                                <Setter TargetName="border" Property="Background" Value="#2D2D44"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="border" Property="Background" Value="#22C55E"/>
@@ -299,7 +299,7 @@
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <!-- Lock Icon -->
                     <Border Width="80" Height="80" CornerRadius="40"
-                            Background="#2D2D44" Margin="0,0,0,24">
+                            Background="#252538" Margin="0,0,0,24">
                         <TextBlock Text="&#xE72E;"
                                    FontFamily="Segoe MDL2 Assets"
                                    FontSize="36"
@@ -317,12 +317,12 @@
 
                     <TextBlock Text="Enter your PIN to unlock"
                                FontSize="14"
-                               Foreground="#9CA3AF"
+                               Foreground="#8888AA"
                                HorizontalAlignment="Center"
                                Margin="0,8,0,24"/>
 
                     <!-- PIN Display -->
-                    <Border Background="#2D2D44"
+                    <Border Background="#252538"
                             CornerRadius="8"
                             Padding="32,16"
                             Margin="0,0,0,16"

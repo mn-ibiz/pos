@@ -8,7 +8,7 @@
              d:DataContext="{d:DesignInstance Type=vm:ChartOfAccountsViewModel}"
              d:DesignHeight="700" d:DesignWidth="1200">
 
-    <Grid>
+    <Grid Background="#1E1E2E">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -16,7 +16,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="#1976D2" Padding="20">
+        <Border Grid.Row="0" Background="#16162B" Padding="20">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -25,7 +25,7 @@
 
                 <StackPanel>
                     <TextBlock Text="Chart of Accounts" FontSize="28" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock Text="Manage your general ledger accounts" FontSize="14" Foreground="#B3FFFFFF" Margin="0,5,0,0"/>
+                    <TextBlock Text="Manage your general ledger accounts" FontSize="14" Foreground="#8888AA" Margin="0,5,0,0"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -38,7 +38,7 @@
         </Border>
 
         <!-- Filter Bar -->
-        <Border Grid.Row="1" Background="#F5F5F5" Padding="15">
+        <Border Grid.Row="1" Background="#2D2D44" Padding="15" BorderBrush="#3D3D5C" BorderThickness="0,0,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="200"/>
@@ -49,16 +49,18 @@
 
                 <ComboBox Grid.Column="0" ItemsSource="{Binding AccountTypes}"
                           SelectedItem="{Binding SelectedAccountType}"
-                          Margin="0,0,10,0" Padding="10">
+                          Margin="0,0,10,0" Padding="10"
+                          Background="#1E1E2E" Foreground="White">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding}"/>
+                            <TextBlock Text="{Binding}" Foreground="White"/>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
 
                 <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         Padding="10" Margin="0,0,10,0">
+                         Padding="10" Margin="0,0,10,0"
+                         Background="#1E1E2E" Foreground="White" BorderBrush="#3D3D5C">
                     <TextBox.Style>
                         <Style TargetType="TextBox">
                             <Style.Triggers>
@@ -67,7 +69,7 @@
                                         <Setter.Value>
                                             <VisualBrush Stretch="None" AlignmentX="Left">
                                                 <VisualBrush.Visual>
-                                                    <TextBlock Text="Search accounts..." Foreground="Gray" Margin="5,0,0,0"/>
+                                                    <TextBlock Text="Search accounts..." Foreground="#555577" Margin="12,0,0,0"/>
                                                 </VisualBrush.Visual>
                                             </VisualBrush>
                                         </Setter.Value>
@@ -91,11 +93,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- Accounts List -->
-            <Border Grid.Column="0" Margin="15" Background="White" CornerRadius="8">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                </Border.Effect>
-
+            <Border Grid.Column="0" Margin="15" Background="#2D2D44" CornerRadius="8" BorderBrush="#3D3D5C" BorderThickness="1">
                 <DataGrid ItemsSource="{Binding FilteredAccounts}"
                           SelectedItem="{Binding SelectedAccount}"
                           AutoGenerateColumns="False"
@@ -104,7 +102,12 @@
                           GridLinesVisibility="Horizontal"
                           HeadersVisibility="Column"
                           BorderThickness="0"
-                          RowHeight="45">
+                          RowHeight="45"
+                          Background="#2D2D44"
+                          Foreground="White"
+                          RowBackground="#2D2D44"
+                          AlternatingRowBackground="#252538"
+                          HorizontalGridLinesBrush="#3D3D5C">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Code" Binding="{Binding AccountCode}" Width="100"/>
                         <DataGridTextColumn Header="Account Name" Binding="{Binding AccountName}" Width="*"/>
@@ -114,7 +117,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border Padding="5,2" CornerRadius="3"
-                                            Background="{Binding IsActive, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#4CAF50|#9E9E9E'}">
+                                            Background="{Binding IsActive, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#22C55E|#555577'}">
                                         <TextBlock Text="{Binding IsActive, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Active|Inactive'}"
                                                    Foreground="White" FontSize="11"/>
                                     </Border>
@@ -126,42 +129,43 @@
             </Border>
 
             <!-- Edit Panel -->
-            <Border Grid.Column="1" Margin="0,15,15,15" Background="White" CornerRadius="8"
+            <Border Grid.Column="1" Margin="0,15,15,15" Background="#2D2D44" CornerRadius="8" BorderBrush="#3D3D5C" BorderThickness="1"
                     Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                </Border.Effect>
-
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="20">
-                        <TextBlock Text="Account Details" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,20"/>
+                        <TextBlock Text="Account Details" FontSize="18" FontWeight="SemiBold" Foreground="#6366F1" Margin="0,0,0,20"/>
 
-                        <TextBlock Text="Account Code" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBlock Text="Account Code" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                         <TextBox Text="{Binding EditAccountCode, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="10" Margin="0,0,0,15"/>
+                                 Padding="10" Margin="0,0,0,15"
+                                 Background="#1E1E2E" Foreground="White" BorderBrush="#3D3D5C"/>
 
-                        <TextBlock Text="Account Name" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBlock Text="Account Name" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                         <TextBox Text="{Binding EditAccountName, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="10" Margin="0,0,0,15"/>
+                                 Padding="10" Margin="0,0,0,15"
+                                 Background="#1E1E2E" Foreground="White" BorderBrush="#3D3D5C"/>
 
-                        <TextBlock Text="Account Type" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBlock Text="Account Type" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                         <ComboBox ItemsSource="{Binding AccountTypes}"
                                   SelectedItem="{Binding EditAccountType}"
-                                  Padding="10" Margin="0,0,0,15"/>
+                                  Padding="10" Margin="0,0,0,15"
+                                  Background="#1E1E2E" Foreground="White"/>
 
-                        <TextBlock Text="Parent Account (Optional)" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBlock Text="Parent Account (Optional)" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                         <ComboBox ItemsSource="{Binding ParentAccounts}"
                                   SelectedValue="{Binding EditParentAccountId}"
                                   SelectedValuePath="Id"
                                   DisplayMemberPath="AccountName"
-                                  Padding="10" Margin="0,0,0,15"/>
+                                  Padding="10" Margin="0,0,0,15"
+                                  Background="#1E1E2E" Foreground="White"/>
 
-                        <TextBlock Text="Description" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBlock Text="Description" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                         <TextBox Text="{Binding EditDescription, UpdateSourceTrigger=PropertyChanged}"
                                  Padding="10" Margin="0,0,0,15"
-                                 TextWrapping="Wrap" AcceptsReturn="True" Height="80"/>
+                                 TextWrapping="Wrap" AcceptsReturn="True" Height="80"
+                                 Background="#1E1E2E" Foreground="White" BorderBrush="#3D3D5C"/>
 
-                        <CheckBox Content="Active" IsChecked="{Binding EditIsActive}" Margin="0,0,0,20"/>
+                        <CheckBox Content="Active" IsChecked="{Binding EditIsActive}" Margin="0,0,0,20" Foreground="White"/>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Content="Cancel" Command="{Binding CancelEditCommand}"
@@ -174,30 +178,26 @@
             </Border>
 
             <!-- View Panel (when not editing) -->
-            <Border Grid.Column="1" Margin="0,15,15,15" Background="White" CornerRadius="8"
+            <Border Grid.Column="1" Margin="0,15,15,15" Background="#2D2D44" CornerRadius="8" BorderBrush="#3D3D5C" BorderThickness="1"
                     Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Inverse}">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                </Border.Effect>
-
                 <Grid>
                     <StackPanel Margin="20" Visibility="{Binding SelectedAccount, Converter={StaticResource NullToVisibilityConverter}}">
-                        <TextBlock Text="Account Details" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,20"/>
+                        <TextBlock Text="Account Details" FontSize="18" FontWeight="SemiBold" Foreground="#6366F1" Margin="0,0,0,20"/>
 
-                        <TextBlock Text="Account Code" FontSize="12" Foreground="Gray"/>
-                        <TextBlock Text="{Binding SelectedAccount.AccountCode}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,15"/>
+                        <TextBlock Text="Account Code" FontSize="12" Foreground="#8888AA"/>
+                        <TextBlock Text="{Binding SelectedAccount.AccountCode}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,15"/>
 
-                        <TextBlock Text="Account Name" FontSize="12" Foreground="Gray"/>
-                        <TextBlock Text="{Binding SelectedAccount.AccountName}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,15"/>
+                        <TextBlock Text="Account Name" FontSize="12" Foreground="#8888AA"/>
+                        <TextBlock Text="{Binding SelectedAccount.AccountName}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,15"/>
 
-                        <TextBlock Text="Account Type" FontSize="12" Foreground="Gray"/>
-                        <TextBlock Text="{Binding SelectedAccount.AccountType}" FontSize="16" Margin="0,0,0,15"/>
+                        <TextBlock Text="Account Type" FontSize="12" Foreground="#8888AA"/>
+                        <TextBlock Text="{Binding SelectedAccount.AccountType}" FontSize="16" Foreground="White" Margin="0,0,0,15"/>
 
-                        <TextBlock Text="Description" FontSize="12" Foreground="Gray"/>
-                        <TextBlock Text="{Binding SelectedAccount.Description}" FontSize="14" TextWrapping="Wrap" Margin="0,0,0,15"/>
+                        <TextBlock Text="Description" FontSize="12" Foreground="#8888AA"/>
+                        <TextBlock Text="{Binding SelectedAccount.Description}" FontSize="14" TextWrapping="Wrap" Foreground="White" Margin="0,0,0,15"/>
 
-                        <TextBlock Text="Status" FontSize="12" Foreground="Gray"/>
-                        <TextBlock FontSize="14" Margin="0,0,0,20">
+                        <TextBlock Text="Status" FontSize="12" Foreground="#8888AA"/>
+                        <TextBlock FontSize="14" Foreground="White" Margin="0,0,0,20">
                             <TextBlock.Text>
                                 <Binding Path="SelectedAccount.IsActive" Converter="{StaticResource BoolToTextConverter}" ConverterParameter="Active|Inactive"/>
                             </TextBlock.Text>
@@ -213,7 +213,7 @@
 
                     <TextBlock Text="Select an account to view details"
                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                               Foreground="Gray" FontSize="14"
+                               Foreground="#555577" FontSize="14"
                                Visibility="{Binding SelectedAccount, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
                 </Grid>
             </Border>

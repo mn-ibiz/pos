@@ -22,7 +22,7 @@
 
         <Style x:Key="StatLabelStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12" />
-            <Setter Property="Foreground" Value="#888888" />
+            <Setter Property="Foreground" Value="#8888AA" />
         </Style>
 
         <Style x:Key="StatValueStyle" TargetType="TextBlock">
@@ -146,7 +146,7 @@
                            Foreground="White" />
                 <TextBlock Text="Manage your loyalty program members"
                            FontSize="14"
-                           Foreground="#888888"
+                           Foreground="#8888AA"
                            Margin="0,4,0,0" />
             </StackPanel>
 
@@ -361,7 +361,7 @@
 
                 <TextBlock Grid.Column="0"
                            VerticalAlignment="Center"
-                           Foreground="#888888"
+                           Foreground="#8888AA"
                            FontSize="13">
                     <Run Text="Showing " />
                     <Run Text="{Binding Members.Count, Mode=OneWay}" FontWeight="SemiBold" Foreground="White" />

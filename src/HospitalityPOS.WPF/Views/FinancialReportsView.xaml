@@ -8,14 +8,14 @@
              d:DataContext="{d:DesignInstance Type=vm:FinancialReportsViewModel}"
              d:DesignHeight="700" d:DesignWidth="1200">
 
-    <Grid>
+    <Grid Background="#1E1E2E">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="#7B1FA2" Padding="20">
+        <Border Grid.Row="0" Background="#16162B" Padding="20">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -24,7 +24,7 @@
 
                 <StackPanel>
                     <TextBlock Text="Financial Reports" FontSize="28" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock Text="Generate financial statements and reports" FontSize="14" Foreground="#B3FFFFFF" Margin="0,5,0,0"/>
+                    <TextBlock Text="Generate financial statements and reports" FontSize="14" Foreground="#8888AA" Margin="0,5,0,0"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -37,17 +37,18 @@
         </Border>
 
         <!-- Tab Control -->
-        <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedReportIndex}" Margin="15">
+        <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedReportIndex}" Margin="15"
+                    Background="#1E1E2E" Foreground="White">
             <!-- Trial Balance Tab -->
             <TabItem Header="Trial Balance">
-                <Grid>
+                <Grid Background="#1E1E2E">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
                     <!-- Parameters -->
-                    <Border Background="#F5F5F5" Padding="15" CornerRadius="5" Margin="0,0,0,15">
+                    <Border Background="#2D2D44" Padding="15" CornerRadius="5" Margin="0,0,0,15" BorderBrush="#3D3D5C" BorderThickness="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -56,7 +57,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="As of Date:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="As of Date:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
                             <DatePicker Grid.Column="1" SelectedDate="{Binding AsOfDate}" Margin="0,0,15,0"/>
 
                             <Button Grid.Column="2" Content="Generate Report" Command="{Binding GenerateTrialBalanceCommand}"
@@ -65,11 +66,7 @@
                     </Border>
 
                     <!-- Report Content -->
-                    <Border Grid.Row="1" Background="White" CornerRadius="8">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                        </Border.Effect>
-
+                    <Border Grid.Row="1" Background="#2D2D44" CornerRadius="8" BorderBrush="#3D3D5C" BorderThickness="1">
                         <Grid>
                             <DataGrid ItemsSource="{Binding TrialBalanceLines}"
                                       AutoGenerateColumns="False"
@@ -78,6 +75,11 @@
                                       HeadersVisibility="Column"
                                       BorderThickness="0"
                                       RowHeight="40"
+                                      Background="#2D2D44"
+                                      Foreground="White"
+                                      RowBackground="#2D2D44"
+                                      AlternatingRowBackground="#252538"
+                                      HorizontalGridLinesBrush="#3D3D5C"
                                       Visibility="{Binding TrialBalance, Converter={StaticResource NullToVisibilityConverter}}">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Account Code" Binding="{Binding AccountCode}" Width="120"/>
@@ -88,6 +90,7 @@
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="HorizontalAlignment" Value="Right"/>
                                                 <Setter Property="Margin" Value="0,0,10,0"/>
+                                                <Setter Property="Foreground" Value="White"/>
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>
@@ -96,6 +99,7 @@
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="HorizontalAlignment" Value="Right"/>
                                                 <Setter Property="Margin" Value="0,0,10,0"/>
+                                                <Setter Property="Foreground" Value="White"/>
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>
@@ -104,13 +108,13 @@
 
                             <TextBlock Text="Click 'Generate Report' to view trial balance"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       Foreground="Gray" FontSize="14"
+                                       Foreground="#555577" FontSize="14"
                                        Visibility="{Binding TrialBalance, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
                         </Grid>
                     </Border>
 
                     <!-- Totals -->
-                    <Border Grid.Row="1" Background="#2E7D32" CornerRadius="5" Padding="15"
+                    <Border Grid.Row="1" Background="#6366F1" CornerRadius="5" Padding="15"
                             VerticalAlignment="Bottom" Margin="0,0,0,10"
                             Visibility="{Binding TrialBalance, Converter={StaticResource NullToVisibilityConverter}}">
                         <Grid>
@@ -144,14 +148,14 @@
 
             <!-- Income Statement Tab -->
             <TabItem Header="Income Statement">
-                <Grid>
+                <Grid Background="#1E1E2E">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
                     <!-- Parameters -->
-                    <Border Background="#F5F5F5" Padding="15" CornerRadius="5" Margin="0,0,0,15">
+                    <Border Background="#2D2D44" Padding="15" CornerRadius="5" Margin="0,0,0,15" BorderBrush="#3D3D5C" BorderThickness="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -162,10 +166,10 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
                             <DatePicker Grid.Column="1" SelectedDate="{Binding StartDate}" Margin="0,0,15,0"/>
 
-                            <TextBlock Grid.Column="2" Text="To:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Grid.Column="2" Text="To:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
                             <DatePicker Grid.Column="3" SelectedDate="{Binding EndDate}" Margin="0,0,15,0"/>
 
                             <Button Grid.Column="4" Content="Generate Report" Command="{Binding GenerateIncomeStatementCommand}"
@@ -174,14 +178,12 @@
                     </Border>
 
                     <!-- Report Content -->
-                    <Border Grid.Row="1" Background="White" CornerRadius="8">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                        </Border.Effect>
-
+                    <Border Grid.Row="1" Background="#2D2D44" CornerRadius="8" BorderBrush="#3D3D5C" BorderThickness="1">
                         <Grid>
                             <ListView ItemsSource="{Binding IncomeStatementLines}"
                                       BorderThickness="0"
+                                      Background="#2D2D44"
+                                      Foreground="White"
                                       Visibility="{Binding IncomeStatement, Converter={StaticResource NullToVisibilityConverter}}">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
@@ -191,14 +193,16 @@
                                                 <ColumnDefinition Width="150"/>
                                             </Grid.ColumnDefinitions>
 
-                                            <TextBlock Text="{Binding DisplayText}" Margin="10,5">
+                                            <TextBlock Text="{Binding DisplayText}" Margin="10,5" Foreground="White">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="White"/>
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsHeader}" Value="True">
                                                                 <Setter Property="FontWeight" Value="Bold"/>
                                                                 <Setter Property="FontSize" Value="16"/>
                                                                 <Setter Property="Margin" Value="10,15,10,5"/>
+                                                                <Setter Property="Foreground" Value="#6366F1"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding IsSection}" Value="True">
                                                                 <Setter Property="FontWeight" Value="SemiBold"/>
@@ -218,10 +222,11 @@
                                             </TextBlock>
 
                                             <TextBlock Grid.Column="1" Text="{Binding Amount, StringFormat=N2}"
-                                                       HorizontalAlignment="Right" Margin="10,5"
+                                                       HorizontalAlignment="Right" Margin="10,5" Foreground="White"
                                                        Visibility="{Binding Amount, Converter={StaticResource NotZeroToVisibilityConverter}}">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="White"/>
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsTotal}" Value="True">
                                                                 <Setter Property="FontWeight" Value="Bold"/>
@@ -241,7 +246,7 @@
 
                             <TextBlock Text="Click 'Generate Report' to view income statement"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       Foreground="Gray" FontSize="14"
+                                       Foreground="#555577" FontSize="14"
                                        Visibility="{Binding IncomeStatement, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
                         </Grid>
                     </Border>
@@ -250,14 +255,14 @@
 
             <!-- Balance Sheet Tab -->
             <TabItem Header="Balance Sheet">
-                <Grid>
+                <Grid Background="#1E1E2E">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
                     <!-- Parameters -->
-                    <Border Background="#F5F5F5" Padding="15" CornerRadius="5" Margin="0,0,0,15">
+                    <Border Background="#2D2D44" Padding="15" CornerRadius="5" Margin="0,0,0,15" BorderBrush="#3D3D5C" BorderThickness="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -266,7 +271,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="As of Date:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="As of Date:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
                             <DatePicker Grid.Column="1" SelectedDate="{Binding AsOfDate}" Margin="0,0,15,0"/>
 
                             <Button Grid.Column="2" Content="Generate Report" Command="{Binding GenerateBalanceSheetCommand}"
@@ -275,14 +280,12 @@
                     </Border>
 
                     <!-- Report Content -->
-                    <Border Grid.Row="1" Background="White" CornerRadius="8">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                        </Border.Effect>
-
+                    <Border Grid.Row="1" Background="#2D2D44" CornerRadius="8" BorderBrush="#3D3D5C" BorderThickness="1">
                         <Grid>
                             <ListView ItemsSource="{Binding BalanceSheetLines}"
                                       BorderThickness="0"
+                                      Background="#2D2D44"
+                                      Foreground="White"
                                       Visibility="{Binding BalanceSheet, Converter={StaticResource NullToVisibilityConverter}}">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
@@ -292,14 +295,16 @@
                                                 <ColumnDefinition Width="150"/>
                                             </Grid.ColumnDefinitions>
 
-                                            <TextBlock Text="{Binding DisplayText}" Margin="10,5">
+                                            <TextBlock Text="{Binding DisplayText}" Margin="10,5" Foreground="White">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="White"/>
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsHeader}" Value="True">
                                                                 <Setter Property="FontWeight" Value="Bold"/>
                                                                 <Setter Property="FontSize" Value="16"/>
                                                                 <Setter Property="Margin" Value="10,15,10,5"/>
+                                                                <Setter Property="Foreground" Value="#6366F1"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding IsSection}" Value="True">
                                                                 <Setter Property="FontWeight" Value="SemiBold"/>
@@ -319,10 +324,11 @@
                                             </TextBlock>
 
                                             <TextBlock Grid.Column="1" Text="{Binding Amount, StringFormat=N2}"
-                                                       HorizontalAlignment="Right" Margin="10,5"
+                                                       HorizontalAlignment="Right" Margin="10,5" Foreground="White"
                                                        Visibility="{Binding Amount, Converter={StaticResource NotZeroToVisibilityConverter}}">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="White"/>
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsTotal}" Value="True">
                                                                 <Setter Property="FontWeight" Value="Bold"/>
@@ -342,7 +348,7 @@
 
                             <TextBlock Text="Click 'Generate Report' to view balance sheet"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       Foreground="Gray" FontSize="14"
+                                       Foreground="#555577" FontSize="14"
                                        Visibility="{Binding BalanceSheet, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
                         </Grid>
                     </Border>
@@ -351,14 +357,14 @@
 
             <!-- Account Ledger Tab -->
             <TabItem Header="Account Ledger">
-                <Grid>
+                <Grid Background="#1E1E2E">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
                     <!-- Parameters -->
-                    <Border Background="#F5F5F5" Padding="15" CornerRadius="5" Margin="0,0,0,15">
+                    <Border Background="#2D2D44" Padding="15" CornerRadius="5" Margin="0,0,0,15" BorderBrush="#3D3D5C" BorderThickness="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="300"/>
@@ -373,12 +379,13 @@
                             <ComboBox ItemsSource="{Binding Accounts}"
                                       SelectedItem="{Binding SelectedAccount}"
                                       DisplayMemberPath="AccountName"
-                                      Padding="10" Margin="0,0,15,0"/>
+                                      Padding="10" Margin="0,0,15,0"
+                                      Background="#1E1E2E" Foreground="White"/>
 
-                            <TextBlock Grid.Column="1" Text="From:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Grid.Column="1" Text="From:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
                             <DatePicker Grid.Column="2" SelectedDate="{Binding StartDate}" Margin="0,0,15,0"/>
 
-                            <TextBlock Grid.Column="3" Text="To:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Grid.Column="3" Text="To:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
                             <DatePicker Grid.Column="4" SelectedDate="{Binding EndDate}" Margin="0,0,15,0"/>
 
                             <Button Grid.Column="5" Content="Generate Ledger" Command="{Binding GenerateAccountLedgerCommand}"
@@ -387,11 +394,7 @@
                     </Border>
 
                     <!-- Report Content -->
-                    <Border Grid.Row="1" Background="White" CornerRadius="8">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                        </Border.Effect>
-
+                    <Border Grid.Row="1" Background="#2D2D44" CornerRadius="8" BorderBrush="#3D3D5C" BorderThickness="1">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -400,7 +403,7 @@
                             </Grid.RowDefinitions>
 
                             <!-- Account Info -->
-                            <Border Background="#F5F5F5" Padding="15"
+                            <Border Background="#252538" Padding="15"
                                     Visibility="{Binding AccountLedger, Converter={StaticResource NullToVisibilityConverter}}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -409,16 +412,16 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel>
-                                        <TextBlock FontSize="16" FontWeight="SemiBold">
+                                        <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="White">
                                             <Run Text="{Binding AccountLedger.AccountCode}"/>
                                             <Run Text=" - "/>
                                             <Run Text="{Binding AccountLedger.AccountName}"/>
                                         </TextBlock>
-                                        <TextBlock Text="{Binding AccountLedger.AccountType}" Foreground="Gray"/>
+                                        <TextBlock Text="{Binding AccountLedger.AccountType}" Foreground="#8888AA"/>
                                     </StackPanel>
 
-                                    <TextBlock Grid.Column="1" VerticalAlignment="Center">
-                                        <Run Text="Opening Balance: " Foreground="Gray"/>
+                                    <TextBlock Grid.Column="1" VerticalAlignment="Center" Foreground="White">
+                                        <Run Text="Opening Balance: " Foreground="#8888AA"/>
                                         <Run Text="{Binding AccountLedger.OpeningBalance, StringFormat=N2}" FontWeight="SemiBold"/>
                                     </TextBlock>
                                 </Grid>
@@ -432,6 +435,11 @@
                                       HeadersVisibility="Column"
                                       BorderThickness="0"
                                       RowHeight="40"
+                                      Background="#2D2D44"
+                                      Foreground="White"
+                                      RowBackground="#2D2D44"
+                                      AlternatingRowBackground="#252538"
+                                      HorizontalGridLinesBrush="#3D3D5C"
                                       Visibility="{Binding AccountLedger, Converter={StaticResource NullToVisibilityConverter}}">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=d}" Width="100"/>
@@ -441,6 +449,7 @@
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="HorizontalAlignment" Value="Right"/>
+                                                <Setter Property="Foreground" Value="White"/>
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>
@@ -448,6 +457,7 @@
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="HorizontalAlignment" Value="Right"/>
+                                                <Setter Property="Foreground" Value="White"/>
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>
@@ -456,6 +466,7 @@
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="HorizontalAlignment" Value="Right"/>
                                                 <Setter Property="FontWeight" Value="SemiBold"/>
+                                                <Setter Property="Foreground" Value="White"/>
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>
@@ -463,7 +474,7 @@
                             </DataGrid>
 
                             <!-- Closing Balance -->
-                            <Border Grid.Row="2" Background="#7B1FA2" Padding="15"
+                            <Border Grid.Row="2" Background="#6366F1" Padding="15"
                                     Visibility="{Binding AccountLedger, Converter={StaticResource NullToVisibilityConverter}}">
                                 <TextBlock Foreground="White" HorizontalAlignment="Right" FontSize="16">
                                     <Run Text="Closing Balance: "/>
@@ -473,7 +484,7 @@
 
                             <TextBlock Text="Select an account and click 'Generate Ledger' to view transactions"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       Foreground="Gray" FontSize="14" Grid.RowSpan="3"
+                                       Foreground="#555577" FontSize="14" Grid.RowSpan="3"
                                        Visibility="{Binding AccountLedger, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
                         </Grid>
                     </Border>

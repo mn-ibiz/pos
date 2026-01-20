@@ -362,7 +362,7 @@
                     </Grid>
 
                     <!-- New Stock Preview -->
-                    <Border Background="#1F2937" CornerRadius="6" Padding="12" Margin="0,0,0,16">
+                    <Border Background="#252538" CornerRadius="6" Padding="12" Margin="0,0,0,16">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <TextBlock Text="New Stock: "
                                        Foreground="#9CA3AF"

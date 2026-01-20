@@ -8,7 +8,7 @@
              d:DataContext="{d:DesignInstance Type=vm:JournalEntriesViewModel}"
              d:DesignHeight="700" d:DesignWidth="1200">
 
-    <Grid>
+    <Grid Background="#1E1E2E">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -16,7 +16,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="#2E7D32" Padding="20">
+        <Border Grid.Row="0" Background="#16162B" Padding="20">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -25,7 +25,7 @@
 
                 <StackPanel>
                     <TextBlock Text="Journal Entries" FontSize="28" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock FontSize="14" Foreground="#B3FFFFFF" Margin="0,5,0,0">
+                    <TextBlock FontSize="14" Foreground="#8888AA" Margin="0,5,0,0">
                         <Run Text="Current Period: "/>
                         <Run Text="{Binding CurrentPeriod.Name, FallbackValue='No open period'}"/>
                     </TextBlock>
@@ -43,7 +43,7 @@
         </Border>
 
         <!-- Filter Bar -->
-        <Border Grid.Row="1" Background="#F5F5F5" Padding="15">
+        <Border Grid.Row="1" Background="#2D2D44" Padding="15" BorderBrush="#3D3D5C" BorderThickness="0,0,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -54,10 +54,10 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
                 <DatePicker Grid.Column="1" SelectedDate="{Binding StartDate}" Margin="0,0,15,0"/>
 
-                <TextBlock Grid.Column="2" Text="To:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Column="2" Text="To:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
                 <DatePicker Grid.Column="3" SelectedDate="{Binding EndDate}" Margin="0,0,15,0"/>
 
                 <Button Grid.Column="4" Content="Load Entries" Command="{Binding LoadEntriesCommand}"
@@ -73,11 +73,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- Entries List -->
-            <Border Grid.Column="0" Margin="15" Background="White" CornerRadius="8">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                </Border.Effect>
-
+            <Border Grid.Column="0" Margin="15" Background="#2D2D44" CornerRadius="8" BorderBrush="#3D3D5C" BorderThickness="1">
                 <DataGrid ItemsSource="{Binding JournalEntries}"
                           SelectedItem="{Binding SelectedEntry}"
                           AutoGenerateColumns="False"
@@ -86,7 +82,12 @@
                           GridLinesVisibility="Horizontal"
                           HeadersVisibility="Column"
                           BorderThickness="0"
-                          RowHeight="45">
+                          RowHeight="45"
+                          Background="#2D2D44"
+                          Foreground="White"
+                          RowBackground="#2D2D44"
+                          AlternatingRowBackground="#252538"
+                          HorizontalGridLinesBrush="#3D3D5C">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Entry #" Binding="{Binding EntryNumber}" Width="100"/>
                         <DataGridTextColumn Header="Date" Binding="{Binding EntryDate, StringFormat=d}" Width="100"/>
@@ -96,7 +97,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border Padding="5,2" CornerRadius="3"
-                                            Background="{Binding IsPosted, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#4CAF50|#FF9800'}">
+                                            Background="{Binding IsPosted, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#22C55E|#F59E0B'}">
                                         <TextBlock Text="{Binding IsPosted, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Posted|Draft'}"
                                                    Foreground="White" FontSize="11"/>
                                     </Border>
@@ -108,16 +109,12 @@
             </Border>
 
             <!-- Entry Details Panel -->
-            <Border Grid.Column="1" Margin="0,15,15,15" Background="White" CornerRadius="8">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                </Border.Effect>
-
+            <Border Grid.Column="1" Margin="0,15,15,15" Background="#2D2D44" CornerRadius="8" BorderBrush="#3D3D5C" BorderThickness="1">
                 <Grid>
                     <ScrollViewer VerticalScrollBarVisibility="Auto"
                                   Visibility="{Binding SelectedEntry, Converter={StaticResource NullToVisibilityConverter}}">
                         <StackPanel Margin="20">
-                            <TextBlock Text="Entry Details" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,20"/>
+                            <TextBlock Text="Entry Details" FontSize="18" FontWeight="SemiBold" Foreground="#6366F1" Margin="0,0,0,20"/>
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -126,32 +123,37 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel>
-                                    <TextBlock Text="Entry Number" FontSize="12" Foreground="Gray"/>
-                                    <TextBlock Text="{Binding SelectedEntry.EntryNumber}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                                    <TextBlock Text="Entry Number" FontSize="12" Foreground="#8888AA"/>
+                                    <TextBlock Text="{Binding SelectedEntry.EntryNumber}" FontSize="14" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,10"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="Date" FontSize="12" Foreground="Gray"/>
-                                    <TextBlock Text="{Binding SelectedEntry.EntryDate, StringFormat=d}" FontSize="14" Margin="0,0,0,10"/>
+                                    <TextBlock Text="Date" FontSize="12" Foreground="#8888AA"/>
+                                    <TextBlock Text="{Binding SelectedEntry.EntryDate, StringFormat=d}" FontSize="14" Foreground="White" Margin="0,0,0,10"/>
                                 </StackPanel>
                             </Grid>
 
-                            <TextBlock Text="Description" FontSize="12" Foreground="Gray"/>
-                            <TextBlock Text="{Binding SelectedEntry.Description}" FontSize="14" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                            <TextBlock Text="Description" FontSize="12" Foreground="#8888AA"/>
+                            <TextBlock Text="{Binding SelectedEntry.Description}" FontSize="14" TextWrapping="Wrap" Foreground="White" Margin="0,0,0,10"/>
 
-                            <TextBlock Text="Reference" FontSize="12" Foreground="Gray"/>
-                            <TextBlock Text="{Binding SelectedEntry.Reference, TargetNullValue='-'}" FontSize="14" Margin="0,0,0,15"/>
+                            <TextBlock Text="Reference" FontSize="12" Foreground="#8888AA"/>
+                            <TextBlock Text="{Binding SelectedEntry.Reference, TargetNullValue='-'}" FontSize="14" Foreground="White" Margin="0,0,0,15"/>
 
-                            <TextBlock Text="Journal Lines" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <TextBlock Text="Journal Lines" FontSize="14" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,10"/>
 
                             <DataGrid ItemsSource="{Binding EntryLines}"
                                       AutoGenerateColumns="False"
                                       IsReadOnly="True"
                                       HeadersVisibility="Column"
                                       BorderThickness="1"
-                                      BorderBrush="#E0E0E0"
+                                      BorderBrush="#3D3D5C"
                                       RowHeight="35"
-                                      MaxHeight="250">
+                                      MaxHeight="250"
+                                      Background="#252538"
+                                      Foreground="White"
+                                      RowBackground="#252538"
+                                      AlternatingRowBackground="#2D2D44"
+                                      HorizontalGridLinesBrush="#3D3D5C">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Account" Binding="{Binding Account.AccountName}" Width="*"/>
                                     <DataGridTextColumn Header="Debit" Binding="{Binding DebitAmount, StringFormat=N2}" Width="80"/>
@@ -172,22 +174,18 @@
 
                     <TextBlock Text="Select an entry to view details"
                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                               Foreground="Gray" FontSize="14"
+                               Foreground="#555577" FontSize="14"
                                Visibility="{Binding SelectedEntry, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"/>
                 </Grid>
             </Border>
         </Grid>
 
         <!-- New Entry Form -->
-        <Border Grid.Row="2" Margin="15" Background="White" CornerRadius="8"
+        <Border Grid.Row="2" Margin="15" Background="#2D2D44" CornerRadius="8" BorderBrush="#3D3D5C" BorderThickness="1"
                 Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-            </Border.Effect>
-
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="20">
-                    <TextBlock Text="New Journal Entry" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,20"/>
+                    <TextBlock Text="New Journal Entry" FontSize="20" FontWeight="SemiBold" Foreground="#6366F1" Margin="0,0,0,20"/>
 
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -198,27 +196,30 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Margin="0,0,15,0">
-                            <TextBlock Text="Entry Number" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox Text="{Binding EditEntryNumber}" Padding="10" IsReadOnly="True" Background="#F5F5F5"/>
+                            <TextBlock Text="Entry Number" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
+                            <TextBox Text="{Binding EditEntryNumber}" Padding="10" IsReadOnly="True"
+                                    Background="#252538" Foreground="#8888AA" BorderBrush="#3D3D5C"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Margin="0,0,15,0">
-                            <TextBlock Text="Entry Date" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <TextBlock Text="Entry Date" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                             <DatePicker SelectedDate="{Binding EditEntryDate}" Padding="5"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="2" Margin="0,0,15,0">
-                            <TextBlock Text="Description" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox Text="{Binding EditDescription, UpdateSourceTrigger=PropertyChanged}" Padding="10"/>
+                            <TextBlock Text="Description" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
+                            <TextBox Text="{Binding EditDescription, UpdateSourceTrigger=PropertyChanged}"
+                                    Padding="10" Background="#1E1E2E" Foreground="White" BorderBrush="#3D3D5C"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="3">
-                            <TextBlock Text="Reference" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox Text="{Binding EditReference, UpdateSourceTrigger=PropertyChanged}" Padding="10"/>
+                            <TextBlock Text="Reference" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
+                            <TextBox Text="{Binding EditReference, UpdateSourceTrigger=PropertyChanged}"
+                                    Padding="10" Background="#1E1E2E" Foreground="White" BorderBrush="#3D3D5C"/>
                         </StackPanel>
                     </Grid>
 
-                    <TextBlock Text="Journal Lines" FontSize="16" FontWeight="SemiBold" Margin="0,20,0,10"/>
+                    <TextBlock Text="Journal Lines" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,20,0,10"/>
 
                     <ItemsControl ItemsSource="{Binding EditLines}">
                         <ItemsControl.ItemTemplate>
@@ -236,16 +237,20 @@
                                               SelectedValue="{Binding AccountId}"
                                               SelectedValuePath="Id"
                                               DisplayMemberPath="AccountName"
-                                              Padding="10" Margin="0,0,10,0"/>
+                                              Padding="10" Margin="0,0,10,0"
+                                              Background="#1E1E2E" Foreground="White"/>
 
                                     <TextBox Grid.Column="1" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                                             Padding="10" Margin="0,0,10,0"/>
+                                             Padding="10" Margin="0,0,10,0"
+                                             Background="#1E1E2E" Foreground="White" BorderBrush="#3D3D5C"/>
 
                                     <TextBox Grid.Column="2" Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"
-                                             Padding="10" Margin="0,0,10,0"/>
+                                             Padding="10" Margin="0,0,10,0"
+                                             Background="#1E1E2E" Foreground="White" BorderBrush="#3D3D5C"/>
 
                                     <ComboBox Grid.Column="3" SelectedIndex="{Binding IsDebit, Converter={StaticResource BoolToIndexConverter}}"
-                                              Padding="10" Margin="0,0,10,0">
+                                              Padding="10" Margin="0,0,10,0"
+                                              Background="#1E1E2E" Foreground="White">
                                         <ComboBoxItem Content="Debit"/>
                                         <ComboBoxItem Content="Credit"/>
                                     </ComboBox>
@@ -265,7 +270,7 @@
                             HorizontalAlignment="Left" Margin="0,10,0,0"/>
 
                     <!-- Totals -->
-                    <Border Background="#F5F5F5" CornerRadius="5" Padding="15" Margin="0,20,0,0">
+                    <Border Background="#252538" CornerRadius="5" Padding="15" Margin="0,20,0,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -275,19 +280,19 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="1" Margin="0,0,30,0">
-                                <TextBlock Text="Total Debits" FontSize="12" Foreground="Gray"/>
-                                <TextBlock Text="{Binding TotalDebits, StringFormat=N2}" FontSize="18" FontWeight="SemiBold"/>
+                                <TextBlock Text="Total Debits" FontSize="12" Foreground="#8888AA"/>
+                                <TextBlock Text="{Binding TotalDebits, StringFormat=N2}" FontSize="18" FontWeight="SemiBold" Foreground="White"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2" Margin="0,0,30,0">
-                                <TextBlock Text="Total Credits" FontSize="12" Foreground="Gray"/>
-                                <TextBlock Text="{Binding TotalCredits, StringFormat=N2}" FontSize="18" FontWeight="SemiBold"/>
+                                <TextBlock Text="Total Credits" FontSize="12" Foreground="#8888AA"/>
+                                <TextBlock Text="{Binding TotalCredits, StringFormat=N2}" FontSize="18" FontWeight="SemiBold" Foreground="White"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="3">
-                                <TextBlock Text="Status" FontSize="12" Foreground="Gray"/>
+                                <TextBlock Text="Status" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock FontSize="18" FontWeight="SemiBold"
-                                           Foreground="{Binding IsBalanced, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#4CAF50|#F44336'}">
+                                           Foreground="{Binding IsBalanced, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#22C55E|#EF4444'}">
                                     <TextBlock.Text>
                                         <Binding Path="IsBalanced" Converter="{StaticResource BoolToTextConverter}" ConverterParameter="Balanced|Unbalanced"/>
                                     </TextBlock.Text>

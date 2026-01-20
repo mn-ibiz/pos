@@ -9,33 +9,35 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
         <Style x:Key="CardStyle" TargetType="Border">
-            <Setter Property="Background" Value="#FFFFFF"/>
-            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Padding" Value="16"/>
         </Style>
         <Style x:Key="LabelStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#666"/>
+            <Setter Property="Foreground" Value="#8888AA"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Margin" Value="0,0,0,4"/>
         </Style>
         <Style x:Key="InputStyle" TargetType="TextBox">
             <Setter Property="Padding" Value="10,8"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
+            <Setter Property="Background" Value="#1E1E2E"/>
+            <Setter Property="Foreground" Value="White"/>
             <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="#F5F5F5">
+    <Grid Background="#1E1E2E">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- Configurations List -->
-        <Border Grid.Column="0" Background="#FFFFFF" Padding="16" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0">
+        <Border Grid.Column="0" Background="#2D2D44" Padding="16" BorderBrush="#3D3D5C" BorderThickness="0,0,1,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -45,19 +47,20 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Text="M-Pesa Configurations" FontSize="18" FontWeight="Bold"
-                          Foreground="#1B5E20" Margin="0,0,0,16"/>
+                          Foreground="#6366F1" Margin="0,0,0,16"/>
 
                 <Button Grid.Row="1" Content="+ New Configuration" Command="{Binding NewConfigurationCommand}"
-                       Padding="12,8" Background="#1B5E20" Foreground="White" BorderThickness="0"
+                       Padding="12,8" Background="#6366F1" Foreground="White" BorderThickness="0"
                        HorizontalAlignment="Stretch" Margin="0,0,0,16"/>
 
                 <ListBox Grid.Row="2" ItemsSource="{Binding Configurations}"
                         SelectedItem="{Binding SelectedConfiguration}"
+                        Background="Transparent"
                         BorderThickness="0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border Padding="12" Margin="0,0,0,8" CornerRadius="4"
-                                   Background="{Binding IsActive, Converter={StaticResource BoolToVisibility}, ConverterParameter='#E8F5E9|#F5F5F5'}">
+                                   Background="#252538">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -66,21 +69,21 @@
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Grid.Row="0" Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14"/>
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" Foreground="White"/>
                                         <Border Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibility}}"
-                                               Background="#1B5E20" CornerRadius="2" Padding="4,2" Margin="8,0,0,0">
+                                               Background="#22C55E" CornerRadius="2" Padding="4,2" Margin="8,0,0,0">
                                             <TextBlock Text="ACTIVE" FontSize="10" Foreground="White"/>
                                         </Border>
                                     </StackPanel>
 
-                                    <TextBlock Grid.Row="1" Text="{Binding BusinessShortCode}" Foreground="#666" FontSize="12"/>
+                                    <TextBlock Grid.Row="1" Text="{Binding BusinessShortCode}" Foreground="#8888AA" FontSize="12"/>
 
                                     <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,4,0,0">
-                                        <Border Background="{Binding Environment, Converter={StaticResource BoolToVisibility}, ConverterParameter='#FFF3E0|#E3F2FD'}"
+                                        <Border Background="#3D3D5C"
                                                CornerRadius="2" Padding="4,2">
-                                            <TextBlock Text="{Binding Environment}" FontSize="10" Foreground="#666"/>
+                                            <TextBlock Text="{Binding Environment}" FontSize="10" Foreground="#8888AA"/>
                                         </Border>
-                                        <TextBlock Text="{Binding TransactionType}" Foreground="#999" FontSize="10" Margin="8,0,0,0"
+                                        <TextBlock Text="{Binding TransactionType}" Foreground="#555577" FontSize="10" Margin="8,0,0,0"
                                                   VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Grid>
@@ -91,17 +94,17 @@
 
                 <StackPanel Grid.Row="3" Margin="0,16,0,0">
                     <Button Content="Edit Selected" Command="{Binding EditConfigurationCommand}"
-                           Padding="10,6" Margin="0,0,0,8"/>
+                           Padding="10,6" Margin="0,0,0,8" Background="#3D3D5C" Foreground="White" BorderThickness="0"/>
                     <Button Content="Activate Selected" Command="{Binding ActivateConfigurationCommand}"
-                           Padding="10,6" Margin="0,0,0,8" Background="#FF9800" Foreground="White" BorderThickness="0"/>
+                           Padding="10,6" Margin="0,0,0,8" Background="#F59E0B" Foreground="White" BorderThickness="0"/>
                     <Button Content="Test Connection" Command="{Binding TestSelectedConfigurationCommand}"
-                           Padding="10,6"/>
+                           Padding="10,6" Background="#3D3D5C" Foreground="White" BorderThickness="0"/>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- Edit Form -->
-        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Background="#1E1E2E">
             <Grid Margin="24">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -111,10 +114,10 @@
 
                 <!-- Messages -->
                 <StackPanel Grid.Row="0" Margin="0,0,0,16">
-                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#D32F2F" TextWrapping="Wrap"
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444" TextWrapping="Wrap"
                               Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisibility}}"
                               Margin="0,0,0,8"/>
-                    <TextBlock Text="{Binding SuccessMessage}" Foreground="#1B5E20" TextWrapping="Wrap"
+                    <TextBlock Text="{Binding SuccessMessage}" Foreground="#22C55E" TextWrapping="Wrap"
                               Visibility="{Binding SuccessMessage, Converter={StaticResource BoolToVisibility}}"/>
                 </StackPanel>
 
@@ -122,9 +125,9 @@
                 <Border Grid.Row="2" Style="{StaticResource CardStyle}"
                        Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibility}, ConverterParameter=Invert}">
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="Select a configuration to edit" FontSize="16" Foreground="#999"
+                        <TextBlock Text="Select a configuration to edit" FontSize="16" Foreground="#555577"
                                   HorizontalAlignment="Center"/>
-                        <TextBlock Text="or click 'New Configuration' to create one" FontSize="14" Foreground="#BBB"
+                        <TextBlock Text="or click 'New Configuration' to create one" FontSize="14" Foreground="#555577"
                                   HorizontalAlignment="Center" Margin="0,8,0,0"/>
                     </StackPanel>
                 </Border>
@@ -140,7 +143,7 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Text="{Binding EditId, StringFormat='Configuration {0}', FallbackValue='New Configuration'}"
-                                  FontSize="20" FontWeight="Bold" Foreground="#1B5E20" Margin="0,0,0,24"/>
+                                  FontSize="20" FontWeight="Bold" Foreground="#6366F1" Margin="0,0,0,24"/>
 
                         <Grid Grid.Row="1">
                             <Grid.ColumnDefinitions>
@@ -169,7 +172,8 @@
                                 <TextBlock Text="Environment *" Style="{StaticResource LabelStyle}"/>
                                 <ComboBox ItemsSource="{Binding EnvironmentOptions}"
                                          SelectedItem="{Binding EditEnvironment}"
-                                         Padding="10,8" Margin="0,0,0,12"/>
+                                         Padding="10,8" Margin="0,0,0,12"
+                                         Background="#1E1E2E" Foreground="White"/>
                             </StackPanel>
 
                             <!-- Consumer Key -->
@@ -183,7 +187,7 @@
                             <StackPanel Grid.Row="1" Grid.Column="1" Margin="12,0,0,0">
                                 <TextBlock Text="Consumer Secret *" Style="{StaticResource LabelStyle}"/>
                                 <PasswordBox x:Name="ConsumerSecretBox" Padding="10,8" Margin="0,0,0,12"
-                                            BorderThickness="1" BorderBrush="#E0E0E0"/>
+                                            BorderThickness="1" BorderBrush="#3D3D5C" Background="#1E1E2E" Foreground="White"/>
                             </StackPanel>
 
                             <!-- Business Short Code -->
@@ -197,7 +201,7 @@
                             <StackPanel Grid.Row="2" Grid.Column="1" Margin="12,0,0,0">
                                 <TextBlock Text="Passkey *" Style="{StaticResource LabelStyle}"/>
                                 <PasswordBox x:Name="PasskeyBox" Padding="10,8" Margin="0,0,0,12"
-                                            BorderThickness="1" BorderBrush="#E0E0E0"/>
+                                            BorderThickness="1" BorderBrush="#3D3D5C" Background="#1E1E2E" Foreground="White"/>
                             </StackPanel>
 
                             <!-- Transaction Type -->
@@ -205,7 +209,8 @@
                                 <TextBlock Text="Transaction Type *" Style="{StaticResource LabelStyle}"/>
                                 <ComboBox ItemsSource="{Binding TransactionTypeOptions}"
                                          SelectedItem="{Binding EditTransactionType}"
-                                         Padding="10,8" Margin="0,0,0,12"/>
+                                         Padding="10,8" Margin="0,0,0,12"
+                                         Background="#1E1E2E" Foreground="White"/>
                             </StackPanel>
 
                             <!-- Callback URL -->
@@ -232,16 +237,17 @@
                             <!-- Test Result -->
                             <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,0,0,16">
                                 <Button Content="Test Configuration" Command="{Binding TestConfigurationCommand}"
-                                       Padding="12,8" IsEnabled="{Binding IsTestingConfiguration, Converter={StaticResource BoolToVisibility}, ConverterParameter=Invert}"/>
+                                       Padding="12,8" Background="#3D3D5C" Foreground="White" BorderThickness="0"
+                                       IsEnabled="{Binding IsTestingConfiguration, Converter={StaticResource BoolToVisibility}, ConverterParameter=Invert}"/>
                                 <TextBlock Text="{Binding TestResultMessage}" VerticalAlignment="Center" Margin="16,0,0,0"
-                                          Foreground="#666"/>
+                                          Foreground="#8888AA"/>
                             </StackPanel>
 
                             <!-- Info -->
-                            <Border Grid.Row="6" Grid.ColumnSpan="2" Background="#FFF3E0" CornerRadius="4" Padding="12">
+                            <Border Grid.Row="6" Grid.ColumnSpan="2" Background="#252538" CornerRadius="4" Padding="12">
                                 <StackPanel>
-                                    <TextBlock Text="Daraja API Setup Instructions:" FontWeight="SemiBold" Foreground="#E65100"/>
-                                    <TextBlock TextWrapping="Wrap" Foreground="#666" Margin="0,8,0,0">
+                                    <TextBlock Text="Daraja API Setup Instructions:" FontWeight="SemiBold" Foreground="#F59E0B"/>
+                                    <TextBlock TextWrapping="Wrap" Foreground="#8888AA" Margin="0,8,0,0">
                                         1. Create an app at developer.safaricom.co.ke
                                         2. Get Consumer Key and Secret from your app
                                         3. For sandbox, use test short code 174379
@@ -255,9 +261,9 @@
                         <!-- Actions -->
                         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
                             <Button Content="Cancel" Command="{Binding CancelEditCommand}"
-                                   Padding="16,10" Margin="0,0,12,0"/>
+                                   Padding="16,10" Margin="0,0,12,0" Background="#3D3D5C" Foreground="White" BorderThickness="0"/>
                             <Button Content="Save Configuration" Command="{Binding SaveConfigurationCommand}"
-                                   Padding="16,10" Background="#1B5E20" Foreground="White" BorderThickness="0"/>
+                                   Padding="16,10" Background="#6366F1" Foreground="White" BorderThickness="0"/>
                         </StackPanel>
                     </Grid>
                 </Border>

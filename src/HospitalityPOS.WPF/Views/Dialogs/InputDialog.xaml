@@ -62,7 +62,7 @@
             <Button Content="OK"
                     Width="100"
                     Height="40"
-                    Background="#4CAF50"
+                    Background="#22C55E"
                     Foreground="White"
                     BorderThickness="0"
                     Cursor="Hand"

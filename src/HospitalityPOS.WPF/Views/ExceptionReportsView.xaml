@@ -8,7 +8,7 @@
              d:DesignHeight="700" d:DesignWidth="1000"
              d:DataContext="{d:DesignInstance vm:ExceptionReportsViewModel}">
 
-    <Grid Background="{StaticResource BackgroundBrush}">
+    <Grid Background="#1E1E2E">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -42,7 +42,7 @@
         </Border>
 
         <!-- Report Selection and Filters -->
-        <Border Grid.Row="1" Background="White" Padding="20" BorderThickness="0,0,0,1" BorderBrush="#E0E0E0">
+        <Border Grid.Row="1" Background="#2D2D44" Padding="20" BorderThickness="0,0,0,1" BorderBrush="#3D3D5C">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -60,7 +60,7 @@
 
                 <!-- Report Type -->
                 <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,0,20,0">
-                    <TextBlock Text="Report Type" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="Report Type" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                     <ComboBox ItemsSource="{Binding ReportTypes}"
                               SelectedItem="{Binding SelectedReportType}"
                               DisplayMemberPath="Name"
@@ -70,7 +70,7 @@
 
                 <!-- From Date -->
                 <StackPanel Grid.Column="1" Grid.Row="0" Margin="0,0,20,0">
-                    <TextBlock Text="From Date" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="From Date" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                     <DatePicker SelectedDate="{Binding FromDate}"
                                 Width="140"
                                 Height="35"/>
@@ -78,7 +78,7 @@
 
                 <!-- To Date -->
                 <StackPanel Grid.Column="2" Grid.Row="0" Margin="0,0,20,0">
-                    <TextBlock Text="To Date" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="To Date" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                     <DatePicker SelectedDate="{Binding ToDate}"
                                 Width="140"
                                 Height="35"/>
@@ -86,7 +86,7 @@
 
                 <!-- User Filter -->
                 <StackPanel Grid.Column="3" Grid.Row="0" Margin="0,0,20,0">
-                    <TextBlock Text="Filter by User" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="Filter by User" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -145,7 +145,7 @@
                 <!-- No Report Message -->
                 <TextBlock Text="Select a report type and date range, then click 'Generate Report'"
                            FontSize="16"
-                           Foreground="#888"
+                           Foreground="#8888AA"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            Visibility="{Binding HasReport, Converter={StaticResource BoolToInverseVisibilityConverter}}"/>
@@ -158,7 +158,7 @@
                     </Border>
 
                     <!-- Void Summary -->
-                    <Border Background="White" Padding="15" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
+                    <Border Background="#2D2D44" Padding="15" BorderBrush="#3D3D5C" BorderThickness="1,0,1,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -167,34 +167,35 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Total Voids" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Total Voids" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding VoidReport.TotalCount}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource ErrorBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Total Amount" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Total Amount" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding VoidReport.TotalAmount, StringFormat='KSh {0:N2}'}"
                                            FontSize="28" FontWeight="Bold" Foreground="{StaticResource ErrorBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Average Void" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Average Void" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding VoidReport.AverageAmount, StringFormat='KSh {0:N2}'}"
-                                           FontSize="28" FontWeight="Bold" Foreground="#666"/>
+                                           FontSize="28" FontWeight="Bold" Foreground="#8888AA"/>
                             </StackPanel>
                         </Grid>
                     </Border>
 
                     <!-- Void Items Grid -->
-                    <TextBlock Text="Void Details" FontSize="16" FontWeight="SemiBold" Margin="0,20,0,10"/>
+                    <TextBlock Text="Void Details" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,20,0,10"/>
                     <DataGrid ItemsSource="{Binding VoidItems}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               HeadersVisibility="Column"
                               MaxHeight="300"
-                              Background="White"
+                              Background="#2D2D44"
+                              Foreground="White"
                               GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#E0E0E0">
+                              HorizontalGridLinesBrush="#3D3D5C">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Receipt #" Binding="{Binding ReceiptNumber}" Width="100"/>
                             <DataGridTextColumn Header="Amount" Binding="{Binding VoidedAmount, StringFormat='KSh {0:N2}'}" Width="120"/>
@@ -207,15 +208,16 @@
                     </DataGrid>
 
                     <!-- Void by Reason Summary -->
-                    <TextBlock Text="Summary by Reason" FontSize="16" FontWeight="SemiBold" Margin="0,20,0,10"/>
+                    <TextBlock Text="Summary by Reason" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,20,0,10"/>
                     <DataGrid ItemsSource="{Binding VoidByReason}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               HeadersVisibility="Column"
                               MaxHeight="200"
-                              Background="White"
+                              Background="#2D2D44"
+                              Foreground="White"
                               GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#E0E0E0">
+                              HorizontalGridLinesBrush="#3D3D5C">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Reason" Binding="{Binding ReasonName}" Width="200"/>
                             <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="80"/>
@@ -233,7 +235,7 @@
                     </Border>
 
                     <!-- Discount Summary -->
-                    <Border Background="White" Padding="15" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1">
+                    <Border Background="#2D2D44" Padding="15" BorderBrush="#3D3D5C" BorderThickness="1,0,1,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -243,25 +245,25 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Total Discounts" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Total Discounts" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding DiscountReport.TotalDiscounts, StringFormat='KSh {0:N2}'}"
                                            FontSize="24" FontWeight="Bold" Foreground="{StaticResource WarningBrush}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Transactions" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Transactions" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding DiscountReport.DiscountTransactionCount}"
-                                           FontSize="24" FontWeight="Bold" Foreground="#666"/>
+                                           FontSize="24" FontWeight="Bold" Foreground="#8888AA"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Average Discount" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Average Discount" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding DiscountReport.AverageDiscount, StringFormat='KSh {0:N2}'}"
-                                           FontSize="24" FontWeight="Bold" Foreground="#666"/>
+                                           FontSize="24" FontWeight="Bold" Foreground="#8888AA"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="3">
-                                <TextBlock Text="Discount Rate" FontSize="12" Foreground="#666"/>
+                                <TextBlock Text="Discount Rate" FontSize="12" Foreground="#8888AA"/>
                                 <TextBlock Text="{Binding DiscountReport.DiscountRate, StringFormat='{}{0:N1}%'}"
                                            FontSize="24" FontWeight="Bold" Foreground="{StaticResource WarningBrush}"/>
                             </StackPanel>
@@ -269,15 +271,16 @@
                     </Border>
 
                     <!-- Discount Items Grid -->
-                    <TextBlock Text="Discount Details" FontSize="16" FontWeight="SemiBold" Margin="0,20,0,10"/>
+                    <TextBlock Text="Discount Details" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,20,0,10"/>
                     <DataGrid ItemsSource="{Binding DiscountItems}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               HeadersVisibility="Column"
                               MaxHeight="250"
-                              Background="White"
+                              Background="#2D2D44"
+                              Foreground="White"
                               GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#E0E0E0">
+                              HorizontalGridLinesBrush="#3D3D5C">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Receipt #" Binding="{Binding ReceiptNumber}" Width="100"/>
                             <DataGridTextColumn Header="Item" Binding="{Binding ItemDescription}" Width="180"/>
@@ -298,15 +301,16 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="By Discount Type" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <TextBlock Text="By Discount Type" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,10"/>
                             <DataGrid ItemsSource="{Binding DiscountByType}"
                                       AutoGenerateColumns="False"
                                       IsReadOnly="True"
                                       HeadersVisibility="Column"
                                       MaxHeight="150"
-                                      Background="White"
+                                      Background="#2D2D44"
+                                      Foreground="White"
                                       GridLinesVisibility="Horizontal"
-                                      HorizontalGridLinesBrush="#E0E0E0">
+                                      HorizontalGridLinesBrush="#3D3D5C">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Type" Binding="{Binding DiscountType}" Width="100"/>
                                     <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="60"/>
@@ -317,15 +321,16 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="By User" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <TextBlock Text="By User" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,10"/>
                             <DataGrid ItemsSource="{Binding DiscountByUser}"
                                       AutoGenerateColumns="False"
                                       IsReadOnly="True"
                                       HeadersVisibility="Column"
                                       MaxHeight="150"
-                                      Background="White"
+                                      Background="#2D2D44"
+                                      Foreground="White"
                                       GridLinesVisibility="Horizontal"
-                                      HorizontalGridLinesBrush="#E0E0E0">
+                                      HorizontalGridLinesBrush="#3D3D5C">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="User" Binding="{Binding UserName}" Width="120"/>
                                     <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="60"/>
@@ -340,7 +345,7 @@
         </ScrollViewer>
 
         <!-- Footer with Actions -->
-        <Border Grid.Row="3" Background="White" Padding="20" BorderThickness="0,1,0,0" BorderBrush="#E0E0E0"
+        <Border Grid.Row="3" Background="#2D2D44" Padding="20" BorderThickness="0,1,0,0" BorderBrush="#3D3D5C"
                 Visibility="{Binding HasReport, Converter={StaticResource BoolToVisibilityConverter}}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -352,13 +357,13 @@
                 <TextBlock Grid.Column="0"
                            Text="{Binding VoidReport.GeneratedAt, StringFormat='Generated: {0:yyyy-MM-dd HH:mm}'}"
                            VerticalAlignment="Center"
-                           Foreground="#666"
+                           Foreground="#8888AA"
                            Visibility="{Binding ShowVoidReport, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
                 <TextBlock Grid.Column="0"
                            Text="{Binding DiscountReport.GeneratedAt, StringFormat='Generated: {0:yyyy-MM-dd HH:mm}'}"
                            VerticalAlignment="Center"
-                           Foreground="#666"
+                           Foreground="#8888AA"
                            Visibility="{Binding ShowDiscountReport, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
                 <Button Grid.Column="1"

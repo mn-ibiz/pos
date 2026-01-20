@@ -60,7 +60,7 @@
             <Button Grid.Column="0"
                     Content="Back"
                     Command="{Binding GoBackCommand}"
-                    Background="#3D3D5C"
+                    Background="#2D2D44"
                     Foreground="White"
                     BorderThickness="0"
                     Padding="16,12"
@@ -107,7 +107,7 @@
                     <TextBlock Text="{Binding DraftCount}"
                                FontSize="24"
                                FontWeight="Bold"
-                               Foreground="#6E6E8E"
+                               Foreground="#8888AA"
                                HorizontalAlignment="Center" />
                 </StackPanel>
                 <StackPanel Margin="0,0,48,0">
@@ -170,7 +170,7 @@
                     <TextBlock Grid.Column="0"
                                Text="Search:"
                                FontSize="14"
-                               Foreground="#888888"
+                               Foreground="#8888AA"
                                VerticalAlignment="Center"
                                Margin="0,0,12,0" />
 
@@ -190,9 +190,10 @@
             <ComboBox Grid.Column="1"
                       ItemsSource="{Binding StatusOptions}"
                       SelectedItem="{Binding SelectedStatusFilter}"
-                      Background="#2D2D44"
+                      Background="#1E1E2E"
                       Foreground="White"
-                      BorderThickness="0"
+                      BorderThickness="1"
+                      BorderBrush="#3D3D5C"
                       Padding="16,12"
                       FontSize="14"
                       Width="180"
@@ -227,7 +228,7 @@
             <Button Grid.Column="3"
                     Content="Refresh"
                     Command="{Binding LoadDataCommand}"
-                    Background="#3D3D5C"
+                    Background="#2D2D44"
                     Foreground="White"
                     BorderThickness="0"
                     Padding="16,12"
@@ -397,7 +398,7 @@
                           GridLinesVisibility="Horizontal"
                           HorizontalGridLinesBrush="#3D3D5C"
                           RowBackground="#2D2D44"
-                          AlternatingRowBackground="#353550"
+                          AlternatingRowBackground="#252538"
                           SelectionMode="Single"
                           SelectionUnit="FullRow"
                           CanUserAddRows="False"
@@ -410,8 +411,8 @@
 
                     <DataGrid.ColumnHeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="Background" Value="#3D3D5C" />
-                            <Setter Property="Foreground" Value="#AAAACC" />
+                            <Setter Property="Background" Value="#16162B" />
+                            <Setter Property="Foreground" Value="#8888AA" />
                             <Setter Property="FontWeight" Value="SemiBold" />
                             <Setter Property="FontSize" Value="14" />
                             <Setter Property="Padding" Value="16,12" />
@@ -426,7 +427,7 @@
                             <Setter Property="VerticalContentAlignment" Value="Center" />
                             <Style.Triggers>
                                 <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="#4A4A6A" />
+                                    <Setter Property="Background" Value="#3D3D5C" />
                                     <Setter Property="Foreground" Value="White" />
                                 </Trigger>
                             </Style.Triggers>
@@ -518,7 +519,7 @@
                 <Button Content="View Details"
                         Command="{Binding ViewPurchaseOrderCommand}"
                         IsEnabled="{Binding SelectedPurchaseOrder, Converter={StaticResource BoolToVisConverter}}"
-                        Background="#3D3D5C"
+                        Background="#2D2D44"
                         Foreground="White"
                         BorderThickness="0"
                         Padding="24,12"

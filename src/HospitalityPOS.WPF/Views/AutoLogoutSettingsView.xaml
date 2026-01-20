@@ -20,13 +20,13 @@
 
         <Style x:Key="SettingLabel" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Foreground" Value="#A0A0B0"/>
+            <Setter Property="Foreground" Value="#8888AA"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
         <Style x:Key="SettingDescription" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Foreground" Value="#606070"/>
+            <Setter Property="Foreground" Value="#555577"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
             <Setter Property="Margin" Value="0,4,0,0"/>
         </Style>
@@ -175,7 +175,7 @@
                             <ComboBox ItemsSource="{Binding AvailableTimeoutMinutes}"
                                       SelectedItem="{Binding InactivityTimeoutMinutes}"
                                       Width="100"
-                                      Background="#3E3E5E"
+                                      Background="#1E1E2E"
                                       Foreground="White"/>
                             <TextBlock Text="minutes"
                                        Style="{StaticResource SettingLabel}"
@@ -223,7 +223,7 @@
                                        Margin="0,0,12,0"/>
                             <TextBox Text="{Binding WarningBeforeLogoutSeconds, UpdateSourceTrigger=PropertyChanged}"
                                      Width="60"
-                                     Background="#3E3E5E"
+                                     Background="#1E1E2E"
                                      Foreground="White"
                                      Padding="8,4"
                                      BorderBrush="#4E4E6E"/>
@@ -311,7 +311,7 @@
                         Margin="0,24,0,0">
                 <Button Content="Reset to Defaults"
                         Style="{StaticResource ActionButton}"
-                        Background="#E74C3C"
+                        Background="#EF4444"
                         Command="{Binding ResetToDefaultsCommand}"/>
                 <Button Content="Cancel"
                         Style="{StaticResource ActionButton}"

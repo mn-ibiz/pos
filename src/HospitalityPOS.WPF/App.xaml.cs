@@ -240,6 +240,9 @@ public partial class App : Application
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
 
+        // Theme service (Singleton - manages application theme)
+        services.AddSingleton<IThemeService, ThemeService>();
+
         // Register ViewModels (Transient - new instance each navigation)
         // NOTE: Many ViewModels temporarily excluded due to API mismatches
         // services.AddTransient<MainViewModel>(); // Excluded - using MainWindowViewModel instead
@@ -358,6 +361,11 @@ public partial class App : Application
             Log.Information("Initializing database...");
             await Services.InitializeDatabaseAsync(seed: true);
             Log.Information("Database initialized successfully");
+
+            // Initialize theme service and load saved preference
+            var themeService = Services.GetRequiredService<IThemeService>();
+            await themeService.LoadSavedThemeAsync();
+            Log.Information("Theme initialized: {Theme}", themeService.CurrentTheme);
 
             // Show the main window
             var mainWindow = Services.GetRequiredService<MainWindow>();

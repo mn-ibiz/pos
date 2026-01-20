@@ -28,7 +28,7 @@
 
         <Style x:Key="DescriptionStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="11" />
-            <Setter Property="Foreground" Value="#666688" />
+            <Setter Property="Foreground" Value="#555577" />
             <Setter Property="Margin" Value="0,4,0,0" />
             <Setter Property="TextWrapping" Value="Wrap" />
         </Style>
@@ -36,14 +36,14 @@
         <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
             <Setter Property="Background" Value="#3D3D5C" />
             <Setter Property="Foreground" Value="White" />
-            <Setter Property="BorderBrush" Value="#4A4A6A" />
+            <Setter Property="BorderBrush" Value="#3D3D5C" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="12,10" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Style.Triggers>
                 <Trigger Property="IsFocused" Value="True">
-                    <Setter Property="BorderBrush" Value="#6B8DD6" />
+                    <Setter Property="BorderBrush" Value="#22C55E" />
                 </Trigger>
                 <Trigger Property="IsEnabled" Value="False">
                     <Setter Property="Opacity" Value="0.6" />
@@ -74,7 +74,7 @@
             <Setter Property="Cursor" Value="Hand" />
             <Style.Triggers>
                 <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="#5A5A7A" />
+                    <Setter Property="Background" Value="#3D3D5C" />
                     <Setter Property="Opacity" Value="0.6" />
                 </Trigger>
             </Style.Triggers>
@@ -116,7 +116,7 @@
                            Foreground="White" />
                 <TextBlock Text="Configure how points are earned, redeemed, and expire"
                            FontSize="14"
-                           Foreground="#888888"
+                           Foreground="#8888AA"
                            Margin="0,4,0,0" />
             </StackPanel>
         </Grid>
@@ -304,7 +304,7 @@
                         <ItemsControl ItemsSource="{Binding TierConfigurations}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="#363654"
+                                    <Border Background="#252538"
                                             CornerRadius="6"
                                             Padding="16"
                                             Margin="0,0,0,12">
@@ -319,11 +319,11 @@
                                                            FontSize="15"
                                                            FontWeight="SemiBold"
                                                            Foreground="White" />
-                                                <TextBlock FontSize="12" Foreground="#AAAACC" Margin="0,4,0,0">
+                                                <TextBlock FontSize="12" Foreground="#8888AA" Margin="0,4,0,0">
                                                     <Run Text="Spend threshold: KES " />
                                                     <Run Text="{Binding MinimumSpend, StringFormat=N0}" FontWeight="SemiBold" />
                                                 </TextBlock>
-                                                <TextBlock FontSize="12" Foreground="#AAAACC" Margin="0,2,0,0">
+                                                <TextBlock FontSize="12" Foreground="#8888AA" Margin="0,2,0,0">
                                                     <Run Text="Points multiplier: " />
                                                     <Run Text="{Binding PointsMultiplier, StringFormat=0.0x}" FontWeight="SemiBold" />
                                                 </TextBlock>
@@ -365,7 +365,7 @@
                         Margin="0,0,16,0"
                         Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisConverter}}">
                     <TextBlock Text="{Binding ErrorMessage}"
-                               Foreground="#FF6B6B"
+                               Foreground="#EF4444"
                                FontSize="13"
                                TextWrapping="Wrap"
                                VerticalAlignment="Center" />
@@ -388,7 +388,7 @@
                 <ProgressBar IsIndeterminate="True"
                              Width="200"
                              Height="4"
-                             Foreground="#6B8DD6" />
+                             Foreground="#22C55E" />
                 <TextBlock Text="{Binding BusyMessage}"
                            Foreground="White"
                            FontSize="16"

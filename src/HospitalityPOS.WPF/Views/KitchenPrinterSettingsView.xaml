@@ -382,7 +382,7 @@
                                 <!-- Connection Info -->
                                 <TextBlock Grid.Row="1"
                                            FontSize="11"
-                                           Foreground="#9CA3AF"
+                                           Foreground="#8888AA"
                                            Margin="0,4,0,0">
                                     <Run Text="{Binding ConnectionType, Mode=OneWay}"/>
                                     <Run Text=" - "/>
@@ -422,7 +422,7 @@
                                    Margin="0,0,0,12"/>
 
                         <TextBlock Text="Printer Name"
-                                   Foreground="#9CA3AF"
+                                   Foreground="#8888AA"
                                    FontSize="12"
                                    Margin="0,0,0,6"/>
                         <TextBox Text="{Binding PrinterName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -463,7 +463,7 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Text="IP Address"
-                                               Foreground="#9CA3AF"
+                                               Foreground="#8888AA"
                                                FontSize="12"
                                                Margin="0,0,0,6"/>
                                     <TextBox Text="{Binding IpAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -471,7 +471,7 @@
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Text="Port"
-                                               Foreground="#9CA3AF"
+                                               Foreground="#8888AA"
                                                FontSize="12"
                                                Margin="0,0,0,6"/>
                                     <TextBox Text="{Binding Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -489,7 +489,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Windows Printer"
-                                           Foreground="#9CA3AF"
+                                           Foreground="#8888AA"
                                            FontSize="12"
                                            Margin="0,0,0,6"/>
                                 <Button Grid.Column="1"
@@ -621,7 +621,7 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,8,0">
                                 <TextBlock Text="Beep count"
-                                           Foreground="#9CA3AF"
+                                           Foreground="#8888AA"
                                            FontSize="12"
                                            Margin="0,0,0,6"/>
                                 <TextBox Text="{Binding BeepCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -629,7 +629,7 @@
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="8,0,0,0">
                                 <TextBlock Text="Copies per order"
-                                           Foreground="#9CA3AF"
+                                           Foreground="#8888AA"
                                            FontSize="12"
                                            Margin="0,0,0,6"/>
                                 <TextBox Text="{Binding CopiesPerOrder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
              d:DesignHeight="800" d:DesignWidth="1200"
-             Background="#0F0F1A">
+             Background="#1E1E2E">
 
     <UserControl.Resources>
         <!-- Mode Card Button Style -->
@@ -19,7 +19,7 @@
                                 CornerRadius="24"
                                 Padding="40,50"
                                 BorderThickness="2"
-                                BorderBrush="#2D2D44"
+                                BorderBrush="#3D3D5C"
                                 Width="320"
                                 Height="400">
                             <Border.Effect>
@@ -97,7 +97,7 @@
             <!-- Subtitle -->
             <TextBlock Text="Select your login mode to continue"
                        FontSize="16"
-                       Foreground="#6B7280"
+                       Foreground="#8888AA"
                        HorizontalAlignment="Center"
                        Margin="0,12,0,0"/>
         </StackPanel>
@@ -111,13 +111,8 @@
             <!-- Supermarket Mode -->
             <Button Style="{StaticResource ModeCardButton}"
                     Command="{Binding SelectSupermarketCommand}"
+                    Background="#2D2D44"
                     Margin="20,0">
-                <Button.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Color="#1E1E38" Offset="0"/>
-                        <GradientStop Color="#16162A" Offset="1"/>
-                    </LinearGradientBrush>
-                </Button.Background>
                 <StackPanel HorizontalAlignment="Center">
                     <!-- Icon -->
                     <Border Width="100" Height="100" CornerRadius="50" Margin="0,0,0,24">
@@ -145,7 +140,7 @@
                     <!-- Description -->
                     <TextBlock Text="Retail POS with barcode scanning"
                                FontSize="14"
-                               Foreground="#6B7280"
+                               Foreground="#8888AA"
                                HorizontalAlignment="Center"
                                Margin="0,8,0,0"
                                TextWrapping="Wrap"
@@ -155,15 +150,15 @@
                     <StackPanel Margin="0,20,0,0">
                         <StackPanel Orientation="Horizontal" Margin="0,4">
                             <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#10B981" Margin="0,0,8,0"/>
-                            <TextBlock Text="Barcode scanning" FontSize="12" Foreground="#9CA3AF"/>
+                            <TextBlock Text="Barcode scanning" FontSize="12" Foreground="#8888AA"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,4">
                             <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#10B981" Margin="0,0,8,0"/>
-                            <TextBlock Text="Keyboard shortcuts" FontSize="12" Foreground="#9CA3AF"/>
+                            <TextBlock Text="Keyboard shortcuts" FontSize="12" Foreground="#8888AA"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,4">
                             <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#10B981" Margin="0,0,8,0"/>
-                            <TextBlock Text="Fast checkout" FontSize="12" Foreground="#9CA3AF"/>
+                            <TextBlock Text="Fast checkout" FontSize="12" Foreground="#8888AA"/>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
@@ -172,13 +167,8 @@
             <!-- Restaurant Mode -->
             <Button Style="{StaticResource ModeCardButton}"
                     Command="{Binding SelectRestaurantCommand}"
+                    Background="#2D2D44"
                     Margin="20,0">
-                <Button.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Color="#1E1E38" Offset="0"/>
-                        <GradientStop Color="#16162A" Offset="1"/>
-                    </LinearGradientBrush>
-                </Button.Background>
                 <StackPanel HorizontalAlignment="Center">
                     <!-- Icon -->
                     <Border Width="100" Height="100" CornerRadius="50" Margin="0,0,0,24">
@@ -206,7 +196,7 @@
                     <!-- Description -->
                     <TextBlock Text="Table service with categories"
                                FontSize="14"
-                               Foreground="#6B7280"
+                               Foreground="#8888AA"
                                HorizontalAlignment="Center"
                                Margin="0,8,0,0"
                                TextWrapping="Wrap"
@@ -216,15 +206,15 @@
                     <StackPanel Margin="0,20,0,0">
                         <StackPanel Orientation="Horizontal" Margin="0,4">
                             <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#F59E0B" Margin="0,0,8,0"/>
-                            <TextBlock Text="PIN-based login" FontSize="12" Foreground="#9CA3AF"/>
+                            <TextBlock Text="PIN-based login" FontSize="12" Foreground="#8888AA"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,4">
                             <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#F59E0B" Margin="0,0,8,0"/>
-                            <TextBlock Text="Category tiles" FontSize="12" Foreground="#9CA3AF"/>
+                            <TextBlock Text="Category tiles" FontSize="12" Foreground="#8888AA"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,4">
                             <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#F59E0B" Margin="0,0,8,0"/>
-                            <TextBlock Text="Table management" FontSize="12" Foreground="#9CA3AF"/>
+                            <TextBlock Text="Table management" FontSize="12" Foreground="#8888AA"/>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
@@ -233,13 +223,8 @@
             <!-- Admin Mode -->
             <Button Style="{StaticResource ModeCardButton}"
                     Command="{Binding SelectAdminCommand}"
+                    Background="#2D2D44"
                     Margin="20,0">
-                <Button.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Color="#1E1E38" Offset="0"/>
-                        <GradientStop Color="#16162A" Offset="1"/>
-                    </LinearGradientBrush>
-                </Button.Background>
                 <StackPanel HorizontalAlignment="Center">
                     <!-- Icon -->
                     <Border Width="100" Height="100" CornerRadius="50" Margin="0,0,0,24">
@@ -267,7 +252,7 @@
                     <!-- Description -->
                     <TextBlock Text="Full system administration"
                                FontSize="14"
-                               Foreground="#6B7280"
+                               Foreground="#8888AA"
                                HorizontalAlignment="Center"
                                Margin="0,8,0,0"
                                TextWrapping="Wrap"
@@ -277,15 +262,15 @@
                     <StackPanel Margin="0,20,0,0">
                         <StackPanel Orientation="Horizontal" Margin="0,4">
                             <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#6366F1" Margin="0,0,8,0"/>
-                            <TextBlock Text="Dashboard &amp; reports" FontSize="12" Foreground="#9CA3AF"/>
+                            <TextBlock Text="Dashboard &amp; reports" FontSize="12" Foreground="#8888AA"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,4">
                             <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#6366F1" Margin="0,0,8,0"/>
-                            <TextBlock Text="Inventory control" FontSize="12" Foreground="#9CA3AF"/>
+                            <TextBlock Text="Inventory control" FontSize="12" Foreground="#8888AA"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,4">
                             <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#6366F1" Margin="0,0,8,0"/>
-                            <TextBlock Text="User management" FontSize="12" Foreground="#9CA3AF"/>
+                            <TextBlock Text="User management" FontSize="12" Foreground="#8888AA"/>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
@@ -296,7 +281,7 @@
         <StackPanel Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,30">
             <TextBlock Text="Version 1.0.0"
                        FontSize="12"
-                       Foreground="#4B5563"
+                       Foreground="#555577"
                        HorizontalAlignment="Center"/>
         </StackPanel>
     </Grid>

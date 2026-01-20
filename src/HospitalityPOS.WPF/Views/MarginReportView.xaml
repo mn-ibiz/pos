@@ -9,15 +9,15 @@
     <UserControl.Resources>
         <!-- Dark Theme Colors -->
         <SolidColorBrush x:Key="PrimaryBackground" Color="#1E1E2E"/>
-        <SolidColorBrush x:Key="SecondaryBackground" Color="#2D2D3D"/>
-        <SolidColorBrush x:Key="CardBackground" Color="#363647"/>
+        <SolidColorBrush x:Key="SecondaryBackground" Color="#252538"/>
+        <SolidColorBrush x:Key="CardBackground" Color="#2D2D44"/>
         <SolidColorBrush x:Key="PrimaryText" Color="#FFFFFF"/>
         <SolidColorBrush x:Key="SecondaryText" Color="#A0A0B0"/>
         <SolidColorBrush x:Key="AccentBlue" Color="#3B82F6"/>
         <SolidColorBrush x:Key="AccentGreen" Color="#22C55E"/>
         <SolidColorBrush x:Key="AccentRed" Color="#EF4444"/>
         <SolidColorBrush x:Key="AccentYellow" Color="#F59E0B"/>
-        <SolidColorBrush x:Key="BorderBrush" Color="#4A4A5A"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#3D3D5C"/>
 
         <!-- Card Style -->
         <Style x:Key="CardStyle" TargetType="Border">
@@ -113,7 +113,7 @@
             <Setter Property="Foreground" Value="{StaticResource PrimaryText}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="RowBackground" Value="Transparent"/>
-            <Setter Property="AlternatingRowBackground" Value="#2A2A3A"/>
+            <Setter Property="AlternatingRowBackground" Value="#252538"/>
             <Setter Property="GridLinesVisibility" Value="Horizontal"/>
             <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="HeadersVisibility" Value="Column"/>

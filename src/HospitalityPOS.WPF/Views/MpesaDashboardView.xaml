@@ -9,8 +9,8 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
         <Style x:Key="StatCardStyle" TargetType="Border">
-            <Setter Property="Background" Value="#FFFFFF"/>
-            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Padding" Value="16"/>
@@ -18,7 +18,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="#F5F5F5">
+    <Grid Background="#1E1E2E">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -26,7 +26,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="#FFFFFF" Padding="16" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+        <Border Grid.Row="0" Background="#2D2D44" Padding="16" BorderBrush="#3D3D5C" BorderThickness="0,0,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -34,29 +34,29 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel>
-                    <TextBlock Text="M-Pesa Dashboard" FontSize="24" FontWeight="Bold" Foreground="#1B5E20"/>
+                    <TextBlock Text="M-Pesa Dashboard" FontSize="24" FontWeight="Bold" Foreground="#6366F1"/>
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <TextBlock Text="Short Code: " Foreground="#666"/>
-                        <TextBlock Text="{Binding ShortCode, FallbackValue='Not configured'}" FontWeight="SemiBold"/>
+                        <TextBlock Text="Short Code: " Foreground="#8888AA"/>
+                        <TextBlock Text="{Binding ShortCode, FallbackValue='Not configured'}" FontWeight="SemiBold" Foreground="White"/>
                         <Border Margin="16,0,0,0" Padding="8,2" CornerRadius="4"
-                                Background="{Binding IsTestMode, Converter={StaticResource BoolToVisibility}, ConverterParameter='#FFF3E0|#E8F5E9'}"
+                                Background="#3D3D5C"
                                 Visibility="{Binding IsConfigured, Converter={StaticResource BoolToVisibility}}">
                             <TextBlock Text="{Binding IsTestMode, Converter={StaticResource BoolToVisibility}, ConverterParameter='SANDBOX|PRODUCTION'}"
-                                     FontWeight="SemiBold" Foreground="#666"/>
+                                     FontWeight="SemiBold" Foreground="#8888AA"/>
                         </Border>
                     </StackPanel>
                 </StackPanel>
 
                 <Button Grid.Column="1" Content="Refresh" Command="{Binding LoadDashboardCommand}"
-                        Padding="16,8" Background="#1B5E20" Foreground="White" BorderThickness="0"/>
+                        Padding="16,8" Background="#6366F1" Foreground="White" BorderThickness="0"/>
             </Grid>
         </Border>
 
         <!-- Loading/Error -->
         <StackPanel Grid.Row="1" Margin="16,8">
             <TextBlock Text="Loading..." Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"
-                      Foreground="#666"/>
-            <TextBlock Text="{Binding ErrorMessage}" Foreground="#D32F2F" TextWrapping="Wrap"
+                      Foreground="#8888AA"/>
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444" TextWrapping="Wrap"
                       Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisibility}}"/>
         </StackPanel>
 
@@ -80,33 +80,33 @@
 
                     <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
                         <StackPanel>
-                            <TextBlock Text="Today's Transactions" Foreground="#666" FontSize="12"/>
-                            <TextBlock Text="{Binding TodayTransactions}" FontSize="28" FontWeight="Bold" Foreground="#1B5E20"/>
-                            <TextBlock Text="{Binding TodayAmount, StringFormat='KES {0:N0}'}" Foreground="#666"/>
+                            <TextBlock Text="Today's Transactions" Foreground="#8888AA" FontSize="12"/>
+                            <TextBlock Text="{Binding TodayTransactions}" FontSize="28" FontWeight="Bold" Foreground="#22C55E"/>
+                            <TextBlock Text="{Binding TodayAmount, StringFormat='KES {0:N0}'}" Foreground="#8888AA"/>
                         </StackPanel>
                     </Border>
 
                     <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
                         <StackPanel>
-                            <TextBlock Text="Pending" Foreground="#666" FontSize="12"/>
-                            <TextBlock Text="{Binding TodayPending}" FontSize="28" FontWeight="Bold" Foreground="#FF9800"/>
-                            <TextBlock Text="Awaiting confirmation" Foreground="#666"/>
+                            <TextBlock Text="Pending" Foreground="#8888AA" FontSize="12"/>
+                            <TextBlock Text="{Binding TodayPending}" FontSize="28" FontWeight="Bold" Foreground="#F59E0B"/>
+                            <TextBlock Text="Awaiting confirmation" Foreground="#8888AA"/>
                         </StackPanel>
                     </Border>
 
                     <Border Grid.Column="2" Style="{StaticResource StatCardStyle}">
                         <StackPanel>
-                            <TextBlock Text="Failed Today" Foreground="#666" FontSize="12"/>
-                            <TextBlock Text="{Binding TodayFailed}" FontSize="28" FontWeight="Bold" Foreground="#D32F2F"/>
-                            <TextBlock Text="Transactions" Foreground="#666"/>
+                            <TextBlock Text="Failed Today" Foreground="#8888AA" FontSize="12"/>
+                            <TextBlock Text="{Binding TodayFailed}" FontSize="28" FontWeight="Bold" Foreground="#EF4444"/>
+                            <TextBlock Text="Transactions" Foreground="#8888AA"/>
                         </StackPanel>
                     </Border>
 
                     <Border Grid.Column="3" Style="{StaticResource StatCardStyle}">
                         <StackPanel>
-                            <TextBlock Text="This Month" Foreground="#666" FontSize="12"/>
-                            <TextBlock Text="{Binding MonthTransactions}" FontSize="28" FontWeight="Bold" Foreground="#1976D2"/>
-                            <TextBlock Text="{Binding MonthAmount, StringFormat='KES {0:N0}'}" Foreground="#666"/>
+                            <TextBlock Text="This Month" Foreground="#8888AA" FontSize="12"/>
+                            <TextBlock Text="{Binding MonthTransactions}" FontSize="28" FontWeight="Bold" Foreground="#6366F1"/>
+                            <TextBlock Text="{Binding MonthAmount, StringFormat='KES {0:N0}'}" Foreground="#8888AA"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -121,7 +121,7 @@
                     <!-- STK Push -->
                     <Border Grid.Column="0" Style="{StaticResource StatCardStyle}" Margin="0,0,8,0">
                         <StackPanel>
-                            <TextBlock Text="Initiate STK Push" FontSize="16" FontWeight="SemiBold" Foreground="#1B5E20" Margin="0,0,0,12"/>
+                            <TextBlock Text="Initiate STK Push" FontSize="16" FontWeight="SemiBold" Foreground="#6366F1" Margin="0,0,0,12"/>
 
                             <Grid Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
@@ -129,63 +129,63 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBox Text="{Binding StkPhoneNumber, UpdateSourceTrigger=PropertyChanged}"
-                                        Padding="8" BorderThickness="1" BorderBrush="#E0E0E0"/>
+                                        Padding="8" BorderThickness="1" BorderBrush="#3D3D5C" Background="#1E1E2E" Foreground="White"/>
                                 <Button Grid.Column="1" Content="Format" Command="{Binding FormatPhoneNumberCommand}"
-                                       Padding="8,4" Margin="4,0,0,0"/>
+                                       Padding="8,4" Margin="4,0,0,0" Background="#3D3D5C" Foreground="White" BorderThickness="0"/>
                             </Grid>
-                            <TextBlock Text="Phone Number (07XX or 254XX)" Foreground="#999" FontSize="11" Margin="0,0,0,8"/>
+                            <TextBlock Text="Phone Number (07XX or 254XX)" Foreground="#555577" FontSize="11" Margin="0,0,0,8"/>
 
                             <TextBox Text="{Binding StkAmount, UpdateSourceTrigger=PropertyChanged}"
-                                    Padding="8" BorderThickness="1" BorderBrush="#E0E0E0" Margin="0,0,0,4"/>
-                            <TextBlock Text="Amount (KES)" Foreground="#999" FontSize="11" Margin="0,0,0,8"/>
+                                    Padding="8" BorderThickness="1" BorderBrush="#3D3D5C" Background="#1E1E2E" Foreground="White" Margin="0,0,0,4"/>
+                            <TextBlock Text="Amount (KES)" Foreground="#555577" FontSize="11" Margin="0,0,0,8"/>
 
                             <TextBox Text="{Binding StkAccountReference, UpdateSourceTrigger=PropertyChanged}"
-                                    Padding="8" BorderThickness="1" BorderBrush="#E0E0E0" Margin="0,0,0,4"/>
-                            <TextBlock Text="Account Reference (optional)" Foreground="#999" FontSize="11" Margin="0,0,0,8"/>
+                                    Padding="8" BorderThickness="1" BorderBrush="#3D3D5C" Background="#1E1E2E" Foreground="White" Margin="0,0,0,4"/>
+                            <TextBlock Text="Account Reference (optional)" Foreground="#555577" FontSize="11" Margin="0,0,0,8"/>
 
                             <TextBox Text="{Binding StkDescription, UpdateSourceTrigger=PropertyChanged}"
-                                    Padding="8" BorderThickness="1" BorderBrush="#E0E0E0" Margin="0,0,0,12"/>
-                            <TextBlock Text="Description (optional)" Foreground="#999" FontSize="11" Margin="0,0,0,8"/>
+                                    Padding="8" BorderThickness="1" BorderBrush="#3D3D5C" Background="#1E1E2E" Foreground="White" Margin="0,0,0,12"/>
+                            <TextBlock Text="Description (optional)" Foreground="#555577" FontSize="11" Margin="0,0,0,8"/>
 
                             <Button Content="Send STK Push" Command="{Binding InitiateStkPushCommand}"
-                                   Padding="12,8" Background="#1B5E20" Foreground="White" BorderThickness="0"
+                                   Padding="12,8" Background="#6366F1" Foreground="White" BorderThickness="0"
                                    IsEnabled="{Binding IsStkProcessing, Converter={StaticResource BoolToVisibility}, ConverterParameter=Invert}"/>
 
                             <TextBlock Text="{Binding StkResultMessage}" TextWrapping="Wrap" Margin="0,8,0,0"
-                                      Foreground="#666"/>
+                                      Foreground="#8888AA"/>
                         </StackPanel>
                     </Border>
 
                     <!-- Manual Entry -->
                     <Border Grid.Column="1" Style="{StaticResource StatCardStyle}" Margin="8,0,0,0">
                         <StackPanel>
-                            <TextBlock Text="Record Manual Transaction" FontSize="16" FontWeight="SemiBold" Foreground="#1B5E20" Margin="0,0,0,12"/>
+                            <TextBlock Text="Record Manual Transaction" FontSize="16" FontWeight="SemiBold" Foreground="#6366F1" Margin="0,0,0,12"/>
 
                             <TextBox Text="{Binding ManualReceiptNumber, UpdateSourceTrigger=PropertyChanged}"
-                                    Padding="8" BorderThickness="1" BorderBrush="#E0E0E0" Margin="0,0,0,4"/>
-                            <TextBlock Text="M-Pesa Receipt Number *" Foreground="#999" FontSize="11" Margin="0,0,0,8"/>
+                                    Padding="8" BorderThickness="1" BorderBrush="#3D3D5C" Background="#1E1E2E" Foreground="White" Margin="0,0,0,4"/>
+                            <TextBlock Text="M-Pesa Receipt Number *" Foreground="#555577" FontSize="11" Margin="0,0,0,8"/>
 
                             <TextBox Text="{Binding ManualAmount, UpdateSourceTrigger=PropertyChanged}"
-                                    Padding="8" BorderThickness="1" BorderBrush="#E0E0E0" Margin="0,0,0,4"/>
-                            <TextBlock Text="Amount (KES) *" Foreground="#999" FontSize="11" Margin="0,0,0,8"/>
+                                    Padding="8" BorderThickness="1" BorderBrush="#3D3D5C" Background="#1E1E2E" Foreground="White" Margin="0,0,0,4"/>
+                            <TextBlock Text="Amount (KES) *" Foreground="#555577" FontSize="11" Margin="0,0,0,8"/>
 
                             <TextBox Text="{Binding ManualPhoneNumber, UpdateSourceTrigger=PropertyChanged}"
-                                    Padding="8" BorderThickness="1" BorderBrush="#E0E0E0" Margin="0,0,0,4"/>
-                            <TextBlock Text="Phone Number" Foreground="#999" FontSize="11" Margin="0,0,0,8"/>
+                                    Padding="8" BorderThickness="1" BorderBrush="#3D3D5C" Background="#1E1E2E" Foreground="White" Margin="0,0,0,4"/>
+                            <TextBlock Text="Phone Number" Foreground="#555577" FontSize="11" Margin="0,0,0,8"/>
 
                             <DatePicker SelectedDate="{Binding ManualTransactionDate}" Margin="0,0,0,4"/>
-                            <TextBlock Text="Transaction Date" Foreground="#999" FontSize="11" Margin="0,0,0,8"/>
+                            <TextBlock Text="Transaction Date" Foreground="#555577" FontSize="11" Margin="0,0,0,8"/>
 
                             <TextBox Text="{Binding ManualNotes, UpdateSourceTrigger=PropertyChanged}"
                                     Padding="8" Height="50" TextWrapping="Wrap" AcceptsReturn="True"
-                                    BorderThickness="1" BorderBrush="#E0E0E0" Margin="0,0,0,12"/>
-                            <TextBlock Text="Notes" Foreground="#999" FontSize="11" Margin="0,0,0,8"/>
+                                    BorderThickness="1" BorderBrush="#3D3D5C" Background="#1E1E2E" Foreground="White" Margin="0,0,0,12"/>
+                            <TextBlock Text="Notes" Foreground="#555577" FontSize="11" Margin="0,0,0,8"/>
 
                             <Button Content="Record Transaction" Command="{Binding RecordManualTransactionCommand}"
-                                   Padding="12,8" Background="#FF9800" Foreground="White" BorderThickness="0"/>
+                                   Padding="12,8" Background="#F59E0B" Foreground="White" BorderThickness="0"/>
 
                             <TextBlock Text="{Binding ManualResultMessage}" TextWrapping="Wrap" Margin="0,8,0,0"
-                                      Foreground="#666"/>
+                                      Foreground="#8888AA"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -204,12 +204,14 @@
                     </Grid.RowDefinitions>
 
                     <!-- Pending Requests -->
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Pending STK Requests" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Pending STK Requests" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,8"/>
                     <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource StatCardStyle}" Margin="0,0,8,0" Padding="0">
                         <Grid>
                             <DataGrid ItemsSource="{Binding PendingRequests}" SelectedItem="{Binding SelectedPendingRequest}"
                                      AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
-                                     GridLinesVisibility="Horizontal" BorderThickness="0">
+                                     GridLinesVisibility="Horizontal" BorderThickness="0"
+                                     Background="#2D2D44" Foreground="White" RowBackground="#2D2D44" AlternatingRowBackground="#252538"
+                                     HorizontalGridLinesBrush="#3D3D5C">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Phone" Binding="{Binding PhoneNumber}" Width="100"/>
                                     <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat='{}{0:N0}'}" Width="80"/>
@@ -221,17 +223,21 @@
                     </Border>
 
                     <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="8,0,0,8">
-                        <Button Content="Query Selected" Command="{Binding QueryTransactionStatusCommand}" Padding="8,4" Margin="0,0,8,0"/>
-                        <Button Content="Query All Pending" Command="{Binding QueryAllPendingCommand}" Padding="8,4"/>
+                        <Button Content="Query Selected" Command="{Binding QueryTransactionStatusCommand}" Padding="8,4" Margin="0,0,8,0"
+                               Background="#3D3D5C" Foreground="White" BorderThickness="0"/>
+                        <Button Content="Query All Pending" Command="{Binding QueryAllPendingCommand}" Padding="8,4"
+                               Background="#3D3D5C" Foreground="White" BorderThickness="0"/>
                     </StackPanel>
 
                     <!-- Unverified Transactions -->
-                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Unverified Manual Entries" FontWeight="SemiBold" Margin="8,0,0,8"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Unverified Manual Entries" FontWeight="SemiBold" Foreground="White" Margin="8,0,0,8"/>
                     <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource StatCardStyle}" Margin="8,0,0,0" Padding="0">
                         <Grid>
                             <DataGrid ItemsSource="{Binding UnverifiedTransactions}" SelectedItem="{Binding SelectedUnverifiedTransaction}"
                                      AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
-                                     GridLinesVisibility="Horizontal" BorderThickness="0">
+                                     GridLinesVisibility="Horizontal" BorderThickness="0"
+                                     Background="#2D2D44" Foreground="White" RowBackground="#2D2D44" AlternatingRowBackground="#252538"
+                                     HorizontalGridLinesBrush="#3D3D5C">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Receipt #" Binding="{Binding MpesaReceiptNumber}" Width="120"/>
                                     <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat='{}{0:N0}'}" Width="80"/>
@@ -243,14 +249,17 @@
                     </Border>
 
                     <Button Grid.Row="1" Grid.Column="1" Content="Verify Selected" Command="{Binding VerifyTransactionCommand}"
-                           Padding="8,4" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="16,0,0,8"/>
+                           Padding="8,4" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="16,0,0,8"
+                           Background="#6366F1" Foreground="White" BorderThickness="0"/>
 
                     <!-- Recent Transactions -->
-                    <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="Recent Transactions" FontWeight="SemiBold" Margin="0,16,0,8"/>
+                    <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="Recent Transactions" FontWeight="SemiBold" Foreground="White" Margin="0,16,0,8"/>
                     <Border Grid.Row="3" Grid.ColumnSpan="2" Style="{StaticResource StatCardStyle}" Padding="0">
                         <DataGrid ItemsSource="{Binding RecentTransactions}" SelectedItem="{Binding SelectedTransaction}"
                                  AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
-                                 GridLinesVisibility="Horizontal" BorderThickness="0">
+                                 GridLinesVisibility="Horizontal" BorderThickness="0"
+                                 Background="#2D2D44" Foreground="White" RowBackground="#2D2D44" AlternatingRowBackground="#252538"
+                                 HorizontalGridLinesBrush="#3D3D5C">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Receipt #" Binding="{Binding MpesaReceiptNumber}" Width="140"/>
                                 <DataGridTextColumn Header="Phone" Binding="{Binding PhoneNumber}" Width="120"/>

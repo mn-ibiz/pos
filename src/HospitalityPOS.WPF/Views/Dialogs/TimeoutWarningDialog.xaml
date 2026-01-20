@@ -105,12 +105,12 @@
                 <Button x:Name="StayLoggedInButton"
                         Content="Stay Logged In"
                         Style="{StaticResource DialogButton}"
-                        Background="#4CAF50"
+                        Background="#22C55E"
                         Click="StayLoggedInButton_Click"/>
                 <Button x:Name="LogoutNowButton"
                         Content="Logout Now"
                         Style="{StaticResource DialogButton}"
-                        Background="#E74C3C"
+                        Background="#EF4444"
                         Click="LogoutNowButton_Click"/>
             </StackPanel>
         </Grid>

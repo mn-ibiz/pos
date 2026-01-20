@@ -178,7 +178,7 @@
                            HorizontalAlignment="Center"/>
                 <TextBlock Text="Receive goods without a purchase order"
                            FontSize="12"
-                           Foreground="#888"
+                           Foreground="#8888AA"
                            HorizontalAlignment="Center"
                            Margin="0,4,0,0"/>
             </StackPanel>
@@ -277,12 +277,12 @@
                                                            FontSize="14"/>
                                                 <TextBlock Text="{Binding Code}"
                                                            FontSize="12"
-                                                           Foreground="#888"/>
+                                                           Foreground="#8888AA"/>
                                             </StackPanel>
 
                                             <TextBlock Grid.Column="1"
                                                        VerticalAlignment="Center"
-                                                       Foreground="#AAA"
+                                                       Foreground="#8888AA"
                                                        Margin="16,0">
                                                 <Run Text="Stock: "/>
                                                 <Run Text="{Binding Inventory.CurrentStock, StringFormat='{}{0:N0}', FallbackValue='0'}"/>
@@ -419,11 +419,11 @@
                             Visibility="{Binding ItemCount, Converter={StaticResource InverseBoolToVisibility}}">
                     <TextBlock Text="No items added"
                                FontSize="16"
-                               Foreground="#888"
+                               Foreground="#8888AA"
                                HorizontalAlignment="Center"/>
                     <TextBlock Text="Search for products above to add them"
                                FontSize="12"
-                               Foreground="#666"
+                               Foreground="#555577"
                                HorizontalAlignment="Center"
                                Margin="0,8,0,0"/>
                 </StackPanel>
@@ -461,9 +461,9 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Total Items: " Foreground="#888" FontSize="14"/>
+                    <TextBlock Text="Total Items: " Foreground="#8888AA" FontSize="14"/>
                     <TextBlock Text="{Binding ItemCount}" Foreground="White" FontSize="14" FontWeight="SemiBold"/>
-                    <TextBlock Text="     Total Value: " Foreground="#888" FontSize="14" Margin="20,0,0,0"/>
+                    <TextBlock Text="     Total Value: " Foreground="#8888AA" FontSize="14" Margin="20,0,0,0"/>
                     <TextBlock Foreground="#4CAF50" FontSize="18" FontWeight="Bold">
                         <TextBlock.Text>
                             <Binding Path="TotalAmount" StringFormat="KSh {0:N2}"/>

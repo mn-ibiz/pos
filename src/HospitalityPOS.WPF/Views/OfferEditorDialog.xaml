@@ -14,16 +14,16 @@
 
     <Window.Resources>
         <Style x:Key="FormLabel" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#9CA3AF"/>
+            <Setter Property="Foreground" Value="#8888AA"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Margin" Value="0,0,0,6"/>
         </Style>
 
         <Style x:Key="FormTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="#252540"/>
+            <Setter Property="Background" Value="#1E1E2E"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="CaretBrush" Value="White"/>
-            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="FontSize" Value="14"/>
@@ -50,9 +50,9 @@
         </Style>
 
         <Style x:Key="FormComboBox" TargetType="ComboBox">
-            <Setter Property="Background" Value="#252540"/>
+            <Setter Property="Background" Value="#1E1E2E"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="FontSize" Value="14"/>
@@ -60,9 +60,9 @@
         </Style>
 
         <Style x:Key="FormDatePicker" TargetType="DatePicker">
-            <Setter Property="Background" Value="#252540"/>
+            <Setter Property="Background" Value="#1E1E2E"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="FontSize" Value="14"/>
@@ -107,11 +107,11 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Setter Property="Background" Value="#4E4E6E"/>
+            <Setter Property="Background" Value="#3D3D5C"/>
         </Style>
     </Window.Resources>
 
-    <Border Background="#1E1E2E" CornerRadius="16" BorderBrush="#4E4E6E" BorderThickness="1">
+    <Border Background="#2D2D44" CornerRadius="16" BorderBrush="#3D3D5C" BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -120,7 +120,7 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <Border Grid.Row="0" Background="#252540" CornerRadius="16,16,0,0">
+            <Border Grid.Row="0" Background="#16162B" CornerRadius="16,16,0,0">
                 <Grid Margin="24,16">
                     <TextBlock Text="{Binding Title}"
                                FontSize="20"
@@ -138,7 +138,7 @@
                                     <TextBlock Text="&#xE711;"
                                                FontFamily="Segoe MDL2 Assets"
                                                FontSize="16"
-                                               Foreground="#9CA3AF"
+                                               Foreground="#8888AA"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"/>
                                 </Border>
@@ -221,19 +221,19 @@
                         <!-- Price Summary -->
                         <StackPanel Grid.Column="2">
                             <TextBlock Style="{StaticResource FormLabel}" Text="Price Summary"/>
-                            <Border Background="#252540" CornerRadius="8" Padding="16">
+                            <Border Background="#252538" CornerRadius="8" Padding="16">
                                 <StackPanel>
                                     <Grid>
-                                        <TextBlock Text="Original:" Foreground="#9CA3AF"/>
+                                        <TextBlock Text="Original:" Foreground="#8888AA"/>
                                         <TextBlock Text="{Binding OriginalPrice, StringFormat='KSh {0:N2}'}"
                                                    HorizontalAlignment="Right"
                                                    Foreground="White"/>
                                     </Grid>
                                     <Grid Margin="0,8,0,0">
-                                        <TextBlock Text="Offer Price:" Foreground="#10B981" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Offer Price:" Foreground="#22C55E" FontWeight="SemiBold"/>
                                         <TextBlock Text="{Binding CalculatedOfferPrice, StringFormat='KSh {0:N2}'}"
                                                    HorizontalAlignment="Right"
-                                                   Foreground="#10B981" FontWeight="SemiBold"/>
+                                                   Foreground="#22C55E" FontWeight="SemiBold"/>
                                     </Grid>
                                     <Grid Margin="0,8,0,0">
                                         <TextBlock Text="Savings:" Foreground="#F59E0B"/>
@@ -312,7 +312,7 @@
             </ScrollViewer>
 
             <!-- Footer -->
-            <Border Grid.Row="2" Background="#252540" CornerRadius="0,0,16,16">
+            <Border Grid.Row="2" Background="#16162B" CornerRadius="0,0,16,16">
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Right"
                             Margin="24,16">
@@ -323,7 +323,7 @@
                     <Button Style="{StaticResource ActionButton}"
                             Content="Save Offer"
                             Command="{Binding SaveCommand}"
-                            Background="#10B981"/>
+                            Background="#22C55E"/>
                 </StackPanel>
             </Border>
         </Grid>

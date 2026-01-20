@@ -30,10 +30,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#3E3E5E"/>
+                                <Setter TargetName="border" Property="Background" Value="#2D2D44"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#5E5E7E"/>
+                                <Setter TargetName="border" Property="Background" Value="#2D2D44"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="border" Property="Opacity" Value="0.5"/>
@@ -42,7 +42,7 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Setter Property="Background" Value="#2E2E4E"/>
+            <Setter Property="Background" Value="#252538"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#4E4E6E"/>
         </Style>
@@ -65,14 +65,14 @@
             <Setter Property="MinHeight" Value="50"/>
             <Setter Property="FontSize" Value="18"/>
             <Setter Property="Padding" Value="12,10"/>
-            <Setter Property="Background" Value="#2E2E4E"/>
+            <Setter Property="Background" Value="#1E1E2E"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CaretBrush" Value="White"/>
             <Style.Triggers>
                 <Trigger Property="IsFocused" Value="True">
-                    <Setter Property="BorderBrush" Value="#6C63FF"/>
+                    <Setter Property="BorderBrush" Value="#4C9AFF"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -82,9 +82,9 @@
             <Setter Property="MinHeight" Value="50"/>
             <Setter Property="FontSize" Value="18"/>
             <Setter Property="Padding" Value="12,10"/>
-            <Setter Property="Background" Value="#2E2E4E"/>
+            <Setter Property="Background" Value="#1E1E2E"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CaretBrush" Value="White"/>
         </Style>
@@ -118,7 +118,7 @@
 
         <!-- Main content - centered login card -->
         <Border VerticalAlignment="Center" HorizontalAlignment="Center"
-                Background="#252538" CornerRadius="16" Padding="48,40"
+                Background="#2D2D44" CornerRadius="16" Padding="48,40"
                 BorderBrush="#3D3D5C" BorderThickness="1"
                 MinWidth="450">
             <Grid>
@@ -139,8 +139,8 @@
                         ToolTip="Back to mode selection">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="&#xE72B;" FontFamily="Segoe MDL2 Assets"
-                                   FontSize="16" Foreground="#9CA3AF" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <TextBlock Text="Back" Foreground="#9CA3AF" FontSize="14"/>
+                                   FontSize="16" Foreground="#555577" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="Back" Foreground="#555577" FontSize="14"/>
                     </StackPanel>
                 </Button>
 
@@ -169,7 +169,7 @@
                     </TextBlock>
                     <TextBlock Text="{Binding ModeTitle}"
                                FontSize="14"
-                               Foreground="#9CA3AF"
+                               Foreground="#8888AA"
                                HorizontalAlignment="Center"
                                Margin="0,8,0,0"/>
                 </StackPanel>
@@ -180,7 +180,7 @@
 
                     <!-- Username Field -->
                     <TextBlock Text="USERNAME"
-                               Foreground="#9CA3AF"
+                               Foreground="#8888AA"
                                FontSize="12"
                                FontWeight="SemiBold"
                                Margin="0,0,0,8"/>
@@ -191,7 +191,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets"
-                                       FontSize="18" Foreground="#6B7280"
+                                       FontSize="18" Foreground="#555577"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <TextBox Grid.Column="1"
                                      Style="{StaticResource InputTextBox}"
@@ -204,7 +204,7 @@
 
                     <!-- Password Field -->
                     <TextBlock Text="PASSWORD"
-                               Foreground="#9CA3AF"
+                               Foreground="#8888AA"
                                FontSize="12"
                                FontWeight="SemiBold"
                                Margin="0,20,0,8"/>
@@ -215,7 +215,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets"
-                                       FontSize="18" Foreground="#6B7280"
+                                       FontSize="18" Foreground="#555577"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <PasswordBox x:Name="PasswordBox" Grid.Column="1"
                                          Style="{StaticResource InputPasswordBox}"
@@ -260,21 +260,21 @@
                             Command="{Binding ToggleModeCommand}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE8D7;" FontFamily="Segoe MDL2 Assets"
-                                       FontSize="16" Foreground="#9CA3AF" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                            <TextBlock Text="Use PIN Instead" Foreground="#9CA3AF" FontSize="14"/>
+                                       FontSize="16" Foreground="#555577" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Use PIN Instead" Foreground="#555577" FontSize="14"/>
                         </StackPanel>
                     </Button>
 
                     <!-- Test credentials button (dev only) -->
                     <Button Style="{StaticResource TouchButton}"
-                            Background="#374151"
+                            Background="#2D2D44"
                             BorderThickness="0"
                             FontSize="12"
                             MinHeight="36"
                             Margin="0,8,0,0"
                             Click="FillTestCredentials_Click"
                             ToolTip="Fills admin / Admin@123">
-                        <TextBlock Text="Fill Test Credentials (admin)" Foreground="#9CA3AF" FontSize="12"/>
+                        <TextBlock Text="Fill Test Credentials (admin)" Foreground="#555577" FontSize="12"/>
                     </Button>
                 </StackPanel>
 
@@ -327,7 +327,7 @@
 
                     <!-- PIN Display -->
                     <TextBlock Text="ENTER PIN"
-                               Foreground="#9CA3AF"
+                               Foreground="#8888AA"
                                FontSize="12"
                                FontWeight="SemiBold"
                                HorizontalAlignment="Center"
@@ -401,7 +401,7 @@
 
                         <!-- Row 4: Back, 0, spans 2 columns -->
                         <Button Grid.Row="3" Grid.Column="0" Style="{StaticResource NumPadButton}"
-                                Background="#374151" ToolTip="Back to user selection"
+                                Background="#2D2D44" ToolTip="Back to user selection"
                                 Command="{Binding DeselectUserCommand}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center"/>
@@ -428,8 +428,8 @@
 
                     <!-- Switch to username/password mode -->
                     <Button Style="{StaticResource TouchButton}"
-                            Background="#374151"
-                            BorderBrush="#4B5563"
+                            Background="#2D2D44"
+                            BorderBrush="#4E4E6E"
                             BorderThickness="1"
                             Margin="0,24,0,0"
                             Height="44"
@@ -437,7 +437,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets"
                                        FontSize="16" Foreground="#60A5FA" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                            <TextBlock Text="Use Username/Password" Foreground="#E5E7EB" FontSize="14" FontWeight="SemiBold"/>
+                            <TextBlock Text="Use Username/Password" Foreground="White" FontSize="14" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -445,7 +445,7 @@
                 <!-- Version info -->
                 <TextBlock Grid.Row="2"
                            Text="Version 1.0.0"
-                           Foreground="#4B5563"
+                           Foreground="#555577"
                            FontSize="11"
                            HorizontalAlignment="Center"
                            Margin="0,32,0,0"/>

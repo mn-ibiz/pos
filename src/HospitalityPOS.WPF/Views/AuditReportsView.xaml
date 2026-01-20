@@ -8,7 +8,7 @@
              d:DesignHeight="700" d:DesignWidth="1000"
              d:DataContext="{d:DesignInstance vm:AuditReportsViewModel}">
 
-    <Grid Background="{StaticResource BackgroundBrush}">
+    <Grid Background="#1E1E2E">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -17,7 +17,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="{StaticResource PrimaryBrush}" Padding="20,15">
+        <Border Grid.Row="0" Background="#16162B" Padding="20,15">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -42,7 +42,7 @@
         </Border>
 
         <!-- Report Selection and Filters -->
-        <Border Grid.Row="1" Background="White" Padding="20" BorderThickness="0,0,0,1" BorderBrush="#E0E0E0">
+        <Border Grid.Row="1" Background="#2D2D44" Padding="20" BorderThickness="0,0,0,1" BorderBrush="#3D3D5C">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -61,17 +61,19 @@
 
                 <!-- Report Type -->
                 <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,0,20,0">
-                    <TextBlock Text="Report Type" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="Report Type" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                     <ComboBox ItemsSource="{Binding ReportTypes}"
                               SelectedItem="{Binding SelectedReportType}"
                               DisplayMemberPath="DisplayName"
                               Width="200"
-                              Height="35"/>
+                              Height="35"
+                              Background="#1E1E2E"
+                              Foreground="White"/>
                 </StackPanel>
 
                 <!-- From Date -->
                 <StackPanel Grid.Column="1" Grid.Row="0" Margin="0,0,20,0">
-                    <TextBlock Text="From Date" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="From Date" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                     <DatePicker SelectedDate="{Binding FromDate}"
                                 Width="140"
                                 Height="35"/>
@@ -79,7 +81,7 @@
 
                 <!-- To Date -->
                 <StackPanel Grid.Column="2" Grid.Row="0" Margin="0,0,20,0">
-                    <TextBlock Text="To Date" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="To Date" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                     <DatePicker SelectedDate="{Binding ToDate}"
                                 Width="140"
                                 Height="35"/>
@@ -87,7 +89,7 @@
 
                 <!-- User Filter -->
                 <StackPanel Grid.Column="3" Grid.Row="0" Margin="0,0,20,0">
-                    <TextBlock Text="Filter by User" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="Filter by User" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -98,20 +100,25 @@
                                   SelectedItem="{Binding SelectedUser}"
                                   DisplayMemberPath="FullName"
                                   Width="150"
-                                  Height="35"/>
+                                  Height="35"
+                                  Background="#1E1E2E"
+                                  Foreground="White"/>
                         <Button Grid.Column="1"
                                 Content="X"
                                 Command="{Binding ClearUserFilterCommand}"
                                 Width="30"
                                 Height="35"
                                 Margin="5,0,0,0"
-                                ToolTip="Clear user filter"/>
+                                ToolTip="Clear user filter"
+                                Background="#3D3D5C"
+                                Foreground="White"
+                                BorderThickness="0"/>
                     </Grid>
                 </StackPanel>
 
                 <!-- Action Filter -->
                 <StackPanel Grid.Column="4" Grid.Row="0" Margin="0,0,20,0">
-                    <TextBlock Text="Filter by Action" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="Filter by Action" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -121,14 +128,19 @@
                                   ItemsSource="{Binding AvailableActions}"
                                   SelectedItem="{Binding SelectedAction}"
                                   Width="150"
-                                  Height="35"/>
+                                  Height="35"
+                                  Background="#1E1E2E"
+                                  Foreground="White"/>
                         <Button Grid.Column="1"
                                 Content="X"
                                 Command="{Binding ClearActionFilterCommand}"
                                 Width="30"
                                 Height="35"
                                 Margin="5,0,0,0"
-                                ToolTip="Clear action filter"/>
+                                ToolTip="Clear action filter"
+                                Background="#3D3D5C"
+                                Foreground="White"
+                                BorderThickness="0"/>
                     </Grid>
                 </StackPanel>
 
@@ -143,11 +155,15 @@
 
                 <!-- Quick Date Buttons -->
                 <StackPanel Grid.Column="0" Grid.ColumnSpan="7" Grid.Row="2" Orientation="Horizontal">
-                    <TextBlock Text="Quick: " VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <Button Content="Today" Command="{Binding SetTodayCommand}" Margin="0,0,5,0" Padding="10,5"/>
-                    <Button Content="This Week" Command="{Binding SetThisWeekCommand}" Margin="0,0,5,0" Padding="10,5"/>
-                    <Button Content="This Month" Command="{Binding SetThisMonthCommand}" Margin="0,0,5,0" Padding="10,5"/>
-                    <Button Content="Last 30 Days" Command="{Binding SetLast30DaysCommand}" Padding="10,5"/>
+                    <TextBlock Text="Quick: " VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
+                    <Button Content="Today" Command="{Binding SetTodayCommand}" Margin="0,0,5,0" Padding="10,5"
+                           Background="#3D3D5C" Foreground="White" BorderThickness="0"/>
+                    <Button Content="This Week" Command="{Binding SetThisWeekCommand}" Margin="0,0,5,0" Padding="10,5"
+                           Background="#3D3D5C" Foreground="White" BorderThickness="0"/>
+                    <Button Content="This Month" Command="{Binding SetThisMonthCommand}" Margin="0,0,5,0" Padding="10,5"
+                           Background="#3D3D5C" Foreground="White" BorderThickness="0"/>
+                    <Button Content="Last 30 Days" Command="{Binding SetLast30DaysCommand}" Padding="10,5"
+                           Background="#3D3D5C" Foreground="White" BorderThickness="0"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -156,30 +172,30 @@
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Padding="20">
             <Grid>
                 <!-- Loading Indicator -->
-                <Border Background="White" CornerRadius="8" Padding="20"
+                <Border Background="#2D2D44" CornerRadius="8" Padding="20" BorderBrush="#3D3D5C" BorderThickness="1"
                         Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Text="Generating report..." FontSize="16" Margin="0,0,0,10"/>
+                        <TextBlock Text="Generating report..." FontSize="16" Foreground="White" Margin="0,0,0,10"/>
                         <ProgressBar IsIndeterminate="True" Width="200" Height="20"/>
                     </StackPanel>
                 </Border>
 
                 <!-- No Report Message -->
-                <Border Background="White" CornerRadius="8" Padding="40"
+                <Border Background="#2D2D44" CornerRadius="8" Padding="40" BorderBrush="#3D3D5C" BorderThickness="1"
                         Visibility="{Binding HasReport, Converter={StaticResource BoolToInverseVisibilityConverter}}">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                                 Visibility="{Binding IsBusy, Converter={StaticResource BoolToInverseVisibilityConverter}}">
                         <TextBlock Text="Select a report type and date range, then click Generate Report"
-                                   FontSize="16" Foreground="Gray" HorizontalAlignment="Center"/>
+                                   FontSize="16" Foreground="#555577" HorizontalAlignment="Center"/>
                         <TextBlock Text="{Binding SelectedReportType.Description}"
-                                   FontSize="14" Foreground="DarkGray" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                                   FontSize="14" Foreground="#555577" HorizontalAlignment="Center" Margin="0,10,0,0"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Report Results -->
                 <Grid Visibility="{Binding HasReport, Converter={StaticResource BoolToVisibilityConverter}}">
                     <!-- All Activity Report -->
-                    <Border Background="White" CornerRadius="8" Padding="20"
+                    <Border Background="#2D2D44" CornerRadius="8" Padding="20" BorderBrush="#3D3D5C" BorderThickness="1"
                             Visibility="{Binding ShowAllActivityReport, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -188,20 +204,20 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Text="All Activity Audit Trail" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+                            <TextBlock Grid.Row="0" Text="All Activity Audit Trail" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,15"/>
 
                             <!-- Summary Cards -->
                             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,20">
-                                <Border Background="#E3F2FD" CornerRadius="8" Padding="20" Margin="0,0,15,0">
+                                <Border Background="#252538" CornerRadius="8" Padding="20" Margin="0,0,15,0" BorderBrush="#3D3D5C" BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="Total Actions" FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding AuditTrailReport.TotalActions, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#1976D2"/>
+                                        <TextBlock Text="Total Actions" FontSize="12" Foreground="#8888AA"/>
+                                        <TextBlock Text="{Binding AuditTrailReport.TotalActions, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#6366F1"/>
                                     </StackPanel>
                                 </Border>
-                                <Border Background="#E8F5E9" CornerRadius="8" Padding="20" Margin="0,0,15,0">
+                                <Border Background="#252538" CornerRadius="8" Padding="20" Margin="0,0,15,0" BorderBrush="#3D3D5C" BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="Unique Users" FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding AuditTrailReport.UniqueUsers, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#388E3C"/>
+                                        <TextBlock Text="Unique Users" FontSize="12" Foreground="#8888AA"/>
+                                        <TextBlock Text="{Binding AuditTrailReport.UniqueUsers, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#22C55E"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -209,7 +225,9 @@
                             <DataGrid Grid.Row="2" ItemsSource="{Binding AuditTrailItems}"
                                       AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
                                       GridLinesVisibility="Horizontal" HeadersVisibility="Column"
-                                      MaxHeight="400">
+                                      MaxHeight="400"
+                                      Background="#2D2D44" Foreground="White" RowBackground="#2D2D44" AlternatingRowBackground="#252538"
+                                      HorizontalGridLinesBrush="#3D3D5C">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" Width="150"/>
                                     <DataGridTextColumn Header="User" Binding="{Binding UserName}" Width="120"/>
@@ -223,7 +241,7 @@
                     </Border>
 
                     <!-- User Activity Report -->
-                    <Border Background="White" CornerRadius="8" Padding="20"
+                    <Border Background="#2D2D44" CornerRadius="8" Padding="20" BorderBrush="#3D3D5C" BorderThickness="1"
                             Visibility="{Binding ShowUserActivityReport, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -232,32 +250,32 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Text="User Activity Log" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+                            <TextBlock Grid.Row="0" Text="User Activity Log" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,15"/>
 
                             <!-- Summary Cards -->
                             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,20">
-                                <Border Background="#E3F2FD" CornerRadius="8" Padding="20" Margin="0,0,15,0">
+                                <Border Background="#252538" CornerRadius="8" Padding="20" Margin="0,0,15,0" BorderBrush="#3D3D5C" BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="Total Actions" FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding UserActivityReport.TotalActions, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#1976D2"/>
+                                        <TextBlock Text="Total Actions" FontSize="12" Foreground="#8888AA"/>
+                                        <TextBlock Text="{Binding UserActivityReport.TotalActions, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#6366F1"/>
                                     </StackPanel>
                                 </Border>
-                                <Border Background="#E8F5E9" CornerRadius="8" Padding="20" Margin="0,0,15,0">
+                                <Border Background="#252538" CornerRadius="8" Padding="20" Margin="0,0,15,0" BorderBrush="#3D3D5C" BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="Logins" FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding UserActivityReport.LoginCount, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#388E3C"/>
+                                        <TextBlock Text="Logins" FontSize="12" Foreground="#8888AA"/>
+                                        <TextBlock Text="{Binding UserActivityReport.LoginCount, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#22C55E"/>
                                     </StackPanel>
                                 </Border>
-                                <Border Background="#FFF3E0" CornerRadius="8" Padding="20" Margin="0,0,15,0">
+                                <Border Background="#252538" CornerRadius="8" Padding="20" Margin="0,0,15,0" BorderBrush="#3D3D5C" BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="Logouts" FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding UserActivityReport.LogoutCount, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#F57C00"/>
+                                        <TextBlock Text="Logouts" FontSize="12" Foreground="#8888AA"/>
+                                        <TextBlock Text="{Binding UserActivityReport.LogoutCount, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#F59E0B"/>
                                     </StackPanel>
                                 </Border>
-                                <Border Background="#FFEBEE" CornerRadius="8" Padding="20">
+                                <Border Background="#252538" CornerRadius="8" Padding="20" BorderBrush="#3D3D5C" BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="Failed Logins" FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding UserActivityReport.FailedLoginCount, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#D32F2F"/>
+                                        <TextBlock Text="Failed Logins" FontSize="12" Foreground="#8888AA"/>
+                                        <TextBlock Text="{Binding UserActivityReport.FailedLoginCount, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#EF4444"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -265,7 +283,9 @@
                             <DataGrid Grid.Row="2" ItemsSource="{Binding UserActivityItems}"
                                       AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
                                       GridLinesVisibility="Horizontal" HeadersVisibility="Column"
-                                      MaxHeight="400">
+                                      MaxHeight="400"
+                                      Background="#2D2D44" Foreground="White" RowBackground="#2D2D44" AlternatingRowBackground="#252538"
+                                      HorizontalGridLinesBrush="#3D3D5C">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" Width="150"/>
                                     <DataGridTextColumn Header="User" Binding="{Binding UserName}" Width="150"/>
@@ -278,7 +298,7 @@
                     </Border>
 
                     <!-- Transaction Log Report -->
-                    <Border Background="White" CornerRadius="8" Padding="20"
+                    <Border Background="#2D2D44" CornerRadius="8" Padding="20" BorderBrush="#3D3D5C" BorderThickness="1"
                             Visibility="{Binding ShowTransactionLogReport, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -287,26 +307,26 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Text="Transaction Log" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+                            <TextBlock Grid.Row="0" Text="Transaction Log" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,15"/>
 
                             <!-- Summary Cards -->
                             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,20">
-                                <Border Background="#E3F2FD" CornerRadius="8" Padding="20" Margin="0,0,15,0">
+                                <Border Background="#252538" CornerRadius="8" Padding="20" Margin="0,0,15,0" BorderBrush="#3D3D5C" BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="Total Transactions" FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding TransactionLogReport.TotalTransactions, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#1976D2"/>
+                                        <TextBlock Text="Total Transactions" FontSize="12" Foreground="#8888AA"/>
+                                        <TextBlock Text="{Binding TransactionLogReport.TotalTransactions, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#6366F1"/>
                                     </StackPanel>
                                 </Border>
-                                <Border Background="#E8F5E9" CornerRadius="8" Padding="20" Margin="0,0,15,0">
+                                <Border Background="#252538" CornerRadius="8" Padding="20" Margin="0,0,15,0" BorderBrush="#3D3D5C" BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="Orders" FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding TransactionLogReport.OrderCount, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#388E3C"/>
+                                        <TextBlock Text="Orders" FontSize="12" Foreground="#8888AA"/>
+                                        <TextBlock Text="{Binding TransactionLogReport.OrderCount, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#22C55E"/>
                                     </StackPanel>
                                 </Border>
-                                <Border Background="#FFF3E0" CornerRadius="8" Padding="20">
+                                <Border Background="#252538" CornerRadius="8" Padding="20" BorderBrush="#3D3D5C" BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="Settlements" FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding TransactionLogReport.SettlementCount, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#F57C00"/>
+                                        <TextBlock Text="Settlements" FontSize="12" Foreground="#8888AA"/>
+                                        <TextBlock Text="{Binding TransactionLogReport.SettlementCount, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#F59E0B"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -314,7 +334,9 @@
                             <DataGrid Grid.Row="2" ItemsSource="{Binding TransactionLogItems}"
                                       AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
                                       GridLinesVisibility="Horizontal" HeadersVisibility="Column"
-                                      MaxHeight="400">
+                                      MaxHeight="400"
+                                      Background="#2D2D44" Foreground="White" RowBackground="#2D2D44" AlternatingRowBackground="#252538"
+                                      HorizontalGridLinesBrush="#3D3D5C">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" Width="150"/>
                                     <DataGridTextColumn Header="User" Binding="{Binding UserName}" Width="120"/>
@@ -328,7 +350,7 @@
                     </Border>
 
                     <!-- Void/Refund Log Report -->
-                    <Border Background="White" CornerRadius="8" Padding="20"
+                    <Border Background="#2D2D44" CornerRadius="8" Padding="20" BorderBrush="#3D3D5C" BorderThickness="1"
                             Visibility="{Binding ShowVoidRefundLogReport, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -337,20 +359,20 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Text="Void/Refund Log" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+                            <TextBlock Grid.Row="0" Text="Void/Refund Log" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,15"/>
 
                             <!-- Summary Cards -->
                             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,20">
-                                <Border Background="#FFEBEE" CornerRadius="8" Padding="20" Margin="0,0,15,0">
+                                <Border Background="#252538" CornerRadius="8" Padding="20" Margin="0,0,15,0" BorderBrush="#3D3D5C" BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="Total Voids" FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding VoidRefundLogReport.TotalVoids, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#D32F2F"/>
+                                        <TextBlock Text="Total Voids" FontSize="12" Foreground="#8888AA"/>
+                                        <TextBlock Text="{Binding VoidRefundLogReport.TotalVoids, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#EF4444"/>
                                     </StackPanel>
                                 </Border>
-                                <Border Background="#FCE4EC" CornerRadius="8" Padding="20">
+                                <Border Background="#252538" CornerRadius="8" Padding="20" BorderBrush="#3D3D5C" BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="Total Value" FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding VoidRefundLogReport.TotalVoidValue, StringFormat='KSh {0:N2}'}" FontSize="24" FontWeight="Bold" Foreground="#C2185B"/>
+                                        <TextBlock Text="Total Value" FontSize="12" Foreground="#8888AA"/>
+                                        <TextBlock Text="{Binding VoidRefundLogReport.TotalVoidValue, StringFormat='KSh {0:N2}'}" FontSize="24" FontWeight="Bold" Foreground="#EC4899"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -358,7 +380,9 @@
                             <DataGrid Grid.Row="2" ItemsSource="{Binding VoidRefundLogItems}"
                                       AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
                                       GridLinesVisibility="Horizontal" HeadersVisibility="Column"
-                                      MaxHeight="400">
+                                      MaxHeight="400"
+                                      Background="#2D2D44" Foreground="White" RowBackground="#2D2D44" AlternatingRowBackground="#252538"
+                                      HorizontalGridLinesBrush="#3D3D5C">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" Width="150"/>
                                     <DataGridTextColumn Header="Requested By" Binding="{Binding RequestedByUser}" Width="120"/>
@@ -372,7 +396,7 @@
                     </Border>
 
                     <!-- Price Change Log Report -->
-                    <Border Background="White" CornerRadius="8" Padding="20"
+                    <Border Background="#2D2D44" CornerRadius="8" Padding="20" BorderBrush="#3D3D5C" BorderThickness="1"
                             Visibility="{Binding ShowPriceChangeLogReport, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -381,20 +405,20 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Text="Price Change Log" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+                            <TextBlock Grid.Row="0" Text="Price Change Log" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,15"/>
 
                             <!-- Summary Cards -->
                             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,20">
-                                <Border Background="#E3F2FD" CornerRadius="8" Padding="20" Margin="0,0,15,0">
+                                <Border Background="#252538" CornerRadius="8" Padding="20" Margin="0,0,15,0" BorderBrush="#3D3D5C" BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="Total Changes" FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding PriceChangeLogReport.TotalPriceChanges, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#1976D2"/>
+                                        <TextBlock Text="Total Changes" FontSize="12" Foreground="#8888AA"/>
+                                        <TextBlock Text="{Binding PriceChangeLogReport.TotalPriceChanges, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#6366F1"/>
                                     </StackPanel>
                                 </Border>
-                                <Border Background="#FFF3E0" CornerRadius="8" Padding="20">
+                                <Border Background="#252538" CornerRadius="8" Padding="20" BorderBrush="#3D3D5C" BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="Products Affected" FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding PriceChangeLogReport.ProductsAffected, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#F57C00"/>
+                                        <TextBlock Text="Products Affected" FontSize="12" Foreground="#8888AA"/>
+                                        <TextBlock Text="{Binding PriceChangeLogReport.ProductsAffected, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#F59E0B"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -402,7 +426,9 @@
                             <DataGrid Grid.Row="2" ItemsSource="{Binding PriceChangeLogItems}"
                                       AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
                                       GridLinesVisibility="Horizontal" HeadersVisibility="Column"
-                                      MaxHeight="400">
+                                      MaxHeight="400"
+                                      Background="#2D2D44" Foreground="White" RowBackground="#2D2D44" AlternatingRowBackground="#252538"
+                                      HorizontalGridLinesBrush="#3D3D5C">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" Width="150"/>
                                     <DataGridTextColumn Header="Changed By" Binding="{Binding UserName}" Width="120"/>
@@ -416,7 +442,7 @@
                     </Border>
 
                     <!-- Permission Override Log Report -->
-                    <Border Background="White" CornerRadius="8" Padding="20"
+                    <Border Background="#2D2D44" CornerRadius="8" Padding="20" BorderBrush="#3D3D5C" BorderThickness="1"
                             Visibility="{Binding ShowPermissionOverrideLogReport, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -425,14 +451,14 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Text="Permission Override Log" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+                            <TextBlock Grid.Row="0" Text="Permission Override Log" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,15"/>
 
                             <!-- Summary Cards -->
                             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,20">
-                                <Border Background="#FFF3E0" CornerRadius="8" Padding="20">
+                                <Border Background="#252538" CornerRadius="8" Padding="20" BorderBrush="#3D3D5C" BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="Total Overrides" FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding PermissionOverrideLogReport.TotalOverrides, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#F57C00"/>
+                                        <TextBlock Text="Total Overrides" FontSize="12" Foreground="#8888AA"/>
+                                        <TextBlock Text="{Binding PermissionOverrideLogReport.TotalOverrides, StringFormat=N0}" FontSize="24" FontWeight="Bold" Foreground="#F59E0B"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -440,7 +466,9 @@
                             <DataGrid Grid.Row="2" ItemsSource="{Binding PermissionOverrideLogItems}"
                                       AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
                                       GridLinesVisibility="Horizontal" HeadersVisibility="Column"
-                                      MaxHeight="400">
+                                      MaxHeight="400"
+                                      Background="#2D2D44" Foreground="White" RowBackground="#2D2D44" AlternatingRowBackground="#252538"
+                                      HorizontalGridLinesBrush="#3D3D5C">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" Width="150"/>
                                     <DataGridTextColumn Header="Requested By" Binding="{Binding RequestedByUser}" Width="120"/>
@@ -457,7 +485,7 @@
         </ScrollViewer>
 
         <!-- Footer with actions -->
-        <Border Grid.Row="3" Background="White" Padding="20" BorderThickness="0,1,0,0" BorderBrush="#E0E0E0"
+        <Border Grid.Row="3" Background="#2D2D44" Padding="20" BorderThickness="0,1,0,0" BorderBrush="#3D3D5C"
                 Visibility="{Binding HasReport, Converter={StaticResource BoolToVisibilityConverter}}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -469,7 +497,7 @@
                 <TextBlock Grid.Column="0"
                            Text="{Binding SelectedReportType.Description}"
                            VerticalAlignment="Center"
-                           Foreground="Gray"/>
+                           Foreground="#8888AA"/>
 
                 <Button Grid.Column="1"
                         Content="Export CSV"
@@ -488,13 +516,15 @@
 
         <!-- Error Message -->
         <Border Grid.Row="2"
-                Background="#FFEBEE"
+                Background="#3D1E1E"
                 CornerRadius="8"
                 Padding="15"
                 Margin="20"
+                BorderBrush="#EF4444"
+                BorderThickness="1"
                 VerticalAlignment="Top"
                 Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
-            <TextBlock Text="{Binding ErrorMessage}" Foreground="#D32F2F" TextWrapping="Wrap"/>
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444" TextWrapping="Wrap"/>
         </Border>
     </Grid>
 </UserControl>

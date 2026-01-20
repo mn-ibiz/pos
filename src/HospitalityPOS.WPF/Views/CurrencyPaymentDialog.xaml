@@ -11,8 +11,8 @@
     <Window.Resources>
         <!-- Dark Theme Colors -->
         <SolidColorBrush x:Key="PrimaryBackground" Color="#1E1E2E"/>
-        <SolidColorBrush x:Key="SecondaryBackground" Color="#2D2D3D"/>
-        <SolidColorBrush x:Key="CardBackground" Color="#363647"/>
+        <SolidColorBrush x:Key="SecondaryBackground" Color="#252538"/>
+        <SolidColorBrush x:Key="CardBackground" Color="#2D2D44"/>
         <SolidColorBrush x:Key="PrimaryText" Color="#FFFFFF"/>
         <SolidColorBrush x:Key="SecondaryText" Color="#A0A0B0"/>
         <SolidColorBrush x:Key="AccentBlue" Color="#3B82F6"/>
@@ -54,8 +54,8 @@
                     <Setter Property="Background" Value="#4F8EF7"/>
                 </Trigger>
                 <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="#4A4A5A"/>
-                    <Setter Property="Foreground" Value="#6A6A7A"/>
+                    <Setter Property="Background" Value="#3D3D5C"/>
+                    <Setter Property="Foreground" Value="#555577"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -83,7 +83,7 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#2A2A3A"/>
+                    <Setter Property="Background" Value="#252538"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -110,7 +110,7 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#464657"/>
+                    <Setter Property="Background" Value="#3D3D5C"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -220,7 +220,7 @@
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="CurrencyBorder" Property="Background" Value="#464657"/>
+                                                    <Setter TargetName="CurrencyBorder" Property="Background" Value="#3D3D5C"/>
                                                 </Trigger>
                                                 <DataTrigger Value="True">
                                                     <DataTrigger.Binding>

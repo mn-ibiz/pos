@@ -41,7 +41,7 @@
             <Setter Property="GridLinesVisibility" Value="Horizontal" />
             <Setter Property="HorizontalGridLinesBrush" Value="#3D3D5C" />
             <Setter Property="RowBackground" Value="#2D2D44" />
-            <Setter Property="AlternatingRowBackground" Value="#353550" />
+            <Setter Property="AlternatingRowBackground" Value="#252538" />
             <Setter Property="SelectionMode" Value="Single" />
             <Setter Property="CanUserAddRows" Value="False" />
             <Setter Property="CanUserDeleteRows" Value="False" />
@@ -70,7 +70,7 @@
             <Button Grid.Column="0"
                     Content="Back"
                     Command="{Binding GoBackCommand}"
-                    Background="#3D3D5C"
+                    Background="#2D2D44"
                     Foreground="White"
                     BorderThickness="0"
                     Padding="16,12"
@@ -131,9 +131,10 @@
                               Width="220"
                               Height="40"
                               FontSize="14"
-                              Background="#3D3D5C"
+                              Background="#1E1E2E"
                               Foreground="White"
-                              BorderThickness="0" />
+                              BorderThickness="1"
+                              BorderBrush="#3D3D5C" />
                 </StackPanel>
 
                 <!-- Date Range Selection -->
@@ -147,7 +148,7 @@
                                 Width="130"
                                 Height="40"
                                 FontSize="14"
-                                Background="#3D3D5C"
+                                Background="#1E1E2E"
                                 Foreground="White" />
 
                     <TextBlock Text="To:"
@@ -159,13 +160,13 @@
                                 Width="130"
                                 Height="40"
                                 FontSize="14"
-                                Background="#3D3D5C"
+                                Background="#1E1E2E"
                                 Foreground="White" />
 
                     <!-- Quick Date Buttons -->
                     <Button Content="Today"
                             Command="{Binding SetTodayCommand}"
-                            Background="#3D3D5C"
+                            Background="#2D2D44"
                             Foreground="White"
                             BorderThickness="0"
                             Padding="12,8"
@@ -174,7 +175,7 @@
                             Margin="16,0,4,0" />
                     <Button Content="Yesterday"
                             Command="{Binding SetYesterdayCommand}"
-                            Background="#3D3D5C"
+                            Background="#2D2D44"
                             Foreground="White"
                             BorderThickness="0"
                             Padding="12,8"
@@ -183,7 +184,7 @@
                             Margin="0,0,4,0" />
                     <Button Content="This Week"
                             Command="{Binding SetThisWeekCommand}"
-                            Background="#3D3D5C"
+                            Background="#2D2D44"
                             Foreground="White"
                             BorderThickness="0"
                             Padding="12,8"
@@ -192,7 +193,7 @@
                             Margin="0,0,4,0" />
                     <Button Content="This Month"
                             Command="{Binding SetThisMonthCommand}"
-                            Background="#3D3D5C"
+                            Background="#2D2D44"
                             Foreground="White"
                             BorderThickness="0"
                             Padding="12,8"
@@ -201,7 +202,7 @@
                             Margin="0,0,4,0" />
                     <Button Content="Last Week"
                             Command="{Binding SetLastWeekCommand}"
-                            Background="#3D3D5C"
+                            Background="#2D2D44"
                             Foreground="White"
                             BorderThickness="0"
                             Padding="12,8"
@@ -210,7 +211,7 @@
                             Margin="0,0,4,0" />
                     <Button Content="Last Month"
                             Command="{Binding SetLastMonthCommand}"
-                            Background="#3D3D5C"
+                            Background="#2D2D44"
                             Foreground="White"
                             BorderThickness="0"
                             Padding="12,8"
@@ -272,7 +273,7 @@
 
                 <!-- Error Message -->
                 <Border Grid.Row="0"
-                        Background="#5A2D2D"
+                        Background="#3D1F1F"
                         CornerRadius="8"
                         Padding="16"
                         Margin="0,0,0,16"

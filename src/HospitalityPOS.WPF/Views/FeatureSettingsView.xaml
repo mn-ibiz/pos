@@ -6,7 +6,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             Background="#1a1a2e">
+             Background="#1E1E2E">
 
     <UserControl.Resources>
         <!-- Toggle switch style -->
@@ -18,7 +18,7 @@
                     <ControlTemplate TargetType="ToggleButton">
                         <Border x:Name="Background"
                                 CornerRadius="13"
-                                Background="#3a3a5c"
+                                Background="#3D3D5C"
                                 Cursor="Hand">
                             <Ellipse x:Name="Knob"
                                      Width="20"
@@ -44,8 +44,8 @@
 
         <!-- Feature card style -->
         <Style x:Key="FeatureCard" TargetType="Border">
-            <Setter Property="Background" Value="#252542"/>
-            <Setter Property="BorderBrush" Value="#3a3a5c"/>
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Padding" Value="16"/>
@@ -61,7 +61,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="#16162a" Padding="24,20">
+        <Border Grid.Row="0" Background="#16162B" Padding="24,20">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -75,7 +75,7 @@
                                Foreground="White"/>
                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                         <TextBlock Text="Current Mode:"
-                                   Foreground="#888"
+                                   Foreground="#8888AA"
                                    VerticalAlignment="Center"/>
                         <Border Background="#6366F133"
                                 BorderBrush="#6366F1"
@@ -96,8 +96,8 @@
                             VerticalAlignment="Center">
                     <Button Command="{Binding ResetToModeDefaultsCommand}"
                             Background="Transparent"
-                            BorderBrush="#3a3a5c"
-                            Foreground="#888"
+                            BorderBrush="#3D3D5C"
+                            Foreground="#8888AA"
                             Padding="16,10"
                             Margin="0,0,8,0"
                             Cursor="Hand"
@@ -190,7 +190,7 @@
 
                                                         <TextBlock Text="{Binding Description}"
                                                                    FontSize="13"
-                                                                   Foreground="#888"
+                                                                   Foreground="#8888AA"
                                                                    Margin="0,4,0,0"
                                                                    TextWrapping="Wrap"/>
                                                     </StackPanel>
@@ -214,7 +214,7 @@
         </ScrollViewer>
 
         <!-- Footer -->
-        <Border Grid.Row="2" Background="#16162a" Padding="24,16">
+        <Border Grid.Row="2" Background="#16162B" Padding="24,16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -224,7 +224,7 @@
                 <!-- Status message -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="{Binding StatusMessage}"
-                               Foreground="#888"
+                               Foreground="#8888AA"
                                Visibility="{Binding StatusMessage, Converter={StaticResource NullToVisibilityConverter}}"/>
 
                     <Border Background="#F59E0B33"
@@ -252,7 +252,7 @@
                     <Button Command="{Binding DiscardChangesCommand}"
                             Visibility="{Binding HasUnsavedChanges, Converter={StaticResource BoolToVisibilityConverter}}"
                             Background="Transparent"
-                            BorderBrush="#3a3a5c"
+                            BorderBrush="#3D3D5C"
                             Foreground="White"
                             Padding="20,10"
                             Margin="0,0,12,0"
@@ -293,13 +293,13 @@
 
         <!-- Loading overlay -->
         <Border Grid.RowSpan="3"
-                Background="#AA1a1a2e"
+                Background="#AA1E1E2E"
                 Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <ProgressBar IsIndeterminate="True"
                              Width="200"
                              Height="4"
-                             Background="#3a3a5c"
+                             Background="#3D3D5C"
                              Foreground="#6366F1"/>
                 <TextBlock Text="{Binding StatusMessage}"
                            Foreground="White"

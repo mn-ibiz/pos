@@ -1,0 +1,96 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Light Theme Colors - Windows Classic Style with High Contrast -->
+
+    <!-- Background Colors - Clean whites and light grays -->
+    <Color x:Key="ThemeBackgroundColor">#F0F0F0</Color>
+    <Color x:Key="ThemeBackgroundSecondaryColor">#FFFFFF</Color>
+    <Color x:Key="ThemeBackgroundTertiaryColor">#E5E5E5</Color>
+    <Color x:Key="ThemeSurfaceColor">#FFFFFF</Color>
+
+    <!-- Text Colors - Dark for maximum readability -->
+    <Color x:Key="ThemeTextPrimaryColor">#000000</Color>
+    <Color x:Key="ThemeTextSecondaryColor">#333333</Color>
+    <Color x:Key="ThemeTextMutedColor">#666666</Color>
+    <Color x:Key="ThemeTextOnDarkColor">#FFFFFF</Color>
+
+    <!-- Border Colors -->
+    <Color x:Key="ThemeBorderPrimaryColor">#ACACAC</Color>
+    <Color x:Key="ThemeBorderSecondaryColor">#D0D0D0</Color>
+
+    <!-- Sidebar Colors - Light with dark text -->
+    <Color x:Key="ThemeSidebarColor">#F5F5F5</Color>
+    <Color x:Key="ThemeSidebarBrandColor">#EBEBEB</Color>
+    <Color x:Key="ThemeSidebarHoverColor">#E0E0E0</Color>
+    <Color x:Key="ThemeSidebarSelectedColor">#D0D0D0</Color>
+
+    <!-- Header/Status Bar Colors -->
+    <Color x:Key="ThemeHeaderColor">#FFFFFF</Color>
+    <Color x:Key="ThemeStatusBarColor">#E8E8E8</Color>
+
+    <!-- Card Colors - White with subtle borders -->
+    <Color x:Key="ThemeCardColor">#FFFFFF</Color>
+    <Color x:Key="ThemeCardHoverColor">#F5F5F5</Color>
+    <Color x:Key="ThemeCardDarkColor">#2D2D44</Color>
+
+    <!-- Input Colors -->
+    <Color x:Key="ThemeInputBackgroundColor">#FFFFFF</Color>
+    <Color x:Key="ThemeInputBorderColor">#ACACAC</Color>
+    <Color x:Key="ThemeInputFocusBorderColor">#0078D4</Color>
+
+    <!-- Scrollbar Colors -->
+    <Color x:Key="ThemeScrollbarBackgroundColor">#F0F0F0</Color>
+    <Color x:Key="ThemeScrollbarThumbColor">#CDCDCD</Color>
+
+    <!-- Overlay Colors -->
+    <Color x:Key="ThemeOverlayColor">#80000000</Color>
+
+    <!-- DataGrid Specific Colors -->
+    <Color x:Key="ThemeDataGridHeaderColor">#E8E8E8</Color>
+    <Color x:Key="ThemeDataGridRowColor">#FFFFFF</Color>
+    <Color x:Key="ThemeDataGridAltRowColor">#F5F8FA</Color>
+    <Color x:Key="ThemeDataGridGridLineColor">#D0D0D0</Color>
+
+    <!-- Brushes -->
+    <SolidColorBrush x:Key="ThemeBackgroundBrush" Color="{DynamicResource ThemeBackgroundColor}" />
+    <SolidColorBrush x:Key="ThemeBackgroundSecondaryBrush" Color="{DynamicResource ThemeBackgroundSecondaryColor}" />
+    <SolidColorBrush x:Key="ThemeBackgroundTertiaryBrush" Color="{DynamicResource ThemeBackgroundTertiaryColor}" />
+    <SolidColorBrush x:Key="ThemeSurfaceBrush" Color="{DynamicResource ThemeSurfaceColor}" />
+
+    <SolidColorBrush x:Key="ThemeTextPrimaryBrush" Color="{DynamicResource ThemeTextPrimaryColor}" />
+    <SolidColorBrush x:Key="ThemeTextSecondaryBrush" Color="{DynamicResource ThemeTextSecondaryColor}" />
+    <SolidColorBrush x:Key="ThemeTextMutedBrush" Color="{DynamicResource ThemeTextMutedColor}" />
+    <SolidColorBrush x:Key="ThemeTextOnDarkBrush" Color="{DynamicResource ThemeTextOnDarkColor}" />
+
+    <SolidColorBrush x:Key="ThemeBorderPrimaryBrush" Color="{DynamicResource ThemeBorderPrimaryColor}" />
+    <SolidColorBrush x:Key="ThemeBorderSecondaryBrush" Color="{DynamicResource ThemeBorderSecondaryColor}" />
+
+    <SolidColorBrush x:Key="ThemeSidebarBrush" Color="{DynamicResource ThemeSidebarColor}" />
+    <SolidColorBrush x:Key="ThemeSidebarBrandBrush" Color="{DynamicResource ThemeSidebarBrandColor}" />
+    <SolidColorBrush x:Key="ThemeSidebarHoverBrush" Color="{DynamicResource ThemeSidebarHoverColor}" />
+    <SolidColorBrush x:Key="ThemeSidebarSelectedBrush" Color="{DynamicResource ThemeSidebarSelectedColor}" />
+
+    <SolidColorBrush x:Key="ThemeHeaderBrush" Color="{DynamicResource ThemeHeaderColor}" />
+    <SolidColorBrush x:Key="ThemeStatusBarBrush" Color="{DynamicResource ThemeStatusBarColor}" />
+
+    <SolidColorBrush x:Key="ThemeCardBrush" Color="{DynamicResource ThemeCardColor}" />
+    <SolidColorBrush x:Key="ThemeCardHoverBrush" Color="{DynamicResource ThemeCardHoverColor}" />
+    <SolidColorBrush x:Key="ThemeCardDarkBrush" Color="{DynamicResource ThemeCardDarkColor}" />
+
+    <SolidColorBrush x:Key="ThemeInputBackgroundBrush" Color="{DynamicResource ThemeInputBackgroundColor}" />
+    <SolidColorBrush x:Key="ThemeInputBorderBrush" Color="{DynamicResource ThemeInputBorderColor}" />
+    <SolidColorBrush x:Key="ThemeInputFocusBorderBrush" Color="{DynamicResource ThemeInputFocusBorderColor}" />
+
+    <SolidColorBrush x:Key="ThemeScrollbarBackgroundBrush" Color="{DynamicResource ThemeScrollbarBackgroundColor}" />
+    <SolidColorBrush x:Key="ThemeScrollbarThumbBrush" Color="{DynamicResource ThemeScrollbarThumbColor}" />
+
+    <SolidColorBrush x:Key="ThemeOverlayBrush" Color="{DynamicResource ThemeOverlayColor}" />
+
+    <!-- DataGrid Brushes -->
+    <SolidColorBrush x:Key="ThemeDataGridHeaderBrush" Color="{DynamicResource ThemeDataGridHeaderColor}" />
+    <SolidColorBrush x:Key="ThemeDataGridRowBrush" Color="{DynamicResource ThemeDataGridRowColor}" />
+    <SolidColorBrush x:Key="ThemeDataGridAltRowBrush" Color="{DynamicResource ThemeDataGridAltRowColor}" />
+    <SolidColorBrush x:Key="ThemeDataGridGridLineBrush" Color="{DynamicResource ThemeDataGridGridLineColor}" />
+
+</ResourceDictionary>

@@ -19,7 +19,7 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
-        <!-- Dark Scrollbar Style for Sidebar -->
+        <!-- Scrollbar Style for Sidebar -->
         <Style x:Key="DarkScrollBarThumb" TargetType="Thumb">
             <Setter Property="Template">
                 <Setter.Value>
@@ -526,7 +526,7 @@
                                 <Button.Style>
                                     <Style TargetType="Button">
                                         <Setter Property="Background" Value="#2D2D44"/>
-                                        <Setter Property="Foreground" Value="#9CA3AF"/>
+                                        <Setter Property="Foreground" Value="#8888AA"/>
                                         <Setter Property="BorderThickness" Value="1"/>
                                         <Setter Property="BorderBrush" Value="#3D3D5C"/>
                                         <Setter Property="Template">
@@ -598,7 +598,7 @@
                                HorizontalAlignment="Center" />
                     <TextBlock Text="System Initializing..."
                                FontSize="16"
-                               Foreground="#666688"
+                               Foreground="#555577"
                                HorizontalAlignment="Center"
                                Margin="0,16,0,0" />
                 </StackPanel>
@@ -715,7 +715,7 @@
                                     </Style>
                                 </Ellipse.Style>
                             </Ellipse>
-                            <TextBlock Text="DB" Foreground="#9CA3AF" FontSize="10"/>
+                            <TextBlock Text="DB" Foreground="#555577" FontSize="10"/>
                         </StackPanel>
                     </Border>
 
@@ -744,7 +744,7 @@
                                     </Style>
                                 </Ellipse.Style>
                             </Ellipse>
-                            <TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" Foreground="#9CA3AF" FontSize="10"/>
+                            <TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" Foreground="#555577" FontSize="10"/>
                         </StackPanel>
                     </Border>
 
