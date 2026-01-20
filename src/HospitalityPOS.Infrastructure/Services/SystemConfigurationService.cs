@@ -58,8 +58,19 @@ public class SystemConfigurationService : ISystemConfigurationService, IDisposab
     /// <inheritdoc />
     public async Task<bool> IsSetupCompleteAsync()
     {
-        var config = await GetConfigurationAsync();
-        return config?.SetupCompleted ?? false;
+        try
+        {
+            var config = await GetConfigurationAsync();
+            var result = config?.SetupCompleted ?? false;
+            _logger.LogInformation("IsSetupCompleteAsync: Config={Config}, SetupCompleted={Result}",
+                config != null ? "Found" : "Null", result);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking if setup is complete");
+            return false;
+        }
     }
 
     /// <inheritdoc />
@@ -79,10 +90,15 @@ public class SystemConfigurationService : ISystemConfigurationService, IDisposab
                 var previousMode = existing.Mode;
                 var changedFeatures = GetChangedFeatures(existing, configuration);
 
+                // Preserve key fields before SetValues overwrites them
+                var existingId = existing.Id;
+                var existingCreatedAt = existing.CreatedAt;
+
                 // Update existing configuration
                 context.Entry(existing).CurrentValues.SetValues(configuration);
+                existing.Id = existingId; // Restore preserved ID
+                existing.CreatedAt = existingCreatedAt; // Restore preserved CreatedAt
                 existing.UpdatedAt = DateTime.UtcNow;
-                existing.Id = existing.Id; // Preserve ID
 
                 await context.SaveChangesAsync();
 
@@ -114,9 +130,14 @@ public class SystemConfigurationService : ISystemConfigurationService, IDisposab
 
             return true;
         }
+        catch (DbUpdateException dbEx)
+        {
+            _logger.LogError(dbEx, "Database update error saving system configuration: {Message}", dbEx.InnerException?.Message ?? dbEx.Message);
+            return false;
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error saving system configuration");
+            _logger.LogError(ex, "Error saving system configuration: {Message}", ex.Message);
             return false;
         }
         finally
@@ -132,19 +153,39 @@ public class SystemConfigurationService : ISystemConfigurationService, IDisposab
         string? businessAddress = null,
         string? businessPhone = null)
     {
-        var configuration = new SystemConfiguration
-        {
-            Mode = mode,
-            BusinessName = businessName,
-            BusinessAddress = businessAddress,
-            BusinessPhone = businessPhone,
-            SetupCompleted = true,
-            SetupCompletedAt = DateTime.UtcNow,
-            CreatedAt = DateTime.UtcNow
-        };
+        // Check if configuration already exists
+        var existing = await GetConfigurationAsync();
 
-        // Apply mode defaults
-        configuration.ApplyModeDefaults();
+        SystemConfiguration configuration;
+        if (existing != null)
+        {
+            // Update existing configuration
+            configuration = existing;
+            configuration.Mode = mode;
+            configuration.BusinessName = businessName;
+            configuration.BusinessAddress = businessAddress;
+            configuration.BusinessPhone = businessPhone;
+            configuration.SetupCompleted = true;
+            configuration.SetupCompletedAt = DateTime.UtcNow;
+            // Apply mode defaults
+            configuration.ApplyModeDefaults();
+        }
+        else
+        {
+            // Create new configuration
+            configuration = new SystemConfiguration
+            {
+                Mode = mode,
+                BusinessName = businessName,
+                BusinessAddress = businessAddress,
+                BusinessPhone = businessPhone,
+                SetupCompleted = true,
+                SetupCompletedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow
+            };
+            // Apply mode defaults
+            configuration.ApplyModeDefaults();
+        }
 
         var saved = await SaveConfigurationAsync(configuration);
         if (!saved)
@@ -268,11 +309,20 @@ public class SystemConfigurationService : ISystemConfigurationService, IDisposab
 
             _cachedConfiguration = await context.SystemConfigurations.FirstOrDefaultAsync();
 
-            _logger.LogDebug("System configuration cache refreshed");
+            if (_cachedConfiguration != null)
+            {
+                _logger.LogInformation(
+                    "System configuration loaded: Mode={Mode}, Business={BusinessName}, SetupCompleted={SetupCompleted}",
+                    _cachedConfiguration.Mode, _cachedConfiguration.BusinessName, _cachedConfiguration.SetupCompleted);
+            }
+            else
+            {
+                _logger.LogWarning("No system configuration found in database");
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error refreshing system configuration cache");
+            _logger.LogError(ex, "Error refreshing system configuration cache: {Message}", ex.Message);
         }
         finally
         {

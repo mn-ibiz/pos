@@ -9,7 +9,8 @@
              xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
              mc:Ignorable="d"
              d:DesignHeight="768" d:DesignWidth="1366"
-             Background="#1E1E2E">
+             Background="#1E1E2E"
+             d:DataContext="{d:DesignInstance Type=vm:CashierShellViewModel}">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
@@ -26,10 +27,28 @@
             </Style.Triggers>
         </Style>
 
-        <!-- ViewModel to View mappings for content -->
-        <DataTemplate DataType="{x:Type vm:POSViewModel}">
-            <views:POSView />
-        </DataTemplate>
+        <!-- Note: We use explicit view switching based on business mode instead of DataTemplates
+             because both Supermarket and Restaurant modes use the same POSViewModel -->
+
+        <!-- Boolean to Visibility for Supermarket mode -->
+        <Style x:Key="SupermarketModeVisibility" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSupermarketMode}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Boolean to Visibility for Restaurant mode -->
+        <Style x:Key="RestaurantModeVisibility" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsRestaurantMode}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
 
         <!-- Compact Header Button Style -->
         <Style x:Key="HeaderButtonStyle" TargetType="Button">
@@ -211,9 +230,15 @@
             </Grid>
         </Border>
 
-        <!-- Main Content Area - Full POS View -->
+        <!-- Main Content Area - Mode-Specific POS View -->
         <Grid Grid.Row="1" Background="#1E1E2E">
-            <ContentControl Content="{Binding CurrentView}"/>
+            <!-- Supermarket Mode: RMS-style layout with search focus -->
+            <views:SupermarketPOSView DataContext="{Binding PosViewModel}"
+                                       Style="{StaticResource SupermarketModeVisibility}"/>
+
+            <!-- Restaurant Mode: Tile-based layout with categories -->
+            <views:POSView DataContext="{Binding PosViewModel}"
+                           Style="{StaticResource RestaurantModeVisibility}"/>
         </Grid>
 
         <!-- Compact Status Bar - Microsoft RMS Style -->
@@ -226,12 +251,22 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Keyboard Shortcuts Hint -->
+                <!-- Keyboard Shortcuts Hint - Mode specific -->
                 <TextBlock Grid.Column="0"
-                           Text="F1-Search  F2-Discount  F5-Cash  F6-M-Pesa  F10-Void"
                            Foreground="#6B7280"
                            FontSize="11"
-                           VerticalAlignment="Center"/>
+                           VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="F1-Help  F2-Discount  F5-Cash  F6-M-Pesa  F9-Hold  F10-Void"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSupermarketMode}" Value="True">
+                                    <Setter Property="Text" Value="F2-Discount  F5-Cash  F6-M-Pesa  F7-Search  F9-Hold  F10-Void  F11-Recall"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
 
                 <!-- Spacer -->
                 <TextBlock Grid.Column="1"/>

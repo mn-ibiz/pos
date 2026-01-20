@@ -48,6 +48,12 @@ public partial class CategoryManagementViewModel : ViewModelBase, INavigationAwa
     [ObservableProperty]
     private int _activeCategoryCount;
 
+    /// <summary>
+    /// Gets or sets the search text for filtering categories.
+    /// </summary>
+    [ObservableProperty]
+    private string _searchText = string.Empty;
+
     #endregion
 
     /// <summary>
@@ -79,6 +85,71 @@ public partial class CategoryManagementViewModel : ViewModelBase, INavigationAwa
         // Clean up if needed
     }
 
+    partial void OnSearchTextChanged(string value)
+    {
+        _ = FilterCategoriesAsync(value);
+    }
+
+    private IReadOnlyList<Category>? _allCategories;
+
+    private async Task FilterCategoriesAsync(string searchText)
+    {
+        if (_allCategories == null)
+        {
+            _allCategories = await _categoryService.GetCategoryTreeAsync();
+        }
+
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            Categories = new ObservableCollection<Category>(_allCategories);
+        }
+        else
+        {
+            var filtered = FilterCategoryTree(_allCategories, searchText.ToLowerInvariant());
+            Categories = new ObservableCollection<Category>(filtered);
+        }
+    }
+
+    private static List<Category> FilterCategoryTree(IEnumerable<Category> categories, string searchText)
+    {
+        var result = new List<Category>();
+        foreach (var category in categories)
+        {
+            var matchesSearch = category.Name.ToLowerInvariant().Contains(searchText);
+            var filteredChildren = FilterCategoryTree(category.SubCategories, searchText);
+
+            if (matchesSearch || filteredChildren.Count > 0)
+            {
+                // Create a copy with filtered children
+                var filteredCategory = new Category
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    ParentCategoryId = category.ParentCategoryId,
+                    DisplayOrder = category.DisplayOrder,
+                    IsActive = category.IsActive,
+                    ImagePath = category.ImagePath
+                };
+                filteredCategory.SubCategories.Clear();
+                foreach (var child in filteredChildren)
+                {
+                    filteredCategory.SubCategories.Add(child);
+                }
+                // If the category itself matches, also include all its children
+                if (matchesSearch)
+                {
+                    filteredCategory.SubCategories.Clear();
+                    foreach (var child in category.SubCategories)
+                    {
+                        filteredCategory.SubCategories.Add(child);
+                    }
+                }
+                result.Add(filteredCategory);
+            }
+        }
+        return result;
+    }
+
     #region Commands
 
     /// <summary>
@@ -89,8 +160,8 @@ public partial class CategoryManagementViewModel : ViewModelBase, INavigationAwa
     {
         await ExecuteAsync(async () =>
         {
-            var categories = await _categoryService.GetCategoryTreeAsync();
-            Categories = new ObservableCollection<Category>(categories);
+            _allCategories = await _categoryService.GetCategoryTreeAsync();
+            Categories = new ObservableCollection<Category>(_allCategories);
 
             // Update counts
             var allCategories = await _categoryService.GetAllCategoriesAsync();

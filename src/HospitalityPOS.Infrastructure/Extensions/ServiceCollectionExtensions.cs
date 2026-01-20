@@ -207,8 +207,8 @@ public static class ServiceCollectionExtensions
         // Printer Service
         services.AddScoped<IPrinterService, PrinterService>();
 
-        // System Configuration
-        services.AddScoped<ISystemConfigurationService, SystemConfigurationService>();
+        // System Configuration (Singleton to maintain cache across requests)
+        services.AddSingleton<ISystemConfigurationService, SystemConfigurationService>();
 
         // Floor Service
         services.AddScoped<IFloorService, FloorService>();

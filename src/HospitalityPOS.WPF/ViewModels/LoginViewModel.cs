@@ -18,6 +18,7 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
     private readonly ISessionService _sessionService;
     private readonly INavigationService _navigationService;
     private readonly IDialogService _dialogService;
+    private readonly IUiShellService _uiShellService;
 
     #region Observable Properties
 
@@ -77,13 +78,15 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
     /// <param name="sessionService">The session service.</param>
     /// <param name="navigationService">The navigation service.</param>
     /// <param name="dialogService">The dialog service.</param>
+    /// <param name="uiShellService">The UI shell service for business mode.</param>
     public LoginViewModel(
         ILogger logger,
         IUserService userService,
         ILoginAuditService loginAuditService,
         ISessionService sessionService,
         INavigationService navigationService,
-        IDialogService dialogService)
+        IDialogService dialogService,
+        IUiShellService uiShellService)
         : base(logger)
     {
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
@@ -91,6 +94,7 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _uiShellService = uiShellService ?? throw new ArgumentNullException(nameof(uiShellService));
 
         Title = "Login";
     }
@@ -273,6 +277,16 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
         ClearPin();
     }
 
+    /// <summary>
+    /// Deselects the current user and returns to user selection.
+    /// </summary>
+    [RelayCommand]
+    private void DeselectUser()
+    {
+        SelectedUser = null;
+        ClearPin();
+    }
+
     #endregion
 
     #region Private Methods
@@ -318,11 +332,24 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
             var users = await _userService.GetActiveUsersForQuickLoginAsync().ConfigureAwait(true);
             QuickLoginUsers = new ObservableCollection<User>(users);
 
-            // Default to PIN mode if we have quick login users
-            if (QuickLoginUsers.Count > 0)
+            // Set login mode based on business mode:
+            // - Restaurant: PIN mode (quick switching for waiters)
+            // - Supermarket: Username/Password mode (cashiers log in once per shift)
+            var isRestaurantMode = _uiShellService.CurrentMode == BusinessMode.Restaurant;
+
+            if (isRestaurantMode && QuickLoginUsers.Count > 0)
             {
+                // Restaurant mode with available users - use PIN
                 IsPinMode = true;
             }
+            else
+            {
+                // Supermarket mode or no quick login users - use username/password
+                IsPinMode = false;
+            }
+
+            _logger.Information("Login mode set to {Mode} for business mode {BusinessMode}",
+                IsPinMode ? "PIN" : "Username/Password", _uiShellService.CurrentMode);
         }
         catch (Exception ex)
         {

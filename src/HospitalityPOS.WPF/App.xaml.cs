@@ -365,6 +365,11 @@ public partial class App : Application
             var configService = Services.GetRequiredService<ISystemConfigurationService>();
             var setupComplete = await configService.IsSetupCompleteAsync();
 
+            // Refresh UI shell service to ensure correct business mode is loaded
+            var uiShellService = Services.GetRequiredService<IUiShellService>();
+            await uiShellService.RefreshAsync();
+            Log.Information("UI Shell refreshed with mode: {Mode}", uiShellService.CurrentMode);
+
             var navigationService = Services.GetRequiredService<INavigationService>();
 
             if (!setupComplete)

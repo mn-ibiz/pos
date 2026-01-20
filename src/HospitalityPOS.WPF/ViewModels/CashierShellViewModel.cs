@@ -11,8 +11,10 @@ using HospitalityPOS.WPF.Services;
 namespace HospitalityPOS.WPF.ViewModels;
 
 /// <summary>
-/// ViewModel for the dedicated cashier shell - a streamlined, full-screen POS interface
-/// designed following Microsoft RMS principles: no sidebar, maximize transaction area.
+/// ViewModel for the dedicated cashier shell - a streamlined, full-screen POS interface.
+/// Automatically selects the appropriate POS view based on business mode:
+/// - Supermarket mode: RMS-style layout with search focus
+/// - Restaurant mode: Tile-based layout with categories
 /// </summary>
 public partial class CashierShellViewModel : ViewModelBase, IDisposable
 {
@@ -21,6 +23,7 @@ public partial class CashierShellViewModel : ViewModelBase, IDisposable
     private readonly ISessionService _sessionService;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IDialogService _dialogService;
+    private readonly IUiShellService _uiShellService;
     private readonly DispatcherTimer _clockTimer;
     private WorkPeriod? _currentWorkPeriod;
 
@@ -91,19 +94,37 @@ public partial class CashierShellViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private string? _unlockError;
 
+    /// <summary>
+    /// Gets whether the system is in Supermarket mode.
+    /// </summary>
+    public bool IsSupermarketMode => _uiShellService?.CurrentMode == BusinessMode.Supermarket;
+
+    /// <summary>
+    /// Gets whether the system is in Restaurant mode.
+    /// </summary>
+    public bool IsRestaurantMode => _uiShellService?.CurrentMode == BusinessMode.Restaurant;
+
+    /// <summary>
+    /// Gets the POSViewModel for the current view (used by both Restaurant and Supermarket views).
+    /// </summary>
+    [ObservableProperty]
+    private POSViewModel? _posViewModel;
+
     public CashierShellViewModel(
         ILogger logger,
         INavigationService navigationService,
         ISessionService sessionService,
         IServiceScopeFactory scopeFactory,
         IDialogService dialogService,
-        ISystemConfigurationService configService)
+        ISystemConfigurationService configService,
+        IUiShellService uiShellService)
         : base(logger)
     {
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _uiShellService = uiShellService ?? throw new ArgumentNullException(nameof(uiShellService));
 
         // Subscribe to session events
         _sessionService.UserLoggedIn += OnUserLoggedIn;
@@ -204,16 +225,24 @@ public partial class CashierShellViewModel : ViewModelBase, IDisposable
 
     /// <summary>
     /// Navigate to POS view (main cashier view).
+    /// Automatically selects Restaurant or Supermarket view based on business mode.
     /// </summary>
     [RelayCommand]
     public void NavigateToPOS()
     {
-        var posViewModel = App.Services.GetRequiredService<POSViewModel>();
-        CurrentView = posViewModel;
+        // Create the POSViewModel (shared between both view types)
+        PosViewModel = App.Services.GetRequiredService<POSViewModel>();
+        CurrentView = PosViewModel;
+
+        // Notify the view about the business mode so it can show the correct UI
+        OnPropertyChanged(nameof(IsSupermarketMode));
+        OnPropertyChanged(nameof(IsRestaurantMode));
 
         // Call OnNavigatedTo to initialize the POS view properly
         // This loads work period, products, categories, etc.
-        posViewModel.OnNavigatedTo(null);
+        PosViewModel.OnNavigatedTo(null);
+
+        _logger.Information("POS view loaded in {Mode} mode", IsSupermarketMode ? "Supermarket" : "Restaurant");
     }
 
     /// <summary>

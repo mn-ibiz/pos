@@ -263,7 +263,7 @@
                 </StackPanel>
 
                 <!-- PIN Mode -->
-                <StackPanel Grid.Row="1" Width="320"
+                <StackPanel Grid.Row="1" Width="420"
                             Visibility="{Binding IsPinMode, Converter={StaticResource BoolToVisibility}}">
 
                     <!-- Quick Login Users -->
@@ -322,13 +322,13 @@
                             BorderBrush="#3D3D5C"
                             BorderThickness="1"
                             HorizontalAlignment="Center"
-                            MinWidth="220">
+                            MinWidth="280">
                         <TextBlock Text="{Binding PinDisplay}"
-                                   FontSize="36"
+                                   FontSize="42"
                                    FontWeight="Bold"
                                    Foreground="White"
                                    HorizontalAlignment="Center"
-                                   MinWidth="140"
+                                   MinWidth="180"
                                    TextAlignment="Center"
                                    FontFamily="Consolas"/>
                     </Border>
@@ -345,41 +345,55 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Row 1: 1, 2, 3 -->
+                        <!-- Row 1: 1, 2, 3, Backspace -->
                         <Button Grid.Row="0" Grid.Column="0" Style="{StaticResource NumPadButton}" Content="1"
                                 Command="{Binding AddPinDigitCommand}" CommandParameter="1"/>
                         <Button Grid.Row="0" Grid.Column="1" Style="{StaticResource NumPadButton}" Content="2"
                                 Command="{Binding AddPinDigitCommand}" CommandParameter="2"/>
                         <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource NumPadButton}" Content="3"
                                 Command="{Binding AddPinDigitCommand}" CommandParameter="3"/>
+                        <Button Grid.Row="0" Grid.Column="3" Style="{StaticResource NumPadButton}"
+                                Background="#F59E0B" ToolTip="Delete last digit"
+                                Command="{Binding BackspacePinCommand}">
+                            <TextBlock Text="&#xE750;" FontFamily="Segoe MDL2 Assets" FontSize="20"/>
+                        </Button>
 
-                        <!-- Row 2: 4, 5, 6 -->
+                        <!-- Row 2: 4, 5, 6, Clear -->
                         <Button Grid.Row="1" Grid.Column="0" Style="{StaticResource NumPadButton}" Content="4"
                                 Command="{Binding AddPinDigitCommand}" CommandParameter="4"/>
                         <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource NumPadButton}" Content="5"
                                 Command="{Binding AddPinDigitCommand}" CommandParameter="5"/>
                         <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource NumPadButton}" Content="6"
                                 Command="{Binding AddPinDigitCommand}" CommandParameter="6"/>
+                        <Button Grid.Row="1" Grid.Column="3" Style="{StaticResource NumPadButton}" Content="CLR"
+                                FontSize="14" Background="#EF4444" ToolTip="Clear all"
+                                Command="{Binding ClearPinCommand}"/>
 
-                        <!-- Row 3: 7, 8, 9 -->
+                        <!-- Row 3: 7, 8, 9, OK -->
                         <Button Grid.Row="2" Grid.Column="0" Style="{StaticResource NumPadButton}" Content="7"
                                 Command="{Binding AddPinDigitCommand}" CommandParameter="7"/>
                         <Button Grid.Row="2" Grid.Column="1" Style="{StaticResource NumPadButton}" Content="8"
                                 Command="{Binding AddPinDigitCommand}" CommandParameter="8"/>
                         <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource NumPadButton}" Content="9"
                                 Command="{Binding AddPinDigitCommand}" CommandParameter="9"/>
-
-                        <!-- Row 4: CLR, 0, OK -->
-                        <Button Grid.Row="3" Grid.Column="0" Style="{StaticResource NumPadButton}" Content="CLR"
-                                FontSize="14" Background="#EF4444"
-                                Command="{Binding ClearPinCommand}"/>
-                        <Button Grid.Row="3" Grid.Column="1" Style="{StaticResource NumPadButton}" Content="0"
-                                Command="{Binding AddPinDigitCommand}" CommandParameter="0"/>
-                        <Button Grid.Row="3" Grid.Column="2" Style="{StaticResource NumPadButton}" Content="OK"
+                        <Button Grid.Row="2" Grid.Column="3" Style="{StaticResource NumPadButton}" Content="OK"
                                 FontSize="14" Background="#22C55E"
                                 Command="{Binding LoginByPinCommand}"/>
+
+                        <!-- Row 4: Back, 0, spans 2 columns -->
+                        <Button Grid.Row="3" Grid.Column="0" Style="{StaticResource NumPadButton}"
+                                Background="#374151" ToolTip="Back to user selection"
+                                Command="{Binding DeselectUserCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Style="{StaticResource NumPadButton}"
+                                Content="0" Width="148"
+                                Command="{Binding AddPinDigitCommand}" CommandParameter="0"/>
                     </Grid>
 
                     <!-- Error message -->

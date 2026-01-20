@@ -5,18 +5,45 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
              mc:Ignorable="d"
-             d:DesignHeight="700" d:DesignWidth="900"
-             Background="#1E1E2E">
+             d:DesignHeight="800" d:DesignWidth="1200"
+             Background="#0F0F1A">
 
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
         <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
         <converters:InverseBoolConverter x:Key="InverseBool"/>
 
-        <Style x:Key="ActionButton" TargetType="Button">
-            <Setter Property="MinHeight" Value="44"/>
-            <Setter Property="MinWidth" Value="100"/>
-            <Setter Property="FontSize" Value="14"/>
+        <!-- Gradient Brushes -->
+        <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#6366F1" Offset="0"/>
+            <GradientStop Color="#8B5CF6" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="SuccessGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#10B981" Offset="0"/>
+            <GradientStop Color="#34D399" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="DangerGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#EF4444" Offset="0"/>
+            <GradientStop Color="#F87171" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="WarningGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#F59E0B" Offset="0"/>
+            <GradientStop Color="#FBBF24" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="CardGradient" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#1A1A2E" Offset="0"/>
+            <GradientStop Color="#16162A" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Modern Action Button Style -->
+        <Style x:Key="ModernActionButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="40"/>
+            <Setter Property="MinWidth" Value="110"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Foreground" Value="White"/>
@@ -26,32 +53,102 @@
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border"
                                 Background="{TemplateBinding Background}"
-                                CornerRadius="8"
-                                Padding="16,8">
+                                CornerRadius="10"
+                                Padding="16,10"
+                                BorderThickness="1"
+                                BorderBrush="#2D2D44">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="2" Opacity="0.3"/>
+                            </Border.Effect>
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                                <Setter TargetName="border" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <TranslateTransform Y="-1"/>
+                                    </Setter.Value>
+                                </Setter>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.85"/>
+                                <Setter TargetName="border" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <TranslateTransform Y="0"/>
+                                    </Setter.Value>
+                                </Setter>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.4"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Setter Property="Background" Value="#4E4E6E"/>
+            <Setter Property="Background" Value="#2D2D44"/>
         </Style>
 
-        <Style x:Key="SmallActionButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
-            <Setter Property="MinHeight" Value="36"/>
-            <Setter Property="MinWidth" Value="80"/>
-            <Setter Property="FontSize" Value="12"/>
+        <!-- Icon Button Style -->
+        <Style x:Key="IconButton" TargetType="Button">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="#9CA3AF"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#2D2D44"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3D3D54"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Search TextBox Style -->
+        <Style x:Key="SearchTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#1A1A2E"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="BorderBrush" Value="#2D2D44"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="40,12,12,12"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          VerticalAlignment="Center"
+                                          Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#6366F1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- TreeView Item Style -->
@@ -60,7 +157,7 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Margin" Value="0,2"/>
-            <Setter Property="Padding" Value="8,8"/>
+            <Setter Property="Padding" Value="12,10"/>
             <Setter Property="IsExpanded" Value="True"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -68,11 +165,11 @@
                         <StackPanel>
                             <Border x:Name="Bd"
                                     Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="0"
-                                    CornerRadius="6"
+                                    BorderBrush="Transparent"
+                                    BorderThickness="2"
+                                    CornerRadius="10"
                                     Padding="{TemplateBinding Padding}"
-                                    Margin="0,1">
+                                    Margin="0,2">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
@@ -82,21 +179,20 @@
                                                   Grid.Column="0"
                                                   ClickMode="Press"
                                                   IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
-                                                  Width="20"
-                                                  Height="20"
+                                                  Width="24"
+                                                  Height="24"
                                                   Margin="0,0,8,0"
                                                   Background="Transparent"
                                                   BorderThickness="0">
                                         <ToggleButton.Template>
                                             <ControlTemplate TargetType="ToggleButton">
-                                                <Border Background="Transparent">
+                                                <Border Background="#1F1F33" CornerRadius="6">
                                                     <Path x:Name="ExpandPath"
                                                           HorizontalAlignment="Center"
                                                           VerticalAlignment="Center"
-                                                          Data="M 0 0 L 6 6 L 12 0"
-                                                          Fill="#8888AA"
-                                                          Stroke="#8888AA"
-                                                          StrokeThickness="1.5"
+                                                          Data="M 0 0 L 5 5 L 10 0"
+                                                          Stroke="#6B7280"
+                                                          StrokeThickness="2"
                                                           RenderTransformOrigin="0.5,0.5">
                                                         <Path.RenderTransform>
                                                             <RotateTransform Angle="-90"/>
@@ -110,6 +206,10 @@
                                                                 <RotateTransform Angle="0"/>
                                                             </Setter.Value>
                                                         </Setter>
+                                                        <Setter TargetName="ExpandPath" Property="Stroke" Value="#8B5CF6"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="ExpandPath" Property="Stroke" Value="#A78BFA"/>
                                                     </Trigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
@@ -121,17 +221,20 @@
                                                       HorizontalAlignment="Stretch"/>
                                 </Grid>
                             </Border>
-                            <ItemsPresenter x:Name="ItemsHost" Margin="24,0,0,0"/>
+                            <ItemsPresenter x:Name="ItemsHost" Margin="32,0,0,0"/>
                         </StackPanel>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#3D3D5C"/>
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="#6E6EAE"/>
-                                <Setter TargetName="Bd" Property="BorderThickness" Value="1"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#1E1E38"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#6366F1"/>
                             </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#353550"/>
-                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsSelected" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Bd" Property="Background" Value="#1A1A2E"/>
+                            </MultiTrigger>
                             <Trigger Property="HasItems" Value="False">
                                 <Setter TargetName="Expander" Property="Visibility" Value="Hidden"/>
                             </Trigger>
@@ -140,173 +243,496 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Stat Card Style -->
+        <Style x:Key="StatCard" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardGradient}"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="20,16"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#2D2D44"/>
+        </Style>
     </UserControl.Resources>
 
-    <Grid Margin="24">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="320"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- Header -->
-        <Grid Grid.Row="0" Margin="0,0,0,24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <!-- Main Content Area -->
+        <Grid Grid.Column="0" Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <Button Grid.Column="0"
-                    Content="Back"
-                    Style="{StaticResource ActionButton}"
-                    Background="#4E4E6E"
-                    Command="{Binding GoBackCommand}"/>
+            <!-- Header -->
+            <Grid Grid.Row="0" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="1"
-                       Text="{Binding Title}"
-                       FontSize="28"
-                       FontWeight="SemiBold"
-                       Foreground="White"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"/>
+                <!-- Back Button -->
+                <Button Grid.Column="0"
+                        Style="{StaticResource IconButton}"
+                        Command="{Binding GoBackCommand}"
+                        ToolTip="Go Back (Esc)">
+                    <Path Data="M 12 0 L 0 10 L 12 20"
+                          Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                          StrokeThickness="2"
+                          Width="12" Height="20"/>
+                </Button>
 
-            <Button Grid.Column="2"
-                    Content="+ New Category"
-                    Style="{StaticResource ActionButton}"
-                    Background="#4CAF50"
-                    Command="{Binding CreateCategoryCommand}"/>
+                <!-- Title and Subtitle -->
+                <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Title}"
+                               FontSize="26"
+                               FontWeight="Bold"
+                               Foreground="White"/>
+                    <TextBlock Text="Organize and manage your product categories"
+                               FontSize="13"
+                               Foreground="#6B7280"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <!-- Primary Action -->
+                <Button Grid.Column="2"
+                        Style="{StaticResource ModernActionButton}"
+                        Background="{StaticResource SuccessGradient}"
+                        Command="{Binding CreateCategoryCommand}"
+                        ToolTip="Create New Category (Ctrl+N)">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="+" FontSize="18" FontWeight="Bold" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="New Category" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <!-- Stats Row -->
+            <Grid Grid.Row="1" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Total Categories Card -->
+                <Border Grid.Column="0" Style="{StaticResource StatCard}" Margin="0,0,8,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="48" Height="48" CornerRadius="10" Background="#1F1F33" Margin="0,0,16,0">
+                            <TextBlock Text="&#xE8B1;" FontFamily="Segoe MDL2 Assets" FontSize="20"
+                                       Foreground="#6366F1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding TotalCategoryCount}" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="Total Categories" FontSize="12" Foreground="#6B7280"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Active Categories Card -->
+                <Border Grid.Column="1" Style="{StaticResource StatCard}" Margin="8,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="48" Height="48" CornerRadius="10" Background="#0D2818" Margin="0,0,16,0">
+                            <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="20"
+                                       Foreground="#10B981" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ActiveCategoryCount}" FontSize="28" FontWeight="Bold" Foreground="#10B981"/>
+                            <TextBlock Text="Active" FontSize="12" Foreground="#6B7280"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Inactive Categories Card -->
+                <Border Grid.Column="2" Style="{StaticResource StatCard}" Margin="8,0,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="48" Height="48" CornerRadius="10" Background="#1F1A1A" Margin="0,0,16,0">
+                            <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="20"
+                                       Foreground="#6B7280" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock FontSize="28" FontWeight="Bold" Foreground="#6B7280">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}">
+                                        <Binding Path="TotalCategoryCount"/>
+                                        <Binding Path="ActiveCategoryCount"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                            <TextBlock Text="Inactive" FontSize="12" Foreground="#6B7280"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Search and Action Bar -->
+            <Border Grid.Row="2" Background="{StaticResource CardGradient}" CornerRadius="12"
+                    Padding="16" Margin="0,0,0,16" BorderThickness="1" BorderBrush="#2D2D44">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Search Box -->
+                    <Grid Grid.Column="0">
+                        <TextBox x:Name="SearchBox"
+                                 Style="{StaticResource SearchTextBox}"
+                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, Delay=300}"/>
+                        <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                   Foreground="#6B7280" IsHitTestVisible="False"
+                                   VerticalAlignment="Center" Margin="14,0,0,0"/>
+                        <TextBlock Text="Search categories..."
+                                   FontSize="14"
+                                   Foreground="#4B5563"
+                                   IsHitTestVisible="False"
+                                   VerticalAlignment="Center"
+                                   Margin="44,0,0,0"
+                                   Visibility="{Binding SearchText.Length, Converter={StaticResource InverseBoolToVisibility}}"/>
+                    </Grid>
+
+                    <!-- Action Buttons -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Button Style="{StaticResource ModernActionButton}"
+                                Background="#2563EB"
+                                Command="{Binding EditCategoryCommand}"
+                                ToolTip="Edit Selected (Enter)">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Edit"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource ModernActionButton}"
+                                Background="{StaticResource WarningGradient}"
+                                Command="{Binding CreateSubcategoryCommand}"
+                                ToolTip="Add Subcategory">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Subcategory"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource ModernActionButton}"
+                                Background="{StaticResource DangerGradient}"
+                                Command="{Binding DeleteCategoryCommand}"
+                                ToolTip="Delete Selected (Del)">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Delete"/>
+                            </StackPanel>
+                        </Button>
+                        <Rectangle Width="1" Fill="#2D2D44" Margin="8,4"/>
+                        <Button Style="{StaticResource IconButton}"
+                                Command="{Binding LoadCategoriesCommand}"
+                                ToolTip="Refresh (F5)">
+                            <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Category Tree -->
+            <Border Grid.Row="3"
+                    Background="{StaticResource CardGradient}"
+                    CornerRadius="12"
+                    BorderThickness="1"
+                    BorderBrush="#2D2D44">
+                <Grid>
+                    <!-- Tree Content -->
+                    <TreeView ItemsSource="{Binding Categories}"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              Padding="12"
+                              ItemContainerStyle="{StaticResource CategoryTreeViewItem}"
+                              SelectedItemChanged="TreeView_SelectedItemChanged"
+                              VirtualizingStackPanel.IsVirtualizing="True"
+                              VirtualizingStackPanel.VirtualizationMode="Recycling"
+                              Visibility="{Binding Categories.Count, Converter={StaticResource BoolToVisibility}}">
+                        <TreeView.ItemTemplate>
+                            <HierarchicalDataTemplate ItemsSource="{Binding SubCategories}">
+                                <Grid MinHeight="36">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Category Icon -->
+                                    <Border Grid.Column="0"
+                                            Width="40"
+                                            Height="40"
+                                            CornerRadius="8"
+                                            Margin="0,0,12,0">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                            <GradientStop Color="#6366F1" Offset="0"/>
+                                                            <GradientStop Color="#8B5CF6" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                        <Setter Property="Background" Value="#374151"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding Name[0]}"
+                                                   FontSize="16"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- Category Name and Details -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontSize="15"
+                                                   FontWeight="SemiBold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                            <Setter Property="Foreground" Value="#6B7280"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                            <TextBlock FontSize="12" Foreground="#6B7280">
+                                                <Run Text="{Binding SubCategories.Count, Mode=OneWay}"/>
+                                                <Run Text=" subcategories"/>
+                                            </TextBlock>
+                                            <TextBlock Text=" | " Foreground="#374151" FontSize="12"/>
+                                            <TextBlock FontSize="12" Foreground="#6B7280">
+                                                <Run Text="Order: "/>
+                                                <Run Text="{Binding DisplayOrder, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- Status Badge -->
+                                    <Border Grid.Column="2"
+                                            CornerRadius="6"
+                                            Padding="10,5"
+                                            Margin="12,0"
+                                            VerticalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#0D2818"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                        <Setter Property="Background" Value="#1F1F33"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock FontSize="11" FontWeight="SemiBold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="Active"/>
+                                                    <Setter Property="Foreground" Value="#10B981"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                            <Setter Property="Text" Value="Inactive"/>
+                                                            <Setter Property="Foreground" Value="#6B7280"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+
+                                    <!-- Quick Actions -->
+                                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button Style="{StaticResource IconButton}" Width="32" Height="32"
+                                                Command="{Binding DataContext.MoveUpCommand, RelativeSource={RelativeSource AncestorType=TreeView}}"
+                                                ToolTip="Move Up">
+                                            <TextBlock Text="&#xE74A;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
+                                        </Button>
+                                        <Button Style="{StaticResource IconButton}" Width="32" Height="32"
+                                                Command="{Binding DataContext.MoveDownCommand, RelativeSource={RelativeSource AncestorType=TreeView}}"
+                                                ToolTip="Move Down">
+                                            <TextBlock Text="&#xE74B;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </HierarchicalDataTemplate>
+                        </TreeView.ItemTemplate>
+                    </TreeView>
+
+                    <!-- Empty State -->
+                    <StackPanel VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Visibility="{Binding Categories.Count, Converter={StaticResource InverseBoolToVisibility}}">
+                        <Border Width="80" Height="80" CornerRadius="40" Background="#1F1F33" Margin="0,0,0,16">
+                            <TextBlock Text="&#xE8B1;" FontFamily="Segoe MDL2 Assets" FontSize="32"
+                                       Foreground="#4B5563" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="No Categories Yet"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Foreground="White"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Create your first category to organize products"
+                                   FontSize="13"
+                                   Foreground="#6B7280"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,8,0,20"/>
+                        <Button Style="{StaticResource ModernActionButton}"
+                                Background="{StaticResource PrimaryGradient}"
+                                Command="{Binding CreateCategoryCommand}"
+                                HorizontalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="+" FontSize="16" Margin="0,0,8,0"/>
+                                <TextBlock Text="Create Category"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Loading Overlay -->
+                    <Border Background="#CC0F0F1A"
+                            CornerRadius="12"
+                            Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <ProgressBar IsIndeterminate="True"
+                                         Width="160"
+                                         Height="4"
+                                         Foreground="#6366F1"
+                                         Background="#1F1F33"/>
+                            <TextBlock Text="{Binding BusyMessage}"
+                                       Foreground="#9CA3AF"
+                                       FontSize="13"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,12,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
         </Grid>
 
-        <!-- Action Buttons -->
-        <StackPanel Grid.Row="1"
-                    Orientation="Horizontal"
-                    Margin="0,0,0,16">
-            <Button Content="Edit"
-                    Style="{StaticResource ActionButton}"
-                    Background="#2196F3"
-                    Command="{Binding EditCategoryCommand}"/>
-            <Button Content="Add Subcategory"
-                    Style="{StaticResource ActionButton}"
-                    Background="#FF9800"
-                    Command="{Binding CreateSubcategoryCommand}"/>
-            <Button Command="{Binding ToggleActiveCommand}">
-                <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource ActionButton}">
-                        <Setter Property="Content" Value="Deactivate"/>
-                        <Setter Property="Background" Value="#9E9E9E"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding SelectedCategory.IsActive}" Value="False">
-                                <Setter Property="Content" Value="Activate"/>
-                                <Setter Property="Background" Value="#4CAF50"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
-            <Button Content="Delete"
-                    Style="{StaticResource ActionButton}"
-                    Background="#F44336"
-                    Command="{Binding DeleteCategoryCommand}"/>
+        <!-- Right Sidebar - Category Details Panel -->
+        <Border Grid.Column="1"
+                Background="{StaticResource CardGradient}"
+                BorderThickness="1,0,0,0"
+                BorderBrush="#2D2D44">
+            <Grid Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <!-- Spacer -->
-            <Rectangle Width="24"/>
+                <!-- Panel Header -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                    <TextBlock Text="Category Details"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="White"/>
+                    <TextBlock Text="View and manage selected category"
+                               FontSize="12"
+                               Foreground="#6B7280"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
 
-            <!-- Reorder Buttons -->
-            <Button Content="Move Up"
-                    Style="{StaticResource SmallActionButton}"
-                    Background="#5D5D7E"
-                    Command="{Binding MoveUpCommand}"/>
-            <Button Content="Move Down"
-                    Style="{StaticResource SmallActionButton}"
-                    Background="#5D5D7E"
-                    Command="{Binding MoveDownCommand}"/>
+                <!-- Category Details Content -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- No Selection State -->
+                        <StackPanel Visibility="{Binding SelectedCategory, Converter={StaticResource InverseBoolToVisibility}}"
+                                    VerticalAlignment="Center" Margin="0,40,0,0">
+                            <Border Width="64" Height="64" CornerRadius="32" Background="#1F1F33" Margin="0,0,0,16" HorizontalAlignment="Center">
+                                <TextBlock Text="&#xE762;" FontFamily="Segoe MDL2 Assets" FontSize="24"
+                                           Foreground="#4B5563" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="No Category Selected"
+                                       FontSize="14"
+                                       Foreground="#6B7280"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Select a category to view details"
+                                       FontSize="12"
+                                       Foreground="#4B5563"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
 
-            <!-- Spacer -->
-            <Rectangle Width="24"/>
-
-            <Button Content="Refresh"
-                    Style="{StaticResource ActionButton}"
-                    Background="#4E4E6E"
-                    Command="{Binding LoadCategoriesCommand}"/>
-        </StackPanel>
-
-        <!-- Category Tree -->
-        <Border Grid.Row="2"
-                Background="#2D2D44"
-                CornerRadius="12"
-                Padding="16">
-            <TreeView ItemsSource="{Binding Categories}"
-                      Background="Transparent"
-                      BorderThickness="0"
-                      ItemContainerStyle="{StaticResource CategoryTreeViewItem}"
-                      SelectedItemChanged="TreeView_SelectedItemChanged"
-                      VirtualizingStackPanel.IsVirtualizing="True"
-                      VirtualizingStackPanel.VirtualizationMode="Recycling">
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding SubCategories}">
-                        <Grid MinHeight="32">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- Category Image or Placeholder -->
-                            <Border Grid.Column="0"
-                                    Width="32"
-                                    Height="32"
-                                    CornerRadius="4"
-                                    Background="#3D3D5C"
-                                    Margin="0,0,12,0">
-                                <TextBlock Text="{Binding Name[0]}"
-                                           FontSize="14"
+                        <!-- Selected Category Details -->
+                        <StackPanel Visibility="{Binding SelectedCategory, Converter={StaticResource BoolToVisibility}}">
+                            <!-- Category Avatar -->
+                            <Border Width="80" Height="80" CornerRadius="16" HorizontalAlignment="Center" Margin="0,0,0,16">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="{StaticResource PrimaryGradient}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedCategory.IsActive}" Value="False">
+                                                <Setter Property="Background" Value="#374151"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding SelectedCategory.Name[0]}"
+                                           FontSize="32"
                                            FontWeight="Bold"
-                                           Foreground="#8888AA"
+                                           Foreground="White"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"/>
                             </Border>
 
                             <!-- Category Name -->
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Name}"
-                                           FontSize="15"
-                                           FontWeight="SemiBold"
-                                           Foreground="White"/>
-                                <TextBlock FontSize="12" Foreground="#6E6E8E" Margin="0,2,0,0">
-                                    <Run Text="Order: "/>
-                                    <Run Text="{Binding DisplayOrder, Mode=OneWay}"/>
-                                    <Run Text=" | "/>
-                                    <Run Text="{Binding SubCategories.Count, Mode=OneWay}"/>
-                                    <Run Text=" subcategories"/>
-                                </TextBlock>
-                            </StackPanel>
+                            <TextBlock Text="{Binding SelectedCategory.Name}"
+                                       FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       TextAlignment="Center"/>
 
                             <!-- Status Badge -->
-                            <Border Grid.Column="2"
-                                    CornerRadius="4"
-                                    Padding="8,4"
-                                    Margin="8,0"
-                                    VerticalAlignment="Center">
+                            <Border CornerRadius="6" Padding="12,6" Margin="0,12,0,0" HorizontalAlignment="Center">
                                 <Border.Style>
                                     <Style TargetType="Border">
-                                        <Setter Property="Background" Value="#2E7D32"/>
+                                        <Setter Property="Background" Value="#0D2818"/>
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsActive}" Value="False">
-                                                <Setter Property="Background" Value="#616161"/>
+                                            <DataTrigger Binding="{Binding SelectedCategory.IsActive}" Value="False">
+                                                <Setter Property="Background" Value="#1F1F33"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-                                <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="White">
+                                <TextBlock FontSize="12" FontWeight="SemiBold">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Text" Value="Active"/>
+                                            <Setter Property="Foreground" Value="#10B981"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                <DataTrigger Binding="{Binding SelectedCategory.IsActive}" Value="False">
                                                     <Setter Property="Text" Value="Inactive"/>
+                                                    <Setter Property="Foreground" Value="#6B7280"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -314,73 +740,177 @@
                                 </TextBlock>
                             </Border>
 
-                            <!-- Product Count Placeholder -->
-                            <TextBlock Grid.Column="3"
-                                       FontSize="12"
-                                       Foreground="#6E6E8E"
-                                       VerticalAlignment="Center"
-                                       Margin="8,0,0,0">
-                                <Run Text="ID: "/>
-                                <Run Text="{Binding Id, Mode=OneWay}"/>
-                            </TextBlock>
+                            <!-- Divider -->
+                            <Rectangle Height="1" Fill="#2D2D44" Margin="0,20"/>
+
+                            <!-- Info Cards -->
+                            <StackPanel>
+                                <!-- ID -->
+                                <Border Background="#1F1F33" CornerRadius="8" Padding="12" Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="&#xE8D4;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                   Foreground="#6B7280" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Category ID" FontSize="11" Foreground="#6B7280"/>
+                                            <TextBlock Text="{Binding SelectedCategory.Id}" FontSize="14" Foreground="White" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Display Order -->
+                                <Border Background="#1F1F33" CornerRadius="8" Padding="12" Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="&#xE8CB;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                   Foreground="#6B7280" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Display Order" FontSize="11" Foreground="#6B7280"/>
+                                            <TextBlock Text="{Binding SelectedCategory.DisplayOrder}" FontSize="14" Foreground="White" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Subcategories -->
+                                <Border Background="#1F1F33" CornerRadius="8" Padding="12" Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="&#xE8B1;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                   Foreground="#6B7280" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Subcategories" FontSize="11" Foreground="#6B7280"/>
+                                            <TextBlock FontSize="14" Foreground="White" FontWeight="SemiBold">
+                                                <Run Text="{Binding SelectedCategory.SubCategories.Count, Mode=OneWay}"/>
+                                                <Run Text=" items" Foreground="#6B7280" FontWeight="Normal"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Divider -->
+                            <Rectangle Height="1" Fill="#2D2D44" Margin="0,12"/>
+
+                            <!-- Quick Actions -->
+                            <TextBlock Text="Quick Actions" FontSize="12" Foreground="#6B7280" Margin="0,0,0,12"/>
+
+                            <Button Style="{StaticResource ModernActionButton}"
+                                    Background="#2563EB"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="0,0,0,8"
+                                    Command="{Binding EditCategoryCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Edit Category"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button HorizontalAlignment="Stretch"
+                                    Margin="0,0,0,8"
+                                    Command="{Binding ToggleActiveCommand}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource ModernActionButton}">
+                                        <Setter Property="Background" Value="#374151"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedCategory.IsActive}" Value="False">
+                                                <Setter Property="Background" Value="{StaticResource SuccessGradient}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="&#xE711;"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding SelectedCategory.IsActive}" Value="False">
+                                                        <Setter Property="Text" Value="&#xE73E;"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="Deactivate"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding SelectedCategory.IsActive}" Value="False">
+                                                        <Setter Property="Text" Value="Activate"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource ModernActionButton}"
+                                    Background="{StaticResource WarningGradient}"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="0,0,0,8"
+                                    Command="{Binding CreateSubcategoryCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Add Subcategory"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource ModernActionButton}"
+                                    Background="{StaticResource DangerGradient}"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{Binding DeleteCategoryCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Delete Category"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Keyboard Shortcuts Footer -->
+                <Border Grid.Row="2" Background="#1F1F33" CornerRadius="8" Padding="12" Margin="0,16,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Keyboard Shortcuts" FontSize="11" Foreground="#6B7280" Margin="0,0,0,8"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Grid.Column="0" Background="#2D2D44" CornerRadius="4" Padding="4,2" Margin="0,2">
+                                <TextBlock Text="Ctrl+N" FontSize="10" Foreground="#9CA3AF" FontFamily="Consolas"/>
+                            </Border>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="New Category" FontSize="10" Foreground="#6B7280" VerticalAlignment="Center" Margin="8,2"/>
+
+                            <Border Grid.Row="1" Grid.Column="0" Background="#2D2D44" CornerRadius="4" Padding="4,2" Margin="0,2">
+                                <TextBlock Text="Enter" FontSize="10" Foreground="#9CA3AF" FontFamily="Consolas"/>
+                            </Border>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="Edit Selected" FontSize="10" Foreground="#6B7280" VerticalAlignment="Center" Margin="8,2"/>
+
+                            <Border Grid.Row="2" Grid.Column="0" Background="#2D2D44" CornerRadius="4" Padding="4,2" Margin="0,2">
+                                <TextBlock Text="Del" FontSize="10" Foreground="#9CA3AF" FontFamily="Consolas"/>
+                            </Border>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="Delete Selected" FontSize="10" Foreground="#6B7280" VerticalAlignment="Center" Margin="8,2"/>
                         </Grid>
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-            </TreeView>
-        </Border>
-
-        <!-- Loading Indicator -->
-        <Border Grid.Row="2"
-                Background="#80000000"
-                CornerRadius="12"
-                Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
-            <StackPanel VerticalAlignment="Center"
-                        HorizontalAlignment="Center">
-                <ProgressBar IsIndeterminate="True"
-                             Width="200"
-                             Height="4"
-                             Foreground="#4CAF50"/>
-                <TextBlock Text="{Binding BusyMessage}"
-                           Foreground="White"
-                           FontSize="14"
-                           HorizontalAlignment="Center"
-                           Margin="0,16,0,0"/>
-            </StackPanel>
-        </Border>
-
-        <!-- Status Bar -->
-        <Border Grid.Row="3"
-                Background="#2D2D44"
-                CornerRadius="8"
-                Padding="16,8"
-                Margin="0,16,0,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="0" Foreground="#8888AA" FontSize="13">
-                    <Run Text="Total Categories: "/>
-                    <Run Text="{Binding TotalCategoryCount, Mode=OneWay}"/>
-                    <Run Text=" | Active: "/>
-                    <Run Text="{Binding ActiveCategoryCount, Mode=OneWay}"/>
-                </TextBlock>
-
-                <TextBlock Grid.Column="1" Foreground="#6E6E8E" FontSize="12">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding SelectedCategory}" Value="{x:Null}">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                    <Run Text="Selected: "/>
-                    <Run Text="{Binding SelectedCategory.Name, Mode=OneWay, FallbackValue='None'}"/>
-                </TextBlock>
+                    </StackPanel>
+                </Border>
             </Grid>
         </Border>
     </Grid>
