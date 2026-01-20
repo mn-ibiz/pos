@@ -244,6 +244,7 @@ public partial class App : Application
         // NOTE: Many ViewModels temporarily excluded due to API mismatches
         // services.AddTransient<MainViewModel>(); // Excluded - using MainWindowViewModel instead
         services.AddSingleton<MainWindowViewModel>(); // Singleton - one instance for the main window
+        services.AddTransient<ModeSelectionViewModel>();
         services.AddTransient<LoginViewModel>();
         services.AddTransient<AutoLogoutSettingsViewModel>();
         services.AddTransient<ChangePasswordViewModel>();
@@ -264,6 +265,7 @@ public partial class App : Application
         services.AddTransient<ExceptionReportsViewModel>();
         services.AddTransient<InventoryReportsViewModel>();
         services.AddTransient<AuditReportsViewModel>();
+        services.AddTransient<ZReportHistoryViewModel>();
         services.AddTransient<LoginAuditViewModel>();
         services.AddTransient<GoodsReceivingViewModel>();
         services.AddTransient<DirectReceivingViewModel>();
@@ -380,9 +382,9 @@ public partial class App : Application
             }
             else
             {
-                // Setup complete - navigate to login screen
-                navigationService.NavigateTo<LoginViewModel>();
-                Log.Information("Navigation to Login screen completed");
+                // Setup complete - navigate to mode selection screen
+                navigationService.NavigateTo<ModeSelectionViewModel>();
+                Log.Information("Navigation to Mode Selection screen completed");
             }
 
             base.OnStartup(e);

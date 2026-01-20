@@ -477,8 +477,15 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
             var currentPeriod = await _workPeriodService.GetCurrentWorkPeriodAsync();
             if (currentPeriod is null)
             {
-                await _dialogService.ShowErrorAsync("No Work Period", "Please start a work period before using the POS.");
-                _navigationService.GoBack();
+                await _dialogService.ShowErrorAsync(
+                    "Work Period Required",
+                    "A work period must be open to use the POS.\n\nPlease log in through Admin mode to open a work period first.");
+
+                // Navigate back to mode selection - don't use GoBack() as history may be empty
+                ModeSelectionViewModel.SelectedLoginMode = LoginMode.None;
+                _sessionService.ClearSession(LogoutReason.UserInitiated);
+                _navigationService.NavigateTo<ModeSelectionViewModel>();
+                _navigationService.ClearHistory();
                 return;
             }
 

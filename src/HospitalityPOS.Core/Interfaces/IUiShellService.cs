@@ -33,6 +33,13 @@ public interface IUiShellService
     bool ShouldShowTableManagement { get; }
 
     /// <summary>
+    /// Sets the business mode for the current session.
+    /// This is used by the login flow to set the mode based on user selection.
+    /// </summary>
+    /// <param name="mode">The business mode to set.</param>
+    void SetMode(BusinessMode mode);
+
+    /// <summary>
     /// Switches to a different layout (only in Hybrid mode).
     /// </summary>
     /// <param name="layout">The layout to switch to.</param>

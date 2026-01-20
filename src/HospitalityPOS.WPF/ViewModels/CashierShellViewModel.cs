@@ -325,7 +325,7 @@ public partial class CashierShellViewModel : ViewModelBase, IDisposable
     }
 
     /// <summary>
-    /// Logout and return to login screen.
+    /// Logout and return to mode selection screen.
     /// </summary>
     [RelayCommand]
     private async Task LogoutAsync()
@@ -337,11 +337,9 @@ public partial class CashierShellViewModel : ViewModelBase, IDisposable
         if (!confirm) return;
 
         _sessionService.ClearSession(LogoutReason.UserInitiated);
-        _navigationService.NavigateTo<LoginViewModel>();
+        ModeSelectionViewModel.SelectedLoginMode = LoginMode.None;
+        _navigationService.NavigateTo<ModeSelectionViewModel>();
         _navigationService.ClearHistory();
-
-        // Close this window and return to main window with login
-        // This will be handled by the window switching logic
     }
 
     /// <summary>

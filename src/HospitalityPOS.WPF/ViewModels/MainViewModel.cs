@@ -509,11 +509,11 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             IsWorkPeriodOpen = false;
             WorkPeriodStatus = "Not Started";
 
-            // Show Z-Report
-            await _dialogService.ShowZReportDialogAsync(zReport);
+            // Show and auto-print Z-Report when closing the day
+            await _dialogService.ShowZReportDialogAsync(zReport, autoPrint: true);
 
             _logger.Information(
-                "Work period {WorkPeriodId} closed. Z-Report #{ZReportNumber} generated. Variance: {Variance:C}",
+                "Work period {WorkPeriodId} closed. Z-Report #{ZReportNumber} generated and printed. Variance: {Variance:C}",
                 closedPeriod.Id,
                 closedPeriod.ZReportNumber,
                 closedPeriod.Variance);

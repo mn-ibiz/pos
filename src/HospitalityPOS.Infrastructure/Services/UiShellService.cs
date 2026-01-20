@@ -69,6 +69,29 @@ public class UiShellService : IUiShellService
     }
 
     /// <inheritdoc />
+    public void SetMode(BusinessMode mode)
+    {
+        if (_currentMode == mode)
+        {
+            return;
+        }
+
+        var previousMode = _currentMode;
+        _currentMode = mode;
+        _currentLayout = GetDefaultLayout();
+
+        _logger.LogInformation("Business mode set from {PreviousMode} to {NewMode}, layout set to {Layout}",
+            previousMode, mode, _currentLayout);
+
+        OnLayoutChanged(new LayoutChangedEventArgs
+        {
+            PreviousLayout = _currentLayout,
+            NewLayout = _currentLayout,
+            Mode = _currentMode
+        });
+    }
+
+    /// <inheritdoc />
     public void SwitchLayout(PosLayoutMode layout)
     {
         if (!CanSwitchLayout && layout != GetDefaultLayout())

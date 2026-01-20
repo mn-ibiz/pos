@@ -12,16 +12,81 @@ namespace HospitalityPOS.WPF.Views.Dialogs;
 public partial class ZReportDialog : Window
 {
     private readonly ZReport _report;
+    private readonly bool _autoPrint;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ZReportDialog"/> class.
     /// </summary>
     /// <param name="report">The Z-Report to display.</param>
-    public ZReportDialog(ZReport report)
+    /// <param name="autoPrint">If true, automatically prints the report when the dialog loads.</param>
+    public ZReportDialog(ZReport report, bool autoPrint = false)
     {
         InitializeComponent();
         _report = report ?? throw new ArgumentNullException(nameof(report));
+        _autoPrint = autoPrint;
         PopulateReport();
+
+        // Auto-print if requested (e.g., when closing day)
+        if (_autoPrint)
+        {
+            Loaded += ZReportDialog_Loaded;
+        }
+    }
+
+    private void ZReportDialog_Loaded(object sender, RoutedEventArgs e)
+    {
+        // Auto-print after dialog is loaded
+        PrintReportSilently();
+    }
+
+    /// <summary>
+    /// Prints the Z-Report without showing the print dialog (uses default printer).
+    /// </summary>
+    public void PrintReportSilently()
+    {
+        try
+        {
+            var printContent = GeneratePrintContent();
+
+            var document = new FlowDocument
+            {
+                FontFamily = new FontFamily("Consolas"),
+                FontSize = 10,
+                PageWidth = 280,
+                PagePadding = new Thickness(10),
+                ColumnWidth = 280
+            };
+
+            var lines = printContent.Split('\n');
+            foreach (var line in lines)
+            {
+                var paragraph = new Paragraph(new Run(line))
+                {
+                    Margin = new Thickness(0, 0, 0, 0),
+                    LineHeight = 1
+                };
+                document.Blocks.Add(paragraph);
+            }
+
+            var printDialog = new System.Windows.Controls.PrintDialog();
+            // Use default printer without showing dialog
+            var paginator = ((IDocumentPaginatorSource)document).DocumentPaginator;
+            printDialog.PrintDocument(paginator, $"Z Report #{_report.ZReportNumber:D4}");
+
+            MessageBox.Show(
+                $"Z-Report #{_report.ZReportNumber:D4} sent to printer.",
+                "Print Complete",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Failed to print Z-Report: {ex.Message}",
+                "Print Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
     }
 
     private void PopulateReport()

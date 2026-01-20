@@ -128,8 +128,24 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
+                <!-- Back Button -->
+                <Button Grid.Row="0"
+                        Style="{StaticResource TouchButton}"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        HorizontalAlignment="Left"
+                        Margin="-24,-20,0,0"
+                        Command="{Binding GoBackCommand}"
+                        ToolTip="Back to mode selection">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE72B;" FontFamily="Segoe MDL2 Assets"
+                                   FontSize="16" Foreground="#9CA3AF" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="Back" Foreground="#9CA3AF" FontSize="14"/>
+                    </StackPanel>
+                </Button>
+
                 <!-- Logo and Title -->
-                <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,36">
+                <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,24,0,36">
                     <Border Width="80" Height="80"
                             CornerRadius="40"
                             Margin="0,0,0,16">
@@ -151,7 +167,7 @@
                                HorizontalAlignment="Center">
                         <Run Text="ProNet" Foreground="#6C63FF"/><Run Text=" POS" Foreground="White"/>
                     </TextBlock>
-                    <TextBlock Text="Sign in to continue"
+                    <TextBlock Text="{Binding ModeTitle}"
                                FontSize="14"
                                Foreground="#9CA3AF"
                                HorizontalAlignment="Center"

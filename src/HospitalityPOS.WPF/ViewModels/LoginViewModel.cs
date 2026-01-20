@@ -99,11 +99,30 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
         Title = "Login";
     }
 
+    /// <summary>
+    /// Gets the currently selected login mode from ModeSelectionViewModel.
+    /// </summary>
+    public LoginMode CurrentLoginMode => ModeSelectionViewModel.SelectedLoginMode;
+
+    /// <summary>
+    /// Gets the title for the login screen based on selected mode.
+    /// </summary>
+    public string ModeTitle => CurrentLoginMode switch
+    {
+        LoginMode.Supermarket => "Supermarket Login",
+        LoginMode.Restaurant => "Restaurant Login",
+        LoginMode.Admin => "Admin Login",
+        _ => "Login"
+    };
+
     /// <inheritdoc />
     public void OnNavigatedTo(object? parameter)
     {
         // Clear any previous credentials
         ClearCredentials();
+
+        // Set the login mode based on selected mode
+        SetLoginModeFromSelection();
 
         // Load quick login users
         _ = LoadQuickLoginUsersAsync();
@@ -287,14 +306,38 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
         ClearPin();
     }
 
+    /// <summary>
+    /// Navigates back to the mode selection screen.
+    /// </summary>
+    [RelayCommand]
+    private void GoBack()
+    {
+        ModeSelectionViewModel.SelectedLoginMode = LoginMode.None;
+        _navigationService.NavigateTo<ModeSelectionViewModel>();
+    }
+
     #endregion
 
     #region Private Methods
 
+    /// <summary>
+    /// Sets the login mode (PIN vs Username/Password) based on the selected mode.
+    /// </summary>
+    private void SetLoginModeFromSelection()
+    {
+        // Restaurant mode uses PIN for quick waiter switching
+        // Supermarket/Admin use username/password
+        IsPinMode = CurrentLoginMode == LoginMode.Restaurant;
+
+        _logger.Information("Login mode set to {Mode} for {LoginMode}",
+            IsPinMode ? "PIN" : "Username/Password", CurrentLoginMode);
+    }
+
     private async Task CompleteLoginAsync(User user)
     {
         _sessionService.SetCurrentUser(user);
-        _logger.Information("User {Username} logged in successfully", user.Username);
+        _logger.Information("User {Username} logged in successfully in {Mode} mode",
+            user.Username, CurrentLoginMode);
 
         // Clear credentials after successful login
         ClearCredentials();
@@ -310,18 +353,32 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
             return;
         }
 
-        // Route based on user role:
-        // - Admin/Manager/Supervisor: Full UI with sidebar (Dashboard)
-        // - Cashier/Waiter only: Dedicated cashier shell (CashierShellViewModel)
-        if (MainWindowViewModel.IsCashierOnlyRole(user))
+        // Route based on selected login mode:
+        // - Supermarket: CashierShell with Supermarket POS layout
+        // - Restaurant: CashierShell with Restaurant POS layout
+        // - Admin: ALWAYS go to Dashboard with sidebar (no work period required)
+        switch (CurrentLoginMode)
         {
-            _logger.Information("User {Username} is cashier-only, navigating to CashierShell", user.Username);
-            _navigationService.NavigateTo<CashierShellViewModel>();
-        }
-        else
-        {
-            _logger.Information("User {Username} has admin/manager role, navigating to Dashboard", user.Username);
-            _navigationService.NavigateTo<DashboardViewModel>();
+            case LoginMode.Supermarket:
+                _logger.Information("User {Username} logged into Supermarket mode, navigating to CashierShell", user.Username);
+                _uiShellService.SetMode(BusinessMode.Supermarket);
+                _navigationService.NavigateTo<CashierShellViewModel>();
+                break;
+
+            case LoginMode.Restaurant:
+                _logger.Information("User {Username} logged into Restaurant mode, navigating to CashierShell", user.Username);
+                _uiShellService.SetMode(BusinessMode.Restaurant);
+                _navigationService.NavigateTo<CashierShellViewModel>();
+                break;
+
+            case LoginMode.Admin:
+            default:
+                // Admin mode - ALWAYS show full dashboard with sidebar
+                // Admin can manage the system without a work period being open
+                // This is the management interface, not the POS interface
+                _logger.Information("User {Username} logged into Admin mode, navigating to Dashboard", user.Username);
+                _navigationService.NavigateTo<DashboardViewModel>();
+                break;
         }
     }
 
@@ -332,24 +389,8 @@ public partial class LoginViewModel : ViewModelBase, INavigationAware
             var users = await _userService.GetActiveUsersForQuickLoginAsync().ConfigureAwait(true);
             QuickLoginUsers = new ObservableCollection<User>(users);
 
-            // Set login mode based on business mode:
-            // - Restaurant: PIN mode (quick switching for waiters)
-            // - Supermarket: Username/Password mode (cashiers log in once per shift)
-            var isRestaurantMode = _uiShellService.CurrentMode == BusinessMode.Restaurant;
-
-            if (isRestaurantMode && QuickLoginUsers.Count > 0)
-            {
-                // Restaurant mode with available users - use PIN
-                IsPinMode = true;
-            }
-            else
-            {
-                // Supermarket mode or no quick login users - use username/password
-                IsPinMode = false;
-            }
-
-            _logger.Information("Login mode set to {Mode} for business mode {BusinessMode}",
-                IsPinMode ? "PIN" : "Username/Password", _uiShellService.CurrentMode);
+            // Note: Login mode (PIN vs Username/Password) is set by SetLoginModeFromSelection()
+            // based on the mode selected in ModeSelectionView
         }
         catch (Exception ex)
         {

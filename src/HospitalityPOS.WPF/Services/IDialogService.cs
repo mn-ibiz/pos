@@ -94,8 +94,9 @@ public interface IDialogService
     /// Shows the Z-Report dialog.
     /// </summary>
     /// <param name="report">The Z-Report to display.</param>
+    /// <param name="autoPrint">If true, automatically prints the report when shown.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task ShowZReportDialogAsync(HospitalityPOS.Core.Models.Reports.ZReport report);
+    Task ShowZReportDialogAsync(HospitalityPOS.Core.Models.Reports.ZReport report, bool autoPrint = false);
 
     /// <summary>
     /// Shows the Close Work Period dialog.

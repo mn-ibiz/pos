@@ -93,9 +93,10 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     /// <summary>
     /// Gets a value indicating whether the sidebar should be visible.
+    /// Hidden by default until user logs in with admin/manager role.
     /// </summary>
     [ObservableProperty]
-    private bool _showSidebar = true;
+    private bool _showSidebar = false;
 
     /// <summary>
     /// Gets a value indicating whether there are low stock alerts.
@@ -234,6 +235,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private void NavigateToInventoryReports() => NavigateWithSidebar<InventoryReportsViewModel>("Inventory Reports");
 
     [RelayCommand]
+    private void NavigateToZReportHistory() => NavigateWithSidebar<ZReportHistoryViewModel>("Z-Report History");
+
+    [RelayCommand]
     private void NavigateToProductManagement() => NavigateWithSidebar<ProductManagementViewModel>("Products");
 
     [RelayCommand]
@@ -342,7 +346,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     {
         _sessionService.ClearSession(LogoutReason.UserInitiated);
         ShowSidebar = false;
-        _navigationService.NavigateTo<LoginViewModel>();
+        ModeSelectionViewModel.SelectedLoginMode = LoginMode.None;
+        _navigationService.NavigateTo<ModeSelectionViewModel>();
         _navigationService.ClearHistory();
     }
 
@@ -396,8 +401,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     {
         CurrentView = e.ViewModel;
 
-        // Hide sidebar for login and setup screens
-        if (e.ViewModel is LoginViewModel or SetupWizardViewModel)
+        // Hide sidebar for login, setup, and mode selection screens
+        if (e.ViewModel is LoginViewModel or SetupWizardViewModel or ModeSelectionViewModel or CashierShellViewModel)
         {
             ShowSidebar = false;
         }
