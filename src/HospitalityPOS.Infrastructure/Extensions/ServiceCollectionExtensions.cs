@@ -217,6 +217,22 @@ public static class ServiceCollectionExtensions
         // Floor Service
         services.AddScoped<IFloorService, FloorService>();
 
+        // HR Services (Kenya Compliant)
+        services.AddScoped<IStatutoryConfigurationService, StatutoryConfigurationService>();
+        services.AddScoped<IEmployeePhotoService, EmployeePhotoService>();
+        services.AddScoped<ILoanService, LoanService>();
+        services.AddScoped<IDisciplinaryDeductionService, DisciplinaryDeductionService>();
+        services.AddScoped<ITerminationService, TerminationService>();
+
+        // Advanced Analytics & AI Services
+        services.AddScoped<IPrimeCostReportService, PrimeCostReportService>();
+        services.AddScoped<IMenuEngineeringService, MenuEngineeringService>();
+        services.AddScoped<ICustomerAnalyticsService, CustomerAnalyticsService>();
+        services.AddScoped<IAIInsightsService, AIInsightsService>();
+
+        // Expense Management Services
+        services.AddScoped<IExpenseService, ExpenseService>();
+
         return services;
     }
 

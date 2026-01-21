@@ -21,7 +21,7 @@ public class PAYETaxBand : BaseEntity
     public decimal? UpperLimit { get; set; }
 
     /// <summary>
-    /// Tax rate as a decimal (e.g., 0.10 for 10%).
+    /// Tax rate as a percentage (e.g., 10 for 10%).
     /// </summary>
     public decimal Rate { get; set; }
 
@@ -46,9 +46,9 @@ public class PAYETaxBand : BaseEntity
     public string? Description { get; set; }
 
     /// <summary>
-    /// Whether this band is currently active based on effective dates.
+    /// Whether this band is currently active.
     /// </summary>
-    public bool IsActive => EffectiveTo == null || EffectiveTo >= DateOnly.FromDateTime(DateTime.Today);
+    public new bool IsActive { get; set; } = true;
 }
 
 /// <summary>
@@ -99,7 +99,7 @@ public class PAYERelief : BaseEntity
     /// <summary>
     /// Whether this relief is currently active.
     /// </summary>
-    public bool IsActive => EffectiveTo == null || EffectiveTo >= DateOnly.FromDateTime(DateTime.Today);
+    public new bool IsActive { get; set; } = true;
 }
 
 /// <summary>
@@ -109,12 +109,12 @@ public class PAYERelief : BaseEntity
 public class NSSFConfiguration : BaseEntity
 {
     /// <summary>
-    /// Employee contribution rate as decimal (e.g., 0.06 for 6%).
+    /// Employee contribution rate as percentage (e.g., 6 for 6%).
     /// </summary>
     public decimal EmployeeRate { get; set; }
 
     /// <summary>
-    /// Employer contribution rate as decimal (e.g., 0.06 for 6%).
+    /// Employer contribution rate as percentage (e.g., 6 for 6%).
     /// </summary>
     public decimal EmployerRate { get; set; }
 
@@ -156,7 +156,7 @@ public class NSSFConfiguration : BaseEntity
     /// <summary>
     /// Whether this configuration is currently active.
     /// </summary>
-    public bool IsActive => EffectiveTo == null || EffectiveTo >= DateOnly.FromDateTime(DateTime.Today);
+    public new bool IsActive { get; set; } = true;
 }
 
 /// <summary>
@@ -166,7 +166,7 @@ public class NSSFConfiguration : BaseEntity
 public class SHIFConfiguration : BaseEntity
 {
     /// <summary>
-    /// Contribution rate as decimal (e.g., 0.0275 for 2.75%).
+    /// Contribution rate as percentage (e.g., 2.75 for 2.75%).
     /// </summary>
     public decimal Rate { get; set; }
 
@@ -198,7 +198,7 @@ public class SHIFConfiguration : BaseEntity
     /// <summary>
     /// Whether this configuration is currently active.
     /// </summary>
-    public bool IsActive => EffectiveTo == null || EffectiveTo >= DateOnly.FromDateTime(DateTime.Today);
+    public new bool IsActive { get; set; } = true;
 }
 
 /// <summary>
@@ -208,12 +208,12 @@ public class SHIFConfiguration : BaseEntity
 public class HousingLevyConfiguration : BaseEntity
 {
     /// <summary>
-    /// Employee contribution rate as decimal (e.g., 0.015 for 1.5%).
+    /// Employee contribution rate as percentage (e.g., 1.5 for 1.5%).
     /// </summary>
     public decimal EmployeeRate { get; set; }
 
     /// <summary>
-    /// Employer contribution rate as decimal (e.g., 0.015 for 1.5%).
+    /// Employer contribution rate as percentage (e.g., 1.5 for 1.5%).
     /// </summary>
     public decimal EmployerRate { get; set; }
 
@@ -235,7 +235,7 @@ public class HousingLevyConfiguration : BaseEntity
     /// <summary>
     /// Whether this configuration is currently active.
     /// </summary>
-    public bool IsActive => EffectiveTo == null || EffectiveTo >= DateOnly.FromDateTime(DateTime.Today);
+    public new bool IsActive { get; set; } = true;
 }
 
 /// <summary>
@@ -277,5 +277,5 @@ public class HELBDeductionBand : BaseEntity
     /// <summary>
     /// Whether this band is currently active.
     /// </summary>
-    public bool IsActive => EffectiveTo == null || EffectiveTo >= DateOnly.FromDateTime(DateTime.Today);
+    public new bool IsActive { get; set; } = true;
 }

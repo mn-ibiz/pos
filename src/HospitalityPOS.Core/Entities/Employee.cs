@@ -20,6 +20,21 @@ public class Employee : BaseEntity
     public DateTime? TerminationDate { get; set; }
 
     /// <summary>
+    /// Alternative name for HireDate, for compatibility.
+    /// </summary>
+    public DateTime? DateOfJoining => HireDate;
+
+    /// <summary>
+    /// Current employment status (Active, Terminated, etc.).
+    /// </summary>
+    public string EmploymentStatus { get; set; } = "Active";
+
+    /// <summary>
+    /// Total allowances amount.
+    /// </summary>
+    public decimal Allowances { get; set; }
+
+    /// <summary>
     /// Department ID - FK to Department entity.
     /// </summary>
     public int? DepartmentId { get; set; }

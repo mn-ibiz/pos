@@ -111,14 +111,39 @@ public class EmployeeLoan : BaseEntity
     public DateOnly? DisbursementDate { get; set; }
 
     /// <summary>
-    /// Date of first deduction.
+    /// Application date.
     /// </summary>
-    public DateOnly FirstDeductionDate { get; set; }
+    public DateOnly ApplicationDate { get; set; }
+
+    /// <summary>
+    /// Requested disbursement date.
+    /// </summary>
+    public DateOnly? RequestedDisbursementDate { get; set; }
+
+    /// <summary>
+    /// Date of first installment/deduction.
+    /// </summary>
+    public DateOnly? FirstInstallmentDate { get; set; }
 
     /// <summary>
     /// Expected completion date.
     /// </summary>
     public DateOnly ExpectedCompletionDate { get; set; }
+
+    /// <summary>
+    /// Number of installments already paid.
+    /// </summary>
+    public int InstallmentsPaid { get; set; }
+
+    /// <summary>
+    /// Date of last payment received.
+    /// </summary>
+    public DateOnly? LastPaymentDate { get; set; }
+
+    /// <summary>
+    /// Whether the loan requires a guarantor.
+    /// </summary>
+    public bool RequiresGuarantor { get; set; }
 
     /// <summary>
     /// Actual completion date (when fully repaid).
@@ -144,6 +169,11 @@ public class EmployeeLoan : BaseEntity
     /// Approval date/time.
     /// </summary>
     public DateTime? ApprovedAt { get; set; }
+
+    /// <summary>
+    /// Approval date (DateOnly for convenience).
+    /// </summary>
+    public DateOnly? ApprovalDate { get; set; }
 
     /// <summary>
     /// Approval notes.
@@ -231,7 +261,7 @@ public class LoanRepayment : BaseEntity
     /// <summary>
     /// Whether this installment is fully paid.
     /// </summary>
-    public bool IsPaid => AmountPaid >= AmountDue;
+    public bool IsPaid { get; set; }
 
     /// <summary>
     /// Whether this was deducted via payroll.

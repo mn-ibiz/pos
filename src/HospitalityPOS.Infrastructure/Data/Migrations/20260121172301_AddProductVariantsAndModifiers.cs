@@ -11,11 +11,12 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "LogoPath",
-                table: "SystemConfigurations",
-                type: "nvarchar(max)",
-                nullable: true);
+            // LogoPath already exists in SystemConfigurations - commented out to avoid duplicate column error
+            // migrationBuilder.AddColumn<string>(
+            //     name: "LogoPath",
+            //     table: "SystemConfigurations",
+            //     type: "nvarchar(max)",
+            //     nullable: true);
 
             migrationBuilder.AddColumn<bool>(
                 name: "HasModifiers",
@@ -1207,9 +1208,10 @@ namespace HospitalityPOS.Infrastructure.Data.Migrations
                 name: "IX_EmailConfigurations_IsActive",
                 table: "EmailConfigurations");
 
-            migrationBuilder.DropColumn(
-                name: "LogoPath",
-                table: "SystemConfigurations");
+            // LogoPath was not added by this migration - commented out
+            // migrationBuilder.DropColumn(
+            //     name: "LogoPath",
+            //     table: "SystemConfigurations");
 
             migrationBuilder.DropColumn(
                 name: "HasModifiers",

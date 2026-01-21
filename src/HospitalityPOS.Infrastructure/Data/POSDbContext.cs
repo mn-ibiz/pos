@@ -143,6 +143,9 @@ public class POSDbContext : DbContext
     #region Expenses
     public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
     public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<RecurringExpense> RecurringExpenses => Set<RecurringExpense>();
+    public DbSet<ExpenseBudget> ExpenseBudgets => Set<ExpenseBudget>();
+    public DbSet<ExpenseAttachment> ExpenseAttachments => Set<ExpenseAttachment>();
     #endregion
 
     #region Accounting
