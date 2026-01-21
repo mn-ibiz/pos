@@ -6,7 +6,7 @@
         xmlns:entities="clr-namespace:HospitalityPOS.Core.Entities;assembly=HospitalityPOS.Core"
         mc:Ignorable="d"
         Title="{Binding DialogTitle}"
-        Height="700" Width="600"
+        Height="720" Width="560"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -14,29 +14,59 @@
         ResizeMode="NoResize">
 
     <Window.Resources>
-        <!-- Modern TextBox Style -->
-        <Style x:Key="ModernTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="#1F1F33"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CaretBrush" Value="White"/>
-            <Setter Property="BorderBrush" Value="#2D2D44"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,10"/>
-            <Setter Property="FontSize" Value="14"/>
+        <!-- Apple-inspired Color Palette (Dark Mode) -->
+        <Color x:Key="SurfaceColor">#1C1C1E</Color>
+        <Color x:Key="SurfaceSecondaryColor">#2C2C2E</Color>
+        <Color x:Key="SurfaceTertiaryColor">#3A3A3C</Color>
+        <Color x:Key="SurfaceElevatedColor">#252528</Color>
+        <Color x:Key="AccentColor">#0A84FF</Color>
+        <Color x:Key="AccentHoverColor">#409CFF</Color>
+        <Color x:Key="SuccessColor">#30D158</Color>
+        <Color x:Key="ErrorColor">#FF453A</Color>
+        <Color x:Key="LabelPrimaryColor">#FFFFFF</Color>
+        <Color x:Key="LabelSecondaryColor">#EBEBF5</Color>
+        <Color x:Key="LabelTertiaryColor">#8E8E93</Color>
+        <Color x:Key="SeparatorColor">#38383A</Color>
+        <Color x:Key="FillColor">#1F1F23</Color>
+
+        <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+        <SolidColorBrush x:Key="SurfaceSecondaryBrush" Color="{StaticResource SurfaceSecondaryColor}"/>
+        <SolidColorBrush x:Key="SurfaceTertiaryBrush" Color="{StaticResource SurfaceTertiaryColor}"/>
+        <SolidColorBrush x:Key="SurfaceElevatedBrush" Color="{StaticResource SurfaceElevatedColor}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+        <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+        <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
+        <SolidColorBrush x:Key="LabelPrimaryBrush" Color="{StaticResource LabelPrimaryColor}"/>
+        <SolidColorBrush x:Key="LabelSecondaryBrush" Color="{StaticResource LabelSecondaryColor}"/>
+        <SolidColorBrush x:Key="LabelTertiaryBrush" Color="{StaticResource LabelTertiaryColor}"/>
+        <SolidColorBrush x:Key="SeparatorBrush" Color="{StaticResource SeparatorColor}"/>
+        <SolidColorBrush x:Key="FillBrush" Color="{StaticResource FillColor}"/>
+
+        <!-- Apple-style TextBox -->
+        <Style x:Key="AppleTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="{StaticResource FillBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource LabelPrimaryBrush}"/>
+            <Setter Property="CaretBrush" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="14,12"/>
+            <Setter Property="FontSize" Value="15"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
-                        <Border Background="{TemplateBinding Background}"
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
+                                CornerRadius="10">
                             <ScrollViewer x:Name="PART_ContentHost"
                                           Padding="{TemplateBinding Padding}"
                                           VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="#6366F1"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -44,42 +74,46 @@
             </Setter>
         </Style>
 
-        <!-- Modern ComboBox Style -->
-        <Style x:Key="ModernComboBox" TargetType="ComboBox">
-            <Setter Property="Background" Value="#1F1F33"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#2D2D44"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,10"/>
-            <Setter Property="FontSize" Value="14"/>
+        <!-- Apple-style ComboBox -->
+        <Style x:Key="AppleComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="{StaticResource FillBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource LabelPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="14,12"/>
+            <Setter Property="FontSize" Value="15"/>
         </Style>
 
-        <!-- Modern Button Style -->
-        <Style x:Key="ModernButton" TargetType="Button">
-            <Setter Property="Background" Value="#6366F1"/>
+        <!-- Primary Button -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontSize" Value="15"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="24,12"/>
+            <Setter Property="Padding" Value="20,12"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border"
                                 Background="{TemplateBinding Background}"
-                                CornerRadius="8"
+                                CornerRadius="10"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                                <Setter TargetName="border" Property="Background">
+                                    <Setter.Value>
+                                        <SolidColorBrush Color="{StaticResource AccentHoverColor}"/>
+                                    </Setter.Value>
+                                </Setter>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.85"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Opacity" Value="0.4"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.35"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -87,15 +121,72 @@
             </Setter>
         </Style>
 
-        <!-- Secondary Button Style -->
-        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
-            <Setter Property="Background" Value="#2D2D44"/>
+        <!-- Secondary Button -->
+        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="{StaticResource SurfaceTertiaryBrush}"/>
         </Style>
 
-        <!-- Modern CheckBox Style -->
-        <Style x:Key="ModernCheckBox" TargetType="CheckBox">
-            <Setter Property="Foreground" Value="#9CA3AF"/>
-            <Setter Property="FontSize" Value="14"/>
+        <!-- Small Button -->
+        <Style x:Key="SmallButton" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <!-- Close Button -->
+        <Style x:Key="CloseButton" TargetType="Button">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="#48484A"
+                                CornerRadius="14">
+                            <TextBlock Text="&#xE711;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="10"
+                                       Foreground="#AEAEB2"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#636366"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Icon Button -->
+        <Style x:Key="IconButton" TargetType="Button">
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="Transparent"
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource SurfaceTertiaryBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Apple-style CheckBox -->
+        <Style x:Key="AppleCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource LabelSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="15"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Template">
@@ -104,30 +195,30 @@
                         <StackPanel Orientation="Horizontal">
                             <Border x:Name="checkBorder"
                                     Width="22" Height="22"
-                                    CornerRadius="4"
-                                    Background="#1F1F33"
-                                    BorderBrush="#2D2D44"
-                                    BorderThickness="1">
+                                    CornerRadius="6"
+                                    Background="{StaticResource FillBrush}"
+                                    BorderBrush="Transparent"
+                                    BorderThickness="0">
                                 <Path x:Name="checkMark"
-                                      Data="M 2 6 L 6 10 L 14 2"
+                                      Data="M 3 6 L 6 9 L 12 3"
                                       Stroke="White"
                                       StrokeThickness="2"
+                                      StrokeLineJoin="Round"
                                       Visibility="Collapsed"
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"
-                                      Width="12" Height="12"
-                                      Margin="2"/>
+                                      Width="12" Height="10"
+                                      Margin="0,1,0,0"/>
                             </Border>
-                            <ContentPresenter Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <ContentPresenter Margin="12,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="checkBorder" Property="Background" Value="#6366F1"/>
-                                <Setter TargetName="checkBorder" Property="BorderBrush" Value="#6366F1"/>
+                                <Setter TargetName="checkBorder" Property="Background" Value="{StaticResource AccentBrush}"/>
                                 <Setter TargetName="checkMark" Property="Visibility" Value="Visible"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="checkBorder" Property="BorderBrush" Value="#6366F1"/>
+                                <Setter TargetName="checkBorder" Property="Opacity" Value="0.85"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -136,10 +227,13 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="#1A1A2E" CornerRadius="16" BorderBrush="#2D2D44" BorderThickness="1">
+    <!-- Main Container -->
+    <Border Background="{StaticResource SurfaceBrush}"
+            CornerRadius="14">
         <Border.Effect>
-            <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="5" Opacity="0.5"/>
+            <DropShadowEffect Color="#000000" BlurRadius="40" ShadowDepth="0" Opacity="0.4"/>
         </Border.Effect>
+
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -148,98 +242,110 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <Border Grid.Row="0" Background="#16162A" CornerRadius="16,16,0,0" Padding="24,20">
+            <Border Grid.Row="0" Padding="24,20,24,16">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+
                     <StackPanel>
                         <TextBlock Text="{Binding DialogTitle}"
-                                   FontSize="20"
-                                   FontWeight="Bold"
-                                   Foreground="White"/>
-                        <TextBlock Text="Define a variant option template with values"
-                                   FontSize="13"
-                                   Foreground="#6B7280"
+                                   FontSize="22"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource LabelPrimaryBrush}"/>
+                        <TextBlock Text="Define variant option template with values"
+                                   FontSize="15"
+                                   Foreground="{StaticResource LabelTertiaryBrush}"
                                    Margin="0,4,0,0"/>
                     </StackPanel>
+
                     <Button Grid.Column="1"
-                            Content="&#xE711;"
-                            FontFamily="Segoe MDL2 Assets"
-                            FontSize="14"
-                            Background="Transparent"
-                            Foreground="#6B7280"
-                            BorderThickness="0"
-                            Cursor="Hand"
+                            Style="{StaticResource CloseButton}"
                             Click="CloseButton_Click"
-                            Width="32" Height="32"/>
+                            VerticalAlignment="Top"/>
                 </Grid>
             </Border>
+
+            <!-- Separator -->
+            <Rectangle Grid.Row="0" Height="0.5" Fill="{StaticResource SeparatorBrush}"
+                       VerticalAlignment="Bottom" Margin="24,0"/>
 
             <!-- Content -->
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,20">
                 <StackPanel>
-                    <!-- Name -->
-                    <TextBlock Text="Name *" FontSize="13" Foreground="#9CA3AF" Margin="0,0,0,8"/>
+                    <!-- Name Field -->
+                    <TextBlock Text="NAME" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{StaticResource LabelTertiaryBrush}"
+                               Margin="0,0,0,8"/>
                     <TextBox x:Name="NameTextBox"
-                             Style="{StaticResource ModernTextBox}"
+                             Style="{StaticResource AppleTextBox}"
                              Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,16"/>
+                             Margin="0,0,0,20"/>
 
-                    <!-- Display Name -->
-                    <TextBlock Text="Display Name (optional)" FontSize="13" Foreground="#9CA3AF" Margin="0,0,0,8"/>
-                    <TextBox Style="{StaticResource ModernTextBox}"
+                    <!-- Display Name Field -->
+                    <TextBlock Text="DISPLAY NAME" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{StaticResource LabelTertiaryBrush}"
+                               Margin="0,0,0,8"/>
+                    <TextBox Style="{StaticResource AppleTextBox}"
                              Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,16"/>
+                             Margin="0,0,0,20"/>
 
                     <!-- Option Type -->
-                    <TextBlock Text="Option Type" FontSize="13" Foreground="#9CA3AF" Margin="0,0,0,8"/>
-                    <ComboBox Style="{StaticResource ModernComboBox}"
+                    <TextBlock Text="OPTION TYPE" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{StaticResource LabelTertiaryBrush}"
+                               Margin="0,0,0,8"/>
+                    <ComboBox Style="{StaticResource AppleComboBox}"
                               ItemsSource="{Binding OptionTypes}"
                               SelectedItem="{Binding SelectedOptionType}"
-                              Margin="0,0,0,16"/>
+                              Margin="0,0,0,20"/>
 
-                    <!-- Description -->
-                    <TextBlock Text="Description (optional)" FontSize="13" Foreground="#9CA3AF" Margin="0,0,0,8"/>
-                    <TextBox Style="{StaticResource ModernTextBox}"
+                    <!-- Description Field -->
+                    <TextBlock Text="DESCRIPTION" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{StaticResource LabelTertiaryBrush}"
+                               Margin="0,0,0,8"/>
+                    <TextBox Style="{StaticResource AppleTextBox}"
                              Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                              AcceptsReturn="True"
                              TextWrapping="Wrap"
-                             Height="80"
+                             Height="72"
                              VerticalContentAlignment="Top"
-                             Margin="0,0,0,16"/>
+                             Margin="0,0,0,20"/>
 
-                    <!-- Display Order -->
-                    <TextBlock Text="Display Order" FontSize="13" Foreground="#9CA3AF" Margin="0,0,0,8"/>
-                    <TextBox Style="{StaticResource ModernTextBox}"
+                    <!-- Display Order Field -->
+                    <TextBlock Text="DISPLAY ORDER" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{StaticResource LabelTertiaryBrush}"
+                               Margin="0,0,0,8"/>
+                    <TextBox Style="{StaticResource AppleTextBox}"
                              Text="{Binding DisplayOrder, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,16"/>
+                             Width="100"
+                             HorizontalAlignment="Left"
+                             Margin="0,0,0,20"/>
 
-                    <!-- Is Global -->
-                    <CheckBox Style="{StaticResource ModernCheckBox}"
+                    <!-- Global Checkbox -->
+                    <CheckBox Style="{StaticResource AppleCheckBox}"
                               Content="Global option (available for all products)"
                               IsChecked="{Binding IsGlobal}"
-                              Margin="0,0,0,20"/>
+                              Margin="0,0,0,24"/>
 
                     <!-- Values Section -->
-                    <Border Background="#16162A" CornerRadius="12" Padding="16" Margin="0,0,0,16">
+                    <Border Background="{StaticResource SurfaceSecondaryBrush}"
+                            CornerRadius="12"
+                            Padding="16">
                         <StackPanel>
-                            <Grid Margin="0,0,0,12">
+                            <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Option Values"
-                                           FontSize="15"
+                                           FontSize="17"
                                            FontWeight="SemiBold"
-                                           Foreground="White"
+                                           Foreground="{StaticResource LabelPrimaryBrush}"
                                            VerticalAlignment="Center"/>
                                 <Button Grid.Column="1"
                                         Content="+ Add Value"
-                                        Style="{StaticResource SecondaryButton}"
-                                        Padding="12,8"
-                                        FontSize="12"
+                                        Style="{StaticResource SmallButton}"
                                         Click="AddValue_Click"/>
                             </Grid>
 
@@ -247,7 +353,10 @@
                             <ItemsControl ItemsSource="{Binding Values}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="#1F1F33" CornerRadius="8" Padding="12" Margin="0,0,0,8">
+                                        <Border Background="{StaticResource SurfaceTertiaryBrush}"
+                                                CornerRadius="10"
+                                                Padding="14,12"
+                                                Margin="0,0,0,8">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
@@ -255,36 +364,43 @@
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel>
-                                                    <TextBlock Text="{Binding Value}" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
-                                                    <TextBlock FontSize="12" Foreground="#6B7280" Margin="0,2,0,0">
-                                                        <Run Text="SKU Suffix: "/>
-                                                        <Run Text="{Binding SkuSuffix, TargetNullValue='None'}"/>
-                                                        <Run Text=" | Price Adj: "/>
-                                                        <Run Text="{Binding PriceAdjustment, StringFormat='+{0:N0}'}"/>
-                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding Value}"
+                                                               FontSize="15"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{StaticResource LabelPrimaryBrush}"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                        <TextBlock Text="SKU: "
+                                                                   FontSize="13"
+                                                                   Foreground="{StaticResource LabelTertiaryBrush}"/>
+                                                        <TextBlock Text="{Binding SkuSuffix, TargetNullValue='—'}"
+                                                                   FontSize="13"
+                                                                   Foreground="{StaticResource LabelSecondaryBrush}"/>
+                                                        <TextBlock Text="  •  Price: "
+                                                                   FontSize="13"
+                                                                   Foreground="{StaticResource LabelTertiaryBrush}"/>
+                                                        <TextBlock Text="{Binding PriceAdjustment, StringFormat='+{0:N0}'}"
+                                                                   FontSize="13"
+                                                                   Foreground="{StaticResource SuccessBrush}"/>
+                                                    </StackPanel>
                                                 </StackPanel>
                                                 <Button Grid.Column="1"
-                                                        Content="&#xE70F;"
-                                                        FontFamily="Segoe MDL2 Assets"
-                                                        FontSize="12"
-                                                        Background="Transparent"
-                                                        Foreground="#6B7280"
-                                                        BorderThickness="0"
-                                                        Cursor="Hand"
-                                                        Width="28" Height="28"
+                                                        Style="{StaticResource IconButton}"
                                                         Click="EditValue_Click"
-                                                        Tag="{Binding}"/>
+                                                        Tag="{Binding}">
+                                                    <TextBlock Text="&#xE70F;"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="14"
+                                                               Foreground="{StaticResource LabelTertiaryBrush}"/>
+                                                </Button>
                                                 <Button Grid.Column="2"
-                                                        Content="&#xE74D;"
-                                                        FontFamily="Segoe MDL2 Assets"
-                                                        FontSize="12"
-                                                        Background="Transparent"
-                                                        Foreground="#EF4444"
-                                                        BorderThickness="0"
-                                                        Cursor="Hand"
-                                                        Width="28" Height="28"
+                                                        Style="{StaticResource IconButton}"
                                                         Click="DeleteValue_Click"
-                                                        Tag="{Binding}"/>
+                                                        Tag="{Binding}">
+                                                    <TextBlock Text="&#xE74D;"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="14"
+                                                               Foreground="{StaticResource ErrorBrush}"/>
+                                                </Button>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -292,14 +408,28 @@
                             </ItemsControl>
 
                             <!-- Empty State -->
-                            <Border Background="#1F1F33" CornerRadius="8" Padding="20"
+                            <Border Background="{StaticResource SurfaceTertiaryBrush}"
+                                    CornerRadius="10"
+                                    Padding="24"
                                     Visibility="{Binding HasValues, Converter={StaticResource InverseBoolToVisibility}, FallbackValue=Visible}">
-                                <TextBlock Text="No values added yet. Click 'Add Value' to create option values."
-                                           FontSize="13"
-                                           Foreground="#6B7280"
-                                           HorizontalAlignment="Center"
-                                           TextWrapping="Wrap"
-                                           TextAlignment="Center"/>
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="&#xE721;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="24"
+                                               Foreground="{StaticResource LabelTertiaryBrush}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,8"/>
+                                    <TextBlock Text="No values added yet"
+                                               FontSize="15"
+                                               Foreground="{StaticResource LabelTertiaryBrush}"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Click 'Add Value' to create option values"
+                                               FontSize="13"
+                                               Foreground="{StaticResource LabelTertiaryBrush}"
+                                               HorizontalAlignment="Center"
+                                               Opacity="0.7"
+                                               Margin="0,4,0,0"/>
+                                </StackPanel>
                             </Border>
                         </StackPanel>
                     </Border>
@@ -307,23 +437,25 @@
             </ScrollViewer>
 
             <!-- Footer -->
-            <Border Grid.Row="2" Background="#16162A" CornerRadius="0,0,16,16" Padding="24,16">
+            <Border Grid.Row="2"
+                    Background="{StaticResource SurfaceElevatedBrush}"
+                    CornerRadius="0,0,14,14"
+                    Padding="24,16">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="1"
+                    <Button Grid.Column="0"
                             Content="Cancel"
                             Style="{StaticResource SecondaryButton}"
-                            Click="CancelButton_Click"
-                            Margin="0,0,12,0"/>
+                            Click="CancelButton_Click"/>
 
                     <Button Grid.Column="2"
                             Content="Save"
-                            Style="{StaticResource ModernButton}"
+                            Style="{StaticResource PrimaryButton}"
                             Click="SaveButton_Click"
                             IsEnabled="{Binding CanSave}"/>
                 </Grid>

@@ -4,8 +4,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         mc:Ignorable="d"
-        Title="Select Modifiers"
-        Height="650" Width="550"
+        Title="Customize Order"
+        Height="680" Width="520"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -15,32 +15,66 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
-        <!-- Modern Button Style -->
-        <Style x:Key="ModernButton" TargetType="Button">
-            <Setter Property="Background" Value="#6366F1"/>
+        <!-- Apple-inspired Color Palette (Dark Mode) -->
+        <Color x:Key="SurfaceColor">#1C1C1E</Color>
+        <Color x:Key="SurfaceSecondaryColor">#2C2C2E</Color>
+        <Color x:Key="SurfaceTertiaryColor">#3A3A3C</Color>
+        <Color x:Key="SurfaceElevatedColor">#252528</Color>
+        <Color x:Key="AccentColor">#0A84FF</Color>
+        <Color x:Key="AccentHoverColor">#409CFF</Color>
+        <Color x:Key="SuccessColor">#30D158</Color>
+        <Color x:Key="WarningColor">#FF9F0A</Color>
+        <Color x:Key="ErrorColor">#FF453A</Color>
+        <Color x:Key="LabelPrimaryColor">#FFFFFF</Color>
+        <Color x:Key="LabelSecondaryColor">#EBEBF5</Color>
+        <Color x:Key="LabelTertiaryColor">#8E8E93</Color>
+        <Color x:Key="LabelQuaternaryColor">#636366</Color>
+        <Color x:Key="SeparatorColor">#38383A</Color>
+
+        <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+        <SolidColorBrush x:Key="SurfaceSecondaryBrush" Color="{StaticResource SurfaceSecondaryColor}"/>
+        <SolidColorBrush x:Key="SurfaceTertiaryBrush" Color="{StaticResource SurfaceTertiaryColor}"/>
+        <SolidColorBrush x:Key="SurfaceElevatedBrush" Color="{StaticResource SurfaceElevatedColor}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+        <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+        <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+        <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
+        <SolidColorBrush x:Key="LabelPrimaryBrush" Color="{StaticResource LabelPrimaryColor}"/>
+        <SolidColorBrush x:Key="LabelSecondaryBrush" Color="{StaticResource LabelSecondaryColor}"/>
+        <SolidColorBrush x:Key="LabelTertiaryBrush" Color="{StaticResource LabelTertiaryColor}"/>
+        <SolidColorBrush x:Key="LabelQuaternaryBrush" Color="{StaticResource LabelQuaternaryColor}"/>
+        <SolidColorBrush x:Key="SeparatorBrush" Color="{StaticResource SeparatorColor}"/>
+
+        <!-- Primary Button Style -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontSize" Value="15"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="24,12"/>
+            <Setter Property="Padding" Value="20,12"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border"
                                 Background="{TemplateBinding Background}"
-                                CornerRadius="8"
+                                CornerRadius="10"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                                <Setter TargetName="border" Property="Background">
+                                    <Setter.Value>
+                                        <SolidColorBrush Color="{StaticResource AccentHoverColor}"/>
+                                    </Setter.Value>
+                                </Setter>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.85"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Opacity" Value="0.4"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.35"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -49,37 +83,66 @@
         </Style>
 
         <!-- Secondary Button Style -->
-        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
-            <Setter Property="Background" Value="#2D2D44"/>
+        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="{StaticResource SurfaceTertiaryBrush}"/>
         </Style>
 
-        <!-- Modifier Item Button Style -->
-        <Style x:Key="ModifierItemButton" TargetType="Button">
-            <Setter Property="Background" Value="#1F1F33"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Padding" Value="12,10"/>
-            <Setter Property="Margin" Value="4"/>
-            <Setter Property="MinWidth" Value="100"/>
+        <!-- Close Button Style -->
+        <Style x:Key="CloseButton" TargetType="Button">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="#48484A"
+                                CornerRadius="14">
+                            <TextBlock Text="&#xE711;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="10"
+                                       Foreground="#AEAEB2"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#636366"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modifier Chip Style -->
+        <Style x:Key="ModifierChip" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource SurfaceTertiaryBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource LabelPrimaryBrush}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="MinWidth" Value="80"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border"
                                 Background="{TemplateBinding Background}"
-                                BorderBrush="#2D2D44"
+                                BorderBrush="Transparent"
                                 BorderThickness="2"
-                                CornerRadius="8"
+                                CornerRadius="10"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#6366F1"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
                             </Trigger>
                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#6366F1"/>
-                                <Setter TargetName="border" Property="BorderBrush" Value="#6366F1"/>
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
                             </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -87,26 +150,29 @@
             </Setter>
         </Style>
 
-        <!-- Quantity Button Style -->
-        <Style x:Key="QuantityButton" TargetType="Button">
-            <Setter Property="Width" Value="28"/>
-            <Setter Property="Height" Value="28"/>
-            <Setter Property="Background" Value="#2D2D44"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="Bold"/>
+        <!-- Quantity Stepper Button Style -->
+        <Style x:Key="StepperButton" TargetType="Button">
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceSecondaryBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border"
                                 Background="{TemplateBinding Background}"
-                                CornerRadius="4">
+                                CornerRadius="8">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#6366F1"/>
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource SurfaceTertiaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.8"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -115,10 +181,13 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="#1A1A2E" CornerRadius="16" BorderBrush="#2D2D44" BorderThickness="1">
+    <!-- Main Container -->
+    <Border Background="{StaticResource SurfaceBrush}"
+            CornerRadius="14">
         <Border.Effect>
-            <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="5" Opacity="0.5"/>
+            <DropShadowEffect Color="#000000" BlurRadius="40" ShadowDepth="0" Opacity="0.4"/>
         </Border.Effect>
+
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -127,41 +196,48 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <Border Grid.Row="0" Background="#16162A" CornerRadius="16,16,0,0" Padding="24,20">
+            <Border Grid.Row="0" Padding="24,20,24,16">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+
                     <StackPanel>
                         <TextBlock Text="{Binding ProductName}"
-                                   FontSize="20"
-                                   FontWeight="Bold"
-                                   Foreground="White"/>
+                                   FontSize="22"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource LabelPrimaryBrush}"
+                                   TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="Customize your order"
-                                   FontSize="13"
-                                   Foreground="#6B7280"
+                                   FontSize="15"
+                                   Foreground="{StaticResource LabelTertiaryBrush}"
                                    Margin="0,4,0,0"/>
                     </StackPanel>
+
                     <Button Grid.Column="1"
-                            Content="&#xE711;"
-                            FontFamily="Segoe MDL2 Assets"
-                            FontSize="14"
-                            Background="Transparent"
-                            Foreground="#6B7280"
-                            BorderThickness="0"
-                            Cursor="Hand"
+                            Style="{StaticResource CloseButton}"
                             Click="CloseButton_Click"
-                            Width="32" Height="32"/>
+                            VerticalAlignment="Top"/>
                 </Grid>
             </Border>
 
+            <!-- Separator -->
+            <Rectangle Grid.Row="0" Height="0.5" Fill="{StaticResource SeparatorBrush}"
+                       VerticalAlignment="Bottom" Margin="24,0"/>
+
             <!-- Content -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,16">
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          Padding="24,16">
                 <ItemsControl x:Name="ModifierGroupsControl" ItemsSource="{Binding ModifierGroups}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Background="#16162A" CornerRadius="12" Padding="16" Margin="0,0,0,16">
+                            <!-- Modifier Group Card -->
+                            <Border Background="{StaticResource SurfaceSecondaryBrush}"
+                                    CornerRadius="12"
+                                    Padding="16"
+                                    Margin="0,0,0,12">
                                 <StackPanel>
                                     <!-- Group Header -->
                                     <Grid Margin="0,0,0,12">
@@ -169,31 +245,48 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
+
                                         <StackPanel>
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="{Binding Name}"
-                                                           FontSize="15"
+                                                           FontSize="17"
                                                            FontWeight="SemiBold"
-                                                           Foreground="White"/>
+                                                           Foreground="{StaticResource LabelPrimaryBrush}"/>
                                                 <TextBlock Text=" *"
-                                                           FontSize="15"
+                                                           FontSize="17"
                                                            FontWeight="SemiBold"
-                                                           Foreground="#EF4444"
+                                                           Foreground="{StaticResource ErrorBrush}"
                                                            Visibility="{Binding IsRequired, Converter={StaticResource BoolToVis}}"/>
                                             </StackPanel>
                                             <TextBlock Text="{Binding SelectionHint}"
-                                                       FontSize="12"
-                                                       Foreground="#6B7280"
+                                                       FontSize="13"
+                                                       Foreground="{StaticResource LabelTertiaryBrush}"
                                                        Margin="0,2,0,0"/>
                                         </StackPanel>
-                                        <TextBlock Grid.Column="1"
-                                                   Text="{Binding SelectionStatus}"
-                                                   FontSize="12"
-                                                   Foreground="{Binding SelectionStatusColor}"
-                                                   VerticalAlignment="Center"/>
+
+                                        <!-- Selection Status Pill -->
+                                        <Border Grid.Column="1"
+                                                CornerRadius="10"
+                                                Padding="10,4"
+                                                VerticalAlignment="Center">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#1A30D158"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding SelectionStatusColor}" Value="#FFEF4444">
+                                                            <Setter Property="Background" Value="#1AFF453A"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding SelectionStatus}"
+                                                       FontSize="12"
+                                                       FontWeight="Medium"
+                                                       Foreground="{Binding SelectionStatusColor}"/>
+                                        </Border>
                                     </Grid>
 
-                                    <!-- Items -->
+                                    <!-- Modifier Items -->
                                     <ItemsControl ItemsSource="{Binding Items}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
@@ -202,46 +295,51 @@
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Button Style="{StaticResource ModifierItemButton}"
+                                                <Button Style="{StaticResource ModifierChip}"
                                                         Click="ModifierItem_Click"
                                                         DataContext="{Binding}">
-                                                    <Grid>
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                        </Grid.RowDefinitions>
-
+                                                    <StackPanel>
                                                         <TextBlock Text="{Binding Name}"
                                                                    FontWeight="Medium"
                                                                    HorizontalAlignment="Center"/>
 
-                                                        <TextBlock Grid.Row="1"
-                                                                   Text="{Binding PriceText}"
-                                                                   FontSize="11"
-                                                                   Foreground="#9CA3AF"
+                                                        <TextBlock Text="{Binding PriceText}"
+                                                                   FontSize="12"
                                                                    HorizontalAlignment="Center"
-                                                                   Visibility="{Binding HasPrice, Converter={StaticResource BoolToVis}}"/>
+                                                                   Margin="0,2,0,0"
+                                                                   Visibility="{Binding HasPrice, Converter={StaticResource BoolToVis}}">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Foreground" Value="{StaticResource LabelTertiaryBrush}"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                            <Setter Property="Foreground" Value="#FFFFFFCC"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
 
-                                                        <!-- Quantity Controls (for selected items with MaxQuantity > 1) -->
-                                                        <StackPanel Grid.Row="2"
-                                                                    Orientation="Horizontal"
-                                                                    HorizontalAlignment="Center"
-                                                                    Margin="0,4,0,0"
-                                                                    Visibility="{Binding ShowQuantityControls, Converter={StaticResource BoolToVis}}">
-                                                            <Button Style="{StaticResource QuantityButton}"
-                                                                    Content="-"
-                                                                    Click="DecreaseQuantity_Click"/>
-                                                            <TextBlock Text="{Binding Quantity}"
-                                                                       Width="30"
-                                                                       TextAlignment="Center"
-                                                                       VerticalAlignment="Center"
-                                                                       FontWeight="SemiBold"/>
-                                                            <Button Style="{StaticResource QuantityButton}"
-                                                                    Content="+"
-                                                                    Click="IncreaseQuantity_Click"/>
-                                                        </StackPanel>
-                                                    </Grid>
+                                                        <!-- Quantity Stepper -->
+                                                        <Border Margin="0,6,0,0"
+                                                                Visibility="{Binding ShowQuantityControls, Converter={StaticResource BoolToVis}}">
+                                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                                <Button Style="{StaticResource StepperButton}"
+                                                                        Content="-"
+                                                                        Click="DecreaseQuantity_Click"/>
+                                                                <TextBlock Text="{Binding Quantity}"
+                                                                           Width="36"
+                                                                           TextAlignment="Center"
+                                                                           VerticalAlignment="Center"
+                                                                           FontSize="15"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="White"/>
+                                                                <Button Style="{StaticResource StepperButton}"
+                                                                        Content="+"
+                                                                        Click="IncreaseQuantity_Click"/>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </StackPanel>
                                                 </Button>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
@@ -253,87 +351,101 @@
                 </ItemsControl>
             </ScrollViewer>
 
-            <!-- Price Summary and Footer -->
-            <Border Grid.Row="2" Background="#16162A" CornerRadius="0,0,16,16" Padding="24,16">
+            <!-- Footer -->
+            <Border Grid.Row="2"
+                    Background="{StaticResource SurfaceElevatedBrush}"
+                    CornerRadius="0,0,14,14"
+                    Padding="24,16">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="16"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <!-- Base Price -->
-                    <Grid Grid.Row="0" Margin="0,0,0,4">
+                    <Grid Grid.Row="0" Margin="0,0,0,6">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Base Price"
-                                   FontSize="13"
-                                   Foreground="#6B7280"/>
+                                   FontSize="15"
+                                   Foreground="{StaticResource LabelTertiaryBrush}"/>
                         <TextBlock Grid.Column="1"
                                    Text="{Binding BasePrice, StringFormat='KSh {0:N2}'}"
-                                   FontSize="13"
-                                   Foreground="#9CA3AF"/>
+                                   FontSize="15"
+                                   Foreground="{StaticResource LabelSecondaryBrush}"/>
                     </Grid>
 
                     <!-- Modifiers Total -->
-                    <Grid Grid.Row="1" Margin="0,0,0,12"
+                    <Grid Grid.Row="1" Margin="0,0,0,8"
                           Visibility="{Binding HasModifierPrice, Converter={StaticResource BoolToVis}}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Modifiers"
-                                   FontSize="13"
-                                   Foreground="#6B7280"/>
+                                   FontSize="15"
+                                   Foreground="{StaticResource LabelTertiaryBrush}"/>
                         <TextBlock Grid.Column="1"
                                    Text="{Binding ModifierTotal, StringFormat='+KSh {0:N2}'}"
-                                   FontSize="13"
-                                   Foreground="#9CA3AF"/>
+                                   FontSize="15"
+                                   Foreground="{StaticResource SuccessBrush}"/>
                     </Grid>
 
+                    <!-- Separator -->
+                    <Rectangle Grid.Row="2" Height="0.5" Fill="{StaticResource SeparatorBrush}" Margin="0,4"/>
+
                     <!-- Total Price -->
-                    <Grid Grid.Row="2" Margin="0,0,0,16">
+                    <Grid Grid.Row="2" Margin="0,12,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Total"
-                                   FontSize="14"
+                                   FontSize="17"
                                    FontWeight="SemiBold"
-                                   Foreground="White"/>
+                                   Foreground="{StaticResource LabelPrimaryBrush}"
+                                   VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1"
                                    Text="{Binding TotalPrice, StringFormat='KSh {0:N2}'}"
-                                   FontSize="20"
+                                   FontSize="28"
                                    FontWeight="Bold"
-                                   Foreground="#10B981"/>
+                                   Foreground="{StaticResource SuccessBrush}"/>
                     </Grid>
 
+                    <!-- Validation Error -->
+                    <Border Grid.Row="4"
+                            Background="#1AFF453A"
+                            CornerRadius="8"
+                            Padding="12,8"
+                            Margin="0,0,0,12"
+                            Visibility="{Binding HasValidationError, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="{Binding ValidationError}"
+                                   FontSize="13"
+                                   Foreground="{StaticResource ErrorBrush}"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+
                     <!-- Buttons -->
-                    <Grid Grid.Row="2" Margin="0,16,0,0">
+                    <Grid Grid.Row="4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Validation Error -->
-                        <TextBlock Text="{Binding ValidationError}"
-                                   Foreground="#EF4444"
-                                   FontSize="12"
-                                   VerticalAlignment="Center"
-                                   Visibility="{Binding HasValidationError, Converter={StaticResource BoolToVis}}"/>
-
-                        <Button Grid.Column="1"
+                        <Button Grid.Column="0"
                                 Content="Cancel"
                                 Style="{StaticResource SecondaryButton}"
-                                Click="CancelButton_Click"
-                                Margin="0,0,12,0"/>
+                                Click="CancelButton_Click"/>
 
                         <Button Grid.Column="2"
                                 Content="Add to Order"
-                                Style="{StaticResource ModernButton}"
+                                Style="{StaticResource PrimaryButton}"
                                 Click="AddButton_Click"
                                 IsEnabled="{Binding CanAdd}"/>
                     </Grid>

@@ -113,6 +113,33 @@ public class POSDbContext : DbContext
     public DbSet<Attendance> Attendances => Set<Attendance>();
     #endregion
 
+    #region HR - Statutory Configuration
+    public DbSet<PAYETaxBand> PAYETaxBands => Set<PAYETaxBand>();
+    public DbSet<PAYERelief> PAYEReliefs => Set<PAYERelief>();
+    public DbSet<NSSFConfiguration> NSSFConfigurations => Set<NSSFConfiguration>();
+    public DbSet<SHIFConfiguration> SHIFConfigurations => Set<SHIFConfiguration>();
+    public DbSet<HousingLevyConfiguration> HousingLevyConfigurations => Set<HousingLevyConfiguration>();
+    public DbSet<HELBDeductionBand> HELBDeductionBands => Set<HELBDeductionBand>();
+    #endregion
+
+    #region HR - Leave Management
+    public DbSet<LeaveType> LeaveTypes => Set<LeaveType>();
+    public DbSet<LeaveAllocation> LeaveAllocations => Set<LeaveAllocation>();
+    public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
+    public DbSet<LeaveBalanceAdjustment> LeaveBalanceAdjustments => Set<LeaveBalanceAdjustment>();
+    public DbSet<PublicHoliday> PublicHolidays => Set<PublicHoliday>();
+    #endregion
+
+    #region HR - Loans & Advances
+    public DbSet<EmployeeLoan> EmployeeLoans => Set<EmployeeLoan>();
+    public DbSet<LoanRepayment> LoanRepayments => Set<LoanRepayment>();
+    #endregion
+
+    #region HR - Disciplinary & Termination
+    public DbSet<DisciplinaryDeduction> DisciplinaryDeductions => Set<DisciplinaryDeduction>();
+    public DbSet<EmployeeTermination> EmployeeTerminations => Set<EmployeeTermination>();
+    #endregion
+
     #region Expenses
     public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
     public DbSet<Expense> Expenses => Set<Expense>();

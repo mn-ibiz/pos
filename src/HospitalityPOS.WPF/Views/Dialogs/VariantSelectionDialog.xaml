@@ -5,7 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         mc:Ignorable="d"
         Title="Select Variant"
-        Height="600" Width="500"
+        Height="620" Width="480"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -13,32 +13,60 @@
         ResizeMode="NoResize">
 
     <Window.Resources>
-        <!-- Modern Button Style -->
-        <Style x:Key="ModernButton" TargetType="Button">
-            <Setter Property="Background" Value="#6366F1"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+
+        <!-- Apple-inspired Color Palette -->
+        <Color x:Key="SurfaceColor">#1C1C1E</Color>
+        <Color x:Key="SurfaceSecondaryColor">#2C2C2E</Color>
+        <Color x:Key="SurfaceTertiaryColor">#3A3A3C</Color>
+        <Color x:Key="AccentColor">#0A84FF</Color>
+        <Color x:Key="AccentHoverColor">#409CFF</Color>
+        <Color x:Key="SuccessColor">#30D158</Color>
+        <Color x:Key="LabelPrimaryColor">#FFFFFF</Color>
+        <Color x:Key="LabelSecondaryColor">#EBEBF5</Color>
+        <Color x:Key="LabelTertiaryColor">#8E8E93</Color>
+        <Color x:Key="SeparatorColor">#38383A</Color>
+
+        <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+        <SolidColorBrush x:Key="SurfaceSecondaryBrush" Color="{StaticResource SurfaceSecondaryColor}"/>
+        <SolidColorBrush x:Key="SurfaceTertiaryBrush" Color="{StaticResource SurfaceTertiaryColor}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+        <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+        <SolidColorBrush x:Key="LabelPrimaryBrush" Color="{StaticResource LabelPrimaryColor}"/>
+        <SolidColorBrush x:Key="LabelSecondaryBrush" Color="{StaticResource LabelSecondaryColor}"/>
+        <SolidColorBrush x:Key="LabelTertiaryBrush" Color="{StaticResource LabelTertiaryColor}"/>
+        <SolidColorBrush x:Key="SeparatorBrush" Color="{StaticResource SeparatorColor}"/>
+
+        <!-- Primary Button Style (Apple-inspired) -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontSize" Value="15"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="24,12"/>
+            <Setter Property="Padding" Value="20,12"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border"
                                 Background="{TemplateBinding Background}"
-                                CornerRadius="8"
+                                CornerRadius="10"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                                <Setter TargetName="border" Property="Background">
+                                    <Setter.Value>
+                                        <SolidColorBrush Color="{StaticResource AccentHoverColor}"/>
+                                    </Setter.Value>
+                                </Setter>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.85"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Opacity" Value="0.4"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.35"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -47,37 +75,67 @@
         </Style>
 
         <!-- Secondary Button Style -->
-        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
-            <Setter Property="Background" Value="#2D2D44"/>
+        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="{StaticResource SurfaceTertiaryBrush}"/>
         </Style>
 
-        <!-- Variant Option Button Style -->
-        <Style x:Key="VariantOptionButton" TargetType="Button">
-            <Setter Property="Background" Value="#1F1F33"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="14"/>
+        <!-- Close Button Style -->
+        <Style x:Key="CloseButton" TargetType="Button">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="#48484A"
+                                CornerRadius="14">
+                            <TextBlock Text="&#xE711;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="10"
+                                       Foreground="#AEAEB2"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#636366"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Variant Option Chip Style -->
+        <Style x:Key="VariantChip" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource SurfaceSecondaryBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource LabelPrimaryBrush}"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="Padding" Value="16,12"/>
-            <Setter Property="Margin" Value="4"/>
-            <Setter Property="MinWidth" Value="80"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="MinWidth" Value="72"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border"
                                 Background="{TemplateBinding Background}"
-                                BorderBrush="#2D2D44"
-                                BorderThickness="2"
-                                CornerRadius="8"
+                                BorderBrush="{StaticResource SeparatorBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#6366F1"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="1.5"/>
                             </Trigger>
                             <Trigger Property="Tag" Value="Selected">
-                                <Setter TargetName="border" Property="Background" Value="#6366F1"/>
-                                <Setter TargetName="border" Property="BorderBrush" Value="#6366F1"/>
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -86,10 +144,13 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="#1A1A2E" CornerRadius="16" BorderBrush="#2D2D44" BorderThickness="1">
+    <!-- Main Container with Apple-style shadow -->
+    <Border Background="{StaticResource SurfaceBrush}"
+            CornerRadius="14">
         <Border.Effect>
-            <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="5" Opacity="0.5"/>
+            <DropShadowEffect Color="#000000" BlurRadius="40" ShadowDepth="0" Opacity="0.4"/>
         </Border.Effect>
+
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -98,49 +159,52 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <Border Grid.Row="0" Background="#16162A" CornerRadius="16,16,0,0" Padding="24,20">
+            <Border Grid.Row="0" Padding="24,20,24,16">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+
                     <StackPanel>
                         <TextBlock Text="{Binding ProductName}"
-                                   FontSize="20"
-                                   FontWeight="Bold"
-                                   Foreground="White"/>
+                                   FontSize="22"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource LabelPrimaryBrush}"
+                                   TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="Select your options"
-                                   FontSize="13"
-                                   Foreground="#6B7280"
+                                   FontSize="15"
+                                   Foreground="{StaticResource LabelTertiaryBrush}"
                                    Margin="0,4,0,0"/>
                     </StackPanel>
+
                     <Button Grid.Column="1"
-                            Content="&#xE711;"
-                            FontFamily="Segoe MDL2 Assets"
-                            FontSize="14"
-                            Background="Transparent"
-                            Foreground="#6B7280"
-                            BorderThickness="0"
-                            Cursor="Hand"
+                            Style="{StaticResource CloseButton}"
                             Click="CloseButton_Click"
-                            Width="32" Height="32"/>
+                            VerticalAlignment="Top"/>
                 </Grid>
             </Border>
 
+            <!-- Separator -->
+            <Rectangle Grid.Row="0" Height="0.5" Fill="{StaticResource SeparatorBrush}"
+                       VerticalAlignment="Bottom" Margin="24,0"/>
+
             <!-- Content -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,20">
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          Padding="24,20">
                 <ItemsControl x:Name="VariantOptionsControl" ItemsSource="{Binding VariantOptions}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Margin="0,0,0,20">
-                                <!-- Option Name -->
+                            <StackPanel Margin="0,0,0,24">
+                                <!-- Option Label -->
                                 <TextBlock Text="{Binding Name}"
-                                           FontSize="15"
+                                           FontSize="13"
                                            FontWeight="SemiBold"
-                                           Foreground="White"
+                                           Foreground="{StaticResource LabelTertiaryBrush}"
                                            Margin="0,0,0,12"/>
 
-                                <!-- Values -->
+                                <!-- Values as Chips -->
                                 <ItemsControl ItemsSource="{Binding Values}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -149,17 +213,19 @@
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Button Style="{StaticResource VariantOptionButton}"
+                                            <Button Style="{StaticResource VariantChip}"
                                                     Tag="{Binding IsSelected, Converter={StaticResource BoolToSelectedConverter}}"
                                                     Click="VariantValue_Click"
                                                     DataContext="{Binding}">
-                                                <StackPanel Orientation="Vertical">
+                                                <StackPanel>
                                                     <TextBlock Text="{Binding DisplayName}"
-                                                               HorizontalAlignment="Center"/>
-                                                    <TextBlock Text="{Binding PriceAdjustmentText}"
-                                                               FontSize="11"
-                                                               Foreground="#9CA3AF"
                                                                HorizontalAlignment="Center"
+                                                               FontWeight="Medium"/>
+                                                    <TextBlock Text="{Binding PriceAdjustmentText}"
+                                                               FontSize="12"
+                                                               Foreground="#8E8E93"
+                                                               HorizontalAlignment="Center"
+                                                               Margin="0,2,0,0"
                                                                Visibility="{Binding HasPriceAdjustment, Converter={StaticResource BoolToVisibilityConverter}}"/>
                                                 </StackPanel>
                                             </Button>
@@ -172,49 +238,52 @@
                 </ItemsControl>
             </ScrollViewer>
 
-            <!-- Price Summary and Footer -->
-            <Border Grid.Row="2" Background="#16162A" CornerRadius="0,0,16,16" Padding="24,16">
+            <!-- Footer -->
+            <Border Grid.Row="2"
+                    Background="#252528"
+                    CornerRadius="0,0,14,14"
+                    Padding="24,16">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="16"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <!-- Price Summary -->
-                    <StackPanel Grid.Row="0" Margin="0,0,0,16">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Total Price"
-                                       FontSize="14"
-                                       Foreground="#9CA3AF"/>
-                            <TextBlock Grid.Column="1"
-                                       Text="{Binding TotalPrice, StringFormat='KSh {0:N2}'}"
-                                       FontSize="20"
-                                       FontWeight="Bold"
-                                       Foreground="#10B981"/>
-                        </Grid>
-                    </StackPanel>
-
-                    <!-- Buttons -->
-                    <Grid Grid.Row="1">
+                    <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Total"
+                                   FontSize="17"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource LabelPrimaryBrush}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding TotalPrice, StringFormat='KSh {0:N2}'}"
+                                   FontSize="24"
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource SuccessBrush}"/>
+                    </Grid>
+
+                    <!-- Buttons -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Button Grid.Column="1"
+                        <Button Grid.Column="0"
                                 Content="Cancel"
                                 Style="{StaticResource SecondaryButton}"
-                                Click="CancelButton_Click"
-                                Margin="0,0,12,0"/>
+                                Click="CancelButton_Click"/>
 
                         <Button Grid.Column="2"
                                 Content="Add to Order"
-                                Style="{StaticResource ModernButton}"
+                                Style="{StaticResource PrimaryButton}"
                                 Click="AddButton_Click"
                                 IsEnabled="{Binding CanAdd}"/>
                     </Grid>

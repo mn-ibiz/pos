@@ -14,9 +14,10 @@ public enum CashFlowActivityType
 }
 
 /// <summary>
-/// Department or cost center for financial allocation.
+/// Financial cost center for financial allocation and reporting.
+/// Note: This is distinct from the HR Department entity used for employee organization.
 /// </summary>
-public class Department : BaseEntity
+public class FinancialCostCenter : BaseEntity
 {
     /// <summary>
     /// Store this department belongs to (null for corporate-wide).
@@ -44,9 +45,9 @@ public class Department : BaseEntity
     public int? ManagerUserId { get; set; }
 
     /// <summary>
-    /// Parent department ID for hierarchy.
+    /// Parent cost center ID for hierarchy.
     /// </summary>
-    public int? ParentDepartmentId { get; set; }
+    public int? ParentCostCenterId { get; set; }
 
     /// <summary>
     /// Display order.
@@ -76,8 +77,8 @@ public class Department : BaseEntity
     // Navigation properties
     public virtual Store? Store { get; set; }
     public virtual User? Manager { get; set; }
-    public virtual Department? ParentDepartment { get; set; }
-    public virtual ICollection<Department> ChildDepartments { get; set; } = new List<Department>();
+    public virtual FinancialCostCenter? ParentCostCenter { get; set; }
+    public virtual ICollection<FinancialCostCenter> ChildCostCenters { get; set; } = new List<FinancialCostCenter>();
     public virtual ChartOfAccount? GLAccount { get; set; }
 }
 
