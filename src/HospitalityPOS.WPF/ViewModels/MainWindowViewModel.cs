@@ -270,6 +270,18 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [RelayCommand]
     private void NavigateToExpenses() => NavigateWithSidebar<ExpenseDashboardViewModel>("Expense Management");
 
+    [RelayCommand]
+    private void NavigateToAIInsights() => NavigateWithSidebar<AIInsightsDashboardViewModel>("AI Insights");
+
+    [RelayCommand]
+    private void NavigateToPrimeCost() => NavigateWithSidebar<PrimeCostReportViewModel>("Prime Cost Analysis");
+
+    [RelayCommand]
+    private void NavigateToMenuEngineering() => NavigateWithSidebar<MenuEngineeringViewModel>("Menu Engineering");
+
+    [RelayCommand]
+    private void NavigateToCustomerAnalytics() => NavigateWithSidebar<CustomerAnalyticsViewModel>("Customer Analytics");
+
     private void NavigateWithSidebar<TViewModel>(string pageTitle) where TViewModel : class
     {
         ShowSidebar = true;

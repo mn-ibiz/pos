@@ -1,0 +1,535 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.Analytics.PrimeCostReportView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="900" d:DesignWidth="1400"
+             Background="#0F0F1A">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+
+        <!-- Gradient Brushes -->
+        <LinearGradientBrush x:Key="SuccessGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#10B981" Offset="0"/>
+            <GradientStop Color="#34D399" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="WarningGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#F59E0B" Offset="0"/>
+            <GradientStop Color="#FBBF24" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="DangerGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#EF4444" Offset="0"/>
+            <GradientStop Color="#F87171" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="InfoGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#3B82F6" Offset="0"/>
+            <GradientStop Color="#60A5FA" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="PurpleGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#8B5CF6" Offset="0"/>
+            <GradientStop Color="#A78BFA" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="CardGradient" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#1A1A2E" Offset="0"/>
+            <GradientStop Color="#16162A" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Card Style -->
+        <Style x:Key="ModernCard" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardGradient}"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="24"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#2D2D44"/>
+        </Style>
+
+        <!-- Metric Card Style -->
+        <Style x:Key="MetricCard" TargetType="Border">
+            <Setter Property="Background" Value="#1F1F23"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#2D2D44"/>
+        </Style>
+
+        <!-- Action Button Style -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="40"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{StaticResource InfoGradient}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Date Picker Style -->
+        <Style x:Key="ModernDatePicker" TargetType="DatePicker">
+            <Setter Property="Background" Value="#1F1F23"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#2D2D44"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <!-- Progress Bar Style -->
+        <Style x:Key="CostProgressBar" TargetType="ProgressBar">
+            <Setter Property="Height" Value="10"/>
+            <Setter Property="Background" Value="#1F1F23"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}" CornerRadius="5"/>
+                            <Border x:Name="PART_Track" CornerRadius="5"/>
+                            <Border x:Name="PART_Indicator" CornerRadius="5" HorizontalAlignment="Left"
+                                    Background="{TemplateBinding Foreground}"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row="0" Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <Border Width="48" Height="48" CornerRadius="12" Margin="0,0,16,0"
+                                Background="{StaticResource SuccessGradient}">
+                            <TextBlock Text="&#xE912;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Prime Cost Analysis" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="COGS + Labor as percentage of revenue (Target: 60% or less)"
+                                       FontSize="14" Foreground="#9CA3AF"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <DatePicker Style="{StaticResource ModernDatePicker}"
+                                SelectedDate="{Binding StartDate}" Width="140" Margin="0,0,8,0"/>
+                    <TextBlock Text="to" Foreground="#9CA3AF" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <DatePicker Style="{StaticResource ModernDatePicker}"
+                                SelectedDate="{Binding EndDate}" Width="140" Margin="0,0,16,0"/>
+                    <Button Style="{StaticResource ActionButton}" Command="{Binding GenerateReportCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                       VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Generate Report"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Prime Cost Summary Card -->
+            <Border Grid.Row="1" Style="{StaticResource ModernCard}" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Prime Cost Gauge -->
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Prime Cost Percentage" FontSize="14" Foreground="#9CA3AF" Margin="0,0,0,16"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,24,0">
+                                <TextBlock Text="{Binding Report.PrimeCostPercentage, StringFormat='{}{0:N1}%', FallbackValue='0.0%'}"
+                                           FontSize="56" FontWeight="Bold" Foreground="{Binding PrimeCostColor}"/>
+                                <Border Background="{Binding StatusBackground}" CornerRadius="8" Padding="12,6"
+                                        HorizontalAlignment="Left" Margin="0,8,0,0">
+                                    <TextBlock Text="{Binding Report.StatusMessage, FallbackValue='Loading...'}"
+                                               FontSize="13" FontWeight="SemiBold" Foreground="{Binding PrimeCostColor}"/>
+                                </Border>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Industry Target: 60%" FontSize="12" Foreground="#6B7280" Margin="0,0,0,8"/>
+                                <Grid>
+                                    <ProgressBar Style="{StaticResource CostProgressBar}"
+                                                 Value="{Binding Report.PrimeCostPercentage, FallbackValue=0}"
+                                                 Maximum="100" Foreground="{Binding PrimeCostColor}"/>
+                                    <!-- Target Line -->
+                                    <Border Width="2" Height="16" Background="#FBBF24"
+                                            HorizontalAlignment="Left" VerticalAlignment="Center"
+                                            Margin="180,0,0,0" ToolTip="Target: 60%"/>
+                                </Grid>
+                                <Grid Margin="0,12,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="0%" Foreground="#6B7280" FontSize="11"/>
+                                    <TextBlock Grid.Column="1" Text="60%" Foreground="#FBBF24" FontSize="11"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Text="100%" Foreground="#6B7280" FontSize="11"
+                                               HorizontalAlignment="Right"/>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Net Revenue -->
+                    <Border Grid.Column="1" Style="{StaticResource MetricCard}" Margin="16,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Net Revenue" FontSize="12" Foreground="#9CA3AF" Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding Report.NetRevenue, StringFormat='KES {0:N0}', FallbackValue='KES 0'}"
+                                       FontSize="24" FontWeight="Bold" Foreground="White"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Border Width="8" Height="8" CornerRadius="4" Background="#10B981" Margin="0,0,6,0"/>
+                                <TextBlock Text="Gross - Discounts" FontSize="11" Foreground="#6B7280"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Total COGS -->
+                    <Border Grid.Column="2" Style="{StaticResource MetricCard}" Margin="16,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Total COGS" FontSize="12" Foreground="#9CA3AF" Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding Report.TotalCOGS, StringFormat='KES {0:N0}', FallbackValue='KES 0'}"
+                                       FontSize="24" FontWeight="Bold" Foreground="#F59E0B"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <TextBlock Text="{Binding Report.COGSPercentage, StringFormat='{}{0:N1}%', FallbackValue='0%'}"
+                                           FontSize="11" Foreground="#F59E0B" FontWeight="SemiBold"/>
+                                <TextBlock Text=" of revenue" FontSize="11" Foreground="#6B7280"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Total Labor -->
+                    <Border Grid.Column="3" Style="{StaticResource MetricCard}" Margin="16,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Total Labor" FontSize="12" Foreground="#9CA3AF" Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding Report.TotalLaborCost, StringFormat='KES {0:N0}', FallbackValue='KES 0'}"
+                                       FontSize="24" FontWeight="Bold" Foreground="#3B82F6"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <TextBlock Text="{Binding Report.LaborCostPercentage, StringFormat='{}{0:N1}%', FallbackValue='0%'}"
+                                           FontSize="11" Foreground="#3B82F6" FontWeight="SemiBold"/>
+                                <TextBlock Text=" of revenue" FontSize="11" Foreground="#6B7280"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Cost Breakdown Row -->
+            <Grid Grid.Row="2" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- COGS Breakdown -->
+                <Border Grid.Column="0" Style="{StaticResource ModernCard}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                            <Border Width="36" Height="36" CornerRadius="8" Background="#261A03" Margin="0,0,12,0">
+                                <TextBlock Text="&#xE7BF;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                           Foreground="#F59E0B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Cost of Goods Sold" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                                <TextBlock Text="Food, beverage, and other materials" FontSize="11" Foreground="#6B7280"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- COGS Items -->
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Food Cost" Foreground="#D1D5DB" FontSize="14"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Report.FoodCost, StringFormat='KES {0:N0}'}"
+                                       Foreground="White" FontWeight="SemiBold" FontSize="14"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Beverage Cost" Foreground="#D1D5DB" FontSize="14"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Report.BeverageCost, StringFormat='KES {0:N0}'}"
+                                       Foreground="White" FontWeight="SemiBold" FontSize="14"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Other COGS" Foreground="#D1D5DB" FontSize="14"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Report.OtherCOGS, StringFormat='KES {0:N0}'}"
+                                       Foreground="White" FontWeight="SemiBold" FontSize="14"/>
+                        </Grid>
+
+                        <Border Height="1" Background="#2D2D44" Margin="0,8,0,12"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Total COGS" Foreground="#F59E0B" FontWeight="Bold" FontSize="15"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Report.TotalCOGS, StringFormat='KES {0:N0}'}"
+                                       Foreground="#F59E0B" FontWeight="Bold" FontSize="15"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Labor Breakdown -->
+                <Border Grid.Column="2" Style="{StaticResource ModernCard}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                            <Border Width="36" Height="36" CornerRadius="8" Background="#0D1526" Margin="0,0,12,0">
+                                <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                           Foreground="#3B82F6" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Labor Costs" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                                <TextBlock Text="Wages, taxes, and benefits" FontSize="11" Foreground="#6B7280"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Labor Items -->
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Wages &amp; Salaries" Foreground="#D1D5DB" FontSize="14"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Report.WagesAndSalaries, StringFormat='KES {0:N0}'}"
+                                       Foreground="White" FontWeight="SemiBold" FontSize="14"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Payroll Taxes" Foreground="#D1D5DB" FontSize="14"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Report.PayrollTaxes, StringFormat='KES {0:N0}'}"
+                                       Foreground="White" FontWeight="SemiBold" FontSize="14"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Employee Benefits" Foreground="#D1D5DB" FontSize="14"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Report.EmployeeBenefits, StringFormat='KES {0:N0}'}"
+                                       Foreground="White" FontWeight="SemiBold" FontSize="14"/>
+                        </Grid>
+
+                        <Border Height="1" Background="#2D2D44" Margin="0,8,0,12"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Total Labor" Foreground="#3B82F6" FontWeight="Bold" FontSize="15"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Report.TotalLaborCost, StringFormat='KES {0:N0}'}"
+                                       Foreground="#3B82F6" FontWeight="Bold" FontSize="15"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Gross Profit and Trend -->
+            <Grid Grid.Row="3" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Gross Profit -->
+                <Border Grid.Column="0" Style="{StaticResource ModernCard}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Width="80" Height="80" CornerRadius="16" Margin="0,0,24,0">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#0D2818" Offset="0"/>
+                                    <GradientStop Color="#0A1F14" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <TextBlock Text="&#xE8D4;" FontFamily="Segoe MDL2 Assets" FontSize="32"
+                                       Foreground="#10B981" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Gross Profit" FontSize="14" Foreground="#9CA3AF" Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding Report.GrossProfit, StringFormat='KES {0:N0}'}"
+                                       FontSize="32" FontWeight="Bold" Foreground="#10B981"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <TextBlock Text="{Binding Report.GrossProfitPercentage, StringFormat='{}{0:N1}%'}"
+                                           FontSize="14" Foreground="#10B981" FontWeight="SemiBold"/>
+                                <TextBlock Text=" profit margin" FontSize="14" Foreground="#6B7280"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Trend Comparison -->
+                <Border Grid.Column="2" Style="{StaticResource ModernCard}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Width="80" Height="80" CornerRadius="16" Margin="0,0,24,0">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#1A1026" Offset="0"/>
+                                    <GradientStop Color="#150D1F" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="32"
+                                       Foreground="#8B5CF6" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="vs Previous Period" FontSize="14" Foreground="#9CA3AF" Margin="0,0,0,8"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Report.TrendChange, StringFormat='{}{0:+0.0;-0.0;0.0}%'}"
+                                           FontSize="32" FontWeight="Bold" Foreground="{Binding TrendColor}"/>
+                            </StackPanel>
+                            <TextBlock FontSize="14" Foreground="#6B7280" Margin="0,8,0,0">
+                                <Run Text="Previous: "/>
+                                <Run Text="{Binding Report.PreviousPeriodPrimeCostPercentage, StringFormat='{}{0:N1}%'}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Recommendations -->
+            <Border Grid.Row="4" Style="{StaticResource ModernCard}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Border Width="36" Height="36" CornerRadius="8" Background="#1A1026" Margin="0,0,12,0">
+                            <TextBlock Text="&#xE82F;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                       Foreground="#8B5CF6" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Cost Optimization Recommendations" FontSize="16" FontWeight="SemiBold"
+                                   Foreground="White" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Background="#1F1F23" CornerRadius="12" Padding="16" Margin="0,0,8,0">
+                            <StackPanel>
+                                <Border Width="40" Height="40" CornerRadius="10" Background="#261A03" Margin="0,0,0,12">
+                                    <TextBlock Text="&#xE7BF;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                               Foreground="#F59E0B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Reduce Food Waste" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="White" Margin="0,0,0,8"/>
+                                <TextBlock Text="Implement portion control and improve inventory management to reduce spoilage."
+                                           Foreground="#9CA3AF" FontSize="12" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="1" Background="#1F1F23" CornerRadius="12" Padding="16" Margin="8,0,8,0">
+                            <StackPanel>
+                                <Border Width="40" Height="40" CornerRadius="10" Background="#0D1526" Margin="0,0,0,12">
+                                    <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                               Foreground="#3B82F6" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Optimize Scheduling" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="White" Margin="0,0,0,8"/>
+                                <TextBlock Text="Match staffing levels to demand patterns to reduce idle labor hours."
+                                           Foreground="#9CA3AF" FontSize="12" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="2" Background="#1F1F23" CornerRadius="12" Padding="16" Margin="8,0,0,0">
+                            <StackPanel>
+                                <Border Width="40" Height="40" CornerRadius="10" Background="#0D2818" Margin="0,0,0,12">
+                                    <TextBlock Text="&#xE912;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                               Foreground="#10B981" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Negotiate Supplier Rates" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="White" Margin="0,0,0,8"/>
+                                <TextBlock Text="Review supplier contracts and seek volume discounts on high-turnover items."
+                                           Foreground="#9CA3AF" FontSize="12" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

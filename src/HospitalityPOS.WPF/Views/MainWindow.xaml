@@ -7,6 +7,7 @@
         xmlns:views="clr-namespace:HospitalityPOS.WPF.Views"
         xmlns:inventoryViews="clr-namespace:HospitalityPOS.WPF.Views.Inventory"
         xmlns:expenseViews="clr-namespace:HospitalityPOS.WPF.Views.Expenses"
+        xmlns:analyticsViews="clr-namespace:HospitalityPOS.WPF.Views.Analytics"
         xmlns:controls="clr-namespace:HospitalityPOS.WPF.Controls"
         mc:Ignorable="d"
         Title="{Binding ApplicationTitle}"
@@ -168,6 +169,18 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ExpenseCategoryManagementViewModel}">
             <expenseViews:ExpenseCategoryManagementView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AIInsightsDashboardViewModel}">
+            <analyticsViews:AIInsightsDashboardView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PrimeCostReportViewModel}">
+            <analyticsViews:PrimeCostReportView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:MenuEngineeringViewModel}">
+            <analyticsViews:MenuEngineeringView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CustomerAnalyticsViewModel}">
+            <analyticsViews:CustomerAnalyticsView />
         </DataTemplate>
     </Window.Resources>
 
@@ -432,6 +445,46 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE912;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
                                     <TextBlock Text="Expenses" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Analytics Group -->
+                            <TextBlock Text="ANALYTICS"
+                                       Style="{StaticResource SidebarGroupHeaderStyle}" />
+
+                            <!-- AI Insights -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToAIInsightsCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE99A;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="AI Insights" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Prime Cost Report -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToPrimeCostCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Prime Cost" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Menu Engineering -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToMenuEngineeringCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xED56;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Menu Engineering" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Customer Analytics -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToCustomerAnalyticsCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE716;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Customer Analytics" Margin="12,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
 

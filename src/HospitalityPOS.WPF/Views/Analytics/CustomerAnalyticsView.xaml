@@ -1,0 +1,358 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.Analytics.CustomerAnalyticsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="900" d:DesignWidth="1400"
+             Background="#0F0F1A">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+
+        <LinearGradientBrush x:Key="CardGradient" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#1A1A2E" Offset="0"/>
+            <GradientStop Color="#16162A" Offset="1"/>
+        </LinearGradientBrush>
+
+        <Style x:Key="ModernCard" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardGradient}"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#2D2D44"/>
+        </Style>
+
+        <Style x:Key="SegmentCard" TargetType="Border">
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="40"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}"
+                                CornerRadius="10" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ModernDatePicker" TargetType="DatePicker">
+            <Setter Property="Background" Value="#1F1F23"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#2D2D44"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row="0" Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <Border Width="48" Height="48" CornerRadius="12" Margin="0,0,16,0">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#06B6D4" Offset="0"/>
+                                    <GradientStop Color="#22D3EE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Customer Analytics" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="RFM Segmentation and Customer Lifetime Value Analysis"
+                                       FontSize="14" Foreground="#9CA3AF"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <DatePicker Style="{StaticResource ModernDatePicker}"
+                                SelectedDate="{Binding StartDate}" Width="140" Margin="0,0,8,0"/>
+                    <TextBlock Text="to" Foreground="#9CA3AF" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <DatePicker Style="{StaticResource ModernDatePicker}"
+                                SelectedDate="{Binding EndDate}" Width="140" Margin="0,0,16,0"/>
+                    <Button Style="{StaticResource ActionButton}" Command="{Binding AnalyzeCommand}">
+                        <Button.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#06B6D4" Offset="0"/>
+                                <GradientStop Color="#22D3EE" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Button.Background>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                       VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Analyze Customers"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Summary Metrics -->
+            <Grid Grid.Row="1" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Total Customers -->
+                <Border Grid.Column="0" Style="{StaticResource SegmentCard}"
+                        Background="#0D1526" BorderBrush="#3B82F6">
+                    <StackPanel>
+                        <Border Width="40" Height="40" CornerRadius="10" Background="#1E40AF" Margin="0,0,0,12">
+                            <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="{Binding Report.TotalCustomers, StringFormat='{}{0:N0}', FallbackValue='0'}"
+                                   FontSize="32" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock Text="Total Customers" FontSize="12" Foreground="#9CA3AF" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Active Customers -->
+                <Border Grid.Column="2" Style="{StaticResource SegmentCard}"
+                        Background="#0D2818" BorderBrush="#10B981">
+                    <StackPanel>
+                        <Border Width="40" Height="40" CornerRadius="10" Background="#059669" Margin="0,0,0,12">
+                            <TextBlock Text="&#xE8FB;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="{Binding Report.ActiveCustomers, StringFormat='{}{0:N0}', FallbackValue='0'}"
+                                   FontSize="32" FontWeight="Bold" Foreground="#10B981"/>
+                        <TextBlock Foreground="#9CA3AF" FontSize="12" Margin="0,4,0,0">
+                            <Run Text="Active ("/>
+                            <Run Text="{Binding Report.CustomerRetentionRate, StringFormat='{}{0:N0}%'}"/>
+                            <Run Text=" retention)"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- At Risk -->
+                <Border Grid.Column="4" Style="{StaticResource SegmentCard}"
+                        Background="#2D1515" BorderBrush="#EF4444">
+                    <StackPanel>
+                        <Border Width="40" Height="40" CornerRadius="10" Background="#DC2626" Margin="0,0,0,12">
+                            <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="{Binding Report.ChurningCustomers, StringFormat='{}{0:N0}', FallbackValue='0'}"
+                                   FontSize="32" FontWeight="Bold" Foreground="#EF4444"/>
+                        <TextBlock Text="At Risk of Churning" FontSize="12" Foreground="#9CA3AF" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Average Value -->
+                <Border Grid.Column="6" Style="{StaticResource SegmentCard}"
+                        Background="#1A1026" BorderBrush="#8B5CF6">
+                    <StackPanel>
+                        <Border Width="40" Height="40" CornerRadius="10" Background="#7C3AED" Margin="0,0,0,12">
+                            <TextBlock Text="&#xE912;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="{Binding Report.AverageCustomerValue, StringFormat='KES {0:N0}', FallbackValue='KES 0'}"
+                                   FontSize="28" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock Text="Avg Customer Value" FontSize="12" Foreground="#9CA3AF" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- RFM Segments & At-Risk List -->
+            <Grid Grid.Row="2" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="400"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- RFM Segments -->
+                <Border Grid.Column="0" Style="{StaticResource ModernCard}">
+                    <StackPanel>
+                        <TextBlock Text="Customer Segments (RFM)" FontSize="16" FontWeight="SemiBold"
+                                   Foreground="White" Margin="0,0,0,16"/>
+                        <ItemsControl ItemsSource="{Binding Report.SegmentSummaries}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#1F1F23" CornerRadius="10" Padding="12" Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Grid.Column="0" Width="8" CornerRadius="4" Margin="0,0,12,0"
+                                                    Background="{Binding SegmentColor}"/>
+
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding SegmentName}" FontSize="13"
+                                                           FontWeight="SemiBold" Foreground="White"/>
+                                                <TextBlock FontSize="11" Foreground="#6B7280">
+                                                    <Run Text="{Binding CustomerPercentage, StringFormat='{}{0:N0}%'}"/>
+                                                    <Run Text=" of customers"/>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="2" Margin="16,0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding CustomerCount, StringFormat='{}{0:N0}'}"
+                                                           FontSize="14" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Right"/>
+                                                <TextBlock Text="customers" FontSize="10" Foreground="#6B7280" HorizontalAlignment="Right"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="3" VerticalAlignment="Center" MinWidth="100">
+                                                <TextBlock Text="{Binding TotalRevenue, StringFormat='KES {0:N0}'}"
+                                                           FontSize="14" FontWeight="SemiBold" Foreground="#10B981" HorizontalAlignment="Right"/>
+                                                <TextBlock Text="{Binding RevenuePercentage, StringFormat='{}{0:N0}% revenue'}"
+                                                           FontSize="10" Foreground="#6B7280" HorizontalAlignment="Right"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- At-Risk Customers -->
+                <Border Grid.Column="2" Style="{StaticResource ModernCard}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+                            <Border Width="32" Height="32" CornerRadius="8" Background="#451A03" Margin="0,0,10,0">
+                                <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                           Foreground="#EF4444" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="Urgent: At-Risk Customers" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="#EF4444" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="1" Foreground="#9CA3AF" FontSize="12" Margin="0,0,0,12">
+                            <Run Text="Potential revenue at risk: KES "/>
+                            <Run Text="{Binding Report.AtRiskRevenue, StringFormat='{}{0:N0}'}" Foreground="#EF4444" FontWeight="SemiBold"/>
+                        </TextBlock>
+
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" MaxHeight="300">
+                            <ItemsControl ItemsSource="{Binding Report.AtRiskCustomers}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#1F1F23" CornerRadius="8" Padding="12" Margin="0,0,0,8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="{Binding CustomerName}" FontSize="13"
+                                                               FontWeight="SemiBold" Foreground="White"/>
+                                                    <TextBlock FontSize="11" Foreground="#6B7280" Margin="0,2,0,0">
+                                                        <Run Text="Last visit: "/>
+                                                        <Run Text="{Binding DaysSinceLastPurchase}"/>
+                                                        <Run Text=" days ago"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding TotalSpent, StringFormat='KES {0:N0}'}"
+                                                               FontSize="12" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Right"/>
+                                                    <Border Background="#451A03" CornerRadius="4" Padding="6,2" Margin="0,4,0,0">
+                                                        <TextBlock Text="{Binding ChurnRiskScore, StringFormat='{}{0:N0}% risk'}"
+                                                                   FontSize="10" Foreground="#EF4444"/>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Recommendations -->
+            <Border Grid.Row="3" Style="{StaticResource ModernCard}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Border Width="36" Height="36" CornerRadius="8" Background="#0D2D26" Margin="0,0,12,0">
+                            <TextBlock Text="&#xE82F;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                       Foreground="#06B6D4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Recommended Actions" FontSize="16" FontWeight="SemiBold"
+                                   Foreground="White" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <ItemsControl ItemsSource="{Binding Report.Recommendations}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="3"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#1F1F23" CornerRadius="12" Padding="16" Margin="0,0,8,8">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold"
+                                                   Foreground="White" Margin="0,0,0,8"/>
+                                        <TextBlock Text="{Binding Description}" FontSize="12"
+                                                   Foreground="#9CA3AF" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                                        <Border Background="#2D2D44" CornerRadius="6" Padding="8,4">
+                                            <TextBlock FontSize="11" Foreground="#06B6D4">
+                                                <Run Text="Target: "/>
+                                                <Run Text="{Binding TargetCustomerCount}"/>
+                                                <Run Text=" customers"/>
+                                            </TextBlock>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

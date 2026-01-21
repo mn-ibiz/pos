@@ -317,6 +317,12 @@ public partial class App : Application
         services.AddTransient<ExpenseListViewModel>();
         services.AddTransient<ExpenseCategoryManagementViewModel>();
 
+        // Analytics ViewModels
+        services.AddTransient<AIInsightsDashboardViewModel>();
+        services.AddTransient<PrimeCostReportViewModel>();
+        services.AddTransient<MenuEngineeringViewModel>();
+        services.AddTransient<CustomerAnalyticsViewModel>();
+
         // Stock Transfer ViewModels (Epic 23) - NOW ENABLED after API fixes
         services.AddTransient<StockTransferViewModel>();
         services.AddTransient<CreateTransferRequestViewModel>();
