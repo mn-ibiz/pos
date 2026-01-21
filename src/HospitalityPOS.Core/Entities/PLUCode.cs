@@ -209,6 +209,11 @@ public class ProductBarcode : BaseEntity
     public int ProductId { get; set; }
 
     /// <summary>
+    /// The product variant ID (null for parent product barcodes).
+    /// </summary>
+    public int? ProductVariantId { get; set; }
+
+    /// <summary>
     /// Barcode value.
     /// </summary>
     public string Barcode { get; set; } = string.Empty;
@@ -216,7 +221,7 @@ public class ProductBarcode : BaseEntity
     /// <summary>
     /// Barcode type.
     /// </summary>
-    public BarcodeType BarcodeType { get; set; }
+    public Enums.BarcodeType BarcodeType { get; set; }
 
     /// <summary>
     /// Whether this is the primary barcode for the product.
@@ -234,7 +239,12 @@ public class ProductBarcode : BaseEntity
     public string? Description { get; set; }
 
     // Navigation properties
-    public Product Product { get; set; } = null!;
+    public virtual Product Product { get; set; } = null!;
+
+    /// <summary>
+    /// The product variant.
+    /// </summary>
+    public virtual ProductVariant? ProductVariant { get; set; }
 }
 
 /// <summary>

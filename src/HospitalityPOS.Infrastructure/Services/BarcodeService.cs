@@ -174,7 +174,7 @@ public class BarcodeService : IBarcodeService
         {
             ProductId = productId,
             Barcode = barcode,
-            BarcodeType = (HospitalityPOS.Core.Entities.BarcodeType)(int)type,
+            BarcodeType = type,
             IsPrimary = isPrimary,
             PackSize = packSize
         };

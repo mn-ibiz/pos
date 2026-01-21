@@ -144,7 +144,10 @@ public partial class CashierShellViewModel : ViewModelBase, IDisposable
 
         // Check if user is already logged in (event was fired before subscription)
         // This handles the case when navigating to CashierShell after login
-        if (_sessionService.CurrentUser != null)
+        // IMPORTANT: Only auto-navigate to POS if we're in Supermarket or Restaurant mode
+        var currentMode = ModeSelectionViewModel.SelectedLoginMode;
+        if (_sessionService.CurrentUser != null &&
+            (currentMode == LoginMode.Supermarket || currentMode == LoginMode.Restaurant))
         {
             var user = _sessionService.CurrentUser;
             CurrentUserName = user.DisplayName ?? user.FullName ?? "Cashier";
@@ -190,6 +193,15 @@ public partial class CashierShellViewModel : ViewModelBase, IDisposable
 
     private async void OnUserLoggedIn(object? sender, SessionEventArgs e)
     {
+        // IMPORTANT: Only respond to login events if we're in Supermarket or Restaurant mode
+        // Admin mode uses MainWindowViewModel and should NOT trigger CashierShell POS navigation
+        var currentMode = ModeSelectionViewModel.SelectedLoginMode;
+        if (currentMode != LoginMode.Supermarket && currentMode != LoginMode.Restaurant)
+        {
+            _logger.Debug("CashierShellViewModel ignoring login event for mode: {Mode}", currentMode);
+            return;
+        }
+
         var user = e.User;
         CurrentUserName = user?.DisplayName ?? user?.FullName ?? "Cashier";
 
@@ -337,6 +349,7 @@ public partial class CashierShellViewModel : ViewModelBase, IDisposable
         if (!confirm) return;
 
         _sessionService.ClearSession(LogoutReason.UserInitiated);
+        _uiShellService.ClearModeSelection(); // Clear mode selection for fresh start
         ModeSelectionViewModel.SelectedLoginMode = LoginMode.None;
         _navigationService.NavigateTo<ModeSelectionViewModel>();
         _navigationService.ClearHistory();

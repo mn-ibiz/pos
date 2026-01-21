@@ -21,6 +21,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly ISessionService _sessionService;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IDialogService _dialogService;
+    private readonly IUiShellService _uiShellService;
     private readonly DispatcherTimer _clockTimer;
 
     private WorkPeriod? _currentWorkPeriod;
@@ -168,13 +169,15 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         INavigationService navigationService,
         ISessionService sessionService,
         IServiceScopeFactory scopeFactory,
-        IDialogService dialogService)
+        IDialogService dialogService,
+        IUiShellService uiShellService)
         : base(logger)
     {
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _uiShellService = uiShellService ?? throw new ArgumentNullException(nameof(uiShellService));
 
         // Subscribe to navigation events
         _navigationService.Navigated += OnNavigated;
@@ -242,6 +245,12 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     [RelayCommand]
     private void NavigateToCategoryManagement() => NavigateWithSidebar<CategoryManagementViewModel>("Categories");
+
+    [RelayCommand]
+    private void NavigateToVariantOptions() => NavigateWithSidebar<VariantOptionsViewModel>("Variant Options");
+
+    [RelayCommand]
+    private void NavigateToModifierGroups() => NavigateWithSidebar<ModifierGroupsViewModel>("Modifier Groups");
 
     [RelayCommand]
     private void NavigateToEmployees() => NavigateWithSidebar<EmployeesViewModel>("Employees");
@@ -345,6 +354,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private void Logout()
     {
         _sessionService.ClearSession(LogoutReason.UserInitiated);
+        _uiShellService.ClearModeSelection(); // Clear mode selection for fresh start
         ShowSidebar = false;
         ModeSelectionViewModel.SelectedLoginMode = LoginMode.None;
         _navigationService.NavigateTo<ModeSelectionViewModel>();

@@ -56,6 +56,12 @@ public interface IUiShellService
     Task RefreshAsync();
 
     /// <summary>
+    /// Clears the explicitly set mode flag, allowing RefreshAsync to update from config.
+    /// Call this when logging out or returning to mode selection.
+    /// </summary>
+    void ClearModeSelection();
+
+    /// <summary>
     /// Event raised when the layout changes.
     /// </summary>
     event EventHandler<LayoutChangedEventArgs>? LayoutChanged;

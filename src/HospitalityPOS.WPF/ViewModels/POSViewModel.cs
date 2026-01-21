@@ -35,6 +35,8 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     private readonly IBarcodeService _barcodeService;
     private readonly IMpesaService? _mpesaService;
     private readonly ILoyaltyService? _loyaltyService;
+    private readonly IProductVariantService? _variantService;
+    private readonly IModifierService? _modifierService;
 
     private const int ItemsPerPage = 15;
     private const decimal TaxRate = 0.16m; // Kenya VAT 16%
@@ -431,6 +433,8 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         IOfferService offerService,
         IUiShellService uiShellService,
         IBarcodeService barcodeService,
+        IProductVariantService? variantService = null,
+        IModifierService? modifierService = null,
         IMpesaService? mpesaService = null,
         ILoyaltyService? loyaltyService = null)
         : base(logger)
@@ -448,6 +452,8 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         _offerService = offerService ?? throw new ArgumentNullException(nameof(offerService));
         _uiShellService = uiShellService ?? throw new ArgumentNullException(nameof(uiShellService));
         _barcodeService = barcodeService ?? throw new ArgumentNullException(nameof(barcodeService));
+        _variantService = variantService; // Optional - variants feature
+        _modifierService = modifierService; // Optional - modifiers feature
         _mpesaService = mpesaService; // Optional - may not be configured
         _loyaltyService = loyaltyService; // Optional - loyalty program
 
@@ -477,6 +483,19 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
             var currentPeriod = await _workPeriodService.GetCurrentWorkPeriodAsync();
             if (currentPeriod is null)
             {
+                // Check if we're in admin mode - admin can navigate back to dashboard to open workday
+                if (ModeSelectionViewModel.SelectedLoginMode == LoginMode.Admin)
+                {
+                    await _dialogService.ShowErrorAsync(
+                        "Work Period Required",
+                        "A work period must be open to use the POS.\n\nPlease use the 'Open Day' option in the sidebar to start a work period.");
+
+                    // Just navigate back - admin can use sidebar to open workday
+                    _navigationService.GoBack();
+                    return;
+                }
+
+                // For cashier modes (Supermarket/Restaurant), log out and redirect to mode selection
                 await _dialogService.ShowErrorAsync(
                     "Work Period Required",
                     "A work period must be open to use the POS.\n\nPlease log in through Admin mode to open a work period first.");
@@ -929,7 +948,9 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
             ImagePath = _imageService.GetDisplayImagePath(p.ImagePath),
             IsOutOfStock = p.Inventory is null || p.Inventory.CurrentStock <= 0,
             IsLowStock = p.IsLowStock,
-            CurrentStock = p.Inventory?.CurrentStock ?? 0
+            CurrentStock = p.Inventory?.CurrentStock ?? 0,
+            HasVariants = p.HasVariants,
+            HasModifiers = p.HasModifiers
         };
     }
 
@@ -983,7 +1004,9 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
                 ImagePath = _imageService.GetDisplayImagePath(p.ImagePath),
                 IsOutOfStock = p.Inventory is null || p.Inventory.CurrentStock <= 0,
                 CurrentStock = p.Inventory?.CurrentStock ?? 0,
-                IsFavorite = favoriteIds.Contains(p.Id)
+                IsFavorite = favoriteIds.Contains(p.Id),
+                HasVariants = p.HasVariants,
+                HasModifiers = p.HasModifiers
             };
 
             // Check for active offer
@@ -1093,9 +1116,78 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
             return;
         }
 
-        // Check if product already in order
-        var existing = OrderItems.FirstOrDefault(oi => oi.ProductId == product.Id);
-        if (existing is not null)
+        // Variables for variant/modifier selection results
+        Views.Dialogs.VariantSelectionResult? variantResult = null;
+        Views.Dialogs.ModifierSelectionResult? modifierResult = null;
+
+        // Check if product has variants - show selection dialog
+        if (product.HasVariants && _variantService != null)
+        {
+            var fullProduct = _allProducts.FirstOrDefault(p => p.Id == product.Id);
+            if (fullProduct != null)
+            {
+                var productVariantOptions = await _variantService.GetProductVariantOptionsAsync(product.Id);
+                var variants = await _variantService.GetProductVariantsAsync(product.Id);
+
+                // Extract the VariantOption entities from ProductVariantOption links
+                var options = productVariantOptions
+                    .Where(pvo => pvo.VariantOption != null)
+                    .Select(pvo => pvo.VariantOption!)
+                    .ToList();
+
+                if (options.Count > 0)
+                {
+                    variantResult = await _dialogService.ShowVariantSelectionDialogAsync(
+                        fullProduct, options, variants);
+
+                    if (variantResult == null)
+                    {
+                        // User cancelled
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Check if product has modifiers - show selection dialog
+        if (product.HasModifiers && _modifierService != null)
+        {
+            var fullProduct = _allProducts.FirstOrDefault(p => p.Id == product.Id);
+            if (fullProduct != null)
+            {
+                var modifierGroups = await _modifierService.GetEffectiveProductModifierGroupsAsync(product.Id);
+
+                if (modifierGroups.Count > 0)
+                {
+                    modifierResult = await _dialogService.ShowModifierSelectionDialogAsync(
+                        fullProduct, modifierGroups);
+
+                    if (modifierResult == null)
+                    {
+                        // User cancelled
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Determine final price based on variant selection
+        var finalPrice = variantResult?.Price ?? product.Price;
+
+        // Create unique key for order item (includes variant if selected)
+        var itemKey = product.Id.ToString();
+        if (variantResult?.ProductVariantId != null)
+        {
+            itemKey += $"_v{variantResult.ProductVariantId}";
+        }
+
+        // Check if product already in order (with same variant)
+        var existing = OrderItems.FirstOrDefault(oi =>
+            oi.ProductId == product.Id &&
+            oi.ProductVariantId == variantResult?.ProductVariantId &&
+            !oi.HasSelectedModifiers); // Only match items without modifiers for quantity increment
+
+        if (existing is not null && modifierResult == null)
         {
             // Check stock before increasing
             if (existing.Quantity >= (int)existing.AvailableStock)
@@ -1113,27 +1205,54 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
             // Check for active offers on this product
             var offer = await _offerService.GetBestOfferForProductAsync(product.Id, 1);
 
+            var displayName = product.Name;
+            if (!string.IsNullOrEmpty(variantResult?.VariantDescription))
+            {
+                displayName = $"{product.Name} ({variantResult.VariantDescription})";
+            }
+
             var orderItem = new OrderItemViewModel
             {
                 ProductId = product.Id,
                 ProductCode = product.Code ?? "",
-                ProductName = product.Name,
-                Price = product.Price,
+                ProductName = displayName,
+                Price = finalPrice,
                 CostPrice = product.CostPrice,
                 AvailableStock = product.CurrentStock,
-                Quantity = 1
+                Quantity = 1,
+                // Variant properties
+                ProductVariantId = variantResult?.ProductVariantId,
+                VariantDescription = variantResult?.VariantDescription,
+                VariantSku = variantResult?.VariantSku
             };
+
+            // Apply modifiers if selected
+            if (modifierResult != null && modifierResult.SelectedModifiers.Count > 0)
+            {
+                orderItem.SelectedModifiers = modifierResult.SelectedModifiers
+                    .Select(m => new SelectedModifierItem
+                    {
+                        ModifierItemId = m.ModifierItemId,
+                        ModifierGroupId = m.ModifierGroupId,
+                        GroupName = m.GroupName,
+                        Name = m.Name,
+                        Quantity = m.Quantity,
+                        UnitPrice = m.UnitPrice
+                    }).ToList();
+
+                orderItem.Modifiers = modifierResult.ModifierDisplayText;
+            }
 
             // Apply offer if available
             if (offer != null && offer.IsCurrentlyActive)
             {
-                orderItem.OriginalPrice = product.Price;
-                orderItem.Price = offer.CalculateOfferPrice(product.Price);
+                orderItem.OriginalPrice = finalPrice;
+                orderItem.Price = offer.CalculateOfferPrice(finalPrice);
                 orderItem.AppliedOfferId = offer.Id;
                 orderItem.AppliedOfferName = offer.OfferName;
 
                 _logger.Debug("Applied offer {OfferName} to {ProductName}: {OriginalPrice} -> {OfferPrice}",
-                    offer.OfferName, product.Name, product.Price, orderItem.Price);
+                    offer.OfferName, product.Name, finalPrice, orderItem.Price);
             }
 
             OrderItems.Add(orderItem);
@@ -2758,6 +2877,20 @@ public class ProductTileViewModel
 
     #endregion
 
+    #region Variants and Modifiers
+
+    /// <summary>
+    /// Gets or sets whether this product has variants.
+    /// </summary>
+    public bool HasVariants { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether this product has modifiers.
+    /// </summary>
+    public bool HasModifiers { get; set; }
+
+    #endregion
+
     #region Profit Margin Properties
 
     /// <summary>
@@ -2837,11 +2970,58 @@ public partial class OrderItemViewModel : ObservableObject
     private string _notes = "";
 
     /// <summary>
-    /// Gets or sets the item modifiers (comma-separated).
+    /// Gets or sets the item modifiers (comma-separated display string).
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasModifiers))]
     private string _modifiers = "";
+
+    #region Variant Properties
+
+    /// <summary>
+    /// Gets or sets the selected product variant ID.
+    /// </summary>
+    public int? ProductVariantId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the variant description text (e.g., "Size: Large, Color: Red").
+    /// </summary>
+    public string? VariantDescription { get; set; }
+
+    /// <summary>
+    /// Gets whether this order item has a variant selected.
+    /// </summary>
+    public bool HasVariant => ProductVariantId.HasValue;
+
+    /// <summary>
+    /// Gets or sets the variant SKU suffix.
+    /// </summary>
+    public string? VariantSku { get; set; }
+
+    #endregion
+
+    #region Structured Modifier Properties
+
+    /// <summary>
+    /// Gets or sets the selected modifiers with their details.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedModifiers))]
+    [NotifyPropertyChangedFor(nameof(ModifierTotal))]
+    [NotifyPropertyChangedFor(nameof(LineTotal))]
+    private List<SelectedModifierItem> _selectedModifiers = [];
+
+    /// <summary>
+    /// Gets whether this item has selected modifiers.
+    /// </summary>
+    public bool HasSelectedModifiers => SelectedModifiers.Count > 0;
+
+    /// <summary>
+    /// Gets the total price of all selected modifiers.
+    /// </summary>
+    public decimal ModifierTotal => SelectedModifiers.Sum(m => m.TotalPrice);
+
+    #endregion
 
     /// <summary>
     /// Gets or sets the discount amount (fixed).
@@ -2905,9 +3085,9 @@ public partial class OrderItemViewModel : ObservableObject
     public decimal LineDiscount => DiscountAmount > 0 ? DiscountAmount : (LineSubtotal * DiscountPercent / 100);
 
     /// <summary>
-    /// Gets the line total after discount.
+    /// Gets the line total after discount, including modifiers.
     /// </summary>
-    public decimal LineTotal => LineSubtotal - LineDiscount;
+    public decimal LineTotal => LineSubtotal - LineDiscount + ModifierTotal;
 
     /// <summary>
     /// Gets whether this item has notes.
@@ -3087,4 +3267,50 @@ public class HeldOrderViewModel
     /// Gets a display string for the held order.
     /// </summary>
     public string DisplayText => $"{OrderNumber} - {TableNumber} ({ItemCount} items)";
+}
+
+/// <summary>
+/// Represents a selected modifier for an order item.
+/// </summary>
+public class SelectedModifierItem
+{
+    /// <summary>
+    /// Gets or sets the modifier item ID.
+    /// </summary>
+    public int ModifierItemId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the modifier group ID.
+    /// </summary>
+    public int ModifierGroupId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the modifier group name.
+    /// </summary>
+    public string GroupName { get; set; } = "";
+
+    /// <summary>
+    /// Gets or sets the modifier name.
+    /// </summary>
+    public string Name { get; set; } = "";
+
+    /// <summary>
+    /// Gets or sets the quantity of this modifier.
+    /// </summary>
+    public int Quantity { get; set; } = 1;
+
+    /// <summary>
+    /// Gets or sets the unit price.
+    /// </summary>
+    public decimal UnitPrice { get; set; }
+
+    /// <summary>
+    /// Gets the total price (UnitPrice * Quantity).
+    /// </summary>
+    public decimal TotalPrice => UnitPrice * Quantity;
+
+    /// <summary>
+    /// Gets the display text for this modifier.
+    /// </summary>
+    public string DisplayText => Quantity > 1 ? $"{Name} x{Quantity}" : Name;
 }

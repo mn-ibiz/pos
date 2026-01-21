@@ -88,4 +88,41 @@ public class Product : BaseEntity
     public virtual ICollection<StoreProductOverride> StoreOverrides { get; set; } = new List<StoreProductOverride>();
     public virtual ICollection<ZonePrice> ZonePrices { get; set; } = new List<ZonePrice>();
     public virtual ICollection<ScheduledPriceChange> ScheduledPriceChanges { get; set; } = new List<ScheduledPriceChange>();
+
+    // Variant support
+    /// <summary>
+    /// Whether this product has variants.
+    /// </summary>
+    public bool HasVariants { get; set; }
+
+    /// <summary>
+    /// Variant options linked to this product.
+    /// </summary>
+    public virtual ICollection<ProductVariantOption> VariantOptions { get; set; } = new List<ProductVariantOption>();
+
+    /// <summary>
+    /// Product variants (specific combinations of options).
+    /// </summary>
+    public virtual ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
+
+    /// <summary>
+    /// Additional barcodes for this product.
+    /// </summary>
+    public virtual ICollection<ProductBarcode> Barcodes { get; set; } = new List<ProductBarcode>();
+
+    // Modifier support (Restaurant mode)
+    /// <summary>
+    /// Whether this product has modifiers.
+    /// </summary>
+    public bool HasModifiers { get; set; }
+
+    /// <summary>
+    /// Modifier groups linked to this product.
+    /// </summary>
+    public virtual ICollection<ProductModifierGroup> ModifierGroups { get; set; } = new List<ProductModifierGroup>();
+
+    /// <summary>
+    /// Modifier presets for this product.
+    /// </summary>
+    public virtual ICollection<ModifierPreset> ModifierPresets { get; set; } = new List<ModifierPreset>();
 }

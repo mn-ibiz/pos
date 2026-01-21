@@ -75,7 +75,9 @@ public partial class ModeSelectionViewModel : ViewModelBase
     private void SelectAdmin()
     {
         SelectedLoginMode = LoginMode.Admin;
-        // Admin can access both modes, but we'll default to showing the sidebar
+        // Clear any previous mode selection so admin starts fresh
+        // This allows RefreshAsync to load the default mode from config if needed
+        _uiShellService.ClearModeSelection();
         _logger.Information("User selected Admin mode");
         _navigationService.NavigateTo<LoginViewModel>();
     }

@@ -50,4 +50,14 @@ public class Category : BaseEntity
     /// Gets or sets the products in this category.
     /// </summary>
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+
+    /// <summary>
+    /// Default modifier groups for products in this category.
+    /// </summary>
+    public virtual ICollection<CategoryModifierGroup> DefaultModifierGroups { get; set; } = new List<CategoryModifierGroup>();
+
+    /// <summary>
+    /// Modifier presets for products in this category.
+    /// </summary>
+    public virtual ICollection<ModifierPreset> ModifierPresets { get; set; } = new List<ModifierPreset>();
 }

@@ -134,5 +134,16 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
             .WithMany()
             .HasForeignKey(e => e.AppliedOfferId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Product Variant relationship
+        builder.Property(e => e.VariantText)
+            .HasMaxLength(200);
+
+        builder.HasOne(e => e.ProductVariant)
+            .WithMany(pv => pv.OrderItems)
+            .HasForeignKey(e => e.ProductVariantId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(e => e.ProductVariantId);
     }
 }

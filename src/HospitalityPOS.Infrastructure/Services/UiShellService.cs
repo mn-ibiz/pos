@@ -13,6 +13,7 @@ public class UiShellService : IUiShellService
     private readonly ILogger<UiShellService> _logger;
     private PosLayoutMode _currentLayout = PosLayoutMode.Restaurant;
     private BusinessMode _currentMode = BusinessMode.Restaurant;
+    private bool _modeExplicitlySet;
 
     /// <inheritdoc />
     public event EventHandler<LayoutChangedEventArgs>? LayoutChanged;
@@ -71,7 +72,7 @@ public class UiShellService : IUiShellService
     /// <inheritdoc />
     public void SetMode(BusinessMode mode)
     {
-        if (_currentMode == mode)
+        if (_currentMode == mode && _modeExplicitlySet)
         {
             return;
         }
@@ -79,6 +80,7 @@ public class UiShellService : IUiShellService
         var previousMode = _currentMode;
         _currentMode = mode;
         _currentLayout = GetDefaultLayout();
+        _modeExplicitlySet = true; // Mark that mode was explicitly set during login
 
         _logger.LogInformation("Business mode set from {PreviousMode} to {NewMode}, layout set to {Layout}",
             previousMode, mode, _currentLayout);
@@ -141,16 +143,35 @@ public class UiShellService : IUiShellService
             var config = await _configurationService.GetConfigurationAsync();
             if (config != null)
             {
-                _currentMode = config.Mode;
-                _currentLayout = GetDefaultLayout();
-
-                _logger.LogDebug("UI Shell refreshed. Mode: {Mode}, Layout: {Layout}", _currentMode, _currentLayout);
+                // Only update mode from config if it wasn't explicitly set during login
+                // This preserves the user's mode selection (Supermarket vs Restaurant)
+                if (!_modeExplicitlySet)
+                {
+                    _currentMode = config.Mode;
+                    _currentLayout = GetDefaultLayout();
+                    _logger.LogDebug("UI Shell refreshed from config. Mode: {Mode}, Layout: {Layout}", _currentMode, _currentLayout);
+                }
+                else
+                {
+                    // Keep the explicitly set mode, just refresh other settings
+                    _logger.LogDebug("UI Shell refresh skipped mode update (explicitly set). Current Mode: {Mode}, Layout: {Layout}", _currentMode, _currentLayout);
+                }
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error refreshing UI shell configuration");
         }
+    }
+
+    /// <summary>
+    /// Clears the explicitly set mode flag, allowing RefreshAsync to update from config.
+    /// Call this when logging out or returning to mode selection.
+    /// </summary>
+    public void ClearModeSelection()
+    {
+        _modeExplicitlySet = false;
+        _logger.LogDebug("Mode selection cleared");
     }
 
     private PosLayoutMode GetDefaultLayout()

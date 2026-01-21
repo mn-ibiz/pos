@@ -154,6 +154,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IConflictResolutionService, ConflictResolutionService>();
         // services.AddScoped<ISyncStatusService, SyncStatusService>(); // Excluded from compilation
 
+        // Product Variant & Modifier Services
+        services.AddScoped<IProductVariantService, ProductVariantService>();
+        services.AddScoped<IModifierService, ModifierService>();
+
         // Recipe & KDS Services (Epic 26-27)
         services.AddScoped<IRecipeService, RecipeService>();
         // services.AddScoped<IRecipeCostService, RecipeCostService>(); // Excluded from compilation

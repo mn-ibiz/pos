@@ -649,4 +649,146 @@ public class DialogService : IDialogService
 
         return Task.FromResult(result);
     }
+
+    /// <inheritdoc />
+    public Task<VariantOptionEditorResult?> ShowVariantOptionEditorDialogAsync(VariantOption? existingOption)
+    {
+        var result = Application.Current.Dispatcher.Invoke(() =>
+        {
+            var dialog = new HospitalityPOS.WPF.Views.Dialogs.VariantOptionEditorDialog(existingOption)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.Result;
+            }
+
+            return null;
+        });
+
+        return Task.FromResult(result);
+    }
+
+    /// <inheritdoc />
+    public Task<VariantOptionValueEditorResult?> ShowVariantValueEditorDialogAsync(VariantOptionValue? existingValue, VariantOption parentOption)
+    {
+        ArgumentNullException.ThrowIfNull(parentOption);
+
+        var result = Application.Current.Dispatcher.Invoke(() =>
+        {
+            var dialog = new HospitalityPOS.WPF.Views.Dialogs.VariantValueEditorDialog(existingValue, parentOption)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.Result;
+            }
+
+            return null;
+        });
+
+        return Task.FromResult(result);
+    }
+
+    /// <inheritdoc />
+    public Task<ModifierGroupEditorResult?> ShowModifierGroupEditorDialogAsync(ModifierGroup? existingGroup)
+    {
+        var result = Application.Current.Dispatcher.Invoke(() =>
+        {
+            var dialog = new HospitalityPOS.WPF.Views.Dialogs.ModifierGroupEditorDialog(existingGroup)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.Result;
+            }
+
+            return null;
+        });
+
+        return Task.FromResult(result);
+    }
+
+    /// <inheritdoc />
+    public Task<ModifierItemEditorResult?> ShowModifierItemEditorDialogAsync(ModifierItem? existingItem, ModifierGroup parentGroup)
+    {
+        ArgumentNullException.ThrowIfNull(parentGroup);
+
+        var result = Application.Current.Dispatcher.Invoke(() =>
+        {
+            var dialog = new HospitalityPOS.WPF.Views.Dialogs.ModifierItemEditorDialog(existingItem, parentGroup)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.Result;
+            }
+
+            return null;
+        });
+
+        return Task.FromResult(result);
+    }
+
+    /// <inheritdoc />
+    public Task<HospitalityPOS.WPF.Views.Dialogs.VariantSelectionResult?> ShowVariantSelectionDialogAsync(
+        Product product,
+        IReadOnlyList<VariantOption> availableOptions,
+        IReadOnlyList<ProductVariant> productVariants)
+    {
+        ArgumentNullException.ThrowIfNull(product);
+        ArgumentNullException.ThrowIfNull(availableOptions);
+        ArgumentNullException.ThrowIfNull(productVariants);
+
+        var result = Application.Current.Dispatcher.Invoke(() =>
+        {
+            var dialog = new HospitalityPOS.WPF.Views.Dialogs.VariantSelectionDialog(product, availableOptions, productVariants)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.Result;
+            }
+
+            return null;
+        });
+
+        return Task.FromResult(result);
+    }
+
+    /// <inheritdoc />
+    public Task<HospitalityPOS.WPF.Views.Dialogs.ModifierSelectionResult?> ShowModifierSelectionDialogAsync(
+        Product product,
+        IReadOnlyList<ModifierGroup> modifierGroups)
+    {
+        ArgumentNullException.ThrowIfNull(product);
+        ArgumentNullException.ThrowIfNull(modifierGroups);
+
+        var result = Application.Current.Dispatcher.Invoke(() =>
+        {
+            var dialog = new HospitalityPOS.WPF.Views.Dialogs.ModifierSelectionDialog(product, modifierGroups)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.Result;
+            }
+
+            return null;
+        });
+
+        return Task.FromResult(result);
+    }
 }

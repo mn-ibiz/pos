@@ -257,6 +257,8 @@ public partial class App : Application
         services.AddTransient<UserEditorViewModel>();
         services.AddTransient<CategoryManagementViewModel>();
         services.AddTransient<ProductManagementViewModel>();
+        services.AddTransient<VariantOptionsViewModel>();
+        services.AddTransient<ModifierGroupsViewModel>();
         services.AddTransient<POSViewModel>(); // Now enabled
         services.AddTransient<SettlementViewModel>(); // Now enabled
         services.AddTransient<PaymentMethodsViewModel>();

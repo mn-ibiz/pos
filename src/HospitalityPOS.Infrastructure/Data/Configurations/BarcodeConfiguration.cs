@@ -62,13 +62,20 @@ public class ProductBarcodeConfiguration : IEntityTypeConfiguration<ProductBarco
             .HasMaxLength(200);
 
         builder.HasOne(e => e.Product)
-            .WithMany()
+            .WithMany(p => p.Barcodes)
             .HasForeignKey(e => e.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Product Variant relationship
+        builder.HasOne(e => e.ProductVariant)
+            .WithMany()
+            .HasForeignKey(e => e.ProductVariantId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(e => e.Barcode)
             .IsUnique();
         builder.HasIndex(e => e.ProductId);
+        builder.HasIndex(e => e.ProductVariantId);
         builder.HasIndex(e => new { e.ProductId, e.IsPrimary });
     }
 }

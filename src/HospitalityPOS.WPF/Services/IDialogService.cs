@@ -263,6 +263,64 @@ public interface IDialogService
     Task<HospitalityPOS.Core.Entities.SupplierInvoice?> ShowSupplierInvoiceEditorDialogAsync(
         HospitalityPOS.Core.Entities.SupplierInvoice? existingInvoice,
         HospitalityPOS.Core.Entities.Supplier supplier);
+
+    /// <summary>
+    /// Shows the Variant Option Editor dialog for creating or editing a variant option.
+    /// </summary>
+    /// <param name="existingOption">The variant option to edit, or null for creating a new one.</param>
+    /// <returns>The variant option editor result if saved, null if cancelled.</returns>
+    Task<VariantOptionEditorResult?> ShowVariantOptionEditorDialogAsync(
+        HospitalityPOS.Core.Entities.VariantOption? existingOption);
+
+    /// <summary>
+    /// Shows the Variant Value Editor dialog for adding or editing a variant option value.
+    /// </summary>
+    /// <param name="existingValue">The variant option value to edit, or null for creating a new one.</param>
+    /// <param name="parentOption">The parent variant option.</param>
+    /// <returns>The variant value editor result if saved, null if cancelled.</returns>
+    Task<VariantOptionValueEditorResult?> ShowVariantValueEditorDialogAsync(
+        HospitalityPOS.Core.Entities.VariantOptionValue? existingValue,
+        HospitalityPOS.Core.Entities.VariantOption parentOption);
+
+    /// <summary>
+    /// Shows the Modifier Group Editor dialog for creating or editing a modifier group.
+    /// </summary>
+    /// <param name="existingGroup">The modifier group to edit, or null for creating a new one.</param>
+    /// <returns>The modifier group editor result if saved, null if cancelled.</returns>
+    Task<ModifierGroupEditorResult?> ShowModifierGroupEditorDialogAsync(
+        HospitalityPOS.Core.Entities.ModifierGroup? existingGroup);
+
+    /// <summary>
+    /// Shows the Modifier Item Editor dialog for adding or editing a modifier item.
+    /// </summary>
+    /// <param name="existingItem">The modifier item to edit, or null for creating a new one.</param>
+    /// <param name="parentGroup">The parent modifier group.</param>
+    /// <returns>The modifier item editor result if saved, null if cancelled.</returns>
+    Task<ModifierItemEditorResult?> ShowModifierItemEditorDialogAsync(
+        HospitalityPOS.Core.Entities.ModifierItem? existingItem,
+        HospitalityPOS.Core.Entities.ModifierGroup parentGroup);
+
+    /// <summary>
+    /// Shows the Variant Selection dialog for POS.
+    /// </summary>
+    /// <param name="product">The product to select variants for.</param>
+    /// <param name="availableOptions">The available variant options.</param>
+    /// <param name="productVariants">The product's variant combinations.</param>
+    /// <returns>The variant selection result if confirmed, null if cancelled.</returns>
+    Task<HospitalityPOS.WPF.Views.Dialogs.VariantSelectionResult?> ShowVariantSelectionDialogAsync(
+        HospitalityPOS.Core.Entities.Product product,
+        IReadOnlyList<HospitalityPOS.Core.Entities.VariantOption> availableOptions,
+        IReadOnlyList<HospitalityPOS.Core.Entities.ProductVariant> productVariants);
+
+    /// <summary>
+    /// Shows the Modifier Selection dialog for POS.
+    /// </summary>
+    /// <param name="product">The product to select modifiers for.</param>
+    /// <param name="modifierGroups">The available modifier groups.</param>
+    /// <returns>The modifier selection result if confirmed, null if cancelled.</returns>
+    Task<HospitalityPOS.WPF.Views.Dialogs.ModifierSelectionResult?> ShowModifierSelectionDialogAsync(
+        HospitalityPOS.Core.Entities.Product product,
+        IReadOnlyList<HospitalityPOS.Core.Entities.ModifierGroup> modifierGroups);
 }
 
 /// <summary>
@@ -284,4 +342,77 @@ public class SplitBillDialogResult
     /// Gets or sets the split requests (for item-based split).
     /// </summary>
     public List<HospitalityPOS.Core.Models.SplitItemRequest> SplitRequests { get; set; } = new();
+}
+
+/// <summary>
+/// Result from the variant option editor dialog.
+/// </summary>
+public class VariantOptionEditorResult
+{
+    public string Name { get; set; } = string.Empty;
+    public string? DisplayName { get; set; }
+    public HospitalityPOS.Core.Entities.VariantOptionType OptionType { get; set; }
+    public string? Description { get; set; }
+    public int DisplayOrder { get; set; }
+    public bool IsGlobal { get; set; } = true;
+    public List<VariantOptionValueEditorResult> Values { get; set; } = new();
+}
+
+/// <summary>
+/// Result from the variant option value editor dialog.
+/// </summary>
+public class VariantOptionValueEditorResult
+{
+    public int Id { get; set; }
+    public string Value { get; set; } = string.Empty;
+    public string? DisplayName { get; set; }
+    public string? ColorCode { get; set; }
+    public decimal PriceAdjustment { get; set; }
+    public bool IsPriceAdjustmentPercent { get; set; }
+    public int DisplayOrder { get; set; }
+    public string? SkuSuffix { get; set; }
+}
+
+/// <summary>
+/// Result from the modifier group editor dialog.
+/// </summary>
+public class ModifierGroupEditorResult
+{
+    public string Name { get; set; } = string.Empty;
+    public string? DisplayName { get; set; }
+    public string? Description { get; set; }
+    public HospitalityPOS.Core.Entities.ModifierSelectionType SelectionType { get; set; }
+    public int MinSelections { get; set; }
+    public int MaxSelections { get; set; }
+    public bool IsRequired { get; set; }
+    public int DisplayOrder { get; set; }
+    public string? ColorCode { get; set; }
+    public string? KitchenStation { get; set; }
+    public bool PrintOnKOT { get; set; } = true;
+    public bool ShowOnReceipt { get; set; } = true;
+    public List<ModifierItemEditorResult> Items { get; set; } = new();
+}
+
+/// <summary>
+/// Result from the modifier item editor dialog.
+/// </summary>
+public class ModifierItemEditorResult
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? DisplayName { get; set; }
+    public string? ShortCode { get; set; }
+    public string? Description { get; set; }
+    public decimal Price { get; set; }
+    public decimal? CostPrice { get; set; }
+    public int MaxQuantity { get; set; } = 10;
+    public int DisplayOrder { get; set; }
+    public string? ColorCode { get; set; }
+    public bool IsAvailable { get; set; } = true;
+    public bool IsDefault { get; set; }
+    public string? KOTText { get; set; }
+    public decimal TaxRate { get; set; } = 16.00m;
+    public int? InventoryProductId { get; set; }
+    public decimal InventoryDeductQuantity { get; set; }
+    public string? Allergens { get; set; }
 }

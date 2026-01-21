@@ -1,0 +1,344 @@
+<Window x:Class="HospitalityPOS.WPF.Views.Dialogs.ModifierSelectionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        mc:Ignorable="d"
+        Title="Select Modifiers"
+        Height="650" Width="550"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <!-- Modern Button Style -->
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="#6366F1"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="24,12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Secondary Button Style -->
+        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Background" Value="#2D2D44"/>
+        </Style>
+
+        <!-- Modifier Item Button Style -->
+        <Style x:Key="ModifierItemButton" TargetType="Button">
+            <Setter Property="Background" Value="#1F1F33"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="#2D2D44"
+                                BorderThickness="2"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#6366F1"/>
+                            </Trigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#6366F1"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#6366F1"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Quantity Button Style -->
+        <Style x:Key="QuantityButton" TargetType="Button">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#6366F1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="#1A1A2E" CornerRadius="16" BorderBrush="#2D2D44" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="5" Opacity="0.5"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0" Background="#16162A" CornerRadius="16,16,0,0" Padding="24,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="{Binding ProductName}"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Foreground="White"/>
+                        <TextBlock Text="Customize your order"
+                                   FontSize="13"
+                                   Foreground="#6B7280"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+                    <Button Grid.Column="1"
+                            Content="&#xE711;"
+                            FontFamily="Segoe MDL2 Assets"
+                            FontSize="14"
+                            Background="Transparent"
+                            Foreground="#6B7280"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Click="CloseButton_Click"
+                            Width="32" Height="32"/>
+                </Grid>
+            </Border>
+
+            <!-- Content -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,16">
+                <ItemsControl x:Name="ModifierGroupsControl" ItemsSource="{Binding ModifierGroups}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#16162A" CornerRadius="12" Padding="16" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <!-- Group Header -->
+                                    <Grid Margin="0,0,0,12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontSize="15"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="White"/>
+                                                <TextBlock Text=" *"
+                                                           FontSize="15"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="#EF4444"
+                                                           Visibility="{Binding IsRequired, Converter={StaticResource BoolToVis}}"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding SelectionHint}"
+                                                       FontSize="12"
+                                                       Foreground="#6B7280"
+                                                       Margin="0,2,0,0"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding SelectionStatus}"
+                                                   FontSize="12"
+                                                   Foreground="{Binding SelectionStatusColor}"
+                                                   VerticalAlignment="Center"/>
+                                    </Grid>
+
+                                    <!-- Items -->
+                                    <ItemsControl ItemsSource="{Binding Items}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Style="{StaticResource ModifierItemButton}"
+                                                        Click="ModifierItem_Click"
+                                                        DataContext="{Binding}">
+                                                    <Grid>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                        </Grid.RowDefinitions>
+
+                                                        <TextBlock Text="{Binding Name}"
+                                                                   FontWeight="Medium"
+                                                                   HorizontalAlignment="Center"/>
+
+                                                        <TextBlock Grid.Row="1"
+                                                                   Text="{Binding PriceText}"
+                                                                   FontSize="11"
+                                                                   Foreground="#9CA3AF"
+                                                                   HorizontalAlignment="Center"
+                                                                   Visibility="{Binding HasPrice, Converter={StaticResource BoolToVis}}"/>
+
+                                                        <!-- Quantity Controls (for selected items with MaxQuantity > 1) -->
+                                                        <StackPanel Grid.Row="2"
+                                                                    Orientation="Horizontal"
+                                                                    HorizontalAlignment="Center"
+                                                                    Margin="0,4,0,0"
+                                                                    Visibility="{Binding ShowQuantityControls, Converter={StaticResource BoolToVis}}">
+                                                            <Button Style="{StaticResource QuantityButton}"
+                                                                    Content="-"
+                                                                    Click="DecreaseQuantity_Click"/>
+                                                            <TextBlock Text="{Binding Quantity}"
+                                                                       Width="30"
+                                                                       TextAlignment="Center"
+                                                                       VerticalAlignment="Center"
+                                                                       FontWeight="SemiBold"/>
+                                                            <Button Style="{StaticResource QuantityButton}"
+                                                                    Content="+"
+                                                                    Click="IncreaseQuantity_Click"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- Price Summary and Footer -->
+            <Border Grid.Row="2" Background="#16162A" CornerRadius="0,0,16,16" Padding="24,16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Base Price -->
+                    <Grid Grid.Row="0" Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Base Price"
+                                   FontSize="13"
+                                   Foreground="#6B7280"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding BasePrice, StringFormat='KSh {0:N2}'}"
+                                   FontSize="13"
+                                   Foreground="#9CA3AF"/>
+                    </Grid>
+
+                    <!-- Modifiers Total -->
+                    <Grid Grid.Row="1" Margin="0,0,0,12"
+                          Visibility="{Binding HasModifierPrice, Converter={StaticResource BoolToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Modifiers"
+                                   FontSize="13"
+                                   Foreground="#6B7280"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding ModifierTotal, StringFormat='+KSh {0:N2}'}"
+                                   FontSize="13"
+                                   Foreground="#9CA3AF"/>
+                    </Grid>
+
+                    <!-- Total Price -->
+                    <Grid Grid.Row="2" Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Total"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="White"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding TotalPrice, StringFormat='KSh {0:N2}'}"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Foreground="#10B981"/>
+                    </Grid>
+
+                    <!-- Buttons -->
+                    <Grid Grid.Row="2" Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Validation Error -->
+                        <TextBlock Text="{Binding ValidationError}"
+                                   Foreground="#EF4444"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding HasValidationError, Converter={StaticResource BoolToVis}}"/>
+
+                        <Button Grid.Column="1"
+                                Content="Cancel"
+                                Style="{StaticResource SecondaryButton}"
+                                Click="CancelButton_Click"
+                                Margin="0,0,12,0"/>
+
+                        <Button Grid.Column="2"
+                                Content="Add to Order"
+                                Style="{StaticResource ModernButton}"
+                                Click="AddButton_Click"
+                                IsEnabled="{Binding CanAdd}"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

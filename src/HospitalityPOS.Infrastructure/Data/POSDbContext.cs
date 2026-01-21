@@ -55,6 +55,25 @@ public class POSDbContext : DbContext
     public DbSet<ProductFavorite> ProductFavorites => Set<ProductFavorite>();
     #endregion
 
+    #region Product Variants
+    public DbSet<VariantOption> VariantOptions => Set<VariantOption>();
+    public DbSet<VariantOptionValue> VariantOptionValues => Set<VariantOptionValue>();
+    public DbSet<ProductVariantOption> ProductVariantOptions => Set<ProductVariantOption>();
+    public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+    public DbSet<ProductVariantValue> ProductVariantValues => Set<ProductVariantValue>();
+    #endregion
+
+    #region Product Modifiers
+    public DbSet<ModifierGroup> ModifierGroups => Set<ModifierGroup>();
+    public DbSet<ModifierItem> ModifierItems => Set<ModifierItem>();
+    public DbSet<ModifierItemNestedGroup> ModifierItemNestedGroups => Set<ModifierItemNestedGroup>();
+    public DbSet<ProductModifierGroup> ProductModifierGroups => Set<ProductModifierGroup>();
+    public DbSet<CategoryModifierGroup> CategoryModifierGroups => Set<CategoryModifierGroup>();
+    public DbSet<OrderItemModifier> OrderItemModifiers => Set<OrderItemModifier>();
+    public DbSet<ModifierPreset> ModifierPresets => Set<ModifierPreset>();
+    public DbSet<ModifierPresetItem> ModifierPresetItems => Set<ModifierPresetItem>();
+    #endregion
+
     #region Orders & Receipts
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();

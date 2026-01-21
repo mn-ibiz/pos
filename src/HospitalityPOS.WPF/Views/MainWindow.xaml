@@ -105,6 +105,12 @@
         <DataTemplate DataType="{x:Type vm:ProductManagementViewModel}">
             <views:ProductManagementView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:VariantOptionsViewModel}">
+            <views:VariantOptionsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ModifierGroupsViewModel}">
+            <views:ModifierGroupsView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:POSViewModel}">
             <views:POSView />
         </DataTemplate>
@@ -425,6 +431,24 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE74C;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
                                     <TextBlock Text="Categories" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Variant Options -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToVariantOptionsCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8B3;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Variant Options" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Modifier Groups -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToModifierGroupsCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE71D;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Modifier Groups" Margin="12,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
 
