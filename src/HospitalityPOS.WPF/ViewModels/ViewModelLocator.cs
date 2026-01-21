@@ -47,6 +47,21 @@ public class ViewModelLocator
     /// </summary>
     public EmailSettingsViewModel EmailSettings => App.Services.GetRequiredService<EmailSettingsViewModel>();
 
+    /// <summary>
+    /// Gets the ExpenseDashboardViewModel instance.
+    /// </summary>
+    public ExpenseDashboardViewModel ExpenseDashboard => App.Services.GetRequiredService<ExpenseDashboardViewModel>();
+
+    /// <summary>
+    /// Gets the ExpenseListViewModel instance.
+    /// </summary>
+    public ExpenseListViewModel ExpenseList => App.Services.GetRequiredService<ExpenseListViewModel>();
+
+    /// <summary>
+    /// Gets the ExpenseCategoryManagementViewModel instance.
+    /// </summary>
+    public ExpenseCategoryManagementViewModel ExpenseCategoryManagement => App.Services.GetRequiredService<ExpenseCategoryManagementViewModel>();
+
     // Add other ViewModels as they are created:
     // public POSViewModel POS => App.Services.GetRequiredService<POSViewModel>();
 }

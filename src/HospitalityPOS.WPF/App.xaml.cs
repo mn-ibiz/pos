@@ -312,6 +312,11 @@ public partial class App : Application
         // services.AddTransient<CustomerEnrollmentViewModel>(); // EXCLUDED - API mismatches
         services.AddTransient<DashboardViewModel>();
 
+        // Expense Management ViewModels
+        services.AddTransient<ExpenseDashboardViewModel>();
+        services.AddTransient<ExpenseListViewModel>();
+        services.AddTransient<ExpenseCategoryManagementViewModel>();
+
         // Stock Transfer ViewModels (Epic 23) - NOW ENABLED after API fixes
         services.AddTransient<StockTransferViewModel>();
         services.AddTransient<CreateTransferRequestViewModel>();

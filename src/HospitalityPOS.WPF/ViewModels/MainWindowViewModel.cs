@@ -267,6 +267,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [RelayCommand]
     private void NavigateToOrganizationSettings() => NavigateWithSidebar<OrganizationSettingsViewModel>("Organization Settings");
 
+    [RelayCommand]
+    private void NavigateToExpenses() => NavigateWithSidebar<ExpenseDashboardViewModel>("Expense Management");
+
     private void NavigateWithSidebar<TViewModel>(string pageTitle) where TViewModel : class
     {
         ShowSidebar = true;

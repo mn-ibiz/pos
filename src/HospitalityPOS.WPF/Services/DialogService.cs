@@ -791,4 +791,38 @@ public class DialogService : IDialogService
 
         return Task.FromResult(result);
     }
+
+    /// <inheritdoc />
+    public Task<ExpenseEditorResult?> ShowExpenseEditorDialogAsync(Expense? existingExpense)
+    {
+        var result = Application.Current.Dispatcher.Invoke<ExpenseEditorResult?>(() =>
+        {
+            using var scope = App.Services.CreateScope();
+            var expenseService = scope.ServiceProvider.GetRequiredService<IExpenseService>();
+            var supplierService = scope.ServiceProvider.GetRequiredService<ISupplierService>();
+            var paymentMethodService = scope.ServiceProvider.GetRequiredService<IPaymentMethodService>();
+
+            // Load required data
+            var categories = expenseService.GetCategoriesAsync().GetAwaiter().GetResult();
+            var suppliers = supplierService.GetAllSuppliersAsync().GetAwaiter().GetResult();
+            var paymentMethods = paymentMethodService.GetAllAsync().GetAwaiter().GetResult();
+
+            var dialog = new ExpenseEditorDialog(existingExpense)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            // Initialize with data
+            dialog.Initialize(categories, suppliers, paymentMethods);
+
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.Result;
+            }
+
+            return null;
+        });
+
+        return Task.FromResult(result);
+    }
 }

@@ -321,6 +321,14 @@ public interface IDialogService
     Task<HospitalityPOS.WPF.Views.Dialogs.ModifierSelectionResult?> ShowModifierSelectionDialogAsync(
         HospitalityPOS.Core.Entities.Product product,
         IReadOnlyList<HospitalityPOS.Core.Entities.ModifierGroup> modifierGroups);
+
+    /// <summary>
+    /// Shows the Expense Editor dialog for creating or editing an expense.
+    /// </summary>
+    /// <param name="existingExpense">The expense to edit, or null for creating a new expense.</param>
+    /// <returns>The expense editor result if saved, null if cancelled.</returns>
+    Task<HospitalityPOS.WPF.Views.Dialogs.ExpenseEditorResult?> ShowExpenseEditorDialogAsync(
+        HospitalityPOS.Core.Entities.Expense? existingExpense);
 }
 
 /// <summary>

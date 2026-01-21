@@ -6,6 +6,7 @@
         xmlns:vm="clr-namespace:HospitalityPOS.WPF.ViewModels"
         xmlns:views="clr-namespace:HospitalityPOS.WPF.Views"
         xmlns:inventoryViews="clr-namespace:HospitalityPOS.WPF.Views.Inventory"
+        xmlns:expenseViews="clr-namespace:HospitalityPOS.WPF.Views.Expenses"
         xmlns:controls="clr-namespace:HospitalityPOS.WPF.Controls"
         mc:Ignorable="d"
         Title="{Binding ApplicationTitle}"
@@ -158,6 +159,15 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:CashierShellViewModel}">
             <views:CashierShellView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ExpenseDashboardViewModel}">
+            <expenseViews:ExpenseDashboardView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ExpenseListViewModel}">
+            <expenseViews:ExpenseListView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ExpenseCategoryManagementViewModel}">
+            <expenseViews:ExpenseCategoryManagementView />
         </DataTemplate>
     </Window.Resources>
 
@@ -409,6 +419,19 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
                                     <TextBlock Text="Z-Report History" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Finance Group -->
+                            <TextBlock Text="FINANCE"
+                                       Style="{StaticResource SidebarGroupHeaderStyle}" />
+
+                            <!-- Expenses -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToExpensesCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE912;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Expenses" Margin="12,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
 

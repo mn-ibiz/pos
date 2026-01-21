@@ -80,9 +80,17 @@ public class Supplier : BaseEntity
     /// </summary>
     public string? Notes { get; set; }
 
+    /// <summary>
+    /// Gets or sets the default expense category ID for this supplier.
+    /// </summary>
+    public int? DefaultExpenseCategoryId { get; set; }
+
     // Navigation properties
     public virtual ICollection<PurchaseOrder> PurchaseOrders { get; set; } = new List<PurchaseOrder>();
     public virtual ICollection<GoodsReceivedNote> GoodsReceivedNotes { get; set; } = new List<GoodsReceivedNote>();
     public virtual ICollection<SupplierInvoice> SupplierInvoices { get; set; } = new List<SupplierInvoice>();
     public virtual ICollection<SupplierPayment> SupplierPayments { get; set; } = new List<SupplierPayment>();
+    public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();
+    public virtual ICollection<RecurringExpense> RecurringExpenses { get; set; } = new List<RecurringExpense>();
+    public virtual ExpenseCategory? DefaultExpenseCategory { get; set; }
 }

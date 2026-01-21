@@ -34,6 +34,7 @@ public static class DatabaseSeeder
                 await SeedPointsConfigurationAsync(context);
                 await SeedTierConfigurationsAsync(context);
                 await SeedSampleCategoriesAndProductsAsync(context);
+                await SeedExpenseCategoriesAsync(context);
 
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -481,5 +482,179 @@ public static class DatabaseSeeder
         };
 
         await context.Products.AddRangeAsync(products);
+    }
+
+    private static async Task SeedExpenseCategoriesAsync(POSDbContext context)
+    {
+        if (await context.ExpenseCategories.AnyAsync()) return;
+
+        // Parent categories
+        var cogsParent = new ExpenseCategory
+        {
+            Name = "Cost of Goods Sold (COGS)",
+            Description = "Direct costs of products sold - Food, Beverage, Packaging",
+            Type = ExpenseCategoryType.COGS,
+            Icon = "ShoppingCart",
+            Color = "#EF4444",
+            SortOrder = 1,
+            IsSystemCategory = true,
+            IsActive = true
+        };
+
+        var laborParent = new ExpenseCategory
+        {
+            Name = "Labor Costs",
+            Description = "Employee wages, benefits, and related expenses",
+            Type = ExpenseCategoryType.Labor,
+            Icon = "Users",
+            Color = "#F59E0B",
+            SortOrder = 2,
+            IsSystemCategory = true,
+            IsActive = true
+        };
+
+        var occupancyParent = new ExpenseCategory
+        {
+            Name = "Occupancy",
+            Description = "Rent, utilities, and property-related expenses",
+            Type = ExpenseCategoryType.Occupancy,
+            Icon = "Building",
+            Color = "#3B82F6",
+            SortOrder = 3,
+            IsSystemCategory = true,
+            IsActive = true
+        };
+
+        var operatingParent = new ExpenseCategory
+        {
+            Name = "Operating Expenses",
+            Description = "Day-to-day operational expenses",
+            Type = ExpenseCategoryType.Operating,
+            Icon = "Cog",
+            Color = "#8B5CF6",
+            SortOrder = 4,
+            IsSystemCategory = true,
+            IsActive = true
+        };
+
+        var marketingParent = new ExpenseCategory
+        {
+            Name = "Marketing & Advertising",
+            Description = "Promotional and advertising expenses",
+            Type = ExpenseCategoryType.Marketing,
+            Icon = "Megaphone",
+            Color = "#EC4899",
+            SortOrder = 5,
+            IsSystemCategory = true,
+            IsActive = true
+        };
+
+        var adminParent = new ExpenseCategory
+        {
+            Name = "Administrative",
+            Description = "Office, professional services, and administrative costs",
+            Type = ExpenseCategoryType.Administrative,
+            Icon = "Briefcase",
+            Color = "#6366F1",
+            SortOrder = 6,
+            IsSystemCategory = true,
+            IsActive = true
+        };
+
+        var otherParent = new ExpenseCategory
+        {
+            Name = "Other Expenses",
+            Description = "Miscellaneous and other expenses",
+            Type = ExpenseCategoryType.Other,
+            Icon = "DotsHorizontal",
+            Color = "#6B7280",
+            SortOrder = 7,
+            IsSystemCategory = true,
+            IsActive = true
+        };
+
+        await context.ExpenseCategories.AddRangeAsync(new[]
+        {
+            cogsParent, laborParent, occupancyParent, operatingParent,
+            marketingParent, adminParent, otherParent
+        });
+        await context.SaveChangesAsync();
+
+        // COGS Subcategories
+        var cogsSubcategories = new List<ExpenseCategory>
+        {
+            new() { Name = "Food Purchases", Description = "Raw food ingredients", ParentCategoryId = cogsParent.Id, Type = ExpenseCategoryType.COGS, Icon = "Apple", Color = "#FCA5A5", SortOrder = 1, IsActive = true },
+            new() { Name = "Beverage Purchases", Description = "Drinks and beverage supplies", ParentCategoryId = cogsParent.Id, Type = ExpenseCategoryType.COGS, Icon = "Beer", Color = "#FCA5A5", SortOrder = 2, IsActive = true },
+            new() { Name = "Packaging & Disposables", Description = "Takeaway containers, napkins, etc.", ParentCategoryId = cogsParent.Id, Type = ExpenseCategoryType.COGS, Icon = "Package", Color = "#FCA5A5", SortOrder = 3, IsActive = true },
+        };
+
+        // Labor Subcategories
+        var laborSubcategories = new List<ExpenseCategory>
+        {
+            new() { Name = "Wages & Salaries", Description = "Employee base pay", ParentCategoryId = laborParent.Id, Type = ExpenseCategoryType.Labor, Icon = "CurrencyDollar", Color = "#FCD34D", SortOrder = 1, IsActive = true },
+            new() { Name = "Payroll Taxes", Description = "PAYE, NSSF, NHIF contributions", ParentCategoryId = laborParent.Id, Type = ExpenseCategoryType.Labor, Icon = "Receipt", Color = "#FCD34D", SortOrder = 2, IsActive = true },
+            new() { Name = "Employee Benefits", Description = "Health insurance, meals, etc.", ParentCategoryId = laborParent.Id, Type = ExpenseCategoryType.Labor, Icon = "Heart", Color = "#FCD34D", SortOrder = 3, IsActive = true },
+            new() { Name = "Training & Development", Description = "Staff training costs", ParentCategoryId = laborParent.Id, Type = ExpenseCategoryType.Labor, Icon = "AcademicCap", Color = "#FCD34D", SortOrder = 4, IsActive = true },
+        };
+
+        // Occupancy Subcategories
+        var occupancySubcategories = new List<ExpenseCategory>
+        {
+            new() { Name = "Rent/Lease", Description = "Monthly rent payments", ParentCategoryId = occupancyParent.Id, Type = ExpenseCategoryType.Occupancy, Icon = "Home", Color = "#93C5FD", SortOrder = 1, IsActive = true },
+            new() { Name = "Electricity", Description = "Power bills", ParentCategoryId = occupancyParent.Id, Type = ExpenseCategoryType.Occupancy, Icon = "LightningBolt", Color = "#93C5FD", SortOrder = 2, IsActive = true },
+            new() { Name = "Water & Sewer", Description = "Water utility bills", ParentCategoryId = occupancyParent.Id, Type = ExpenseCategoryType.Occupancy, Icon = "Drop", Color = "#93C5FD", SortOrder = 3, IsActive = true },
+            new() { Name = "Gas", Description = "Cooking gas and heating", ParentCategoryId = occupancyParent.Id, Type = ExpenseCategoryType.Occupancy, Icon = "Fire", Color = "#93C5FD", SortOrder = 4, IsActive = true },
+            new() { Name = "Internet & Phone", Description = "Telecommunications", ParentCategoryId = occupancyParent.Id, Type = ExpenseCategoryType.Occupancy, Icon = "Wifi", Color = "#93C5FD", SortOrder = 5, IsActive = true },
+            new() { Name = "Property Insurance", Description = "Building and contents insurance", ParentCategoryId = occupancyParent.Id, Type = ExpenseCategoryType.Occupancy, Icon = "Shield", Color = "#93C5FD", SortOrder = 6, IsActive = true },
+            new() { Name = "Trash Removal", Description = "Waste management services", ParentCategoryId = occupancyParent.Id, Type = ExpenseCategoryType.Occupancy, Icon = "Trash", Color = "#93C5FD", SortOrder = 7, IsActive = true },
+        };
+
+        // Operating Subcategories
+        var operatingSubcategories = new List<ExpenseCategory>
+        {
+            new() { Name = "Cleaning Supplies", Description = "Cleaning materials and chemicals", ParentCategoryId = operatingParent.Id, Type = ExpenseCategoryType.Operating, Icon = "Sparkles", Color = "#C4B5FD", SortOrder = 1, IsActive = true },
+            new() { Name = "Repairs & Maintenance", Description = "Equipment and facility repairs", ParentCategoryId = operatingParent.Id, Type = ExpenseCategoryType.Operating, Icon = "Wrench", Color = "#C4B5FD", SortOrder = 2, IsActive = true },
+            new() { Name = "Equipment (Small)", Description = "Small equipment purchases", ParentCategoryId = operatingParent.Id, Type = ExpenseCategoryType.Operating, Icon = "Cube", Color = "#C4B5FD", SortOrder = 3, IsActive = true },
+            new() { Name = "Office Supplies", Description = "Stationery and office materials", ParentCategoryId = operatingParent.Id, Type = ExpenseCategoryType.Operating, Icon = "Pencil", Color = "#C4B5FD", SortOrder = 4, IsActive = true },
+            new() { Name = "Bank & CC Fees", Description = "Bank charges and card processing fees", ParentCategoryId = operatingParent.Id, Type = ExpenseCategoryType.Operating, Icon = "CreditCard", Color = "#C4B5FD", SortOrder = 5, IsActive = true },
+            new() { Name = "Licenses & Permits", Description = "Business licenses and permits", ParentCategoryId = operatingParent.Id, Type = ExpenseCategoryType.Operating, Icon = "DocumentText", Color = "#C4B5FD", SortOrder = 6, IsActive = true },
+            new() { Name = "Delivery & Transport", Description = "Delivery and transportation costs", ParentCategoryId = operatingParent.Id, Type = ExpenseCategoryType.Operating, Icon = "Truck", Color = "#C4B5FD", SortOrder = 7, IsActive = true },
+        };
+
+        // Marketing Subcategories
+        var marketingSubcategories = new List<ExpenseCategory>
+        {
+            new() { Name = "Online Advertising", Description = "Digital ads, social media", ParentCategoryId = marketingParent.Id, Type = ExpenseCategoryType.Marketing, Icon = "Globe", Color = "#F9A8D4", SortOrder = 1, IsActive = true },
+            new() { Name = "Print Materials", Description = "Menus, flyers, business cards", ParentCategoryId = marketingParent.Id, Type = ExpenseCategoryType.Marketing, Icon = "Newspaper", Color = "#F9A8D4", SortOrder = 2, IsActive = true },
+            new() { Name = "Promotions & Discounts", Description = "Special offers and discounts cost", ParentCategoryId = marketingParent.Id, Type = ExpenseCategoryType.Marketing, Icon = "Tag", Color = "#F9A8D4", SortOrder = 3, IsActive = true },
+            new() { Name = "Photography & Media", Description = "Food photography, video production", ParentCategoryId = marketingParent.Id, Type = ExpenseCategoryType.Marketing, Icon = "Camera", Color = "#F9A8D4", SortOrder = 4, IsActive = true },
+        };
+
+        // Admin Subcategories
+        var adminSubcategories = new List<ExpenseCategory>
+        {
+            new() { Name = "Accounting Services", Description = "Bookkeeping and accounting fees", ParentCategoryId = adminParent.Id, Type = ExpenseCategoryType.Administrative, Icon = "Calculator", Color = "#A5B4FC", SortOrder = 1, IsActive = true },
+            new() { Name = "Legal Services", Description = "Legal fees and consultation", ParentCategoryId = adminParent.Id, Type = ExpenseCategoryType.Administrative, Icon = "Scale", Color = "#A5B4FC", SortOrder = 2, IsActive = true },
+            new() { Name = "Security Services", Description = "Security guards and systems", ParentCategoryId = adminParent.Id, Type = ExpenseCategoryType.Administrative, Icon = "ShieldCheck", Color = "#A5B4FC", SortOrder = 3, IsActive = true },
+            new() { Name = "Software & Subscriptions", Description = "POS, accounting software, etc.", ParentCategoryId = adminParent.Id, Type = ExpenseCategoryType.Administrative, Icon = "DesktopComputer", Color = "#A5B4FC", SortOrder = 4, IsActive = true },
+            new() { Name = "Professional Development", Description = "Conferences, memberships", ParentCategoryId = adminParent.Id, Type = ExpenseCategoryType.Administrative, Icon = "UserGroup", Color = "#A5B4FC", SortOrder = 5, IsActive = true },
+        };
+
+        // Other Subcategories
+        var otherSubcategories = new List<ExpenseCategory>
+        {
+            new() { Name = "Seasonal/Holiday", Description = "Seasonal decorations and expenses", ParentCategoryId = otherParent.Id, Type = ExpenseCategoryType.Other, Icon = "Gift", Color = "#9CA3AF", SortOrder = 1, IsActive = true },
+            new() { Name = "Charitable Contributions", Description = "Donations and sponsorships", ParentCategoryId = otherParent.Id, Type = ExpenseCategoryType.Other, Icon = "HandRaised", Color = "#9CA3AF", SortOrder = 2, IsActive = true },
+            new() { Name = "Miscellaneous", Description = "Other uncategorized expenses", ParentCategoryId = otherParent.Id, Type = ExpenseCategoryType.Other, Icon = "Puzzle", Color = "#9CA3AF", SortOrder = 3, IsActive = true },
+        };
+
+        // Add all subcategories
+        await context.ExpenseCategories.AddRangeAsync(cogsSubcategories);
+        await context.ExpenseCategories.AddRangeAsync(laborSubcategories);
+        await context.ExpenseCategories.AddRangeAsync(occupancySubcategories);
+        await context.ExpenseCategories.AddRangeAsync(operatingSubcategories);
+        await context.ExpenseCategories.AddRangeAsync(marketingSubcategories);
+        await context.ExpenseCategories.AddRangeAsync(adminSubcategories);
+        await context.ExpenseCategories.AddRangeAsync(otherSubcategories);
     }
 }
