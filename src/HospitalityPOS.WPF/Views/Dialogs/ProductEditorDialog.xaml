@@ -193,6 +193,34 @@
                                    Foreground="#9CA3AF"
                                    Margin="0,2,0,0"/>
                     </StackPanel>
+                    <!-- Close Button -->
+                    <Button x:Name="CloseButton"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Width="32"
+                            Height="32"
+                            Cursor="Hand"
+                            Click="CloseButton_Click"
+                            ToolTip="Close">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="border"
+                                        Background="Transparent"
+                                        CornerRadius="6">
+                                    <Path Data="M 8,8 L 16,16 M 16,8 L 8,16"
+                                          Stroke="#9CA3AF"
+                                          StrokeThickness="2"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="border" Property="Background" Value="#3D3D52"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
                 </Grid>
             </Border>
 
@@ -248,22 +276,60 @@
                                      MaxLength="200"/>
                         </StackPanel>
 
-                        <!-- Category with Search -->
+                        <!-- Category with Search and Quick Add -->
                         <StackPanel Margin="0,14,0,0">
                             <TextBlock Text="Category *" Style="{StaticResource FieldLabel}"/>
-                            <ComboBox x:Name="CategoryComboBox"
-                                      Style="{StaticResource InputComboBox}"
-                                      IsEditable="True"
-                                      IsTextSearchEnabled="True"
-                                      StaysOpenOnEdit="True"
-                                      TextBoxBase.TextChanged="CategoryComboBox_TextChanged">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Name}"/>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                            <TextBlock Text="Type to search categories"
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ComboBox x:Name="CategoryComboBox"
+                                          Style="{StaticResource InputComboBox}"
+                                          IsEditable="True"
+                                          IsTextSearchEnabled="True"
+                                          TextSearch.TextPath="Name"
+                                          StaysOpenOnEdit="True"
+                                          TextBoxBase.TextChanged="CategoryComboBox_TextChanged"
+                                          SelectionChanged="CategoryComboBox_SelectionChanged">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <Button x:Name="AddCategoryButton"
+                                        Grid.Column="1"
+                                        Content="+ Add"
+                                        Background="#4E4E6E"
+                                        Foreground="White"
+                                        FontSize="12"
+                                        Margin="8,0,0,0"
+                                        Padding="12,8"
+                                        Cursor="Hand"
+                                        Visibility="Collapsed"
+                                        Click="AddCategoryButton_Click"
+                                        ToolTip="Add new category">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="border"
+                                                    Background="{TemplateBinding Background}"
+                                                    CornerRadius="5"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="#10B981"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </Grid>
+                            <TextBlock x:Name="CategoryHintText"
+                                       Text="Type to search or add new category"
                                        FontSize="10"
                                        Foreground="#6E6E8E"
                                        Margin="2,4,0,0"/>

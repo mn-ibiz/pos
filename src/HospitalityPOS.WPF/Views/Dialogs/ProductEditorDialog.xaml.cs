@@ -97,9 +97,12 @@ public partial class ProductEditorDialog : Window
     private readonly Product? _existingProduct;
     private readonly IReadOnlyList<Category> _categories;
     private readonly IImageService? _imageService;
+    private readonly ICategoryService? _categoryService;
     private string? _selectedImagePath;
     private List<Category> _filteredCategories = [];
+    private List<Category> _allCategories = [];
     private bool _isUpdatingCategoryFilter;
+    private Category? _selectedCategory;
 
     private static readonly string[] UnitOfMeasureOptions =
     [
@@ -142,7 +145,9 @@ public partial class ProductEditorDialog : Window
 
         _existingProduct = existingProduct;
         _categories = categories;
+        _allCategories = categories.Where(c => c.IsActive).ToList();
         _imageService = App.Services.GetService<IImageService>();
+        _categoryService = App.Services.GetService<ICategoryService>();
 
         SetupDialog(defaultCategoryId);
     }
@@ -150,7 +155,7 @@ public partial class ProductEditorDialog : Window
     private void SetupDialog(int? defaultCategoryId)
     {
         // Setup category dropdown with filtering support
-        _filteredCategories = _categories.Where(c => c.IsActive).ToList();
+        _filteredCategories = _allCategories.ToList();
         CategoryComboBox.ItemsSource = _filteredCategories;
 
         // Setup unit of measure dropdown
@@ -167,7 +172,12 @@ public partial class ProductEditorDialog : Window
             CodeTextBox.Text = _existingProduct.Code;
             NameTextBox.Text = _existingProduct.Name;
             DescriptionTextBox.Text = _existingProduct.Description;
-            CategoryComboBox.SelectedItem = _categories.FirstOrDefault(c => c.Id == _existingProduct.CategoryId);
+            _selectedCategory = _allCategories.FirstOrDefault(c => c.Id == _existingProduct.CategoryId);
+            if (_selectedCategory is not null)
+            {
+                CategoryComboBox.SelectedItem = _selectedCategory;
+                CategoryComboBox.Text = _selectedCategory.Name;
+            }
             BarcodeTextBox.Text = _existingProduct.Barcode;
             SellingPriceTextBox.Text = _existingProduct.SellingPrice.ToString("F2");
             CostPriceTextBox.Text = _existingProduct.CostPrice?.ToString("F2") ?? "";
@@ -193,7 +203,12 @@ public partial class ProductEditorDialog : Window
             // Set default category if specified
             if (defaultCategoryId.HasValue)
             {
-                CategoryComboBox.SelectedItem = _categories.FirstOrDefault(c => c.Id == defaultCategoryId);
+                _selectedCategory = _allCategories.FirstOrDefault(c => c.Id == defaultCategoryId);
+                if (_selectedCategory is not null)
+                {
+                    CategoryComboBox.SelectedItem = _selectedCategory;
+                    CategoryComboBox.Text = _selectedCategory.Name;
+                }
             }
         }
 
@@ -241,17 +256,36 @@ public partial class ProductEditorDialog : Window
         try
         {
             var searchText = CategoryComboBox.Text?.Trim() ?? "";
-            var activeCategories = _categories.Where(c => c.IsActive).ToList();
 
             if (string.IsNullOrEmpty(searchText))
             {
-                _filteredCategories = activeCategories;
+                _filteredCategories = _allCategories.ToList();
+                AddCategoryButton.Visibility = Visibility.Collapsed;
+                CategoryHintText.Text = "Type to search or add new category";
             }
             else
             {
-                _filteredCategories = activeCategories
+                _filteredCategories = _allCategories
                     .Where(c => c.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))
                     .ToList();
+
+                // Check if the exact name already exists (case-insensitive)
+                var exactMatch = _allCategories
+                    .FirstOrDefault(c => c.Name.Equals(searchText, StringComparison.OrdinalIgnoreCase));
+
+                if (exactMatch is not null)
+                {
+                    // Exact match found - select it and hide add button
+                    AddCategoryButton.Visibility = Visibility.Collapsed;
+                    CategoryHintText.Text = "Category found";
+                    _selectedCategory = exactMatch;
+                }
+                else
+                {
+                    // No exact match - show add button
+                    AddCategoryButton.Visibility = Visibility.Visible;
+                    CategoryHintText.Text = $"Press '+ Add' to create \"{searchText}\" category";
+                }
             }
 
             CategoryComboBox.ItemsSource = _filteredCategories;
@@ -266,6 +300,118 @@ public partial class ProductEditorDialog : Window
         {
             _isUpdatingCategoryFilter = false;
         }
+    }
+
+    private void CategoryComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isUpdatingCategoryFilter)
+            return;
+
+        if (CategoryComboBox.SelectedItem is Category category)
+        {
+            _selectedCategory = category;
+            _isUpdatingCategoryFilter = true;
+            try
+            {
+                CategoryComboBox.Text = category.Name;
+                AddCategoryButton.Visibility = Visibility.Collapsed;
+                CategoryHintText.Text = "Type to search or add new category";
+            }
+            finally
+            {
+                _isUpdatingCategoryFilter = false;
+            }
+        }
+    }
+
+    private async void AddCategoryButton_Click(object sender, RoutedEventArgs e)
+    {
+        var categoryName = CategoryComboBox.Text?.Trim();
+        if (string.IsNullOrEmpty(categoryName))
+            return;
+
+        if (_categoryService is null)
+        {
+            ShowError("Category service unavailable. Please try again.");
+            return;
+        }
+
+        // Check if already exists (double-check)
+        var existingCategory = _allCategories
+            .FirstOrDefault(c => c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase));
+
+        if (existingCategory is not null)
+        {
+            _selectedCategory = existingCategory;
+            _isUpdatingCategoryFilter = true;
+            try
+            {
+                CategoryComboBox.SelectedItem = existingCategory;
+                CategoryComboBox.Text = existingCategory.Name;
+                AddCategoryButton.Visibility = Visibility.Collapsed;
+                CategoryHintText.Text = "Category selected";
+            }
+            finally
+            {
+                _isUpdatingCategoryFilter = false;
+            }
+            return;
+        }
+
+        try
+        {
+            AddCategoryButton.IsEnabled = false;
+            AddCategoryButton.Content = "Adding...";
+
+            // Create new category
+            var dto = new CategoryDto
+            {
+                Name = categoryName,
+                IsActive = true,
+                DisplayOrder = _allCategories.Count + 1
+            };
+
+            var newCategory = await _categoryService.CreateCategoryAsync(dto, 1);
+
+            // Add to local lists
+            _allCategories.Add(newCategory);
+            _filteredCategories.Add(newCategory);
+
+            // Select the new category
+            _selectedCategory = newCategory;
+            _isUpdatingCategoryFilter = true;
+            try
+            {
+                CategoryComboBox.ItemsSource = _filteredCategories.ToList();
+                CategoryComboBox.SelectedItem = newCategory;
+                CategoryComboBox.Text = newCategory.Name;
+                AddCategoryButton.Visibility = Visibility.Collapsed;
+                CategoryHintText.Text = $"Category \"{categoryName}\" added successfully";
+            }
+            finally
+            {
+                _isUpdatingCategoryFilter = false;
+            }
+
+            HideError();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to create category: {ex.Message}");
+            ShowError($"Failed to create category: {ex.Message}");
+        }
+        finally
+        {
+            AddCategoryButton.IsEnabled = true;
+            AddCategoryButton.Content = "+ Add";
+        }
+    }
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        Result = null;
+        DialogResult = false;
+        Close();
     }
 
     private void BrowseButton_Click(object sender, RoutedEventArgs e)
@@ -342,11 +488,23 @@ public partial class ProductEditorDialog : Window
         }
 
         // Validate category
-        if (CategoryComboBox.SelectedItem is not Category selectedCategory)
+        var selectedCategory = _selectedCategory ?? CategoryComboBox.SelectedItem as Category;
+        if (selectedCategory is null)
         {
-            ShowError("Please select a category.");
-            CategoryComboBox.Focus();
-            return;
+            // Check if user typed a category name that matches an existing one
+            var typedCategoryName = CategoryComboBox.Text?.Trim();
+            if (!string.IsNullOrEmpty(typedCategoryName))
+            {
+                selectedCategory = _allCategories
+                    .FirstOrDefault(c => c.Name.Equals(typedCategoryName, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (selectedCategory is null)
+            {
+                ShowError("Please select a category or add a new one using the '+ Add' button.");
+                CategoryComboBox.Focus();
+                return;
+            }
         }
 
         // Validate selling price
