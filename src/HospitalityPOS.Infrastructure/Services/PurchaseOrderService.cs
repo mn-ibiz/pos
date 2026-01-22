@@ -29,15 +29,19 @@ public class PurchaseOrderService : IPurchaseOrderService
     /// <inheritdoc />
     public async Task<IReadOnlyList<PurchaseOrder>> GetAllPurchaseOrdersAsync(bool includeItems = false, CancellationToken cancellationToken = default)
     {
-        var query = _context.PurchaseOrders
+        IQueryable<PurchaseOrder> query = _context.PurchaseOrders
             .AsNoTracking()
             .Include(po => po.Supplier)
             .Include(po => po.CreatedByUser);
 
         if (includeItems)
         {
-            query = query.Include(po => po.PurchaseOrderItems)
-                         .ThenInclude(i => i.Product);
+            query = _context.PurchaseOrders
+                .AsNoTracking()
+                .Include(po => po.Supplier)
+                .Include(po => po.CreatedByUser)
+                .Include(po => po.PurchaseOrderItems)
+                    .ThenInclude(i => i.Product);
         }
 
         return await query

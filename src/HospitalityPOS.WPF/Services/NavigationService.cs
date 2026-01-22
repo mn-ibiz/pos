@@ -1,3 +1,4 @@
+using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using HospitalityPOS.WPF.ViewModels;
 
@@ -46,25 +47,38 @@ public class NavigationService : INavigationService
     /// <inheritdoc />
     public void NavigateTo<TViewModel>(object parameter) where TViewModel : class
     {
-        // Push current view to history if it exists
-        if (_currentView is not null)
+        try
         {
-            _navigationHistory.Push(_currentView);
+            // Push current view to history if it exists
+            if (_currentView is not null)
+            {
+                _navigationHistory.Push(_currentView);
+            }
+
+            // Resolve the new ViewModel
+            var viewModel = _serviceProvider.GetRequiredService<TViewModel>();
+
+            // Always call OnNavigatedTo if ViewModel supports it (even with null parameter)
+            if (viewModel is INavigationAware navigationAware)
+            {
+                navigationAware.OnNavigatedTo(parameter);
+            }
+
+            CurrentView = viewModel;
+
+            // Raise the Navigated event
+            Navigated?.Invoke(this, new NavigationEventArgs(viewModel, parameter));
         }
-
-        // Resolve the new ViewModel
-        var viewModel = _serviceProvider.GetRequiredService<TViewModel>();
-
-        // Always call OnNavigatedTo if ViewModel supports it (even with null parameter)
-        if (viewModel is INavigationAware navigationAware)
+        catch (InvalidOperationException ex)
         {
-            navigationAware.OnNavigatedTo(parameter);
+            // Service not registered or dependency missing - show user-friendly message
+            var viewModelName = typeof(TViewModel).Name.Replace("ViewModel", "");
+            MessageBox.Show(
+                $"The '{viewModelName}' feature is not available.\n\nThis feature requires services that are currently disabled.",
+                "Feature Not Available",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
-
-        CurrentView = viewModel;
-
-        // Raise the Navigated event
-        Navigated?.Invoke(this, new NavigationEventArgs(viewModel, parameter));
     }
 
     /// <inheritdoc />

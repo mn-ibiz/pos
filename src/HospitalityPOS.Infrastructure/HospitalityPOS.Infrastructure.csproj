@@ -65,7 +65,6 @@
     <Compile Remove="Services\ChainReportingService.cs" />
     <Compile Remove="Services\StockTakeService.cs" />
     <Compile Remove="Services\SmsMarketingService.cs" />
-    <Compile Remove="Services\PurchaseOrderService.cs" />
     <Compile Remove="Services\PrinterDiscoveryService.cs" />
     <Compile Remove="Services\LabelPrinterService.cs" />
     <Compile Remove="Services\MobileMoneyService.cs" />

@@ -119,7 +119,7 @@ public class ReportService : IReportService
                 GrossSales = g.Sum(ri => ri.Quantity * ri.UnitPrice),
                 Discounts = g.Sum(ri => ri.DiscountAmount),
                 NetSales = g.Sum(ri => ri.TotalAmount - ri.TaxAmount),
-                CostOfGoodsSold = g.Sum(ri => ri.Quantity) * g.Key.CostPrice
+                CostOfGoodsSold = g.Sum(ri => ri.Quantity) * (g.Key.CostPrice ?? 0)
             })
             .OrderByDescending(p => p.NetSales)
             .ToListAsync(cancellationToken)
@@ -413,9 +413,7 @@ public class ReportService : IReportService
         var query = _context.Receipts
             .AsNoTracking()
             .Include(r => r.Owner)
-            .Include(r => r.VoidedBy)
-            .Include(r => r.VoidAuthorizedBy)
-            .Include(r => r.VoidReason)
+            .Include(r => r.VoidedByUser)
             .Where(r => r.Status == ReceiptStatus.Voided)
             .Where(r => r.VoidedAt >= parameters.StartDate)
             .Where(r => r.VoidedAt < parameters.EndDate);
@@ -1036,12 +1034,12 @@ public class ReportService : IReportService
             .ToDictionaryAsync(x => x.ProductId, x => x.LastMovement, cancellationToken)
             .ConfigureAwait(false);
 
-        var items = new List<DeadStockItem>();
+        var items = new List<Models.Reports.DeadStockItem>();
         decimal totalValue = 0;
 
         foreach (var product in products)
         {
-            var lastMovementDate = lastMovements.GetValueOrDefault(product.Id);
+            DateTime? lastMovementDate = lastMovements.TryGetValue(product.Id, out var lmd) ? lmd : null;
             var currentStock = product.Inventory?.CurrentStock ?? 0;
             var costPrice = product.CostPrice ?? 0;
 
@@ -1055,7 +1053,7 @@ public class ReportService : IReportService
                 var stockValue = currentStock * costPrice;
                 totalValue += stockValue;
 
-                items.Add(new DeadStockItem
+                items.Add(new Models.Reports.DeadStockItem
                 {
                     ProductId = product.Id,
                     ProductCode = product.Code,

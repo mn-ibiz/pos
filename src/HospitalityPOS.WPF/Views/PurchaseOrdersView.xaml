@@ -200,13 +200,7 @@
                       Margin="0,0,16,0">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Converter={StaticResource BoolToVisConverter}}" Foreground="White">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="{Binding}" />
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
+                        <TextBlock Text="{Binding}" Foreground="White"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>

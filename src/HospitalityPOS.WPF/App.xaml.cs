@@ -159,6 +159,9 @@ public partial class App : Application
         // Order service (Scoped - accesses DbContext directly)
         services.AddScoped<IOrderService, OrderService>();
 
+        // Purchase order service (Scoped - accesses DbContext directly)
+        services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
+
         // Receipt service (Scoped - accesses DbContext directly)
         services.AddScoped<IReceiptService, ReceiptService>();
 
@@ -266,7 +269,7 @@ public partial class App : Application
         // services.AddTransient<StockAlertWidgetViewModel>(); // Excluded
         services.AddTransient<SuppliersViewModel>();
         services.AddTransient<PurchaseOrdersViewModel>();
-        services.AddTransient<SalesReportsViewModel>();
+        // services.AddTransient<SalesReportsViewModel>(); // Disabled - IReportService not available
         services.AddTransient<ExceptionReportsViewModel>();
         services.AddTransient<InventoryReportsViewModel>();
         services.AddTransient<AuditReportsViewModel>();

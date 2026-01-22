@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Interfaces;
 
@@ -17,6 +18,7 @@ public class POSDbContext : DbContext
     /// Initializes a new instance of the <see cref="POSDbContext"/> class.
     /// </summary>
     /// <param name="options">The database context options.</param>
+    [ActivatorUtilitiesConstructor]
     public POSDbContext(DbContextOptions<POSDbContext> options) : base(options)
     {
     }
