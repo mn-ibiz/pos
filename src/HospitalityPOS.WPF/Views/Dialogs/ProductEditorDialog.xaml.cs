@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
@@ -97,6 +98,8 @@ public partial class ProductEditorDialog : Window
     private readonly IReadOnlyList<Category> _categories;
     private readonly IImageService? _imageService;
     private string? _selectedImagePath;
+    private List<Category> _filteredCategories = [];
+    private bool _isUpdatingCategoryFilter;
 
     private static readonly string[] UnitOfMeasureOptions =
     [
@@ -146,8 +149,9 @@ public partial class ProductEditorDialog : Window
 
     private void SetupDialog(int? defaultCategoryId)
     {
-        // Setup category dropdown
-        CategoryComboBox.ItemsSource = _categories.Where(c => c.IsActive).ToList();
+        // Setup category dropdown with filtering support
+        _filteredCategories = _categories.Where(c => c.IsActive).ToList();
+        CategoryComboBox.ItemsSource = _filteredCategories;
 
         // Setup unit of measure dropdown
         UnitOfMeasureComboBox.ItemsSource = UnitOfMeasureOptions;
@@ -226,6 +230,42 @@ public partial class ProductEditorDialog : Window
         var newText = textBox.Text.Insert(textBox.CaretIndex, e.Text);
 
         e.Handled = !decimal.TryParse(newText, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out _);
+    }
+
+    private void CategoryComboBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (_isUpdatingCategoryFilter)
+            return;
+
+        _isUpdatingCategoryFilter = true;
+        try
+        {
+            var searchText = CategoryComboBox.Text?.Trim() ?? "";
+            var activeCategories = _categories.Where(c => c.IsActive).ToList();
+
+            if (string.IsNullOrEmpty(searchText))
+            {
+                _filteredCategories = activeCategories;
+            }
+            else
+            {
+                _filteredCategories = activeCategories
+                    .Where(c => c.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            CategoryComboBox.ItemsSource = _filteredCategories;
+
+            // Keep the dropdown open while typing
+            if (_filteredCategories.Count > 0 && !string.IsNullOrEmpty(searchText))
+            {
+                CategoryComboBox.IsDropDownOpen = true;
+            }
+        }
+        finally
+        {
+            _isUpdatingCategoryFilter = false;
+        }
     }
 
     private void BrowseButton_Click(object sender, RoutedEventArgs e)
@@ -374,7 +414,7 @@ public partial class ProductEditorDialog : Window
         // Validate stock level relationship
         if (minStock.HasValue && maxStock.HasValue && minStock >= maxStock)
         {
-            ShowError("Minimum stock must be less than maximum stock.");
+            ShowError("Reorder point must be less than maximum stock.");
             MinStockTextBox.Focus();
             return;
         }
