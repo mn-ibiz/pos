@@ -270,12 +270,12 @@ public partial class PayrollViewModel : ObservableObject
         {
             using var scope = App.Services.CreateScope();
             var payrollService = scope.ServiceProvider.GetRequiredService<IPayrollService>();
-            var exportService = scope.ServiceProvider.GetRequiredService<IExportService>();
+            var reportPrintService = scope.ServiceProvider.GetRequiredService<IReportPrintService>();
 
             var html = await payrollService.GeneratePayslipHtmlAsync(SelectedPayslip.Id);
             var filename = $"Payslip_{SelectedPayslip.Employee.EmployeeNumber}_{SelectedPeriod?.PeriodName.Replace(" ", "_")}.pdf";
 
-            await exportService.ExportToPdfAsync(html, filename);
+            await reportPrintService.ExportToPdfAsync(html, filename);
             await _dialogService.ShowSuccessAsync($"Payslip exported to {filename}");
         }
         catch (Exception ex)
@@ -293,12 +293,12 @@ public partial class PayrollViewModel : ObservableObject
         {
             using var scope = App.Services.CreateScope();
             var payrollService = scope.ServiceProvider.GetRequiredService<IPayrollService>();
-            var exportService = scope.ServiceProvider.GetRequiredService<IExportService>();
+            var reportPrintService = scope.ServiceProvider.GetRequiredService<IReportPrintService>();
 
             var html = await payrollService.GeneratePayrollReportHtmlAsync(SelectedPeriod.Id);
             var filename = $"PayrollReport_{SelectedPeriod.PeriodName.Replace(" ", "_")}.pdf";
 
-            await exportService.ExportToPdfAsync(html, filename);
+            await reportPrintService.ExportToPdfAsync(html, filename);
             await _dialogService.ShowSuccessAsync($"Report exported to {filename}");
         }
         catch (Exception ex)

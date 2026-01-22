@@ -54,7 +54,7 @@
     <!-- <Compile Remove="ViewModels\MainViewModel.cs" /> -->
     <!-- POSViewModel and SettlementViewModel now enabled -->
     <Compile Remove="ViewModels\TableMapViewModel.cs" />
-    <Compile Remove="ViewModels\PayrollViewModel.cs" />
+    <!-- PayrollViewModel now enabled for HR section -->
     <Compile Remove="ViewModels\PayslipHistoryViewModel.cs" />
     <!-- Stock Transfer ViewModels (Epic 23) - NOW ENABLED after API fixes -->
     <!-- <Compile Remove="ViewModels\StockTransferViewModel.cs" /> -->
@@ -80,7 +80,7 @@
     <!-- <Compile Remove="ViewModels\MpesaSettingsViewModel.cs" /> --> <!-- M-Pesa settings -->
     <!-- <Compile Remove="ViewModels\OfferReportViewModel.cs" /> -->
     <Compile Remove="ViewModels\PLUManagementViewModel.cs" />
-    <Compile Remove="ViewModels\AttendanceViewModel.cs" />
+    <!-- AttendanceViewModel now enabled for HR section -->
     <!-- <Compile Remove="ViewModels\SalesReportsViewModel.cs" /> -->
     <Compile Remove="ViewModels\WeightScaleDialogViewModel.cs" />
     <!-- <Compile Remove="ViewModels\AuditReportsViewModel.cs" /> -->
@@ -104,8 +104,7 @@
     <!-- SalesReportsView now enabled for sidebar navigation -->
     <!-- <Compile Remove="Views\SalesReportsView.xaml.cs" /> -->
     <!-- <Page Remove="Views\SalesReportsView.xaml" /> -->
-    <Compile Remove="Views\AttendanceView.xaml.cs" />
-    <Page Remove="Views\AttendanceView.xaml" />
+    <!-- AttendanceView now enabled for HR section -->
     <Compile Remove="Views\CurrencyPaymentDialog.xaml.cs" />
     <Page Remove="Views\CurrencyPaymentDialog.xaml" />
     <Compile Remove="Views\CustomerDisplayWindow.xaml.cs" />
@@ -113,8 +112,7 @@
     <Compile Remove="Views\WeightScaleDialog.xaml.cs" />
     <Page Remove="Views\WeightScaleDialog.xaml" />
     <!-- POSView now enabled -->
-    <Compile Remove="Views\PayrollView.xaml.cs" />
-    <Page Remove="Views\PayrollView.xaml" />
+    <!-- PayrollView now enabled for HR section -->
     <!-- Email settings excluded due to API mismatches -->
     <Compile Remove="Views\EmailSettingsView.xaml.cs" />
     <Page Remove="Views\EmailSettingsView.xaml" />

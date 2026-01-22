@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Interfaces;
@@ -428,5 +429,42 @@ public partial class ProductEditorDialog : Window
     private void HideError()
     {
         ErrorBorder.Visibility = Visibility.Collapsed;
+    }
+
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        // Set window size to 70% of screen dimensions
+        var screenWidth = SystemParameters.PrimaryScreenWidth;
+        var screenHeight = SystemParameters.PrimaryScreenHeight;
+
+        Width = screenWidth * 0.70;
+        Height = screenHeight * 0.70;
+
+        // Center the window
+        Left = (screenWidth - Width) / 2;
+        Top = (screenHeight - Height) / 2;
+
+        // Prevent closing by clicking outside - capture mouse on the content border
+        MouseDown += Window_MouseDown;
+    }
+
+    private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        // Only allow interaction within the dialog content
+        // This prevents accidental closing by clicking the transparent area
+        if (e.OriginalSource == this)
+        {
+            e.Handled = true;
+        }
+    }
+
+    protected override void OnDeactivated(EventArgs e)
+    {
+        base.OnDeactivated(e);
+        // Keep the dialog focused and prevent it from being dismissed
+        if (IsVisible)
+        {
+            Activate();
+        }
     }
 }

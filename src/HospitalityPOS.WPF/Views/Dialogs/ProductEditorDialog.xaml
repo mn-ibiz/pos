@@ -5,38 +5,40 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Product Editor"
-        Height="750"
-        Width="550"
-        WindowStartupLocation="CenterOwner"
+        WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Loaded="Window_Loaded">
 
     <Window.Resources>
         <Style x:Key="InputTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="#2D2D44"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="Background" Value="#1A1A2E"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="CaretBrush" Value="#FFFFFF"/>
             <Setter Property="BorderBrush" Value="#4E4E6E"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,10"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Height" Value="44"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding" Value="14,12"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Height" Value="52"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
                         <Border Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6">
+                                CornerRadius="8">
                             <ScrollViewer x:Name="PART_ContentHost"
                                           VerticalAlignment="Center"
                                           Margin="{TemplateBinding Padding}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="#6E6EAE"/>
+                                <Setter Property="BorderBrush" Value="#6366F1"/>
+                                <Setter Property="Background" Value="#252538"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -45,30 +47,30 @@
         </Style>
 
         <Style x:Key="InputComboBox" TargetType="ComboBox">
-            <Setter Property="Background" Value="#2D2D44"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#1A1A2E"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
             <Setter Property="BorderBrush" Value="#4E4E6E"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,10"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Height" Value="44"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding" Value="14,12"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Height" Value="52"/>
         </Style>
 
         <Style x:Key="ActionButton" TargetType="Button">
-            <Setter Property="MinHeight" Value="44"/>
-            <Setter Property="MinWidth" Value="100"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="MinHeight" Value="52"/>
+            <Setter Property="MinWidth" Value="140"/>
+            <Setter Property="FontSize" Value="16"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Margin" Value="8,0"/>
+            <Setter Property="Margin" Value="10,0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border"
                                 Background="{TemplateBinding Background}"
-                                CornerRadius="8"
-                                Padding="20,10">
+                                CornerRadius="10"
+                                Padding="24,14">
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center"/>
                         </Border>
@@ -130,16 +132,17 @@
         </Style>
 
         <Style x:Key="SectionHeader" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontSize" Value="18"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#A0A0B0"/>
-            <Setter Property="Margin" Value="0,16,0,8"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Margin" Value="0,24,0,12"/>
         </Style>
 
         <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Foreground" Value="#8888AA"/>
-            <Setter Property="Margin" Value="0,0,0,4"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Foreground" Value="#B0B0C0"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
         </Style>
     </Window.Resources>
 
@@ -155,20 +158,20 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <Border Grid.Row="0" Background="#252538" CornerRadius="16,16,0,0" Padding="24,16">
+            <Border Grid.Row="0" Background="#252538" CornerRadius="16,16,0,0" Padding="32,24">
                 <StackPanel>
                     <TextBlock x:Name="TitleTextBlock"
                                Text="Create Product"
-                               FontSize="22"
-                               FontWeight="SemiBold"
+                               FontSize="28"
+                               FontWeight="Bold"
                                Foreground="White"
                                HorizontalAlignment="Center"/>
                     <TextBlock x:Name="SubtitleTextBlock"
                                Text="Add a new product to the catalog"
-                               FontSize="13"
-                               Foreground="#8888AA"
+                               FontSize="16"
+                               Foreground="#9CA3AF"
                                HorizontalAlignment="Center"
-                               Margin="0,4,0,0"/>
+                               Margin="0,8,0,0"/>
                 </StackPanel>
             </Border>
 
@@ -176,7 +179,7 @@
             <ScrollViewer Grid.Row="1"
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled"
-                          Padding="24,8,24,16">
+                          Padding="32,12,32,24">
                 <StackPanel>
                     <!-- Basic Information Section -->
                     <TextBlock Text="Basic Information" Style="{StaticResource SectionHeader}"/>
@@ -204,20 +207,21 @@
                         </StackPanel>
                     </Grid>
 
-                    <TextBlock Text="Product Name *" Style="{StaticResource FieldLabel}" Margin="0,12,0,4"/>
+                    <TextBlock Text="Product Name *" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
                     <TextBox x:Name="NameTextBox"
                              Style="{StaticResource InputTextBox}"
                              MaxLength="200"/>
 
-                    <TextBlock Text="Description" Style="{StaticResource FieldLabel}" Margin="0,12,0,4"/>
+                    <TextBlock Text="Description" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
                     <TextBox x:Name="DescriptionTextBox"
                              Style="{StaticResource InputTextBox}"
-                             Height="70"
+                             Height="90"
                              TextWrapping="Wrap"
                              AcceptsReturn="True"
-                             VerticalContentAlignment="Top"/>
+                             VerticalContentAlignment="Top"
+                             Padding="14,14"/>
 
-                    <TextBlock Text="Category *" Style="{StaticResource FieldLabel}" Margin="0,12,0,4"/>
+                    <TextBlock Text="Category *" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
                     <ComboBox x:Name="CategoryComboBox"
                               Style="{StaticResource InputComboBox}"
                               DisplayMemberPath="Name"/>
@@ -292,11 +296,11 @@
 
                     <!-- Initial Stock (only for new products) -->
                     <StackPanel x:Name="InitialStockPanel">
-                        <TextBlock Text="Initial Stock" Style="{StaticResource FieldLabel}" Margin="0,12,0,4"/>
+                        <TextBlock Text="Initial Stock" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
                         <TextBox x:Name="InitialStockTextBox"
                                  Style="{StaticResource InputTextBox}"
                                  Text="0"
-                                 Width="150"
+                                 Width="200"
                                  HorizontalAlignment="Left"
                                  PreviewTextInput="DecimalTextBox_PreviewTextInput"/>
                     </StackPanel>
@@ -397,15 +401,16 @@
             </ScrollViewer>
 
             <!-- Action Buttons -->
-            <Border Grid.Row="2" Background="#252538" CornerRadius="0,0,16,16" Padding="24,16">
+            <Border Grid.Row="2" Background="#252538" CornerRadius="0,0,16,16" Padding="32,20">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Cancel"
                             Style="{StaticResource ActionButton}"
                             Background="#4E4E6E"
                             Click="CancelButton_Click"/>
-                    <Button Content="Save Product"
+                    <Button x:Name="SaveButton"
+                            Content="Save Product"
                             Style="{StaticResource ActionButton}"
-                            Background="#4CAF50"
+                            Background="#10B981"
                             Click="SaveButton_Click"/>
                 </StackPanel>
             </Border>

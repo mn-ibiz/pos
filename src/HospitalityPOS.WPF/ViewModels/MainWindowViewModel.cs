@@ -256,6 +256,12 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private void NavigateToEmployees() => NavigateWithSidebar<EmployeesViewModel>("Employees");
 
     [RelayCommand]
+    private void NavigateToAttendance() => NavigateWithSidebar<AttendanceViewModel>("Attendance");
+
+    [RelayCommand]
+    private void NavigateToPayroll() => NavigateWithSidebar<PayrollViewModel>("Payroll");
+
+    [RelayCommand]
     private void NavigateToUserManagement() => NavigateWithSidebar<UserManagementViewModel>("Users");
 
     [RelayCommand]

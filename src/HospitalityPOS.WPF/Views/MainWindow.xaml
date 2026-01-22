@@ -134,6 +134,12 @@
         <DataTemplate DataType="{x:Type vm:EmployeeEditorViewModel}">
             <views:EmployeeEditorView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AttendanceViewModel}">
+            <views:AttendanceView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PayrollViewModel}">
+            <views:PayrollView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
             <views:DashboardView />
         </DataTemplate>
@@ -488,6 +494,37 @@
                                 </StackPanel>
                             </Button>
 
+                            <!-- HR Group -->
+                            <TextBlock Text="HR"
+                                       Style="{StaticResource SidebarGroupHeaderStyle}" />
+
+                            <!-- Employees -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToEmployeesCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE716;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Employees" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Attendance -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToAttendanceCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Attendance" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Payroll -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToPayrollCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8C7;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Payroll" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
                             <!-- Management Group -->
                             <TextBlock Text="MANAGEMENT"
                                        Style="{StaticResource SidebarGroupHeaderStyle}" />
@@ -525,15 +562,6 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE71D;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
                                     <TextBlock Text="Modifier Groups" Margin="12,0,0,0" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Employees -->
-                            <Button Style="{StaticResource SidebarMenuItemStyle}"
-                                    Command="{Binding NavigateToEmployeesCommand}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE716;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
-                                    <TextBlock Text="Employees" Margin="12,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
 

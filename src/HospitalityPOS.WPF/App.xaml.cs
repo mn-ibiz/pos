@@ -297,10 +297,11 @@ public partial class App : Application
         // services.AddTransient<OfferReportViewModel>(); // Excluded
         services.AddTransient<SupplierInvoicesViewModel>();
         // services.AddTransient<SupplierStatementViewModel>(); // Excluded
+        // HR ViewModels
         services.AddTransient<EmployeesViewModel>();
         services.AddTransient<EmployeeEditorViewModel>();
-        // services.AddTransient<AttendanceViewModel>(); // Excluded
-        // services.AddTransient<PayrollViewModel>(); // Excluded
+        services.AddTransient<AttendanceViewModel>();
+        services.AddTransient<PayrollViewModel>();
         // services.AddTransient<PayslipHistoryViewModel>(); // Excluded
         services.AddTransient<ChartOfAccountsViewModel>();
         // services.AddTransient<JournalEntriesViewModel>(); // Excluded - API mismatches with JournalEntry entity
