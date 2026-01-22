@@ -322,8 +322,45 @@
                                 </StackPanel>
                             </Button>
 
-                            <!-- Point of Sale - Hidden for admin interface, accessed via Supermarket/Restaurant mode -->
-                            <!-- Admins manage the system, cashiers/waiters use POS through dedicated shells -->
+                            <!-- Products Group -->
+                            <TextBlock Text="PRODUCTS"
+                                       Style="{StaticResource SidebarGroupHeaderStyle}" />
+
+                            <!-- Products -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToProductManagementCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE7BF;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Products" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Categories -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToCategoryManagementCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE74C;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Categories" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Variant Options -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToVariantOptionsCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8B3;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Variant Options" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Modifier Groups -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToModifierGroupsCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE71D;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Modifier Groups" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
 
                             <!-- Inventory Group -->
                             <TextBlock Text="INVENTORY"
@@ -528,42 +565,6 @@
                             <!-- Management Group -->
                             <TextBlock Text="MANAGEMENT"
                                        Style="{StaticResource SidebarGroupHeaderStyle}" />
-
-                            <!-- Products -->
-                            <Button Style="{StaticResource SidebarMenuItemStyle}"
-                                    Command="{Binding NavigateToProductManagementCommand}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE7BF;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
-                                    <TextBlock Text="Products" Margin="12,0,0,0" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Categories -->
-                            <Button Style="{StaticResource SidebarMenuItemStyle}"
-                                    Command="{Binding NavigateToCategoryManagementCommand}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE74C;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
-                                    <TextBlock Text="Categories" Margin="12,0,0,0" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Variant Options -->
-                            <Button Style="{StaticResource SidebarMenuItemStyle}"
-                                    Command="{Binding NavigateToVariantOptionsCommand}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE8B3;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
-                                    <TextBlock Text="Variant Options" Margin="12,0,0,0" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Modifier Groups -->
-                            <Button Style="{StaticResource SidebarMenuItemStyle}"
-                                    Command="{Binding NavigateToModifierGroupsCommand}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE71D;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
-                                    <TextBlock Text="Modifier Groups" Margin="12,0,0,0" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </Button>
 
                             <!-- Users -->
                             <Button Style="{StaticResource SidebarMenuItemStyle}"
