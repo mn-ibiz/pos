@@ -42,7 +42,7 @@
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
 
-        <Style x:Key="FilterComboStyle" TargetType="ComboBox">
+        <Style x:Key="FilterComboStyle" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
             <Setter Property="Background" Value="#3D3D5C" />
             <Setter Property="Foreground" Value="White" />
             <Setter Property="BorderBrush" Value="#4A4A6A" />

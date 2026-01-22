@@ -75,7 +75,7 @@
         </Style>
 
         <!-- Apple-style ComboBox -->
-        <Style x:Key="AppleComboBox" TargetType="ComboBox">
+        <Style x:Key="AppleComboBox" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
             <Setter Property="Background" Value="{StaticResource FillBrush}"/>
             <Setter Property="Foreground" Value="{StaticResource LabelPrimaryBrush}"/>
             <Setter Property="BorderBrush" Value="Transparent"/>

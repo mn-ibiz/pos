@@ -79,7 +79,7 @@
         </Style>
 
         <!-- ComboBox Style -->
-        <Style x:Key="SettingsComboBox" TargetType="ComboBox">
+        <Style x:Key="SettingsComboBox" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
             <Setter Property="Background" Value="#3D3D5C"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#4E4E6E"/>

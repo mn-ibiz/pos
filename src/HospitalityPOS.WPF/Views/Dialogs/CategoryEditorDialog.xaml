@@ -44,7 +44,7 @@
             </Setter>
         </Style>
 
-        <Style x:Key="InputComboBox" TargetType="ComboBox">
+        <Style x:Key="InputComboBox" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
             <Setter Property="Background" Value="#2D2D44"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#4E4E6E"/>

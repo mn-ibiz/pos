@@ -56,7 +56,7 @@
         </Style>
 
         <!-- ComboBox Style -->
-        <Style x:Key="FormComboBoxStyle" TargetType="ComboBox">
+        <Style x:Key="FormComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
             <Setter Property="Background" Value="#1E1E2E"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#3D3D5C"/>

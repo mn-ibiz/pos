@@ -43,7 +43,7 @@
             </Setter>
         </Style>
 
-        <Style x:Key="FormComboBox" TargetType="ComboBox">
+        <Style x:Key="FormComboBox" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
             <Setter Property="Background" Value="#3D3D5C"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>

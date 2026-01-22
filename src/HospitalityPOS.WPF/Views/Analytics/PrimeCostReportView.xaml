@@ -96,7 +96,7 @@
         </Style>
 
         <!-- Date Picker Style -->
-        <Style x:Key="ModernDatePicker" TargetType="DatePicker">
+        <Style x:Key="ModernDatePicker" TargetType="DatePicker" BasedOn="{StaticResource {x:Type DatePicker}}">
             <Setter Property="Background" Value="#1F1F23"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#2D2D44"/>

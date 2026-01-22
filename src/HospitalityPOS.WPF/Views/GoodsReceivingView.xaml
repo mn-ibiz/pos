@@ -77,7 +77,7 @@
             </Setter>
         </Style>
 
-        <Style x:Key="FormComboBox" TargetType="ComboBox">
+        <Style x:Key="FormComboBox" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
             <Setter Property="Background" Value="#2D2D44"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#3D3D5C"/>

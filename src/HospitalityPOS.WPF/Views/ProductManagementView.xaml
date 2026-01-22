@@ -153,7 +153,7 @@
         </Style>
 
         <!-- Filter ComboBox Style -->
-        <Style x:Key="FilterComboBox" TargetType="ComboBox">
+        <Style x:Key="FilterComboBox" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
             <Setter Property="Background" Value="#1A1A2E"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#2D2D44"/>

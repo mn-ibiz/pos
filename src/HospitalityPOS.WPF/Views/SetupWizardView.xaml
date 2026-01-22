@@ -56,17 +56,13 @@
         </Style>
 
         <!-- ComboBox style for dark theme -->
-        <Style x:Key="WizardComboBox" TargetType="ComboBox">
+        <Style x:Key="WizardComboBox" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
             <Setter Property="Background" Value="#252542"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#3a3a5c"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="FontSize" Value="14"/>
-            <Style.Resources>
-                <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#252542"/>
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#6366F1"/>
-            </Style.Resources>
         </Style>
     </UserControl.Resources>
 
