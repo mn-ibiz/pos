@@ -11,26 +11,31 @@
         Background="Transparent"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
+        SizeToContent="Height"
+        Width="680"
+        MaxHeight="720"
         Loaded="Window_Loaded">
 
     <Window.Resources>
+        <!-- Compact Input TextBox -->
         <Style x:Key="InputTextBox" TargetType="TextBox">
             <Setter Property="Background" Value="#1A1A2E"/>
             <Setter Property="Foreground" Value="#FFFFFF"/>
             <Setter Property="CaretBrush" Value="#FFFFFF"/>
             <Setter Property="BorderBrush" Value="#4E4E6E"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="Padding" Value="14,12"/>
-            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="Normal"/>
-            <Setter Property="Height" Value="52"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
                         <Border Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
+                                CornerRadius="5">
                             <ScrollViewer x:Name="PART_ContentHost"
                                           VerticalAlignment="Center"
                                           Margin="{TemplateBinding Padding}"/>
@@ -46,31 +51,33 @@
             </Setter>
         </Style>
 
-        <Style x:Key="InputComboBox" TargetType="ComboBox">
+        <!-- Compact ComboBox - inherits dark theme template from global style -->
+        <Style x:Key="InputComboBox" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
             <Setter Property="Background" Value="#1A1A2E"/>
             <Setter Property="Foreground" Value="#FFFFFF"/>
             <Setter Property="BorderBrush" Value="#4E4E6E"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="Padding" Value="14,12"/>
-            <Setter Property="FontSize" Value="16"/>
-            <Setter Property="Height" Value="52"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="34"/>
         </Style>
 
+        <!-- Compact Action Button -->
         <Style x:Key="ActionButton" TargetType="Button">
-            <Setter Property="MinHeight" Value="52"/>
-            <Setter Property="MinWidth" Value="140"/>
-            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="MinHeight" Value="34"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Margin" Value="10,0"/>
+            <Setter Property="Margin" Value="8,0,0,0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border"
                                 Background="{TemplateBinding Background}"
-                                CornerRadius="10"
-                                Padding="24,14">
+                                CornerRadius="6"
+                                Padding="16,8">
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center"/>
                         </Border>
@@ -90,26 +97,27 @@
             </Setter>
         </Style>
 
+        <!-- Compact CheckBox -->
         <Style x:Key="ModernCheckBox" TargetType="CheckBox">
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontSize" Value="12"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
                         <StackPanel Orientation="Horizontal">
                             <Border x:Name="CheckBorder"
-                                    Width="22"
-                                    Height="22"
-                                    CornerRadius="4"
+                                    Width="18"
+                                    Height="18"
+                                    CornerRadius="3"
                                     Background="#2D2D44"
                                     BorderBrush="#4E4E6E"
                                     BorderThickness="1"
-                                    Margin="0,0,10,0">
+                                    Margin="0,0,8,0">
                                 <Path x:Name="CheckMark"
-                                      Data="M 3 7 L 7 11 L 13 3"
+                                      Data="M 2 6 L 5 9 L 11 2"
                                       Stroke="White"
-                                      StrokeThickness="2"
+                                      StrokeThickness="1.5"
                                       Visibility="Collapsed"
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"/>
@@ -131,23 +139,25 @@
             </Setter>
         </Style>
 
+        <!-- Compact Section Header -->
         <Style x:Key="SectionHeader" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="Margin" Value="0,24,0,12"/>
+            <Setter Property="Foreground" Value="#8B8BA7"/>
+            <Setter Property="Margin" Value="0,12,0,8"/>
         </Style>
 
+        <!-- Compact Field Label -->
         <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="15"/>
-            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Normal"/>
             <Setter Property="Foreground" Value="#B0B0C0"/>
-            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
         </Style>
     </Window.Resources>
 
     <Border Background="#1E1E2E"
-            CornerRadius="16"
+            CornerRadius="12"
             BorderBrush="#3E3E5E"
             BorderThickness="1">
         <Grid>
@@ -157,38 +167,39 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Header -->
-            <Border Grid.Row="0" Background="#252538" CornerRadius="16,16,0,0" Padding="32,24">
-                <StackPanel>
-                    <TextBlock x:Name="TitleTextBlock"
-                               Text="Create Product"
-                               FontSize="28"
-                               FontWeight="Bold"
-                               Foreground="White"
-                               HorizontalAlignment="Center"/>
-                    <TextBlock x:Name="SubtitleTextBlock"
-                               Text="Add a new product to the catalog"
-                               FontSize="16"
-                               Foreground="#9CA3AF"
-                               HorizontalAlignment="Center"
-                               Margin="0,8,0,0"/>
-                </StackPanel>
+            <!-- Compact Header -->
+            <Border Grid.Row="0" Background="#252538" CornerRadius="12,12,0,0" Padding="20,14">
+                <Grid>
+                    <StackPanel HorizontalAlignment="Left">
+                        <TextBlock x:Name="TitleTextBlock"
+                                   Text="Create Product"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Foreground="White"/>
+                        <TextBlock x:Name="SubtitleTextBlock"
+                                   Text="Add a new product to the catalog"
+                                   FontSize="12"
+                                   Foreground="#9CA3AF"
+                                   Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Grid>
             </Border>
 
-            <!-- Form Fields -->
+            <!-- Form Fields - Compact Layout -->
             <ScrollViewer Grid.Row="1"
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled"
-                          Padding="32,12,32,24">
+                          Padding="20,8,20,12">
                 <StackPanel>
-                    <!-- Basic Information Section -->
-                    <TextBlock Text="Basic Information" Style="{StaticResource SectionHeader}"/>
-
+                    <!-- Row 1: Code, Barcode, Category -->
+                    <TextBlock Text="BASIC INFORMATION" Style="{StaticResource SectionHeader}" Margin="0,4,0,8"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="12"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="1.2*"/>
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
@@ -205,36 +216,46 @@
                                      Style="{StaticResource InputTextBox}"
                                      MaxLength="50"/>
                         </StackPanel>
+
+                        <StackPanel Grid.Column="4">
+                            <TextBlock Text="Category *" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox x:Name="CategoryComboBox"
+                                      Style="{StaticResource InputComboBox}"
+                                      DisplayMemberPath="Name"/>
+                        </StackPanel>
                     </Grid>
 
-                    <TextBlock Text="Product Name *" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
-                    <TextBox x:Name="NameTextBox"
-                             Style="{StaticResource InputTextBox}"
-                             MaxLength="200"/>
+                    <!-- Row 2: Name and Description side by side -->
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.5*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Description" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
-                    <TextBox x:Name="DescriptionTextBox"
-                             Style="{StaticResource InputTextBox}"
-                             Height="90"
-                             TextWrapping="Wrap"
-                             AcceptsReturn="True"
-                             VerticalContentAlignment="Top"
-                             Padding="14,14"/>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Product Name *" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="NameTextBox"
+                                     Style="{StaticResource InputTextBox}"
+                                     MaxLength="200"/>
+                        </StackPanel>
 
-                    <TextBlock Text="Category *" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
-                    <ComboBox x:Name="CategoryComboBox"
-                              Style="{StaticResource InputComboBox}"
-                              DisplayMemberPath="Name"/>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Description" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="DescriptionTextBox"
+                                     Style="{StaticResource InputTextBox}"
+                                     MaxLength="500"/>
+                        </StackPanel>
+                    </Grid>
 
                     <!-- Pricing Section -->
-                    <TextBlock Text="Pricing" Style="{StaticResource SectionHeader}"/>
-
+                    <TextBlock Text="PRICING" Style="{StaticResource SectionHeader}"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="12"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="12"/>
                             <ColumnDefinition Width="80"/>
                         </Grid.ColumnDefinitions>
 
@@ -262,14 +283,15 @@
                     </Grid>
 
                     <!-- Inventory Section -->
-                    <TextBlock Text="Inventory" Style="{StaticResource SectionHeader}"/>
-
+                    <TextBlock Text="INVENTORY" Style="{StaticResource SectionHeader}"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="12"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
@@ -292,62 +314,61 @@
                                      Style="{StaticResource InputTextBox}"
                                      PreviewTextInput="DecimalTextBox_PreviewTextInput"/>
                         </StackPanel>
+
+                        <!-- Initial Stock inline -->
+                        <StackPanel x:Name="InitialStockPanel" Grid.Column="6">
+                            <TextBlock Text="Initial Stock" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="InitialStockTextBox"
+                                     Style="{StaticResource InputTextBox}"
+                                     Text="0"
+                                     PreviewTextInput="DecimalTextBox_PreviewTextInput"/>
+                        </StackPanel>
                     </Grid>
 
-                    <!-- Initial Stock (only for new products) -->
-                    <StackPanel x:Name="InitialStockPanel">
-                        <TextBlock Text="Initial Stock" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
-                        <TextBox x:Name="InitialStockTextBox"
-                                 Style="{StaticResource InputTextBox}"
-                                 Text="0"
-                                 Width="200"
-                                 HorizontalAlignment="Left"
-                                 PreviewTextInput="DecimalTextBox_PreviewTextInput"/>
-                    </StackPanel>
-
-                    <!-- Image Section -->
-                    <TextBlock Text="Product Image" Style="{StaticResource SectionHeader}"/>
-
+                    <!-- Image and Status Row -->
+                    <TextBlock Text="IMAGE &amp; STATUS" Style="{StaticResource SectionHeader}"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
+                        <!-- Compact Image Preview -->
                         <Border Grid.Column="0"
-                                Width="80"
-                                Height="80"
-                                CornerRadius="8"
+                                Width="56"
+                                Height="56"
+                                CornerRadius="6"
                                 Background="#2D2D44"
                                 BorderBrush="#4E4E6E"
                                 BorderThickness="1">
                             <Grid>
                                 <TextBlock x:Name="NoImageText"
                                            Text="No Image"
-                                           FontSize="11"
+                                           FontSize="9"
                                            Foreground="#6E6E8E"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"/>
                                 <Image x:Name="ImagePreview"
                                        Stretch="Uniform"
-                                       Margin="4"
+                                       Margin="3"
                                        Visibility="Collapsed"/>
                             </Grid>
                         </Border>
 
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
-                            <Button Content="Browse..."
+                        <!-- Image Buttons -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                            <Button Content="Browse"
                                     Background="#4E4E6E"
                                     Foreground="White"
-                                    FontSize="13"
-                                    Padding="16,8"
-                                    HorizontalAlignment="Left"
+                                    FontSize="12"
+                                    Padding="12,6"
                                     Cursor="Hand"
                                     Click="BrowseButton_Click">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border Background="{TemplateBinding Background}"
-                                                CornerRadius="6"
+                                                CornerRadius="4"
                                                 Padding="{TemplateBinding Padding}">
                                             <ContentPresenter HorizontalAlignment="Center"
                                                               VerticalAlignment="Center"/>
@@ -356,18 +377,17 @@
                                 </Button.Template>
                             </Button>
                             <Button Content="Clear"
-                                    Background="#616161"
-                                    Foreground="White"
-                                    FontSize="13"
-                                    Padding="16,8"
-                                    HorizontalAlignment="Left"
-                                    Margin="0,8,0,0"
+                                    Background="#3D3D52"
+                                    Foreground="#9CA3AF"
+                                    FontSize="12"
+                                    Padding="12,6"
+                                    Margin="8,0,0,0"
                                     Cursor="Hand"
                                     Click="ClearImageButton_Click">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border Background="{TemplateBinding Background}"
-                                                CornerRadius="6"
+                                                CornerRadius="4"
                                                 Padding="{TemplateBinding Padding}">
                                             <ContentPresenter HorizontalAlignment="Center"
                                                               VerticalAlignment="Center"/>
@@ -376,36 +396,38 @@
                                 </Button.Template>
                             </Button>
                         </StackPanel>
-                    </Grid>
 
-                    <!-- Active Status -->
-                    <CheckBox x:Name="IsActiveCheckBox"
-                              Content="Active"
-                              Style="{StaticResource ModernCheckBox}"
-                              IsChecked="True"
-                              Margin="0,16,0,0"/>
+                        <!-- Active Status aligned right -->
+                        <CheckBox x:Name="IsActiveCheckBox"
+                                  Grid.Column="2"
+                                  Content="Active"
+                                  Style="{StaticResource ModernCheckBox}"
+                                  IsChecked="True"
+                                  VerticalAlignment="Center"/>
+                    </Grid>
 
                     <!-- Error Message -->
                     <Border x:Name="ErrorBorder"
                             Background="#3D2030"
-                            CornerRadius="8"
-                            Padding="16"
-                            Margin="0,16,0,0"
+                            CornerRadius="6"
+                            Padding="12,10"
+                            Margin="0,12,0,0"
                             Visibility="Collapsed">
                         <TextBlock x:Name="ErrorTextBlock"
                                    Foreground="#E74C3C"
-                                   FontSize="13"
+                                   FontSize="12"
                                    TextWrapping="Wrap"/>
                     </Border>
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- Action Buttons -->
-            <Border Grid.Row="2" Background="#252538" CornerRadius="0,0,16,16" Padding="32,20">
+            <!-- Compact Action Buttons -->
+            <Border Grid.Row="2" Background="#252538" CornerRadius="0,0,12,12" Padding="20,12">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Cancel"
                             Style="{StaticResource ActionButton}"
                             Background="#4E4E6E"
+                            Margin="0"
                             Click="CancelButton_Click"/>
                     <Button x:Name="SaveButton"
                             Content="Save Product"

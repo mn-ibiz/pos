@@ -433,16 +433,12 @@ public partial class ProductEditorDialog : Window
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
-        // Set window size to 70% of screen dimensions
+        // Center the window on screen (width is fixed in XAML, height is auto-sized)
         var screenWidth = SystemParameters.PrimaryScreenWidth;
         var screenHeight = SystemParameters.PrimaryScreenHeight;
 
-        Width = screenWidth * 0.70;
-        Height = screenHeight * 0.70;
-
-        // Center the window
-        Left = (screenWidth - Width) / 2;
-        Top = (screenHeight - Height) / 2;
+        Left = (screenWidth - ActualWidth) / 2;
+        Top = (screenHeight - ActualHeight) / 2;
 
         // Prevent closing by clicking outside - capture mouse on the content border
         MouseDown += Window_MouseDown;
