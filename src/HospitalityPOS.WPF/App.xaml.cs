@@ -344,6 +344,9 @@ public partial class App : Application
         services.AddTransient<MenuEngineeringViewModel>();
         services.AddTransient<CustomerAnalyticsViewModel>();
 
+        // Label Printing ViewModels
+        services.AddTransient<LabelPrinterConfigurationViewModel>();
+
         // Stock Transfer ViewModels (Epic 23) - NOW ENABLED after API fixes
         services.AddTransient<StockTransferViewModel>();
         services.AddTransient<CreateTransferRequestViewModel>();

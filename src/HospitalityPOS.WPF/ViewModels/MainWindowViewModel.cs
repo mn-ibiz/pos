@@ -288,6 +288,123 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [RelayCommand]
     private void NavigateToCustomerAnalytics() => NavigateWithSidebar<CustomerAnalyticsViewModel>("Customer Analytics");
 
+    [RelayCommand]
+    private void NavigateToLabelPrinters() => NavigateWithSidebar<LabelPrinterConfigurationViewModel>("Label Printers");
+
+    // Marketing & Offers
+    [RelayCommand]
+    private void NavigateToOffers() => NavigateWithSidebar<OffersViewModel>("Offers");
+
+    [RelayCommand]
+    private void NavigateToOfferReport() => NavigateWithSidebar<OfferReportViewModel>("Offer Performance");
+
+    // Loyalty & Customers
+    [RelayCommand]
+    private void NavigateToLoyaltySettings() => NavigateWithSidebar<LoyaltySettingsViewModel>("Loyalty Settings");
+
+    [RelayCommand]
+    private void NavigateToCustomerList() => NavigateWithSidebar<CustomerListViewModel>("Customers");
+
+    [RelayCommand]
+    private void NavigateToCustomerEnrollment() => NavigateWithSidebar<CustomerEnrollmentViewModel>("Customer Enrollment");
+
+    // Floor & Table Management
+    [RelayCommand]
+    private void NavigateToFloorManagement() => NavigateWithSidebar<FloorManagementViewModel>("Floor Management");
+
+    [RelayCommand]
+    private void NavigateToTableMap() => NavigateWithSidebar<TableMapViewModel>("Table Map");
+
+    // Finance & Accounting
+    [RelayCommand]
+    private void NavigateToFinancialReports() => NavigateWithSidebar<FinancialReportsViewModel>("Financial Reports");
+
+    [RelayCommand]
+    private void NavigateToChartOfAccounts() => NavigateWithSidebar<ChartOfAccountsViewModel>("Chart of Accounts");
+
+    [RelayCommand]
+    private void NavigateToJournalEntries() => NavigateWithSidebar<JournalEntriesViewModel>("Journal Entries");
+
+    [RelayCommand]
+    private void NavigateToMarginReport() => NavigateWithSidebar<MarginReportViewModel>("Margin Report");
+
+    [RelayCommand]
+    private void NavigateToComparativeAnalytics() => NavigateWithSidebar<ComparativeAnalyticsViewModel>("Comparative Analytics");
+
+    // Supplier Management
+    [RelayCommand]
+    private void NavigateToSupplierInvoices() => NavigateWithSidebar<SupplierInvoicesViewModel>("Supplier Invoices");
+
+    [RelayCommand]
+    private void NavigateToSupplierStatement() => NavigateWithSidebar<SupplierStatementViewModel>("Supplier Statement");
+
+    [RelayCommand]
+    private void NavigateToDirectReceiving() => NavigateWithSidebar<DirectReceivingViewModel>("Direct Receiving");
+
+    // Audit & Reporting
+    [RelayCommand]
+    private void NavigateToAuditReports() => NavigateWithSidebar<AuditReportsViewModel>("Audit Reports");
+
+    [RelayCommand]
+    private void NavigateToLoginAudit() => NavigateWithSidebar<LoginAuditViewModel>("Login Audit");
+
+    [RelayCommand]
+    private void NavigateToExceptionReports() => NavigateWithSidebar<ExceptionReportsViewModel>("Exception Reports");
+
+    // eTIMS & M-Pesa Integration
+    [RelayCommand]
+    private void NavigateToEtimsDashboard() => NavigateWithSidebar<EtimsDashboardViewModel>("eTIMS Dashboard");
+
+    [RelayCommand]
+    private void NavigateToEtimsDeviceSettings() => NavigateWithSidebar<EtimsDeviceSettingsViewModel>("eTIMS Settings");
+
+    [RelayCommand]
+    private void NavigateToMpesaDashboard() => NavigateWithSidebar<MpesaDashboardViewModel>("M-Pesa Dashboard");
+
+    [RelayCommand]
+    private void NavigateToMpesaSettings() => NavigateWithSidebar<MpesaSettingsViewModel>("M-Pesa Settings");
+
+    // Device Settings
+    [RelayCommand]
+    private void NavigateToPrinterSettings() => NavigateWithSidebar<PrinterSettingsViewModel>("Printer Settings");
+
+    [RelayCommand]
+    private void NavigateToKitchenPrinterSettings() => NavigateWithSidebar<KitchenPrinterSettingsViewModel>("Kitchen Printers");
+
+    [RelayCommand]
+    private void NavigateToCashDrawerSettings() => NavigateWithSidebar<CashDrawerSettingsViewModel>("Cash Drawer");
+
+    [RelayCommand]
+    private void NavigateToBarcodeSettings() => NavigateWithSidebar<BarcodeSettingsViewModel>("Barcode Settings");
+
+    [RelayCommand]
+    private void NavigateToPLUManagement() => NavigateWithSidebar<PLUManagementViewModel>("PLU Codes");
+
+    [RelayCommand]
+    private void NavigateToAutoLogoutSettings() => NavigateWithSidebar<AutoLogoutSettingsViewModel>("Auto Logout");
+
+    [RelayCommand]
+    private void NavigateToFeatureSettings() => NavigateWithSidebar<FeatureSettingsViewModel>("Feature Settings");
+
+    [RelayCommand]
+    private void NavigateToEmailSettings() => NavigateWithSidebar<EmailSettingsViewModel>("Email Settings");
+
+    // Inventory Management
+    [RelayCommand]
+    private void NavigateToReorderRules() => NavigateWithSidebar<ReorderRulesViewModel>("Reorder Rules");
+
+    [RelayCommand]
+    private void NavigateToPurchaseOrderReview() => NavigateWithSidebar<PurchaseOrderReviewViewModel>("PO Review");
+
+    [RelayCommand]
+    private void NavigateToBatchManagement() => NavigateWithSidebar<BatchManagementViewModel>("Batch Management");
+
+    [RelayCommand]
+    private void NavigateToStockTransfer() => NavigateWithSidebar<StockTransferViewModel>("Stock Transfer");
+
+    [RelayCommand]
+    private void NavigateToExpiryAlerts() => NavigateWithSidebar<ExpiryAlertsViewModel>("Expiry Alerts");
+
     private void NavigateWithSidebar<TViewModel>(string pageTitle) where TViewModel : class
     {
         ShowSidebar = true;
