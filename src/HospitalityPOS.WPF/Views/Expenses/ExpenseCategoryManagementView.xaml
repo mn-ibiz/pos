@@ -245,7 +245,7 @@
                                         </Grid.ColumnDefinitions>
 
                                         <TextBlock FontSize="11" Foreground="#6B7280">
-                                            <Run Text="{Binding SubCategories.Count, FallbackValue=0}"/>
+                                            <Run Text="{Binding SubCategories.Count, Mode=OneWay, FallbackValue=0}"/>
                                             <Run Text=" subcategories"/>
                                         </TextBlock>
 
