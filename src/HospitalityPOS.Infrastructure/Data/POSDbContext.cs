@@ -375,6 +375,11 @@ public class POSDbContext : DbContext
     public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
     public DbSet<LowStockAlertConfig> LowStockAlertConfigs => Set<LowStockAlertConfig>();
     public DbSet<ExpiryAlertConfig> ExpiryAlertConfigs => Set<ExpiryAlertConfig>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+    #endregion
+
+    #region Purchase Order Automation
+    public DbSet<PurchaseOrderSettings> PurchaseOrderSettings => Set<PurchaseOrderSettings>();
     #endregion
 
     /// <inheritdoc />

@@ -99,6 +99,16 @@ public interface IInventoryAnalyticsService
     Task<IEnumerable<ReorderSuggestion>> GetPendingReorderSuggestionsAsync(int storeId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets reorder suggestions filtered by status.
+    /// </summary>
+    Task<IEnumerable<ReorderSuggestion>> GetReorderSuggestionsAsync(int storeId, string? status = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates a reorder suggestion.
+    /// </summary>
+    Task<ReorderSuggestion> UpdateReorderSuggestionAsync(ReorderSuggestion suggestion, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Approves a reorder suggestion.
     /// </summary>
     Task<ReorderSuggestion> ApproveReorderSuggestionAsync(int suggestionId, int userId, decimal? adjustedQuantity = null, CancellationToken cancellationToken = default);

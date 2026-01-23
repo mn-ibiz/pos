@@ -196,7 +196,8 @@ public enum PurchaseOrderStatus
     Sent = 2,
     PartiallyReceived = 3,
     Complete = 4,
-    Cancelled = 5
+    Cancelled = 5,
+    Archived = 6
 }
 
 /// <summary>

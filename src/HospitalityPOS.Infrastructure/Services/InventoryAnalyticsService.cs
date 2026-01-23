@@ -681,6 +681,54 @@ public class InventoryAnalyticsService : IInventoryAnalyticsService
     }
 
     /// <inheritdoc />
+    public async Task<IEnumerable<ReorderSuggestion>> GetReorderSuggestionsAsync(
+        int storeId,
+        string? status = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.ReorderSuggestions
+            .Include(s => s.Product)
+            .Include(s => s.Supplier)
+            .Where(s => s.StoreId == storeId && !s.IsDeleted);
+
+        if (!string.IsNullOrEmpty(status))
+        {
+            query = query.Where(s => s.Status == status);
+        }
+
+        return await query
+            .OrderBy(s => s.Priority == "Critical" ? 0 : s.Priority == "High" ? 1 : s.Priority == "Medium" ? 2 : 3)
+            .ThenBy(s => s.DaysUntilStockout)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task<ReorderSuggestion> UpdateReorderSuggestionAsync(
+        ReorderSuggestion suggestion,
+        CancellationToken cancellationToken = default)
+    {
+        var existing = await _context.ReorderSuggestions
+            .FirstOrDefaultAsync(s => s.Id == suggestion.Id && !s.IsDeleted, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (existing == null)
+        {
+            throw new InvalidOperationException($"Reorder suggestion {suggestion.Id} not found.");
+        }
+
+        existing.Status = suggestion.Status;
+        existing.Notes = suggestion.Notes;
+        existing.ApprovedByUserId = suggestion.ApprovedByUserId;
+        existing.ApprovedAt = suggestion.ApprovedAt;
+        existing.SuggestedQuantity = suggestion.SuggestedQuantity;
+        existing.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return existing;
+    }
+
+    /// <inheritdoc />
     public async Task<ReorderSuggestion> ApproveReorderSuggestionAsync(
         int suggestionId,
         int userId,

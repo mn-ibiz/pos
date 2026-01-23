@@ -162,6 +162,21 @@ public partial class App : Application
         // Purchase order service (Scoped - accesses DbContext directly)
         services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
 
+        // Purchase order settings service (Scoped - accesses DbContext directly)
+        services.AddScoped<IPurchaseOrderSettingsService, PurchaseOrderSettingsService>();
+
+        // Purchase order consolidation service (Scoped - accesses DbContext directly)
+        services.AddScoped<IPurchaseOrderConsolidationService, PurchaseOrderConsolidationService>();
+
+        // Notification service (Scoped - accesses DbContext directly)
+        services.AddScoped<INotificationService, NotificationService>();
+
+        // Stock monitoring service (Scoped - accesses DbContext directly)
+        services.AddScoped<IStockMonitoringService, StockMonitoringService>();
+
+        // Email digest service (Scoped - accesses DbContext directly)
+        services.AddScoped<IEmailDigestService, EmailDigestService>();
+
         // Receipt service (Scoped - accesses DbContext directly)
         services.AddScoped<IReceiptService, ReceiptService>();
 
@@ -269,6 +284,8 @@ public partial class App : Application
         // services.AddTransient<StockAlertWidgetViewModel>(); // Excluded
         services.AddTransient<SuppliersViewModel>();
         services.AddTransient<PurchaseOrdersViewModel>();
+        services.AddTransient<PurchaseOrderReviewViewModel>();
+        services.AddTransient<ReorderRulesViewModel>();
         // services.AddTransient<SalesReportsViewModel>(); // Disabled - IReportService not available
         services.AddTransient<ExceptionReportsViewModel>();
         services.AddTransient<InventoryReportsViewModel>();
