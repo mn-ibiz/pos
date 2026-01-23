@@ -252,6 +252,7 @@
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="Product Code *" Style="{StaticResource FieldLabel}"/>
                                 <TextBox x:Name="CodeTextBox"
+                                         AutomationProperties.AutomationId="CodeTextBox"
                                          Style="{StaticResource InputTextBox}"
                                          Height="38"
                                          MaxLength="50"
@@ -261,6 +262,7 @@
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Barcode" Style="{StaticResource FieldLabel}"/>
                                 <TextBox x:Name="BarcodeTextBox"
+                                         AutomationProperties.AutomationId="BarcodeTextBox"
                                          Style="{StaticResource InputTextBox}"
                                          Height="38"
                                          MaxLength="50"/>
@@ -271,6 +273,7 @@
                         <StackPanel Margin="0,14,0,0">
                             <TextBlock Text="Product Name *" Style="{StaticResource FieldLabel}"/>
                             <TextBox x:Name="NameTextBox"
+                                     AutomationProperties.AutomationId="NameTextBox"
                                      Style="{StaticResource InputTextBox}"
                                      Height="38"
                                      MaxLength="200"/>
@@ -285,6 +288,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <ComboBox x:Name="CategoryComboBox"
+                                          AutomationProperties.AutomationId="CategoryComboBox"
                                           Style="{StaticResource InputComboBox}"
                                           IsEditable="True"
                                           IsTextSearchEnabled="True"
@@ -299,6 +303,7 @@
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
                                 <Button x:Name="AddCategoryButton"
+                                        AutomationProperties.AutomationId="AddCategoryButton"
                                         Grid.Column="1"
                                         Content="+ Add"
                                         Background="#4E4E6E"
@@ -432,6 +437,7 @@
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="Selling Price (KSh) *" Style="{StaticResource FieldLabel}"/>
                                 <TextBox x:Name="SellingPriceTextBox"
+                                         AutomationProperties.AutomationId="SellingPriceTextBox"
                                          Style="{StaticResource InputTextBox}"
                                          Height="38"
                                          PreviewTextInput="DecimalTextBox_PreviewTextInput"/>
@@ -560,6 +566,7 @@
                             Margin="0"
                             Click="CancelButton_Click"/>
                     <Button x:Name="SaveButton"
+                            AutomationProperties.AutomationId="SaveButton"
                             Content="Save Product"
                             Style="{StaticResource ActionButton}"
                             Background="#10B981"

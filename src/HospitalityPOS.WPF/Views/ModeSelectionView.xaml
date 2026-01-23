@@ -222,6 +222,7 @@
 
             <!-- Admin Mode -->
             <Button Style="{StaticResource ModeCardButton}"
+                    AutomationProperties.AutomationId="AdminModeButton"
                     Command="{Binding SelectAdminCommand}"
                     Background="#2D2D44"
                     Margin="20,0">

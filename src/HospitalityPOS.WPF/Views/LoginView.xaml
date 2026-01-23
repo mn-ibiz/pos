@@ -194,6 +194,7 @@
                                        FontSize="18" Foreground="#555577"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <TextBox Grid.Column="1"
+                                     AutomationProperties.AutomationId="UsernameTextBox"
                                      Style="{StaticResource InputTextBox}"
                                      Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
                                      KeyDown="UsernameTextBox_KeyDown"
@@ -218,6 +219,7 @@
                                        FontSize="18" Foreground="#555577"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <PasswordBox x:Name="PasswordBox" Grid.Column="1"
+                                         AutomationProperties.AutomationId="PasswordBox"
                                          Style="{StaticResource InputPasswordBox}"
                                          PasswordChanged="PasswordBox_PasswordChanged"
                                          KeyDown="PasswordBox_KeyDown"
@@ -242,6 +244,7 @@
 
                     <!-- Login Button -->
                     <Button Style="{StaticResource PrimaryButton}"
+                            AutomationProperties.AutomationId="LoginButton"
                             Margin="0,24,0,0"
                             Height="52"
                             Command="{Binding LoginCommand}">
