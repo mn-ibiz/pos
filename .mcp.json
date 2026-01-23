@@ -16,6 +16,10 @@
         "MSSQL_DATABASE": "posdb",
         "MSSQL_WINDOWS_AUTH": "true"
       }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
     }
   }
 }
