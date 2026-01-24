@@ -160,6 +160,12 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<StockMonitoringJob>());
         services.AddSingleton<IStockMonitoringService>(sp => sp.GetRequiredService<StockMonitoringJob>());
 
+        // Terminal Health Monitoring Background Job (MT-028)
+        services.Configure<TerminalHealthMonitoringOptions>(options => { });
+        services.AddSingleton<TerminalHealthMonitoringJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<TerminalHealthMonitoringJob>());
+        services.AddSingleton<ITerminalHealthService>(sp => sp.GetRequiredService<TerminalHealthMonitoringJob>());
+
         // Loyalty Points Expiry Background Job
         services.AddSingleton<ExpirePointsJob>();
         services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<ExpirePointsJob>());
