@@ -125,4 +125,17 @@ public class Product : BaseEntity
     /// Modifier presets for this product.
     /// </summary>
     public virtual ICollection<ModifierPreset> ModifierPresets { get; set; } = new List<ModifierPreset>();
+
+    // Loyalty points configuration
+    /// <summary>
+    /// Points multiplier for this specific product.
+    /// 1.0 = normal rate, 2.0 = double points, 0.5 = half points, 0 = no points.
+    /// Null means use category or global default.
+    /// </summary>
+    public decimal? PointsMultiplier { get; set; }
+
+    /// <summary>
+    /// Whether this product is excluded from earning loyalty points entirely.
+    /// </summary>
+    public bool ExcludeFromLoyaltyPoints { get; set; }
 }

@@ -219,8 +219,6 @@ public class LabelTemplate : BaseEntity
 /// </summary>
 public class LabelTemplateField : BaseEntity
 {
-    public int TemplateId { get; set; }
-
     public int LabelTemplateId { get; set; }
 
     [Required]
@@ -330,8 +328,6 @@ public class LabelPrintJob : BaseEntity
 /// </summary>
 public class LabelPrintJobItem : BaseEntity
 {
-    public int JobId { get; set; }
-
     public int LabelPrintJobId { get; set; }
 
     public int ProductId { get; set; }

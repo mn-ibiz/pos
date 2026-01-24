@@ -108,7 +108,17 @@ public enum KdsItemStatus
     /// <summary>
     /// Item was voided/cancelled.
     /// </summary>
-    Voided = 4
+    Voided = 4,
+
+    /// <summary>
+    /// Item is on hold, waiting to be fired.
+    /// </summary>
+    OnHold = 5,
+
+    /// <summary>
+    /// Item has been fired and is ready for prep.
+    /// </summary>
+    Fired = 6
 }
 
 /// <summary>
@@ -424,12 +434,30 @@ public class KdsOrder : BaseEntity
     /// </summary>
     public int? ServedByUserId { get; set; }
 
+    /// <summary>
+    /// Whether fire-on-demand mode is enabled for this order.
+    /// When enabled, items are held until manually fired.
+    /// </summary>
+    public bool FireOnDemandEnabled { get; set; }
+
+    /// <summary>
+    /// When fire-on-demand was enabled.
+    /// </summary>
+    public DateTime? FireOnDemandEnabledAt { get; set; }
+
+    /// <summary>
+    /// User who enabled fire-on-demand.
+    /// </summary>
+    public int? FireOnDemandEnabledByUserId { get; set; }
+
     // Navigation properties
     public virtual Order Order { get; set; } = null!;
     public virtual Store Store { get; set; } = null!;
     public virtual User? ServedByUser { get; set; }
+    public virtual User? FireOnDemandEnabledByUser { get; set; }
     public virtual ICollection<KdsOrderItem> Items { get; set; } = new List<KdsOrderItem>();
     public virtual ICollection<KdsOrderStatusLog> StatusLogs { get; set; } = new List<KdsOrderStatusLog>();
+    public virtual ICollection<KdsCourseState> CourseStates { get; set; } = new List<KdsCourseState>();
 }
 
 /// <summary>
@@ -502,11 +530,74 @@ public class KdsOrderItem : BaseEntity
     /// </summary>
     public int? CourseNumber { get; set; }
 
+    /// <summary>
+    /// Link to the course state for this item.
+    /// </summary>
+    public int? CourseStateId { get; set; }
+
+    /// <summary>
+    /// Fire status of this item within its course.
+    /// </summary>
+    public ItemFireStatus ItemFireStatus { get; set; } = ItemFireStatus.Waiting;
+
+    /// <summary>
+    /// When this item is scheduled to fire.
+    /// </summary>
+    public DateTime? ScheduledFireAt { get; set; }
+
+    /// <summary>
+    /// Whether this item requires fire-on-demand (manual firing).
+    /// </summary>
+    public bool FireOnDemand { get; set; }
+
+    /// <summary>
+    /// Whether this item is currently on hold.
+    /// </summary>
+    public bool IsOnHold { get; set; }
+
+    /// <summary>
+    /// When the item was put on hold.
+    /// </summary>
+    public DateTime? HeldAt { get; set; }
+
+    /// <summary>
+    /// User who put the item on hold.
+    /// </summary>
+    public int? HeldByUserId { get; set; }
+
+    /// <summary>
+    /// Reason for holding the item.
+    /// </summary>
+    public string? HoldReason { get; set; }
+
+    /// <summary>
+    /// When the item was fired (released from hold).
+    /// </summary>
+    public DateTime? FiredAt { get; set; }
+
+    /// <summary>
+    /// User who fired the item.
+    /// </summary>
+    public int? FiredByUserId { get; set; }
+
+    /// <summary>
+    /// Estimated prep time in minutes for this item.
+    /// </summary>
+    public int? EstimatedPrepTimeMinutes { get; set; }
+
+    /// <summary>
+    /// Target ready time (calculated from fire time + prep time).
+    /// </summary>
+    public DateTime? TargetReadyTime { get; set; }
+
     // Navigation properties
     public virtual KdsOrder KdsOrder { get; set; } = null!;
     public virtual OrderItem OrderItem { get; set; } = null!;
     public virtual KdsStation Station { get; set; } = null!;
     public virtual User? CompletedByUser { get; set; }
+    public virtual User? HeldByUser { get; set; }
+    public virtual User? FiredByUser { get; set; }
+    public virtual KdsCourseState? CourseState { get; set; }
 }
 
 /// <summary>

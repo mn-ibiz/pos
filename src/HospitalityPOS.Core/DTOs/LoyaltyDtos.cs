@@ -22,6 +22,11 @@ public class EnrollCustomerDto
     /// Customer's email address. Optional.
     /// </summary>
     public string? Email { get; set; }
+
+    /// <summary>
+    /// Customer's date of birth. Optional but needed for birthday rewards.
+    /// </summary>
+    public DateOnly? DateOfBirth { get; set; }
 }
 
 /// <summary>
@@ -122,6 +127,11 @@ public class LoyaltyMemberDto
     /// The member's email.
     /// </summary>
     public string? Email { get; set; }
+
+    /// <summary>
+    /// The member's date of birth.
+    /// </summary>
+    public DateOnly? DateOfBirth { get; set; }
 
     /// <summary>
     /// The membership number.
@@ -1041,6 +1051,891 @@ public class CustomerExportResult
     /// Creates a failure result.
     /// </summary>
     public static CustomerExportResult Failure(string errorMessage) => new()
+    {
+        IsSuccess = false,
+        ErrorMessage = errorMessage
+    };
+}
+
+// ================== Birthday Reward DTOs ==================
+
+/// <summary>
+/// DTO for creating or updating a one-time reward template.
+/// </summary>
+public class OneTimeRewardDto
+{
+    /// <summary>
+    /// The reward ID (0 for new rewards).
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// The reward name.
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The reward description.
+    /// </summary>
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// The type of one-time reward.
+    /// </summary>
+    public OneTimeRewardType RewardType { get; set; }
+
+    /// <summary>
+    /// How the reward value is applied.
+    /// </summary>
+    public RewardValueType ValueType { get; set; }
+
+    /// <summary>
+    /// The reward value.
+    /// </summary>
+    public decimal Value { get; set; }
+
+    /// <summary>
+    /// Minimum tier required (null for all tiers).
+    /// </summary>
+    public MembershipTier? MinimumTier { get; set; }
+
+    /// <summary>
+    /// Days the reward is valid after issuance.
+    /// </summary>
+    public int ValidityDays { get; set; } = 30;
+
+    /// <summary>
+    /// Minimum purchase amount required to redeem (KES).
+    /// </summary>
+    public decimal? MinimumPurchaseAmount { get; set; }
+
+    /// <summary>
+    /// Maximum discount amount for percentage discounts (KES).
+    /// </summary>
+    public decimal? MaximumDiscountAmount { get; set; }
+
+    /// <summary>
+    /// Product ID for free item rewards.
+    /// </summary>
+    public int? FreeItemProductId { get; set; }
+
+    /// <summary>
+    /// SMS template for notification.
+    /// </summary>
+    public string? SmsTemplate { get; set; }
+
+    /// <summary>
+    /// Email template for notification.
+    /// </summary>
+    public string? EmailTemplate { get; set; }
+
+    /// <summary>
+    /// Whether to send SMS notification.
+    /// </summary>
+    public bool SendSmsNotification { get; set; } = true;
+
+    /// <summary>
+    /// Whether to send email notification.
+    /// </summary>
+    public bool SendEmailNotification { get; set; } = true;
+
+    /// <summary>
+    /// Days before the event to issue the reward.
+    /// </summary>
+    public int DaysBeforeToIssue { get; set; } = 0;
+
+    /// <summary>
+    /// Days after the event the reward remains valid.
+    /// </summary>
+    public int DaysAfterEventValid { get; set; } = 7;
+
+    /// <summary>
+    /// Whether the reward is active.
+    /// </summary>
+    public bool IsActive { get; set; } = true;
+}
+
+/// <summary>
+/// DTO representing a member's reward for display.
+/// </summary>
+public class MemberRewardDto
+{
+    /// <summary>
+    /// The reward instance ID.
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// The loyalty member ID.
+    /// </summary>
+    public int LoyaltyMemberId { get; set; }
+
+    /// <summary>
+    /// The member's name.
+    /// </summary>
+    public string? MemberName { get; set; }
+
+    /// <summary>
+    /// The member's phone number.
+    /// </summary>
+    public string MemberPhone { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The reward template ID.
+    /// </summary>
+    public int OneTimeRewardId { get; set; }
+
+    /// <summary>
+    /// The reward name.
+    /// </summary>
+    public string RewardName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The reward type.
+    /// </summary>
+    public OneTimeRewardType RewardType { get; set; }
+
+    /// <summary>
+    /// The reward type display name.
+    /// </summary>
+    public string RewardTypeName => RewardType.ToString();
+
+    /// <summary>
+    /// How the value is applied.
+    /// </summary>
+    public RewardValueType ValueType { get; set; }
+
+    /// <summary>
+    /// The reward value.
+    /// </summary>
+    public decimal Value { get; set; }
+
+    /// <summary>
+    /// The unique redemption code.
+    /// </summary>
+    public string RedemptionCode { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The current status.
+    /// </summary>
+    public MemberRewardStatus Status { get; set; }
+
+    /// <summary>
+    /// The status display name.
+    /// </summary>
+    public string StatusName => Status.ToString();
+
+    /// <summary>
+    /// When the reward was issued.
+    /// </summary>
+    public DateTime IssuedAt { get; set; }
+
+    /// <summary>
+    /// When the reward expires.
+    /// </summary>
+    public DateTime ExpiresAt { get; set; }
+
+    /// <summary>
+    /// When the reward was redeemed (if applicable).
+    /// </summary>
+    public DateTime? RedeemedAt { get; set; }
+
+    /// <summary>
+    /// The year this reward is for.
+    /// </summary>
+    public int RewardYear { get; set; }
+
+    /// <summary>
+    /// The event date (e.g., birthday).
+    /// </summary>
+    public DateOnly? EventDate { get; set; }
+
+    /// <summary>
+    /// Days until expiry.
+    /// </summary>
+    public int DaysUntilExpiry => Status == MemberRewardStatus.Active
+        ? Math.Max(0, (int)(ExpiresAt - DateTime.UtcNow).TotalDays)
+        : 0;
+
+    /// <summary>
+    /// Whether the reward is expired.
+    /// </summary>
+    public bool IsExpired => DateTime.UtcNow > ExpiresAt;
+
+    /// <summary>
+    /// Display value with appropriate formatting.
+    /// </summary>
+    public string DisplayValue => ValueType switch
+    {
+        RewardValueType.FixedPoints => $"{Value:N0} points",
+        RewardValueType.PercentageDiscount => $"{Value}% off",
+        RewardValueType.FixedDiscount => $"KES {Value:N0} off",
+        RewardValueType.FreeItem => "Free item",
+        RewardValueType.PointsMultiplier => $"{Value}x points",
+        _ => Value.ToString("N0")
+    };
+}
+
+/// <summary>
+/// Result of issuing a birthday reward.
+/// </summary>
+public class BirthdayRewardResult
+{
+    /// <summary>
+    /// Whether the reward was issued successfully.
+    /// </summary>
+    public bool IsSuccess { get; set; }
+
+    /// <summary>
+    /// Error message if failed.
+    /// </summary>
+    public string? ErrorMessage { get; set; }
+
+    /// <summary>
+    /// The issued reward.
+    /// </summary>
+    public MemberRewardDto? Reward { get; set; }
+
+    /// <summary>
+    /// Whether SMS notification was sent.
+    /// </summary>
+    public bool SmsSent { get; set; }
+
+    /// <summary>
+    /// Whether email notification was sent.
+    /// </summary>
+    public bool EmailSent { get; set; }
+
+    /// <summary>
+    /// Creates a successful result.
+    /// </summary>
+    public static BirthdayRewardResult Success(MemberRewardDto reward, bool smsSent, bool emailSent) => new()
+    {
+        IsSuccess = true,
+        Reward = reward,
+        SmsSent = smsSent,
+        EmailSent = emailSent
+    };
+
+    /// <summary>
+    /// Creates a failure result.
+    /// </summary>
+    public static BirthdayRewardResult Failure(string errorMessage) => new()
+    {
+        IsSuccess = false,
+        ErrorMessage = errorMessage
+    };
+
+    /// <summary>
+    /// Creates a skipped result (already issued this year).
+    /// </summary>
+    public static BirthdayRewardResult AlreadyIssued(int year) => new()
+    {
+        IsSuccess = false,
+        ErrorMessage = $"Birthday reward already issued for {year}"
+    };
+}
+
+/// <summary>
+/// Result of redeeming a member reward.
+/// </summary>
+public class RewardRedemptionResult
+{
+    /// <summary>
+    /// Whether the redemption was successful.
+    /// </summary>
+    public bool IsSuccess { get; set; }
+
+    /// <summary>
+    /// Error message if failed.
+    /// </summary>
+    public string? ErrorMessage { get; set; }
+
+    /// <summary>
+    /// The discount amount applied (KES).
+    /// </summary>
+    public decimal DiscountApplied { get; set; }
+
+    /// <summary>
+    /// Points awarded (for point rewards).
+    /// </summary>
+    public decimal PointsAwarded { get; set; }
+
+    /// <summary>
+    /// The redeemed reward.
+    /// </summary>
+    public MemberRewardDto? Reward { get; set; }
+
+    /// <summary>
+    /// Creates a successful redemption result.
+    /// </summary>
+    public static RewardRedemptionResult Success(MemberRewardDto reward, decimal discountApplied, decimal pointsAwarded = 0) => new()
+    {
+        IsSuccess = true,
+        Reward = reward,
+        DiscountApplied = discountApplied,
+        PointsAwarded = pointsAwarded
+    };
+
+    /// <summary>
+    /// Creates a failure result.
+    /// </summary>
+    public static RewardRedemptionResult Failure(string errorMessage) => new()
+    {
+        IsSuccess = false,
+        ErrorMessage = errorMessage
+    };
+}
+
+/// <summary>
+/// Summary of birthday rewards processing job.
+/// </summary>
+public class BirthdayRewardJobSummary
+{
+    /// <summary>
+    /// Total members with birthdays in the processing window.
+    /// </summary>
+    public int TotalMembersWithBirthdays { get; set; }
+
+    /// <summary>
+    /// Number of rewards successfully issued.
+    /// </summary>
+    public int RewardsIssued { get; set; }
+
+    /// <summary>
+    /// Number of rewards skipped (already issued).
+    /// </summary>
+    public int RewardsSkipped { get; set; }
+
+    /// <summary>
+    /// Number of rewards that failed to issue.
+    /// </summary>
+    public int RewardsFailed { get; set; }
+
+    /// <summary>
+    /// Number of SMS notifications sent.
+    /// </summary>
+    public int SmsSent { get; set; }
+
+    /// <summary>
+    /// Number of SMS notifications failed.
+    /// </summary>
+    public int SmsFailed { get; set; }
+
+    /// <summary>
+    /// Number of email notifications sent.
+    /// </summary>
+    public int EmailsSent { get; set; }
+
+    /// <summary>
+    /// Number of email notifications failed.
+    /// </summary>
+    public int EmailsFailed { get; set; }
+
+    /// <summary>
+    /// Processing date.
+    /// </summary>
+    public DateTime ProcessedAt { get; set; } = DateTime.UtcNow;
+}
+
+// ================== Points Multiplier DTOs ==================
+
+/// <summary>
+/// Represents an item in a transaction for points calculation.
+/// </summary>
+public class TransactionItemDto
+{
+    /// <summary>
+    /// The product ID.
+    /// </summary>
+    public int ProductId { get; set; }
+
+    /// <summary>
+    /// The product name (for display).
+    /// </summary>
+    public string? ProductName { get; set; }
+
+    /// <summary>
+    /// The category ID (if available).
+    /// </summary>
+    public int? CategoryId { get; set; }
+
+    /// <summary>
+    /// The quantity purchased.
+    /// </summary>
+    public decimal Quantity { get; set; }
+
+    /// <summary>
+    /// The line total amount (after any line discounts).
+    /// </summary>
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// The discount applied to this item.
+    /// </summary>
+    public decimal DiscountAmount { get; set; }
+
+    /// <summary>
+    /// The tax amount for this item.
+    /// </summary>
+    public decimal TaxAmount { get; set; }
+}
+
+/// <summary>
+/// Result of item-level points calculation.
+/// </summary>
+public class ItemPointsResult
+{
+    /// <summary>
+    /// The product ID.
+    /// </summary>
+    public int ProductId { get; set; }
+
+    /// <summary>
+    /// The product name.
+    /// </summary>
+    public string? ProductName { get; set; }
+
+    /// <summary>
+    /// The amount used for points calculation.
+    /// </summary>
+    public decimal EligibleAmount { get; set; }
+
+    /// <summary>
+    /// Base points earned from this item.
+    /// </summary>
+    public decimal BasePoints { get; set; }
+
+    /// <summary>
+    /// The multiplier applied (product, category, or promotional).
+    /// </summary>
+    public decimal MultiplierApplied { get; set; } = 1.0m;
+
+    /// <summary>
+    /// Bonus points from multiplier.
+    /// </summary>
+    public decimal BonusPoints { get; set; }
+
+    /// <summary>
+    /// Total points for this item.
+    /// </summary>
+    public decimal TotalPoints => BasePoints + BonusPoints;
+
+    /// <summary>
+    /// The source of the multiplier (Product, Category, Promotion, etc.).
+    /// </summary>
+    public string? MultiplierSource { get; set; }
+
+    /// <summary>
+    /// The promotion or rule name if applicable.
+    /// </summary>
+    public string? PromotionName { get; set; }
+
+    /// <summary>
+    /// Whether this item was excluded from points earning.
+    /// </summary>
+    public bool IsExcluded { get; set; }
+
+    /// <summary>
+    /// Reason for exclusion (if excluded).
+    /// </summary>
+    public string? ExclusionReason { get; set; }
+}
+
+/// <summary>
+/// Extended points calculation result with item-level breakdown.
+/// </summary>
+public class DetailedPointsCalculationResult
+{
+    /// <summary>
+    /// Total eligible amount across all items.
+    /// </summary>
+    public decimal TotalEligibleAmount { get; set; }
+
+    /// <summary>
+    /// Total base points earned.
+    /// </summary>
+    public decimal TotalBasePoints { get; set; }
+
+    /// <summary>
+    /// Total bonus points from multipliers and promotions.
+    /// </summary>
+    public decimal TotalBonusPoints { get; set; }
+
+    /// <summary>
+    /// Tier bonus points (separate from item multipliers).
+    /// </summary>
+    public decimal TierBonusPoints { get; set; }
+
+    /// <summary>
+    /// The member's tier multiplier.
+    /// </summary>
+    public decimal TierMultiplier { get; set; } = 1.0m;
+
+    /// <summary>
+    /// Grand total points to be earned.
+    /// </summary>
+    public decimal GrandTotalPoints => TotalBasePoints + TotalBonusPoints + TierBonusPoints;
+
+    /// <summary>
+    /// Item-level breakdown of points.
+    /// </summary>
+    public List<ItemPointsResult> ItemBreakdown { get; set; } = new();
+
+    /// <summary>
+    /// Active promotional rules applied.
+    /// </summary>
+    public List<AppliedMultiplierRuleDto> AppliedRules { get; set; } = new();
+
+    /// <summary>
+    /// The base earning rate used.
+    /// </summary>
+    public decimal EarningRate { get; set; }
+
+    /// <summary>
+    /// Summary description.
+    /// </summary>
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Number of items that earned bonus points.
+    /// </summary>
+    public int ItemsWithBonusCount => ItemBreakdown.Count(i => i.BonusPoints > 0);
+
+    /// <summary>
+    /// Number of items excluded from points.
+    /// </summary>
+    public int ExcludedItemsCount => ItemBreakdown.Count(i => i.IsExcluded);
+}
+
+/// <summary>
+/// DTO for a points multiplier rule that was applied.
+/// </summary>
+public class AppliedMultiplierRuleDto
+{
+    /// <summary>
+    /// The rule ID.
+    /// </summary>
+    public int RuleId { get; set; }
+
+    /// <summary>
+    /// The rule name.
+    /// </summary>
+    public string RuleName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The rule type.
+    /// </summary>
+    public string RuleType { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The multiplier applied.
+    /// </summary>
+    public decimal Multiplier { get; set; }
+
+    /// <summary>
+    /// Bonus points earned from this rule.
+    /// </summary>
+    public decimal BonusPointsEarned { get; set; }
+
+    /// <summary>
+    /// Products/items this rule applied to.
+    /// </summary>
+    public List<int> AppliedToProductIds { get; set; } = new();
+}
+
+/// <summary>
+/// DTO for creating or updating a points multiplier rule.
+/// </summary>
+public class PointsMultiplierRuleDto
+{
+    /// <summary>
+    /// The rule ID (0 for new rules).
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// The rule name.
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The rule description.
+    /// </summary>
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// The rule type.
+    /// </summary>
+    public PointsMultiplierRuleTypeDto RuleType { get; set; }
+
+    /// <summary>
+    /// The multiplier to apply.
+    /// </summary>
+    public decimal Multiplier { get; set; } = 1.0m;
+
+    /// <summary>
+    /// Whether this rule stacks with others.
+    /// </summary>
+    public bool IsStackable { get; set; }
+
+    /// <summary>
+    /// Evaluation priority (higher = first).
+    /// </summary>
+    public int Priority { get; set; } = 100;
+
+    /// <summary>
+    /// Target product ID (for Product rules).
+    /// </summary>
+    public int? ProductId { get; set; }
+
+    /// <summary>
+    /// Target product name (for display).
+    /// </summary>
+    public string? ProductName { get; set; }
+
+    /// <summary>
+    /// Target category ID (for Category rules).
+    /// </summary>
+    public int? CategoryId { get; set; }
+
+    /// <summary>
+    /// Target category name (for display).
+    /// </summary>
+    public string? CategoryName { get; set; }
+
+    /// <summary>
+    /// Minimum tier required.
+    /// </summary>
+    public MembershipTier? MinimumTier { get; set; }
+
+    /// <summary>
+    /// Rule start date.
+    /// </summary>
+    public DateTime? StartDate { get; set; }
+
+    /// <summary>
+    /// Rule end date.
+    /// </summary>
+    public DateTime? EndDate { get; set; }
+
+    /// <summary>
+    /// Days of week when active (comma-separated).
+    /// </summary>
+    public string? DaysOfWeek { get; set; }
+
+    /// <summary>
+    /// Start time of day.
+    /// </summary>
+    public TimeOnly? StartTime { get; set; }
+
+    /// <summary>
+    /// End time of day.
+    /// </summary>
+    public TimeOnly? EndTime { get; set; }
+
+    /// <summary>
+    /// Minimum purchase amount required.
+    /// </summary>
+    public decimal? MinimumPurchaseAmount { get; set; }
+
+    /// <summary>
+    /// Minimum quantity required.
+    /// </summary>
+    public int? MinimumQuantity { get; set; }
+
+    /// <summary>
+    /// Maximum bonus points per transaction.
+    /// </summary>
+    public decimal? MaxBonusPointsPerTransaction { get; set; }
+
+    /// <summary>
+    /// Maximum total usages allowed.
+    /// </summary>
+    public int? MaxTotalUsages { get; set; }
+
+    /// <summary>
+    /// Current usage count.
+    /// </summary>
+    public int CurrentUsageCount { get; set; }
+
+    /// <summary>
+    /// Maximum usages per member.
+    /// </summary>
+    public int? MaxUsagesPerMember { get; set; }
+
+    /// <summary>
+    /// Target store ID.
+    /// </summary>
+    public int? StoreId { get; set; }
+
+    /// <summary>
+    /// Whether the rule is active.
+    /// </summary>
+    public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Whether the rule is currently active based on dates and status.
+    /// </summary>
+    public bool IsCurrentlyActive { get; set; }
+
+    /// <summary>
+    /// Remaining usages (if limited).
+    /// </summary>
+    public int? RemainingUsages => MaxTotalUsages.HasValue ? MaxTotalUsages.Value - CurrentUsageCount : null;
+}
+
+/// <summary>
+/// Rule type enum for DTOs (mirrors entity enum).
+/// </summary>
+public enum PointsMultiplierRuleTypeDto
+{
+    Product = 1,
+    Category = 2,
+    Global = 3,
+    TierBased = 4,
+    DayOfWeek = 5,
+    TimeOfDay = 6
+}
+
+/// <summary>
+/// Summary of product/category points configuration.
+/// </summary>
+public class ProductPointsConfigDto
+{
+    /// <summary>
+    /// The product ID.
+    /// </summary>
+    public int ProductId { get; set; }
+
+    /// <summary>
+    /// The product name.
+    /// </summary>
+    public string ProductName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The product SKU.
+    /// </summary>
+    public string? SKU { get; set; }
+
+    /// <summary>
+    /// The category ID.
+    /// </summary>
+    public int? CategoryId { get; set; }
+
+    /// <summary>
+    /// The category name.
+    /// </summary>
+    public string? CategoryName { get; set; }
+
+    /// <summary>
+    /// Product-level multiplier (null = use category/global).
+    /// </summary>
+    public decimal? ProductMultiplier { get; set; }
+
+    /// <summary>
+    /// Category-level multiplier (null = use global).
+    /// </summary>
+    public decimal? CategoryMultiplier { get; set; }
+
+    /// <summary>
+    /// The effective multiplier that will be used.
+    /// </summary>
+    public decimal EffectiveMultiplier => ProductMultiplier ?? CategoryMultiplier ?? 1.0m;
+
+    /// <summary>
+    /// Source of the effective multiplier.
+    /// </summary>
+    public string MultiplierSource => ProductMultiplier.HasValue ? "Product"
+        : CategoryMultiplier.HasValue ? "Category"
+        : "Global";
+
+    /// <summary>
+    /// Whether this product is excluded from points.
+    /// </summary>
+    public bool IsExcluded { get; set; }
+
+    /// <summary>
+    /// Active promotional rules for this product.
+    /// </summary>
+    public List<PointsMultiplierRuleDto> ActivePromotions { get; set; } = new();
+}
+
+/// <summary>
+/// Request to update product points configuration.
+/// </summary>
+public class UpdateProductPointsDto
+{
+    /// <summary>
+    /// The product ID.
+    /// </summary>
+    public int ProductId { get; set; }
+
+    /// <summary>
+    /// The points multiplier (null to use category/global default).
+    /// </summary>
+    public decimal? PointsMultiplier { get; set; }
+
+    /// <summary>
+    /// Whether to exclude from loyalty points.
+    /// </summary>
+    public bool ExcludeFromLoyaltyPoints { get; set; }
+}
+
+/// <summary>
+/// Request to update category points configuration.
+/// </summary>
+public class UpdateCategoryPointsDto
+{
+    /// <summary>
+    /// The category ID.
+    /// </summary>
+    public int CategoryId { get; set; }
+
+    /// <summary>
+    /// The points multiplier (null to use global default).
+    /// </summary>
+    public decimal? PointsMultiplier { get; set; }
+
+    /// <summary>
+    /// Whether to exclude from loyalty points by default.
+    /// </summary>
+    public bool ExcludeFromLoyaltyPoints { get; set; }
+}
+
+/// <summary>
+/// Result of creating/updating a multiplier rule.
+/// </summary>
+public class MultiplierRuleResult
+{
+    /// <summary>
+    /// Whether the operation was successful.
+    /// </summary>
+    public bool IsSuccess { get; set; }
+
+    /// <summary>
+    /// Error message if failed.
+    /// </summary>
+    public string? ErrorMessage { get; set; }
+
+    /// <summary>
+    /// The rule that was created/updated.
+    /// </summary>
+    public PointsMultiplierRuleDto? Rule { get; set; }
+
+    /// <summary>
+    /// Creates a successful result.
+    /// </summary>
+    public static MultiplierRuleResult Success(PointsMultiplierRuleDto rule) => new()
+    {
+        IsSuccess = true,
+        Rule = rule
+    };
+
+    /// <summary>
+    /// Creates a failure result.
+    /// </summary>
+    public static MultiplierRuleResult Failure(string errorMessage) => new()
     {
         IsSuccess = false,
         ErrorMessage = errorMessage

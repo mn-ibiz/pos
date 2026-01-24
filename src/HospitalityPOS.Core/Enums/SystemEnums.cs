@@ -754,5 +754,118 @@ public enum LoyaltyTransactionType
     /// <summary>
     /// Points transferred to another member.
     /// </summary>
-    TransferOut = 8
+    TransferOut = 8,
+
+    /// <summary>
+    /// Points awarded as birthday reward.
+    /// </summary>
+    BirthdayReward = 9,
+
+    /// <summary>
+    /// Points awarded as anniversary reward.
+    /// </summary>
+    AnniversaryReward = 10,
+
+    /// <summary>
+    /// Points awarded for referral.
+    /// </summary>
+    ReferralReward = 11
+}
+
+/// <summary>
+/// Types of one-time rewards that can be issued to loyalty members.
+/// </summary>
+public enum OneTimeRewardType
+{
+    /// <summary>
+    /// Birthday reward issued annually.
+    /// </summary>
+    Birthday = 1,
+
+    /// <summary>
+    /// Membership anniversary reward.
+    /// </summary>
+    Anniversary = 2,
+
+    /// <summary>
+    /// Reward for signing up.
+    /// </summary>
+    Signup = 3,
+
+    /// <summary>
+    /// Reward for referring a new member.
+    /// </summary>
+    Referral = 4,
+
+    /// <summary>
+    /// Milestone reward (e.g., 100 visits).
+    /// </summary>
+    Milestone = 5,
+
+    /// <summary>
+    /// Custom promotional reward.
+    /// </summary>
+    Promotional = 6
+}
+
+/// <summary>
+/// How the reward value is calculated/applied.
+/// </summary>
+public enum RewardValueType
+{
+    /// <summary>
+    /// Fixed bonus points awarded.
+    /// </summary>
+    FixedPoints = 1,
+
+    /// <summary>
+    /// Percentage discount on purchase.
+    /// </summary>
+    PercentageDiscount = 2,
+
+    /// <summary>
+    /// Fixed monetary discount (KES).
+    /// </summary>
+    FixedDiscount = 3,
+
+    /// <summary>
+    /// Free item from a predefined list.
+    /// </summary>
+    FreeItem = 4,
+
+    /// <summary>
+    /// Points multiplier on next purchase.
+    /// </summary>
+    PointsMultiplier = 5
+}
+
+/// <summary>
+/// Status of a member reward.
+/// </summary>
+public enum MemberRewardStatus
+{
+    /// <summary>
+    /// Reward is pending (scheduled but not yet active).
+    /// </summary>
+    Pending = 1,
+
+    /// <summary>
+    /// Reward is active and can be redeemed.
+    /// </summary>
+    Active = 2,
+
+    /// <summary>
+    /// Reward has been redeemed.
+    /// </summary>
+    Redeemed = 3,
+
+    /// <summary>
+    /// Reward has expired without being redeemed.
+    /// </summary>
+    Expired = 4,
+
+    /// <summary>
+    /// Reward was cancelled/voided.
+    /// </summary>
+    Cancelled = 5
 }

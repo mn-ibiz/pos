@@ -684,6 +684,284 @@ public class KdsOrderService : IKdsOrderService
 
     #endregion
 
+    #region Fire on Demand / Item Holds
+
+    public async Task<KdsOrderItemDto> HoldItemAsync(int kdsOrderItemId, int userId, string? reason = null)
+    {
+        var item = await _kdsOrderItemRepository.GetByIdAsync(kdsOrderItemId);
+        if (item == null || !item.IsActive)
+        {
+            throw new InvalidOperationException($"KDS order item {kdsOrderItemId} not found.");
+        }
+
+        if (item.Status == KdsItemStatus.Done || item.Status == KdsItemStatus.Voided)
+        {
+            throw new InvalidOperationException($"Cannot hold item with status {item.Status}.");
+        }
+
+        item.IsOnHold = true;
+        item.HeldAt = DateTime.UtcNow;
+        item.HeldByUserId = userId;
+        item.HoldReason = reason;
+        item.Status = KdsItemStatus.OnHold;
+        item.UpdatedAt = DateTime.UtcNow;
+
+        await _kdsOrderItemRepository.UpdateAsync(item);
+        await _unitOfWork.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Item {ItemId} on order {OrderId} placed on hold by user {UserId}. Reason: {Reason}",
+            item.Id, item.KdsOrderId, userId, reason);
+
+        return MapToItemDto(item);
+    }
+
+    public async Task<KdsOrderItemDto> FireItemAsync(int kdsOrderItemId, int userId)
+    {
+        var item = await _kdsOrderItemRepository.GetByIdAsync(kdsOrderItemId);
+        if (item == null || !item.IsActive)
+        {
+            throw new InvalidOperationException($"KDS order item {kdsOrderItemId} not found.");
+        }
+
+        if (item.Status != KdsItemStatus.OnHold && !item.IsOnHold)
+        {
+            throw new InvalidOperationException($"Item is not on hold. Current status: {item.Status}");
+        }
+
+        item.IsOnHold = false;
+        item.FiredAt = DateTime.UtcNow;
+        item.FiredByUserId = userId;
+        item.Status = KdsItemStatus.Pending; // Ready for prep
+        item.UpdatedAt = DateTime.UtcNow;
+
+        // Calculate target ready time if prep time is set
+        if (item.EstimatedPrepTimeMinutes.HasValue)
+        {
+            item.TargetReadyTime = DateTime.UtcNow.AddMinutes(item.EstimatedPrepTimeMinutes.Value);
+        }
+
+        await _kdsOrderItemRepository.UpdateAsync(item);
+        await _unitOfWork.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Item {ItemId} on order {OrderId} fired by user {UserId}",
+            item.Id, item.KdsOrderId, userId);
+
+        return MapToItemDto(item);
+    }
+
+    public async Task<List<KdsOrderItemDto>> FireCourseAsync(int kdsOrderId, int courseNumber, int userId)
+    {
+        var items = await _kdsOrderItemRepository.FindAsync(i =>
+            i.KdsOrderId == kdsOrderId &&
+            i.CourseNumber == courseNumber &&
+            i.IsOnHold &&
+            i.IsActive);
+
+        var firedItems = new List<KdsOrderItemDto>();
+
+        foreach (var item in items)
+        {
+            item.IsOnHold = false;
+            item.FiredAt = DateTime.UtcNow;
+            item.FiredByUserId = userId;
+            item.Status = KdsItemStatus.Pending;
+            item.UpdatedAt = DateTime.UtcNow;
+
+            if (item.EstimatedPrepTimeMinutes.HasValue)
+            {
+                item.TargetReadyTime = DateTime.UtcNow.AddMinutes(item.EstimatedPrepTimeMinutes.Value);
+            }
+
+            await _kdsOrderItemRepository.UpdateAsync(item);
+            firedItems.Add(MapToItemDto(item));
+        }
+
+        await _unitOfWork.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Course {Course} on order {OrderId} fired by user {UserId}. {Count} items released.",
+            courseNumber, kdsOrderId, userId, firedItems.Count);
+
+        return firedItems;
+    }
+
+    public async Task<List<KdsOrderItemDto>> FireAllOrderItemsAsync(int kdsOrderId, int userId)
+    {
+        var items = await _kdsOrderItemRepository.FindAsync(i =>
+            i.KdsOrderId == kdsOrderId &&
+            i.IsOnHold &&
+            i.IsActive);
+
+        var firedItems = new List<KdsOrderItemDto>();
+
+        foreach (var item in items)
+        {
+            item.IsOnHold = false;
+            item.FiredAt = DateTime.UtcNow;
+            item.FiredByUserId = userId;
+            item.Status = KdsItemStatus.Pending;
+            item.UpdatedAt = DateTime.UtcNow;
+
+            if (item.EstimatedPrepTimeMinutes.HasValue)
+            {
+                item.TargetReadyTime = DateTime.UtcNow.AddMinutes(item.EstimatedPrepTimeMinutes.Value);
+            }
+
+            await _kdsOrderItemRepository.UpdateAsync(item);
+            firedItems.Add(MapToItemDto(item));
+        }
+
+        await _unitOfWork.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "All held items on order {OrderId} fired by user {UserId}. {Count} items released.",
+            kdsOrderId, userId, firedItems.Count);
+
+        // Also disable fire-on-demand mode for the order
+        var order = await _kdsOrderRepository.GetByIdAsync(kdsOrderId);
+        if (order != null && order.FireOnDemandEnabled)
+        {
+            order.FireOnDemandEnabled = false;
+            order.UpdatedAt = DateTime.UtcNow;
+            await _kdsOrderRepository.UpdateAsync(order);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        return firedItems;
+    }
+
+    public async Task<List<KdsOrderItemDto>> GetHeldItemsAsync(int? stationId = null)
+    {
+        var query = stationId.HasValue
+            ? await _kdsOrderItemRepository.FindAsync(i =>
+                i.StationId == stationId.Value && i.IsOnHold && i.IsActive)
+            : await _kdsOrderItemRepository.FindAsync(i =>
+                i.IsOnHold && i.IsActive);
+
+        return query.Select(i => MapToItemDto(i)).ToList();
+    }
+
+    public async Task<List<KdsOrderDto>> GetOrdersWithHeldItemsAsync(int storeId)
+    {
+        // Get all held items
+        var heldItems = await _kdsOrderItemRepository.FindAsync(i =>
+            i.IsOnHold && i.IsActive);
+
+        var kdsOrderIds = heldItems.Select(i => i.KdsOrderId).Distinct().ToList();
+
+        // Get the orders
+        var orders = await _kdsOrderRepository.FindAsync(o =>
+            kdsOrderIds.Contains(o.Id) && o.StoreId == storeId && o.IsActive);
+
+        var result = new List<KdsOrderDto>();
+        foreach (var order in orders)
+        {
+            result.Add(await MapToOrderDtoAsync(order));
+        }
+
+        return result;
+    }
+
+    public async Task<KdsOrderDto> EnableFireOnDemandAsync(int kdsOrderId, int userId)
+    {
+        var order = await _kdsOrderRepository.GetByIdAsync(kdsOrderId);
+        if (order == null || !order.IsActive)
+        {
+            throw new InvalidOperationException($"KDS order {kdsOrderId} not found.");
+        }
+
+        order.FireOnDemandEnabled = true;
+        order.FireOnDemandEnabledAt = DateTime.UtcNow;
+        order.FireOnDemandEnabledByUserId = userId;
+        order.UpdatedAt = DateTime.UtcNow;
+
+        // Put all pending items on hold
+        var items = await _kdsOrderItemRepository.FindAsync(i =>
+            i.KdsOrderId == kdsOrderId &&
+            (i.Status == KdsItemStatus.Pending || i.Status == KdsItemStatus.Fired) &&
+            !i.IsOnHold &&
+            i.IsActive);
+
+        foreach (var item in items)
+        {
+            item.IsOnHold = true;
+            item.HeldAt = DateTime.UtcNow;
+            item.HeldByUserId = userId;
+            item.HoldReason = "Fire on Demand enabled";
+            item.Status = KdsItemStatus.OnHold;
+            item.UpdatedAt = DateTime.UtcNow;
+            await _kdsOrderItemRepository.UpdateAsync(item);
+        }
+
+        await _kdsOrderRepository.UpdateAsync(order);
+        await _unitOfWork.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Fire on Demand enabled for order {OrderId} by user {UserId}. {Count} items put on hold.",
+            kdsOrderId, userId, items.Count());
+
+        return await MapToOrderDtoAsync(order);
+    }
+
+    public async Task<KdsOrderDto> DisableFireOnDemandAsync(int kdsOrderId, int userId)
+    {
+        var order = await _kdsOrderRepository.GetByIdAsync(kdsOrderId);
+        if (order == null || !order.IsActive)
+        {
+            throw new InvalidOperationException($"KDS order {kdsOrderId} not found.");
+        }
+
+        order.FireOnDemandEnabled = false;
+        order.UpdatedAt = DateTime.UtcNow;
+
+        await _kdsOrderRepository.UpdateAsync(order);
+        await _unitOfWork.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Fire on Demand disabled for order {OrderId} by user {UserId}",
+            kdsOrderId, userId);
+
+        return await MapToOrderDtoAsync(order);
+    }
+
+    public async Task<List<KdsOrderItemDto>> HoldCourseAsync(int kdsOrderId, int courseNumber, int userId, string? reason = null)
+    {
+        var items = await _kdsOrderItemRepository.FindAsync(i =>
+            i.KdsOrderId == kdsOrderId &&
+            i.CourseNumber == courseNumber &&
+            !i.IsOnHold &&
+            i.Status != KdsItemStatus.Done &&
+            i.Status != KdsItemStatus.Voided &&
+            i.IsActive);
+
+        var heldItems = new List<KdsOrderItemDto>();
+
+        foreach (var item in items)
+        {
+            item.IsOnHold = true;
+            item.HeldAt = DateTime.UtcNow;
+            item.HeldByUserId = userId;
+            item.HoldReason = reason ?? $"Course {courseNumber} held";
+            item.Status = KdsItemStatus.OnHold;
+            item.UpdatedAt = DateTime.UtcNow;
+
+            await _kdsOrderItemRepository.UpdateAsync(item);
+            heldItems.Add(MapToItemDto(item));
+        }
+
+        await _unitOfWork.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Course {Course} on order {OrderId} held by user {UserId}. {Count} items on hold.",
+            courseNumber, kdsOrderId, userId, heldItems.Count);
+
+        return heldItems;
+    }
+
+    #endregion
+
     #region Private Helpers
 
     private async Task<KdsOrderDto> MapToOrderDtoAsync(KdsOrder kdsOrder)
@@ -715,7 +993,10 @@ public class KdsOrderService : IKdsOrderService
                 ShouldFlash = (DateTime.UtcNow - kdsOrder.ReceivedAt).TotalMinutes > 15,
                 ShouldPlayAudio = (DateTime.UtcNow - kdsOrder.ReceivedAt).TotalMinutes > 15,
                 DisplayTime = FormatDisplayTime(DateTime.UtcNow - kdsOrder.ReceivedAt)
-            }
+            },
+            // Fire on Demand fields
+            FireOnDemandEnabled = kdsOrder.FireOnDemandEnabled,
+            FireOnDemandEnabledAt = kdsOrder.FireOnDemandEnabledAt
         };
     }
 
@@ -736,7 +1017,15 @@ public class KdsOrderService : IKdsOrderService
             StartedAt = item.StartedAt,
             CompletedAt = item.CompletedAt,
             SequenceNumber = item.SequenceNumber,
-            CourseNumber = item.CourseNumber
+            CourseNumber = item.CourseNumber,
+            // Fire on Demand fields
+            IsOnHold = item.IsOnHold,
+            HeldAt = item.HeldAt,
+            HoldReason = item.HoldReason,
+            FiredAt = item.FiredAt,
+            FireOnDemand = item.FireOnDemand,
+            EstimatedPrepTimeMinutes = item.EstimatedPrepTimeMinutes,
+            TargetReadyTime = item.TargetReadyTime
         };
     }
 
@@ -825,6 +1114,8 @@ public class KdsOrderService : IKdsOrderService
             KdsItemStatus.Preparing => KdsItemStatusDto.Preparing,
             KdsItemStatus.Done => KdsItemStatusDto.Done,
             KdsItemStatus.Voided => KdsItemStatusDto.Voided,
+            KdsItemStatus.OnHold => KdsItemStatusDto.OnHold,
+            KdsItemStatus.Fired => KdsItemStatusDto.Fired,
             _ => KdsItemStatusDto.Pending
         };
     }

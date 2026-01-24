@@ -44,7 +44,9 @@ public enum KdsItemStatusDto
     Pending = 1,
     Preparing = 2,
     Done = 3,
-    Voided = 4
+    Voided = 4,
+    OnHold = 5,
+    Fired = 6
 }
 
 /// <summary>
@@ -279,6 +281,21 @@ public class KdsOrderDto
     public TimeSpan ElapsedTime => DateTime.UtcNow - ReceivedAt;
     public List<KdsOrderItemDto> Items { get; set; } = new();
     public KdsTimerStatusDto? TimerStatus { get; set; }
+
+    /// <summary>
+    /// Whether fire-on-demand mode is enabled for this order.
+    /// </summary>
+    public bool FireOnDemandEnabled { get; set; }
+
+    /// <summary>
+    /// When fire-on-demand was enabled.
+    /// </summary>
+    public DateTime? FireOnDemandEnabledAt { get; set; }
+
+    /// <summary>
+    /// Count of items currently on hold.
+    /// </summary>
+    public int HeldItemCount => Items?.Count(i => i.IsOnHold) ?? 0;
 }
 
 /// <summary>
@@ -300,6 +317,41 @@ public class KdsOrderItemDto
     public DateTime? CompletedAt { get; set; }
     public int SequenceNumber { get; set; }
     public int? CourseNumber { get; set; }
+
+    /// <summary>
+    /// Whether this item is currently on hold.
+    /// </summary>
+    public bool IsOnHold { get; set; }
+
+    /// <summary>
+    /// When the item was put on hold.
+    /// </summary>
+    public DateTime? HeldAt { get; set; }
+
+    /// <summary>
+    /// Reason for holding the item.
+    /// </summary>
+    public string? HoldReason { get; set; }
+
+    /// <summary>
+    /// When the item was fired (released from hold).
+    /// </summary>
+    public DateTime? FiredAt { get; set; }
+
+    /// <summary>
+    /// Whether this item requires fire-on-demand (manual firing).
+    /// </summary>
+    public bool FireOnDemand { get; set; }
+
+    /// <summary>
+    /// Estimated prep time in minutes.
+    /// </summary>
+    public int? EstimatedPrepTimeMinutes { get; set; }
+
+    /// <summary>
+    /// Target ready time (calculated from fire time + prep time).
+    /// </summary>
+    public DateTime? TargetReadyTime { get; set; }
 }
 
 /// <summary>

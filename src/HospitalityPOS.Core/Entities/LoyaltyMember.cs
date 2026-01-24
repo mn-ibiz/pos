@@ -24,6 +24,11 @@ public class LoyaltyMember : BaseEntity
     public string? Email { get; set; }
 
     /// <summary>
+    /// Customer's date of birth (optional, used for birthday rewards).
+    /// </summary>
+    public DateOnly? DateOfBirth { get; set; }
+
+    /// <summary>
     /// Auto-generated membership number in format LM-YYYYMMDD-XXXXX.
     /// </summary>
     public string MembershipNumber { get; set; } = string.Empty;
@@ -79,4 +84,9 @@ public class LoyaltyMember : BaseEntity
     /// Gets or sets the collection of receipts associated with this member.
     /// </summary>
     public virtual ICollection<Receipt> Receipts { get; set; } = new List<Receipt>();
+
+    /// <summary>
+    /// Gets or sets the collection of one-time rewards issued to this member.
+    /// </summary>
+    public virtual ICollection<MemberReward> MemberRewards { get; set; } = new List<MemberReward>();
 }

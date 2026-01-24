@@ -8,10 +8,15 @@ public enum ExportFormat
     /// <summary>
     /// Comma-Separated Values format (Excel/Spreadsheet compatible).
     /// </summary>
-    CSV = 0,
+    Csv = 0,
 
     /// <summary>
     /// Portable Document Format.
     /// </summary>
-    PDF = 1
+    Pdf = 1,
+
+    /// <summary>
+    /// Microsoft Excel format (xlsx).
+    /// </summary>
+    Excel = 2
 }

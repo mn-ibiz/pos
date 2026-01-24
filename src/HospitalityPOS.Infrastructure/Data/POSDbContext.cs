@@ -257,6 +257,29 @@ public class POSDbContext : DbContext
     public DbSet<PointsConfiguration> PointsConfigurations => Set<PointsConfiguration>();
     public DbSet<TierConfiguration> TierConfigurations => Set<TierConfiguration>();
     public DbSet<RedemptionOtp> RedemptionOtps => Set<RedemptionOtp>();
+    public DbSet<OneTimeReward> OneTimeRewards => Set<OneTimeReward>();
+    public DbSet<MemberReward> MemberRewards => Set<MemberReward>();
+    public DbSet<PointsMultiplierRule> PointsMultiplierRules => Set<PointsMultiplierRule>();
+    public DbSet<PointsMultiplierUsage> PointsMultiplierUsages => Set<PointsMultiplierUsage>();
+    #endregion
+
+    #region Referral Program
+    public DbSet<ReferralCode> ReferralCodes => Set<ReferralCode>();
+    public DbSet<Referral> Referrals => Set<Referral>();
+    public DbSet<ReferralConfiguration> ReferralConfigurations => Set<ReferralConfiguration>();
+    public DbSet<ReferralMilestone> ReferralMilestones => Set<ReferralMilestone>();
+    public DbSet<MemberReferralMilestone> MemberReferralMilestones => Set<MemberReferralMilestone>();
+    #endregion
+
+    #region Gamification
+    public DbSet<Badge> Badges => Set<Badge>();
+    public DbSet<MemberBadge> MemberBadges => Set<MemberBadge>();
+    public DbSet<Challenge> Challenges => Set<Challenge>();
+    public DbSet<MemberChallenge> MemberChallenges => Set<MemberChallenge>();
+    public DbSet<MemberStreak> MemberStreaks => Set<MemberStreak>();
+    public DbSet<StreakMilestoneDefinition> StreakMilestoneDefinitions => Set<StreakMilestoneDefinition>();
+    public DbSet<StreakMilestone> StreakMilestones => Set<StreakMilestone>();
+    public DbSet<GamificationConfiguration> GamificationConfigurations => Set<GamificationConfiguration>();
     #endregion
 
     #region Multi-Store Management
@@ -417,6 +440,76 @@ public class POSDbContext : DbContext
 
     #region Purchase Order Automation
     public DbSet<PurchaseOrderSettings> PurchaseOrderSettings => Set<PurchaseOrderSettings>();
+    #endregion
+
+    #region Course Firing
+    public DbSet<CourseDefinition> CourseDefinitions => Set<CourseDefinition>();
+    public DbSet<CourseConfiguration> CourseConfigurations => Set<CourseConfiguration>();
+    public DbSet<KdsCourseState> KdsCourseStates => Set<KdsCourseState>();
+    public DbSet<CourseFiringLog> CourseFiringLogs => Set<CourseFiringLog>();
+    #endregion
+
+    #region Marketing Campaign Flows
+    public DbSet<CampaignFlow> CampaignFlows => Set<CampaignFlow>();
+    public DbSet<CampaignFlowStep> CampaignFlowSteps => Set<CampaignFlowStep>();
+    public DbSet<MemberFlowEnrollment> MemberFlowEnrollments => Set<MemberFlowEnrollment>();
+    public DbSet<FlowStepExecution> FlowStepExecutions => Set<FlowStepExecution>();
+    public DbSet<CampaignEmailTemplate> CampaignEmailTemplates => Set<CampaignEmailTemplate>();
+    public DbSet<CampaignSmsTemplate> CampaignSmsTemplates => Set<CampaignSmsTemplate>();
+    public DbSet<CampaignFlowConfiguration> CampaignFlowConfigurations => Set<CampaignFlowConfiguration>();
+    #endregion
+
+    #region AI Upsell Recommendations
+    public DbSet<ProductAssociation> ProductAssociations => Set<ProductAssociation>();
+    public DbSet<UpsellRule> UpsellRules => Set<UpsellRule>();
+    public DbSet<UpsellSuggestionLog> UpsellSuggestionLogs => Set<UpsellSuggestionLog>();
+    public DbSet<CustomerPreference> CustomerPreferences => Set<CustomerPreference>();
+    public DbSet<UpsellConfiguration> UpsellConfigurations => Set<UpsellConfiguration>();
+    public DbSet<UpsellDailyMetrics> UpsellDailyMetrics => Set<UpsellDailyMetrics>();
+    #endregion
+
+    #region KDS Prep Timing
+    public DbSet<PrepTimingConfiguration> PrepTimingConfigurations => Set<PrepTimingConfiguration>();
+    public DbSet<ItemFireSchedule> ItemFireSchedules => Set<ItemFireSchedule>();
+    public DbSet<ProductPrepTimeConfig> ProductPrepTimeConfigs => Set<ProductPrepTimeConfig>();
+    public DbSet<ModifierPrepTimeAdjustment> ModifierPrepTimeAdjustments => Set<ModifierPrepTimeAdjustment>();
+    public DbSet<CategoryPrepTimeDefault> CategoryPrepTimeDefaults => Set<CategoryPrepTimeDefault>();
+    public DbSet<PrepTimingDailyMetrics> PrepTimingDailyMetrics => Set<PrepTimingDailyMetrics>();
+    public DbSet<ProductPrepTimeAccuracy> ProductPrepTimeAccuracies => Set<ProductPrepTimeAccuracy>();
+    #endregion
+
+    #region Label Printing
+    public DbSet<LabelSize> LabelSizes => Set<LabelSize>();
+    public DbSet<LabelPrinter> LabelPrinters => Set<LabelPrinter>();
+    public DbSet<LabelTemplate> LabelTemplates => Set<LabelTemplate>();
+    public DbSet<LabelTemplateField> LabelTemplateFields => Set<LabelTemplateField>();
+    public DbSet<CategoryPrinterAssignment> CategoryPrinterAssignments => Set<CategoryPrinterAssignment>();
+    public DbSet<LabelPrintJob> LabelPrintJobs => Set<LabelPrintJob>();
+    public DbSet<LabelPrintJobItem> LabelPrintJobItems => Set<LabelPrintJobItem>();
+    public DbSet<LabelTemplateLibrary> LabelTemplateLibraries => Set<LabelTemplateLibrary>();
+    #endregion
+
+    #region Dynamic Pricing
+    public DbSet<DynamicPricingConfiguration> DynamicPricingConfigurations => Set<DynamicPricingConfiguration>();
+    public DbSet<DynamicPricingRule> DynamicPricingRules => Set<DynamicPricingRule>();
+    public DbSet<DynamicPricingException> DynamicPricingExceptions => Set<DynamicPricingException>();
+    public DbSet<DynamicPriceLog> DynamicPriceLogs => Set<DynamicPriceLog>();
+    public DbSet<PendingPriceChange> PendingPriceChanges => Set<PendingPriceChange>();
+    public DbSet<CurrentDynamicPrice> CurrentDynamicPrices => Set<CurrentDynamicPrice>();
+    public DbSet<DynamicPricingDailyMetrics> DynamicPricingDailyMetrics => Set<DynamicPricingDailyMetrics>();
+    public DbSet<DynamicPricingRuleMetrics> DynamicPricingRuleMetrics => Set<DynamicPricingRuleMetrics>();
+    #endregion
+
+    #region Labor Forecasting
+    public DbSet<LaborConfiguration> LaborConfigurations => Set<LaborConfiguration>();
+    public DbSet<LaborRoleConfiguration> LaborRoleConfigurations => Set<LaborRoleConfiguration>();
+    public DbSet<DailyLaborForecast> DailyLaborForecasts => Set<DailyLaborForecast>();
+    public DbSet<HourlyLaborForecast> HourlyLaborForecasts => Set<HourlyLaborForecast>();
+    public DbSet<HourlyRoleForecast> HourlyRoleForecasts => Set<HourlyRoleForecast>();
+    public DbSet<ShiftRecommendation> ShiftRecommendations => Set<ShiftRecommendation>();
+    public DbSet<StaffingIssue> StaffingIssues => Set<StaffingIssue>();
+    public DbSet<OptimizationSuggestion> OptimizationSuggestions => Set<OptimizationSuggestion>();
+    public DbSet<LaborEfficiencyMetrics> LaborEfficiencyMetrics => Set<LaborEfficiencyMetrics>();
     #endregion
 
     /// <inheritdoc />

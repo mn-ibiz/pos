@@ -153,6 +153,84 @@ public interface IKdsOrderService
 
     #endregion
 
+    #region Fire on Demand / Item Holds
+
+    /// <summary>
+    /// Places an item on hold (prevents it from showing as ready for prep).
+    /// </summary>
+    /// <param name="kdsOrderItemId">The KDS order item ID.</param>
+    /// <param name="userId">The user placing the hold.</param>
+    /// <param name="reason">Optional reason for holding.</param>
+    /// <returns>The updated item.</returns>
+    Task<KdsOrderItemDto> HoldItemAsync(int kdsOrderItemId, int userId, string? reason = null);
+
+    /// <summary>
+    /// Fires (releases from hold) a single item.
+    /// </summary>
+    /// <param name="kdsOrderItemId">The KDS order item ID.</param>
+    /// <param name="userId">The user firing the item.</param>
+    /// <returns>The fired item.</returns>
+    Task<KdsOrderItemDto> FireItemAsync(int kdsOrderItemId, int userId);
+
+    /// <summary>
+    /// Fires all items in a specific course for an order.
+    /// </summary>
+    /// <param name="kdsOrderId">The KDS order ID.</param>
+    /// <param name="courseNumber">The course number to fire.</param>
+    /// <param name="userId">The user firing the course.</param>
+    /// <returns>List of fired items.</returns>
+    Task<List<KdsOrderItemDto>> FireCourseAsync(int kdsOrderId, int courseNumber, int userId);
+
+    /// <summary>
+    /// Fires all held items for an entire order.
+    /// </summary>
+    /// <param name="kdsOrderId">The KDS order ID.</param>
+    /// <param name="userId">The user firing the order.</param>
+    /// <returns>List of fired items.</returns>
+    Task<List<KdsOrderItemDto>> FireAllOrderItemsAsync(int kdsOrderId, int userId);
+
+    /// <summary>
+    /// Gets all held items for a station (for expo display).
+    /// </summary>
+    /// <param name="stationId">The station ID (null for all stations).</param>
+    /// <returns>List of held items.</returns>
+    Task<List<KdsOrderItemDto>> GetHeldItemsAsync(int? stationId = null);
+
+    /// <summary>
+    /// Gets held items grouped by order for expo view.
+    /// </summary>
+    /// <param name="storeId">The store ID.</param>
+    /// <returns>List of orders with their held items.</returns>
+    Task<List<KdsOrderDto>> GetOrdersWithHeldItemsAsync(int storeId);
+
+    /// <summary>
+    /// Enables fire-on-demand mode for an order (holds all future items).
+    /// </summary>
+    /// <param name="kdsOrderId">The KDS order ID.</param>
+    /// <param name="userId">The user enabling the mode.</param>
+    /// <returns>The updated order.</returns>
+    Task<KdsOrderDto> EnableFireOnDemandAsync(int kdsOrderId, int userId);
+
+    /// <summary>
+    /// Disables fire-on-demand mode for an order.
+    /// </summary>
+    /// <param name="kdsOrderId">The KDS order ID.</param>
+    /// <param name="userId">The user disabling the mode.</param>
+    /// <returns>The updated order.</returns>
+    Task<KdsOrderDto> DisableFireOnDemandAsync(int kdsOrderId, int userId);
+
+    /// <summary>
+    /// Holds all items in a specific course.
+    /// </summary>
+    /// <param name="kdsOrderId">The KDS order ID.</param>
+    /// <param name="courseNumber">The course number to hold.</param>
+    /// <param name="userId">The user placing the hold.</param>
+    /// <param name="reason">Optional reason for holding.</param>
+    /// <returns>List of held items.</returns>
+    Task<List<KdsOrderItemDto>> HoldCourseAsync(int kdsOrderId, int courseNumber, int userId, string? reason = null);
+
+    #endregion
+
     #region Statistics
 
     /// <summary>

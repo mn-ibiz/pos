@@ -86,8 +86,8 @@ public static class ServiceCollectionExtensions
 
         // Infrastructure Services
         services.AddScoped<IInventoryService, InventoryService>();
-        // services.AddScoped<IStockTakeService, StockTakeService>(); // Excluded from compilation
-        // services.AddScoped<IReportService, ReportService>(); // Excluded from compilation
+        services.AddScoped<IStockTakeService, StockTakeService>();
+        services.AddScoped<IReportService, ReportService>();
         services.AddScoped<IGoodsReceivingService, GoodsReceivingService>();
         services.AddScoped<ISupplierService, SupplierService>();
         // services.AddScoped<IPurchaseOrderService, PurchaseOrderService>(); // Excluded from compilation
@@ -95,6 +95,8 @@ public static class ServiceCollectionExtensions
         // Loyalty Services
         services.AddScoped<ILoyaltyMemberRepository, LoyaltyMemberRepository>();
         services.AddScoped<ILoyaltyService, LoyaltyService>();
+        services.AddScoped<IBirthdayRewardService, BirthdayRewardService>();
+        services.AddScoped<IPointsMultiplierService, PointsMultiplierService>();
         services.AddSingleton<ISmsService, SmsService>();
         services.AddScoped<IOtpService, OtpService>();
 
@@ -151,6 +153,56 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<ExpirePointsJob>());
         services.AddSingleton<IExpirePointsJob>(sp => sp.GetRequiredService<ExpirePointsJob>());
 
+        // Birthday Reward Background Job
+        services.AddSingleton<BirthdayRewardJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<BirthdayRewardJob>());
+        services.AddSingleton<IBirthdayRewardJob>(sp => sp.GetRequiredService<BirthdayRewardJob>());
+
+        // Referral Program Services
+        services.AddScoped<IReferralService, ReferralService>();
+
+        // Referral Expiry Background Job
+        services.AddSingleton<ReferralExpiryJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<ReferralExpiryJob>());
+        services.AddSingleton<IReferralExpiryJob>(sp => sp.GetRequiredService<ReferralExpiryJob>());
+
+        // Gamification Services (Badges, Challenges, Streaks)
+        services.AddScoped<IGamificationService, GamificationService>();
+
+        // Gamification Background Jobs
+        services.AddSingleton<StreakCheckJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<StreakCheckJob>());
+        services.AddSingleton<IStreakCheckJob>(sp => sp.GetRequiredService<StreakCheckJob>());
+
+        services.AddSingleton<ChallengeExpiryJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<ChallengeExpiryJob>());
+        services.AddSingleton<IChallengeExpiryJob>(sp => sp.GetRequiredService<ChallengeExpiryJob>());
+
+        // Marketing Campaign Flow Services
+        services.AddScoped<ICampaignFlowService, CampaignFlowService>();
+        services.AddScoped<ICampaignFlowTriggerService, CampaignFlowService>();
+
+        // Campaign Flow Background Jobs
+        services.AddSingleton<CampaignFlowProcessorJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<CampaignFlowProcessorJob>());
+        services.AddSingleton<ICampaignFlowProcessorJob>(sp => sp.GetRequiredService<CampaignFlowProcessorJob>());
+
+        services.AddSingleton<CampaignFlowTriggerJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<CampaignFlowTriggerJob>());
+        services.AddSingleton<ICampaignFlowTriggerJob>(sp => sp.GetRequiredService<CampaignFlowTriggerJob>());
+
+        // AI Upsell Recommendation Services
+        services.AddScoped<IUpsellService, UpsellService>();
+
+        // Upsell Background Jobs
+        services.AddSingleton<AssociationMiningJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<AssociationMiningJob>());
+        services.AddSingleton<IAssociationMiningJob>(sp => sp.GetRequiredService<AssociationMiningJob>());
+
+        services.AddSingleton<CustomerPreferenceJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<CustomerPreferenceJob>());
+        services.AddSingleton<ICustomerPreferenceJob>(sp => sp.GetRequiredService<CustomerPreferenceJob>());
+
         // Stock Transfer Services (Epic 23)
         // services.AddScoped<IStockTransferService, StockTransferService>(); // Excluded from compilation
         // services.AddScoped<IStockReservationService, StockReservationService>(); // Excluded from compilation
@@ -183,16 +235,25 @@ public static class ServiceCollectionExtensions
         // services.AddScoped<IKdsStatusService, KdsStatusService>(); // Excluded from compilation
         services.AddScoped<IKdsTimerService, KdsTimerService>();
         services.AddScoped<IExpoService, ExpoService>();
+        services.AddScoped<IKdsCoursingService, KdsCoursingService>();
 
         // KDS SignalR Hub Service (Epic 26-27)
         services.Configure<KdsHubConfiguration>(options => { });
         services.AddScoped<IKdsHubService, KdsHubService>();
         services.AddScoped<IKdsHubServiceFactory, KdsHubServiceFactory>();
 
+        // KDS Prep Timing Services (Issue #103)
+        services.AddScoped<IKdsPrepTimingService, KdsPrepTimingService>();
+
+        // Prep Timing Background Job (runs every 15 seconds)
+        services.AddSingleton<PrepTimingJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<PrepTimingJob>());
+        services.AddSingleton<IPrepTimingJob>(sp => sp.GetRequiredService<PrepTimingJob>());
+
         // Label Services (Epic 28)
-        // services.AddScoped<ILabelPrinterService, LabelPrinterService>(); // Excluded from compilation
+        services.AddScoped<ILabelPrinterService, LabelPrinterService>();
         services.AddScoped<ILabelTemplateService, LabelTemplateService>();
-        // services.AddScoped<ILabelPrintService, LabelPrintService>(); // Excluded from compilation
+        services.AddScoped<ILabelPrintService, LabelPrintService>();
 
         // Kenya Integration Services (Epic 39)
         services.AddScoped<IEtimsService, EtimsService>();
@@ -253,6 +314,29 @@ public static class ServiceCollectionExtensions
 
         // Email Digest Services
         services.AddScoped<IEmailDigestService, EmailDigestService>();
+
+        // Dynamic Pricing Services (Issue #105)
+        services.AddScoped<IDynamicPricingService, DynamicPricingService>();
+
+        // Dynamic Pricing Background Jobs
+        services.AddSingleton<DynamicPricingJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<DynamicPricingJob>());
+        services.AddSingleton<IDynamicPricingJob>(sp => sp.GetRequiredService<DynamicPricingJob>());
+
+        services.AddSingleton<Jobs.ExpiryPricingJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<Jobs.ExpiryPricingJob>());
+        services.AddSingleton<IExpiryPricingJob>(sp => sp.GetRequiredService<Jobs.ExpiryPricingJob>());
+
+        // Labor Forecasting Services (Issue #107)
+        services.AddScoped<ILaborForecastingService, LaborForecastingService>();
+
+        // Labor Forecasting Background Jobs
+        services.AddSingleton<LaborForecastingJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<LaborForecastingJob>());
+        services.AddSingleton<ILaborForecastingJob>(sp => sp.GetRequiredService<LaborForecastingJob>());
+
+        services.AddSingleton<LaborForecastCleanupJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<LaborForecastCleanupJob>());
 
         return services;
     }

@@ -678,13 +678,3 @@ public class StockCountScheduleDto
     public bool UseDoubleBlind { get; set; }
     public string? Notes { get; set; }
 }
-
-/// <summary>
-/// Export format for reports.
-/// </summary>
-public enum ExportFormat
-{
-    Pdf = 1,
-    Excel = 2,
-    Csv = 3
-}
