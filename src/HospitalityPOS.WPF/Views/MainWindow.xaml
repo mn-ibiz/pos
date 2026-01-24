@@ -223,6 +223,13 @@
         <DataTemplate DataType="{x:Type marketingVm:CustomerSegmentListViewModel}">
             <marketingViews:CustomerSegmentListView />
         </DataTemplate>
+        <!-- Terminal Management Views (MT-027) -->
+        <DataTemplate DataType="{x:Type vm:TerminalManagementViewModel}">
+            <views:TerminalManagementView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:TerminalEditorViewModel}">
+            <views:TerminalEditorView />
+        </DataTemplate>
     </Window.Resources>
 
     <Grid>
@@ -766,6 +773,15 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE8D7;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
                                     <TextBlock Text="Roles &amp; Permissions" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Terminals -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToTerminalManagementCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE7F4;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Terminals" Margin="12,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
 

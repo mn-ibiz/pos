@@ -457,6 +457,10 @@ public partial class App : Application
         services.AddTransient<ConflictResolutionViewModel>();
         services.AddTransient<PermissionOverrideViewModel>();
 
+        // Terminal Management ViewModels (MT-027)
+        services.AddTransient<TerminalManagementViewModel>();
+        services.AddTransient<TerminalEditorViewModel>();
+
         // Batch/Expiry ViewModels (Epic 24) - Excluded
         // services.AddTransient<BatchManagementViewModel>();
         // services.AddTransient<ExpiryAlertsViewModel>();
