@@ -1,3 +1,4 @@
+using HospitalityPOS.Core.DTOs;
 using HospitalityPOS.Core.Models.Reports;
 
 namespace HospitalityPOS.Core.Interfaces;
@@ -41,6 +42,52 @@ public interface IReportPrintService
     /// <param name="content">The CSV content.</param>
     /// <param name="fileName">The base file name (without extension).</param>
     Task ExportToCsvAsync(string content, string fileName);
+
+    #region X-Report and Z-Report
+
+    /// <summary>
+    /// Prints an X-Report to a thermal printer (80mm, 48 chars per line).
+    /// </summary>
+    /// <param name="report">The X-Report data to print.</param>
+    /// <returns>A task representing the async operation.</returns>
+    Task PrintXReportAsync(XReportData report);
+
+    /// <summary>
+    /// Prints a Z-Report to a thermal printer (80mm, 48 chars per line).
+    /// </summary>
+    /// <param name="report">The Z-Report to print.</param>
+    /// <returns>A task representing the async operation.</returns>
+    Task PrintZReportAsync(ZReport report);
+
+    /// <summary>
+    /// Prints a Combined X-Report to a thermal printer (80mm, 48 chars per line).
+    /// </summary>
+    /// <param name="report">The Combined X-Report data to print.</param>
+    /// <returns>A task representing the async operation.</returns>
+    Task PrintCombinedXReportAsync(CombinedXReportData report);
+
+    /// <summary>
+    /// Prints a Combined Z-Report preview to a thermal printer (80mm, 48 chars per line).
+    /// </summary>
+    /// <param name="report">The Combined Z-Report preview to print.</param>
+    /// <returns>A task representing the async operation.</returns>
+    Task PrintCombinedZReportAsync(CombinedZReportPreview report);
+
+    /// <summary>
+    /// Generates thermal printer content for an X-Report.
+    /// </summary>
+    /// <param name="report">The X-Report data.</param>
+    /// <returns>Formatted string for 80mm thermal printer (48 chars per line).</returns>
+    string GenerateXReportThermalContent(XReportData report);
+
+    /// <summary>
+    /// Generates thermal printer content for a Z-Report.
+    /// </summary>
+    /// <param name="report">The Z-Report.</param>
+    /// <returns>Formatted string for 80mm thermal printer (48 chars per line).</returns>
+    string GenerateZReportThermalContent(ZReport report);
+
+    #endregion
 
     #region Inventory Reports
 

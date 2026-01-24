@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using HospitalityPOS.Core.DTOs;
 using HospitalityPOS.Core.Enums;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.Core.Models.Reports;
@@ -381,6 +382,321 @@ public class ReportPrintService : IReportPrintService
             }
         });
     }
+
+    #region X-Report and Z-Report Thermal Printing
+
+    /// <inheritdoc />
+    public async Task PrintXReportAsync(XReportData report)
+    {
+        var content = GenerateXReportThermalContent(report);
+        await PrintReportAsync(content, $"X-Report {report.ReportNumber}");
+    }
+
+    /// <inheritdoc />
+    public async Task PrintZReportAsync(ZReport report)
+    {
+        var content = GenerateZReportThermalContent(report);
+        await PrintReportAsync(content, $"Z-Report {report.ReportNumberFormatted}");
+    }
+
+    /// <inheritdoc />
+    public async Task PrintCombinedXReportAsync(CombinedXReportData report)
+    {
+        var content = GenerateCombinedXReportThermalContent(report);
+        await PrintReportAsync(content, $"Combined X-Report {report.ReportNumber}");
+    }
+
+    /// <inheritdoc />
+    public async Task PrintCombinedZReportAsync(CombinedZReportPreview report)
+    {
+        var content = GenerateCombinedZReportThermalContent(report);
+        await PrintReportAsync(content, "Combined Z-Report Preview");
+    }
+
+    /// <inheritdoc />
+    public string GenerateXReportThermalContent(XReportData report)
+    {
+        var sb = new StringBuilder();
+
+        // Header
+        sb.AppendLine(new string('=', LineWidth));
+        sb.AppendLine(CenterText(report.BusinessName, LineWidth));
+        sb.AppendLine(CenterText("X-REPORT", LineWidth));
+        sb.AppendLine(new string('=', LineWidth));
+
+        // Terminal Info
+        if (!string.IsNullOrEmpty(report.TerminalCode))
+        {
+            sb.AppendLine($"Terminal: {report.TerminalCode}");
+            sb.AppendLine($"          {report.TerminalName}");
+        }
+        sb.AppendLine($"Report #: {report.ReportNumber}");
+        sb.AppendLine($"Generated: {report.GeneratedAt.ToLocalTime():yyyy-MM-dd HH:mm}");
+        sb.AppendLine($"By: {report.GeneratedByName}");
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Shift Info
+        sb.AppendLine("SHIFT INFORMATION");
+        sb.AppendLine(new string('-', LineWidth));
+        sb.AppendLine(FormatLine("Started:", report.ShiftStarted.ToLocalTime().ToString("yyyy-MM-dd HH:mm")));
+        sb.AppendLine(FormatLine("Duration:", report.ShiftDurationFormatted));
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Sales Summary
+        sb.AppendLine("SALES SUMMARY");
+        sb.AppendLine(new string('-', LineWidth));
+        sb.AppendLine(FormatLine("Gross Sales:", $"KSh {report.GrossSales:N2}"));
+        sb.AppendLine(FormatLine("Discounts:", $"-KSh {report.Discounts:N2}"));
+        sb.AppendLine(FormatLine("Refunds:", $"-KSh {report.Refunds:N2}"));
+        sb.AppendLine(FormatLine("Net Sales:", $"KSh {report.NetSales:N2}"));
+        sb.AppendLine(FormatLine("Tax:", $"KSh {report.TaxAmount:N2}"));
+        sb.AppendLine(FormatLine("Tips:", $"KSh {report.TipsCollected:N2}"));
+        sb.AppendLine(new string(' ', LineWidth - 20) + new string('-', 20));
+        sb.AppendLine(FormatLine("GRAND TOTAL:", $"KSh {report.GrandTotal:N2}"));
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Payment Breakdown by Type
+        sb.AppendLine("PAYMENT BREAKDOWN");
+        sb.AppendLine(new string('-', LineWidth));
+        if (report.PaymentTypeBreakdown?.Count > 0)
+        {
+            foreach (var pt in report.PaymentTypeBreakdown)
+            {
+                sb.AppendLine(FormatLine($"[{pt.PaymentTypeName}] ({pt.TotalTransactionCount}):", $"KSh {pt.TotalAmount:N2}"));
+                foreach (var pm in pt.Methods)
+                {
+                    sb.AppendLine(FormatLine($"  {pm.PaymentMethodName} ({pm.TransactionCount}):", $"KSh {pm.Amount:N2}"));
+                }
+            }
+        }
+        else if (report.PaymentBreakdown?.Count > 0)
+        {
+            foreach (var pm in report.PaymentBreakdown)
+            {
+                sb.AppendLine(FormatLine($"{pm.PaymentMethodName} ({pm.TransactionCount}):", $"KSh {pm.Amount:N2}"));
+            }
+        }
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Statistics
+        sb.AppendLine("STATISTICS");
+        sb.AppendLine(new string('-', LineWidth));
+        sb.AppendLine(FormatLine("Transactions:", report.TransactionCount.ToString()));
+        sb.AppendLine(FormatLine("Average Transaction:", $"KSh {report.AverageTransaction:N2}"));
+        sb.AppendLine(FormatLine("Voids:", report.VoidCount.ToString()));
+        sb.AppendLine(FormatLine("Refunds:", report.RefundCount.ToString()));
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Cash Drawer
+        sb.AppendLine("CASH DRAWER");
+        sb.AppendLine(new string('-', LineWidth));
+        sb.AppendLine(FormatLine("Opening Float:", $"KSh {report.OpeningFloat:N2}"));
+        sb.AppendLine(FormatLine("+ Cash Received:", $"KSh {report.CashReceived:N2}"));
+        sb.AppendLine(FormatLine("- Cash Refunds:", $"KSh {report.CashRefunds:N2}"));
+        sb.AppendLine(FormatLine("- Cash Payouts:", $"KSh {report.CashPayouts:N2}"));
+        sb.AppendLine(new string(' ', LineWidth - 20) + new string('-', 20));
+        sb.AppendLine(FormatLine("EXPECTED CASH:", $"KSh {report.ExpectedCash:N2}"));
+        sb.AppendLine(new string('=', LineWidth));
+
+        // Footer
+        sb.AppendLine(CenterText("** INTERIM REPORT **", LineWidth));
+        sb.AppendLine(CenterText("Work Period Still Open", LineWidth));
+        sb.AppendLine(new string('=', LineWidth));
+
+        return sb.ToString();
+    }
+
+    /// <inheritdoc />
+    public string GenerateZReportThermalContent(ZReport report)
+    {
+        var sb = new StringBuilder();
+
+        // Header
+        sb.AppendLine(new string('=', LineWidth));
+        sb.AppendLine(CenterText(report.BusinessName, LineWidth));
+        sb.AppendLine(CenterText("*** Z-REPORT ***", LineWidth));
+        sb.AppendLine(new string('=', LineWidth));
+
+        // Terminal Info
+        if (!string.IsNullOrEmpty(report.TerminalCode))
+        {
+            sb.AppendLine($"Terminal: {report.TerminalCode}");
+            sb.AppendLine($"          {report.TerminalName}");
+        }
+        sb.AppendLine($"Z-Report #: {report.ReportNumberFormatted}");
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Work Period Info
+        sb.AppendLine("WORK PERIOD");
+        sb.AppendLine(new string('-', LineWidth));
+        sb.AppendLine(FormatLine("Opened:", report.WorkPeriodOpenedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")));
+        sb.AppendLine(FormatLine("Closed:", report.WorkPeriodClosedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")));
+        sb.AppendLine(FormatLine("Duration:", $"{(int)report.Duration.TotalHours}h {report.Duration.Minutes}m"));
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Sales Summary
+        sb.AppendLine("FINAL SALES SUMMARY");
+        sb.AppendLine(new string('-', LineWidth));
+        sb.AppendLine(FormatLine("Gross Sales:", $"KSh {report.GrossSales:N2}"));
+        sb.AppendLine(FormatLine("Discounts:", $"-KSh {report.TotalDiscounts:N2}"));
+        sb.AppendLine(FormatLine("Net Sales:", $"KSh {report.NetSales:N2}"));
+        sb.AppendLine(FormatLine("Tax Collected:", $"KSh {report.TaxCollected:N2}"));
+        sb.AppendLine(new string(' ', LineWidth - 20) + new string('-', 20));
+        sb.AppendLine(FormatLine("GRAND TOTAL:", $"KSh {report.GrandTotal:N2}"));
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Payment Methods
+        sb.AppendLine("PAYMENT METHODS");
+        sb.AppendLine(new string('-', LineWidth));
+        foreach (var pm in report.SalesByPaymentMethod)
+        {
+            sb.AppendLine(FormatLine($"{pm.PaymentMethod} ({pm.TransactionCount}):", $"KSh {pm.TotalAmount:N2}"));
+        }
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Cash Drawer Reconciliation
+        sb.AppendLine("CASH DRAWER RECONCILIATION");
+        sb.AppendLine(new string('-', LineWidth));
+        sb.AppendLine(FormatLine("Opening Float:", $"KSh {report.OpeningFloat:N2}"));
+        sb.AppendLine(FormatLine("+ Cash Sales:", $"KSh {report.CashSales:N2}"));
+        sb.AppendLine(FormatLine("- Cash Payouts:", $"KSh {report.CashPayouts:N2}"));
+        sb.AppendLine(new string(' ', LineWidth - 20) + new string('-', 20));
+        sb.AppendLine(FormatLine("EXPECTED CASH:", $"KSh {report.ExpectedCash:N2}"));
+        sb.AppendLine(FormatLine("ACTUAL CASH:", $"KSh {report.ActualCash:N2}"));
+        sb.AppendLine(new string(' ', LineWidth - 20) + new string('-', 20));
+        sb.AppendLine(FormatLine("VARIANCE:", $"KSh {report.Variance:N2}"));
+        sb.AppendLine(FormatLine("Status:", report.VarianceStatus));
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Receipts Summary
+        sb.AppendLine("RECEIPTS SUMMARY");
+        sb.AppendLine(new string('-', LineWidth));
+        sb.AppendLine(FormatLine($"Settled ({report.SettledReceiptsCount}):", $"KSh {report.SettledReceiptsTotal:N2}"));
+        sb.AppendLine(FormatLine($"Pending ({report.PendingReceiptsCount}):", $"KSh {report.PendingReceiptsTotal:N2}"));
+        sb.AppendLine(FormatLine($"Voided ({report.VoidCount}):", $"KSh {report.VoidTotal:N2}"));
+        sb.AppendLine(new string('=', LineWidth));
+
+        // Footer
+        sb.AppendLine(CenterText("*** END OF Z-REPORT ***", LineWidth));
+        sb.AppendLine(CenterText("OFFICIAL DOCUMENT", LineWidth));
+        sb.AppendLine($"Printed: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        sb.AppendLine(new string('=', LineWidth));
+
+        return sb.ToString();
+    }
+
+    private string GenerateCombinedXReportThermalContent(CombinedXReportData report)
+    {
+        var sb = new StringBuilder();
+
+        // Header
+        sb.AppendLine(new string('=', LineWidth));
+        sb.AppendLine(CenterText(report.BusinessName, LineWidth));
+        sb.AppendLine(CenterText("COMBINED X-REPORT", LineWidth));
+        sb.AppendLine(CenterText($"({report.TerminalCount} Terminals)", LineWidth));
+        sb.AppendLine(new string('=', LineWidth));
+
+        sb.AppendLine($"Report #: {report.ReportNumber}");
+        sb.AppendLine($"Generated: {report.GeneratedAt.ToLocalTime():yyyy-MM-dd HH:mm}");
+        sb.AppendLine($"By: {report.GeneratedByName}");
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Combined Sales
+        sb.AppendLine("COMBINED SALES SUMMARY");
+        sb.AppendLine(new string('-', LineWidth));
+        sb.AppendLine(FormatLine("Gross Sales:", $"KSh {report.GrossSales:N2}"));
+        sb.AppendLine(FormatLine("Discounts:", $"-KSh {report.Discounts:N2}"));
+        sb.AppendLine(FormatLine("Refunds:", $"-KSh {report.Refunds:N2}"));
+        sb.AppendLine(FormatLine("Net Sales:", $"KSh {report.NetSales:N2}"));
+        sb.AppendLine(FormatLine("Tax:", $"KSh {report.TaxAmount:N2}"));
+        sb.AppendLine(new string(' ', LineWidth - 20) + new string('-', 20));
+        sb.AppendLine(FormatLine("GRAND TOTAL:", $"KSh {report.GrandTotal:N2}"));
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Terminal Breakdown
+        sb.AppendLine("TERMINAL BREAKDOWN");
+        sb.AppendLine(new string('-', LineWidth));
+        foreach (var t in report.TerminalBreakdown)
+        {
+            var status = t.IsOnline ? "" : " [OFFLINE]";
+            sb.AppendLine($"{t.TerminalCode}{status}");
+            sb.AppendLine(FormatLine($"  Net Sales:", $"KSh {t.NetSales:N2}"));
+            sb.AppendLine(FormatLine($"  Transactions:", t.TransactionCount.ToString()));
+        }
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Combined Payment Breakdown
+        sb.AppendLine("PAYMENT BREAKDOWN");
+        sb.AppendLine(new string('-', LineWidth));
+        foreach (var pm in report.PaymentBreakdown)
+        {
+            sb.AppendLine(FormatLine($"{pm.PaymentMethodName} ({pm.TransactionCount}):", $"KSh {pm.Amount:N2}"));
+        }
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Combined Cash Drawer
+        sb.AppendLine("COMBINED CASH DRAWER");
+        sb.AppendLine(new string('-', LineWidth));
+        sb.AppendLine(FormatLine("Total Expected:", $"KSh {report.ExpectedCash:N2}"));
+        sb.AppendLine(new string('=', LineWidth));
+
+        // Footer
+        sb.AppendLine(CenterText("** COMBINED INTERIM REPORT **", LineWidth));
+        sb.AppendLine(new string('=', LineWidth));
+
+        return sb.ToString();
+    }
+
+    private string GenerateCombinedZReportThermalContent(CombinedZReportPreview report)
+    {
+        var sb = new StringBuilder();
+
+        // Header
+        sb.AppendLine(new string('=', LineWidth));
+        sb.AppendLine(CenterText("COMBINED Z-REPORT PREVIEW", LineWidth));
+        sb.AppendLine(CenterText($"({report.TerminalCount} Terminals)", LineWidth));
+        sb.AppendLine(new string('=', LineWidth));
+
+        sb.AppendLine($"Work Period: {report.WorkPeriodStart.ToLocalTime():yyyy-MM-dd HH:mm}");
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Status
+        sb.AppendLine("STATUS OVERVIEW");
+        sb.AppendLine(new string('-', LineWidth));
+        sb.AppendLine(FormatLine("Total Terminals:", report.TerminalCount.ToString()));
+        sb.AppendLine(FormatLine("Z-Reports Completed:", report.CompletedZReportCount.ToString()));
+        sb.AppendLine(FormatLine("Pending:", report.PendingZReportCount.ToString()));
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Combined Totals
+        sb.AppendLine("COMBINED TOTALS");
+        sb.AppendLine(new string('-', LineWidth));
+        sb.AppendLine(FormatLine("Total Gross Sales:", $"KSh {report.TotalGrossSales:N2}"));
+        sb.AppendLine(FormatLine("Total Net Sales:", $"KSh {report.TotalNetSales:N2}"));
+        sb.AppendLine(FormatLine("Total Grand Total:", $"KSh {report.TotalGrandTotal:N2}"));
+        sb.AppendLine(FormatLine("Total Transactions:", report.TotalTransactionCount.ToString()));
+        sb.AppendLine(new string('-', LineWidth));
+
+        // Terminal Status
+        sb.AppendLine("TERMINAL STATUS");
+        sb.AppendLine(new string('-', LineWidth));
+        foreach (var t in report.TerminalBreakdown)
+        {
+            var status = t.HasZReport ? "[DONE]" : "[PENDING]";
+            sb.AppendLine($"{status} {t.TerminalCode}");
+            sb.AppendLine(FormatLine($"  Net Sales:", $"KSh {t.NetSales:N2}"));
+        }
+        sb.AppendLine(new string('=', LineWidth));
+
+        // Footer
+        sb.AppendLine(CenterText("** PREVIEW ONLY **", LineWidth));
+        sb.AppendLine($"Printed: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        sb.AppendLine(new string('=', LineWidth));
+
+        return sb.ToString();
+    }
+
+    #endregion
 
     #region Inventory Report Printing
 
