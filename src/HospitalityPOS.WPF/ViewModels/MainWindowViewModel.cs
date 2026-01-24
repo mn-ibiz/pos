@@ -263,6 +263,21 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private void NavigateToPayroll() => NavigateWithSidebar<PayrollViewModel>("Payroll");
 
     [RelayCommand]
+    private void NavigateToLeaveManagement() => NavigateWithSidebar<LeaveManagementViewModel>("Leave Management");
+
+    [RelayCommand]
+    private void NavigateToLoanManagement() => NavigateWithSidebar<LoanManagementViewModel>("Loan Management");
+
+    [RelayCommand]
+    private void NavigateToCommissionManagement() => NavigateWithSidebar<CommissionManagementViewModel>("Commission Management");
+
+    [RelayCommand]
+    private void NavigateToEmployeeTermination() => NavigateWithSidebar<EmployeeTerminationViewModel>("Employee Termination");
+
+    [RelayCommand]
+    private void NavigateToDisciplinaryDeductions() => NavigateWithSidebar<DisciplinaryDeductionsViewModel>("Disciplinary Deductions");
+
+    [RelayCommand]
     private void NavigateToUserManagement() => NavigateWithSidebar<UserManagementViewModel>("Users");
 
     [RelayCommand]
@@ -337,6 +352,18 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     [RelayCommand]
     private void NavigateToComparativeAnalytics() => NavigateWithSidebar<ComparativeAnalyticsViewModel>("Comparative Analytics");
+
+    [RelayCommand]
+    private void NavigateToBudgetManagement() => NavigateWithSidebar<BudgetManagementViewModel>("Budget Management");
+
+    [RelayCommand]
+    private void NavigateToBankReconciliation() => NavigateWithSidebar<BankReconciliationViewModel>("Bank Reconciliation");
+
+    [RelayCommand]
+    private void NavigateToAccountsReceivable() => NavigateWithSidebar<AccountsReceivableViewModel>("Accounts Receivable");
+
+    [RelayCommand]
+    private void NavigateToSupplierCredit() => NavigateWithSidebar<SupplierCreditViewModel>("Supplier Credit");
 
     // Supplier Management
     [RelayCommand]
@@ -424,6 +451,26 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     [RelayCommand]
     private void NavigateToExpiryAlerts() => NavigateWithSidebar<ExpiryAlertsViewModel>("Expiry Alerts");
+
+    // Operations
+    [RelayCommand]
+    private void NavigateToTimePricing() => NavigateWithSidebar<TimePricingViewModel>("Time-Based Pricing");
+
+    [RelayCommand]
+    private void NavigateToWasteReporting() => NavigateWithSidebar<WasteReportingViewModel>("Waste Reporting");
+
+    [RelayCommand]
+    private void NavigateToChainReporting() => NavigateWithSidebar<ChainReportingViewModel>("Chain Reporting");
+
+    [RelayCommand]
+    private void NavigateToHotelPMSIntegration() => NavigateWithSidebar<HotelPMSIntegrationViewModel>("Hotel PMS Integration");
+
+    // System & Data Management
+    [RelayCommand]
+    private void NavigateToConflictResolution() => NavigateWithSidebar<ConflictResolutionViewModel>("Conflict Resolution");
+
+    [RelayCommand]
+    private void NavigateToPermissionOverride() => NavigateWithSidebar<PermissionOverrideViewModel>("Permission Override");
 
     private void NavigateWithSidebar<TViewModel>(string pageTitle) where TViewModel : class
     {

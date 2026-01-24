@@ -385,6 +385,29 @@ public partial class App : Application
         services.AddTransient<TransferApprovalViewModel>();
         services.AddTransient<TransferReceiveViewModel>();
 
+        // HR Extended ViewModels (Leave, Loan, Commission, Termination, Disciplinary)
+        services.AddTransient<LeaveManagementViewModel>();
+        services.AddTransient<LoanManagementViewModel>();
+        services.AddTransient<CommissionManagementViewModel>();
+        services.AddTransient<EmployeeTerminationViewModel>();
+        services.AddTransient<DisciplinaryDeductionsViewModel>();
+
+        // Finance Extended ViewModels (Budget, Bank Reconciliation, AR, AP)
+        services.AddTransient<BudgetManagementViewModel>();
+        services.AddTransient<BankReconciliationViewModel>();
+        services.AddTransient<AccountsReceivableViewModel>();
+        services.AddTransient<SupplierCreditViewModel>();
+
+        // Operations ViewModels (Time Pricing, Waste, Chain Reporting, Hotel PMS)
+        services.AddTransient<TimePricingViewModel>();
+        services.AddTransient<WasteReportingViewModel>();
+        services.AddTransient<ChainReportingViewModel>();
+        services.AddTransient<HotelPMSIntegrationViewModel>();
+
+        // System ViewModels (Conflict Resolution, Permission Override)
+        services.AddTransient<ConflictResolutionViewModel>();
+        services.AddTransient<PermissionOverrideViewModel>();
+
         // Batch/Expiry ViewModels (Epic 24) - Excluded
         // services.AddTransient<BatchManagementViewModel>();
         // services.AddTransient<ExpiryAlertsViewModel>();

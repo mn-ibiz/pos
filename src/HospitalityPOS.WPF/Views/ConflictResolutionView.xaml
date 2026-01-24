@@ -1,0 +1,133 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.ConflictResolutionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" d:DesignHeight="800" d:DesignWidth="1400" Background="#1E1E2E">
+    <UserControl.Resources><BooleanToVisibilityConverter x:Key="BoolToVisConverter" /></UserControl.Resources>
+    <Grid Margin="24">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <Grid Grid.Row="0" Margin="0,0,0,24">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <Button Content="Back" Command="{Binding GoBackCommand}" Background="#3D3D5C" Foreground="White" BorderThickness="0" Padding="16,12" Cursor="Hand"/>
+            <TextBlock Grid.Column="1" Text="Data Sync Conflict Resolution" FontSize="28" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Content="Auto Resolve All" Command="{Binding AutoResolveAllCommand}" Background="#0284C7" Foreground="White" BorderThickness="0" Padding="24,12" Margin="0,0,8,0" Cursor="Hand"/>
+                <Button Content="Refresh" Command="{Binding RefreshCommand}" Background="#059669" Foreground="White" BorderThickness="0" Padding="24,12" Cursor="Hand"/>
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <Border Background="#2D2D44" CornerRadius="8" Padding="16" Margin="0,0,8,0">
+                <StackPanel HorizontalAlignment="Center"><TextBlock Text="Pending Conflicts" Foreground="#9CA3AF" FontSize="12" HorizontalAlignment="Center"/><TextBlock Text="{Binding PendingConflictCount}" FontSize="24" FontWeight="Bold" Foreground="#FF9800" HorizontalAlignment="Center"/></StackPanel>
+            </Border>
+            <Border Grid.Column="1" Background="#2D2D44" CornerRadius="8" Padding="16" Margin="4,0">
+                <StackPanel HorizontalAlignment="Center"><TextBlock Text="Auto-Resolved" Foreground="#9CA3AF" FontSize="12" HorizontalAlignment="Center"/><TextBlock Text="{Binding AutoResolvedCount}" FontSize="24" FontWeight="Bold" Foreground="#4CAF50" HorizontalAlignment="Center"/></StackPanel>
+            </Border>
+            <Border Grid.Column="2" Background="#2D2D44" CornerRadius="8" Padding="16" Margin="4,0">
+                <StackPanel HorizontalAlignment="Center"><TextBlock Text="Manual Resolution" Foreground="#9CA3AF" FontSize="12" HorizontalAlignment="Center"/><TextBlock Text="{Binding ManualResolutionCount}" FontSize="24" FontWeight="Bold" Foreground="#2196F3" HorizontalAlignment="Center"/></StackPanel>
+            </Border>
+            <Border Grid.Column="3" Background="#2D2D44" CornerRadius="8" Padding="16" Margin="8,0,0,0">
+                <StackPanel HorizontalAlignment="Center"><TextBlock Text="Sync Status" Foreground="#9CA3AF" FontSize="12" HorizontalAlignment="Center"/><TextBlock Text="{Binding SyncStatus}" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/></StackPanel>
+            </Border>
+        </Grid>
+        <TabControl Grid.Row="2" SelectedIndex="{Binding SelectedTabIndex}" Background="Transparent" BorderThickness="0">
+            <TabControl.Resources>
+                <Style TargetType="TabItem"><Setter Property="Background" Value="#2D2D44"/><Setter Property="Foreground" Value="#9CA3AF"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TabItem"><Border Name="Border" Background="#2D2D44" CornerRadius="8,8,0,0" Margin="0,0,4,0"><ContentPresenter ContentSource="Header" Margin="20,12"/></Border><ControlTemplate.Triggers><Trigger Property="IsSelected" Value="True"><Setter TargetName="Border" Property="Background" Value="#4F46E5"/><Setter Property="Foreground" Value="White"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style>
+            </TabControl.Resources>
+            <TabItem Header="Pending Conflicts">
+                <Border Background="#2D2D44" CornerRadius="0,8,8,8">
+                    <DataGrid ItemsSource="{Binding PendingConflicts}" SelectedItem="{Binding SelectedConflict}" AutoGenerateColumns="False" Background="Transparent" Foreground="White" BorderThickness="0" RowBackground="#2D2D44" AlternatingRowBackground="#353550" CanUserAddRows="False" IsReadOnly="True" RowHeight="48" Margin="16">
+                        <DataGrid.ColumnHeaderStyle><Style TargetType="DataGridColumnHeader"><Setter Property="Background" Value="#3D3D5C"/><Setter Property="Foreground" Value="#AAAACC"/><Setter Property="Padding" Value="16,12"/><Setter Property="BorderThickness" Value="0"/></Style></DataGrid.ColumnHeaderStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Detected" Binding="{Binding DetectedAt, StringFormat='{}{0:dd MMM HH:mm}'}" Width="140"/>
+                            <DataGridTextColumn Header="Entity" Binding="{Binding EntityType}" Width="120"/>
+                            <DataGridTextColumn Header="Record" Binding="{Binding RecordIdentifier}" Width="*"/>
+                            <DataGridTextColumn Header="Type" Binding="{Binding ConflictType}" Width="120"/>
+                            <DataGridTextColumn Header="Source" Binding="{Binding SourceDevice}" Width="120"/>
+                            <DataGridTemplateColumn Header="Actions" Width="220">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="View" Command="{Binding DataContext.ViewConflictCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" Background="#4F46E5" Foreground="White" Padding="8,4" Margin="0,0,4,0" BorderThickness="0" Cursor="Hand"/>
+                                            <Button Content="Local" Command="{Binding DataContext.KeepLocalCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" Background="#0284C7" Foreground="White" Padding="8,4" Margin="0,0,4,0" BorderThickness="0" Cursor="Hand"/>
+                                            <Button Content="Remote" Command="{Binding DataContext.KeepRemoteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" Background="#059669" Foreground="White" Padding="8,4" BorderThickness="0" Cursor="Hand"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+            </TabItem>
+            <TabItem Header="Conflict Details">
+                <Border Background="#2D2D44" CornerRadius="0,8,8,8">
+                    <Grid Margin="16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,8,0">
+                            <TextBlock Text="Local Version" FontSize="18" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
+                            <Border Background="#353550" CornerRadius="8" Padding="16">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding ConflictDetails.LocalModifiedAt, StringFormat='Modified: {0:dd MMM yyyy HH:mm}'}" Foreground="#9CA3AF" Margin="0,0,0,8"/>
+                                    <TextBlock Text="{Binding ConflictDetails.LocalModifiedBy, StringFormat='By: {0}'}" Foreground="#9CA3AF" Margin="0,0,0,16"/>
+                                    <ItemsControl ItemsSource="{Binding ConflictDetails.LocalFields}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#2D2D44" CornerRadius="4" Padding="12,8" Margin="0,0,0,4">
+                                                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding FieldName, StringFormat='{0}:'}" Foreground="#9CA3AF" Width="120"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding Value}" Foreground="White" TextWrapping="Wrap"/>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                            <Button Content="Keep Local Version" Command="{Binding KeepLocalVersionCommand}" Background="#0284C7" Foreground="White" Padding="24,12" Margin="0,16,0,0" BorderThickness="0" Cursor="Hand" HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                            <TextBlock Text="Remote Version" FontSize="18" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
+                            <Border Background="#353550" CornerRadius="8" Padding="16">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding ConflictDetails.RemoteModifiedAt, StringFormat='Modified: {0:dd MMM yyyy HH:mm}'}" Foreground="#9CA3AF" Margin="0,0,0,8"/>
+                                    <TextBlock Text="{Binding ConflictDetails.RemoteModifiedBy, StringFormat='By: {0}'}" Foreground="#9CA3AF" Margin="0,0,0,16"/>
+                                    <ItemsControl ItemsSource="{Binding ConflictDetails.RemoteFields}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#2D2D44" CornerRadius="4" Padding="12,8" Margin="0,0,0,4">
+                                                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding FieldName, StringFormat='{0}:'}" Foreground="#9CA3AF" Width="120"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding Value}" Foreground="White" TextWrapping="Wrap"/>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                            <Button Content="Keep Remote Version" Command="{Binding KeepRemoteVersionCommand}" Background="#059669" Foreground="White" Padding="24,12" Margin="0,16,0,0" BorderThickness="0" Cursor="Hand" HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </TabItem>
+            <TabItem Header="Resolution History">
+                <Border Background="#2D2D44" CornerRadius="0,8,8,8">
+                    <DataGrid ItemsSource="{Binding ResolutionHistory}" AutoGenerateColumns="False" Background="Transparent" Foreground="White" BorderThickness="0" RowBackground="#2D2D44" AlternatingRowBackground="#353550" CanUserAddRows="False" IsReadOnly="True" RowHeight="48" Margin="16">
+                        <DataGrid.ColumnHeaderStyle><Style TargetType="DataGridColumnHeader"><Setter Property="Background" Value="#3D3D5C"/><Setter Property="Foreground" Value="#AAAACC"/><Setter Property="Padding" Value="16,12"/><Setter Property="BorderThickness" Value="0"/></Style></DataGrid.ColumnHeaderStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Resolved At" Binding="{Binding ResolvedAt, StringFormat='{}{0:dd MMM HH:mm}'}" Width="140"/>
+                            <DataGridTextColumn Header="Entity" Binding="{Binding EntityType}" Width="120"/>
+                            <DataGridTextColumn Header="Record" Binding="{Binding RecordIdentifier}" Width="*"/>
+                            <DataGridTextColumn Header="Resolution" Binding="{Binding ResolutionType}" Width="120"/>
+                            <DataGridTextColumn Header="Resolved By" Binding="{Binding ResolvedBy}" Width="120"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+            </TabItem>
+        </TabControl>
+        <Border Grid.RowSpan="3" Background="#80000000" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisConverter}}" Panel.ZIndex="100">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"><ProgressBar IsIndeterminate="True" Width="150" Height="4" Foreground="#4F46E5"/><TextBlock Text="Loading..." Foreground="White" FontSize="14" Margin="0,12,0,0" HorizontalAlignment="Center"/></StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
