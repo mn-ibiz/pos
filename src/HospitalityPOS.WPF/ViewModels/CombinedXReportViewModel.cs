@@ -159,8 +159,24 @@ public partial class CombinedXReportViewModel : ObservableObject, INavigationAwa
     {
         try
         {
-            // TODO: Implement export functionality
-            await _dialogService.ShowMessageAsync("Export", "Export functionality will be implemented in MT-025.");
+            // Show format selection dialog
+            var format = await _dialogService.ShowExportFormatDialogAsync();
+            if (format == null) return; // User cancelled
+
+            using var scope = _scopeFactory.CreateScope();
+            var combinedReportService = scope.ServiceProvider.GetRequiredService<ICombinedReportService>();
+            var reportExportService = scope.ServiceProvider.GetRequiredService<IReportExportService>();
+
+            // Get fresh report data
+            var report = await combinedReportService.GenerateCombinedXReportAsync();
+
+            // Export the report
+            var exportedPath = await reportExportService.ExportCombinedXReportAsync(report, format.Value);
+
+            if (!string.IsNullOrEmpty(exportedPath))
+            {
+                await _dialogService.ShowMessageAsync("Export Complete", $"Report exported to:\n{exportedPath}");
+            }
         }
         catch (Exception ex)
         {

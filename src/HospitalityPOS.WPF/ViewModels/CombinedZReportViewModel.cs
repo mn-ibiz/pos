@@ -128,8 +128,37 @@ public partial class CombinedZReportViewModel : ObservableObject, INavigationAwa
     {
         try
         {
-            // TODO: Implement export functionality
-            await _dialogService.ShowMessageAsync("Export", "Export functionality will be implemented in MT-025.");
+            // Show format selection dialog
+            var format = await _dialogService.ShowExportFormatDialogAsync();
+            if (format == null) return; // User cancelled
+
+            using var scope = _scopeFactory.CreateScope();
+            var combinedReportService = scope.ServiceProvider.GetRequiredService<ICombinedReportService>();
+            var reportExportService = scope.ServiceProvider.GetRequiredService<IReportExportService>();
+
+            // Get current work period if not set
+            if (_workPeriodId == 0)
+            {
+                var workPeriodService = scope.ServiceProvider.GetRequiredService<IWorkPeriodService>();
+                var currentWorkPeriod = await workPeriodService.GetCurrentWorkPeriodAsync();
+                if (currentWorkPeriod == null)
+                {
+                    await _dialogService.ShowErrorAsync("No active work period found.");
+                    return;
+                }
+                _workPeriodId = currentWorkPeriod.Id;
+            }
+
+            // Get preview data
+            var preview = await combinedReportService.PreviewCombinedZReportAsync(_workPeriodId);
+
+            // Export the report
+            var exportedPath = await reportExportService.ExportCombinedZReportAsync(preview, format.Value);
+
+            if (!string.IsNullOrEmpty(exportedPath))
+            {
+                await _dialogService.ShowMessageAsync("Export Complete", $"Report exported to:\n{exportedPath}");
+            }
         }
         catch (Exception ex)
         {

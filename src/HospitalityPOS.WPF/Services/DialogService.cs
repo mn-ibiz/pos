@@ -1018,4 +1018,25 @@ public class DialogService : IDialogService
 
         return Task.FromResult(result);
     }
+
+    public async Task<HospitalityPOS.Core.Enums.ExportFormat?> ShowExportFormatDialogAsync()
+    {
+        // Use action sheet to select export format
+        var selected = await ShowActionSheetAsync(
+            "Export Report",
+            "Select export format:",
+            "Cancel",
+            null,
+            "CSV (Spreadsheet)",
+            "Excel",
+            "HTML (Printable)");
+
+        return selected switch
+        {
+            "CSV (Spreadsheet)" => HospitalityPOS.Core.Enums.ExportFormat.Csv,
+            "Excel" => HospitalityPOS.Core.Enums.ExportFormat.Excel,
+            "HTML (Printable)" => HospitalityPOS.Core.Enums.ExportFormat.Pdf,
+            _ => null
+        };
+    }
 }

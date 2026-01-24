@@ -397,6 +397,12 @@ public interface IDialogService
     /// <returns>The expense budget if saved, null if cancelled.</returns>
     Task<HospitalityPOS.Core.Entities.ExpenseBudget?> ShowExpenseBudgetEditorDialogAsync(
         HospitalityPOS.Core.Entities.ExpenseBudget? existingBudget);
+
+    /// <summary>
+    /// Shows a dialog for selecting an export format (CSV, Excel, PDF).
+    /// </summary>
+    /// <returns>The selected export format, or null if cancelled.</returns>
+    Task<HospitalityPOS.Core.Enums.ExportFormat?> ShowExportFormatDialogAsync();
 }
 
 /// <summary>

@@ -296,6 +296,7 @@ public static class ServiceCollectionExtensions
 
         // Export Service
         services.AddScoped<IExportService, ExportService>();
+        services.AddScoped<IReportExportService, ReportExportService>();
 
         // Printer Service
         services.AddScoped<IPrinterService, PrinterService>();
