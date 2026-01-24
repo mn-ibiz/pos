@@ -19,12 +19,30 @@ public interface IZReportService
     Task<ZReportPreview> PreviewZReportAsync(int workPeriodId, CancellationToken ct = default);
 
     /// <summary>
+    /// Generates a preview of the Z Report for a specific terminal.
+    /// </summary>
+    /// <param name="workPeriodId">The work period to preview.</param>
+    /// <param name="terminalId">The terminal ID.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Preview data including sales summary, validation issues, and expected values.</returns>
+    Task<ZReportPreview> PreviewZReportForTerminalAsync(int workPeriodId, int terminalId, CancellationToken ct = default);
+
+    /// <summary>
     /// Validates whether a Z Report can be generated for the specified work period.
     /// </summary>
     /// <param name="workPeriodId">The work period to validate.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Validation result with any blocking or warning issues.</returns>
     Task<ZReportValidationResult> ValidateCanGenerateAsync(int workPeriodId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Validates whether a Z Report can be generated for a specific terminal's work period.
+    /// </summary>
+    /// <param name="workPeriodId">The work period to validate.</param>
+    /// <param name="terminalId">The terminal ID.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Validation result with any blocking or warning issues.</returns>
+    Task<ZReportValidationResult> ValidateCanGenerateForTerminalAsync(int workPeriodId, int terminalId, CancellationToken ct = default);
 
     #endregion
 
@@ -42,6 +60,25 @@ public interface IZReportService
     /// <returns>The generated and finalized Z Report record.</returns>
     Task<ZReportRecord> GenerateZReportAsync(
         int workPeriodId,
+        decimal actualCashCounted,
+        int generatedByUserId,
+        string? varianceExplanation = null,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Generates and finalizes a Z Report for a specific terminal's work period.
+    /// This action is permanent - the report becomes immutable once generated.
+    /// </summary>
+    /// <param name="workPeriodId">The work period to close and report on.</param>
+    /// <param name="terminalId">The terminal ID.</param>
+    /// <param name="actualCashCounted">The actual cash amount counted in the drawer.</param>
+    /// <param name="generatedByUserId">The user generating the report.</param>
+    /// <param name="varianceExplanation">Optional explanation for any cash variance.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The generated and finalized Z Report record.</returns>
+    Task<ZReportRecord> GenerateZReportForTerminalAsync(
+        int workPeriodId,
+        int terminalId,
         decimal actualCashCounted,
         int generatedByUserId,
         string? varianceExplanation = null,
@@ -131,6 +168,16 @@ public interface IZReportService
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The next report number.</returns>
     Task<int> GetNextReportNumberAsync(int? storeId = null, CancellationToken ct = default);
+
+    /// <summary>
+    /// Generates a formatted report number for Z Reports.
+    /// Format: Z-YYYY-TID-NNNN (e.g., Z-2024-001-0042).
+    /// </summary>
+    /// <param name="terminalId">The terminal ID.</param>
+    /// <param name="sequentialNumber">The sequential report number.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The formatted report number string.</returns>
+    Task<string> GenerateFormattedReportNumberAsync(int terminalId, int sequentialNumber, CancellationToken ct = default);
 
     /// <summary>
     /// Gets the total count of Z Reports matching the filter.

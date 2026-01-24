@@ -26,9 +26,19 @@ public class ZReportRecord : BaseEntity
     public int? TerminalId { get; set; }
 
     /// <summary>
+    /// Terminal code for denormalization (e.g., "REG-001").
+    /// </summary>
+    public string? TerminalCode { get; set; }
+
+    /// <summary>
     /// Associated work period ID.
     /// </summary>
     public int WorkPeriodId { get; set; }
+
+    /// <summary>
+    /// Formatted report number (Z-YYYY-TID-NNNN format).
+    /// </summary>
+    public string? ReportNumberFormatted { get; set; }
 
     /// <summary>
     /// When the Z Report was generated.
@@ -243,6 +253,12 @@ public class ZReportRecord : BaseEntity
     /// </summary>
     public string ReportDataJson { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Cashier session breakdown data serialized as JSON.
+    /// Contains session start/end times, sales, payments per cashier.
+    /// </summary>
+    public string? CashierSessionsJson { get; set; }
+
     #endregion
 
     #region Business Information (Denormalized for Report Permanence)
@@ -272,6 +288,7 @@ public class ZReportRecord : BaseEntity
     #region Navigation Properties
 
     public virtual WorkPeriod WorkPeriod { get; set; } = null!;
+    public virtual Terminal? Terminal { get; set; }
     public virtual User GeneratedByUser { get; set; } = null!;
     public virtual User? VarianceApprovedByUser { get; set; }
     public virtual ICollection<ZReportCategorySales> CategorySales { get; set; } = new List<ZReportCategorySales>();
@@ -617,6 +634,8 @@ public class ZReportFilterDto
 public class ZReportPreview
 {
     public int WorkPeriodId { get; set; }
+    public int? TerminalId { get; set; }
+    public string? TerminalCode { get; set; }
     public DateTime PeriodStartDateTime { get; set; }
     public DateTime? PeriodEndDateTime { get; set; }
     public string OpenedByUserName { get; set; } = string.Empty;
@@ -652,6 +671,30 @@ public class ZReportPreview
     public List<CategorySalesSummaryDto> CategorySales { get; set; } = [];
     public List<PaymentSummaryDto> PaymentSummaries { get; set; } = [];
     public List<UserSalesSummaryDto> UserSales { get; set; } = [];
+    public List<CashierSessionBreakdown> CashierSessions { get; set; } = [];
+}
+
+/// <summary>
+/// Cashier session breakdown for Z Report.
+/// </summary>
+public class CashierSessionBreakdown
+{
+    public int UserId { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public int SessionId { get; set; }
+    public DateTime SessionStart { get; set; }
+    public DateTime? SessionEnd { get; set; }
+    public TimeSpan Duration => (SessionEnd ?? DateTime.UtcNow) - SessionStart;
+    public int TransactionCount { get; set; }
+    public decimal GrossSales { get; set; }
+    public decimal NetSales { get; set; }
+    public decimal CashPayments { get; set; }
+    public decimal CardPayments { get; set; }
+    public decimal OtherPayments { get; set; }
+    public int VoidCount { get; set; }
+    public decimal VoidAmount { get; set; }
+    public int RefundCount { get; set; }
+    public decimal RefundAmount { get; set; }
 }
 
 /// <summary>
@@ -736,6 +779,7 @@ public class ZReportScheduleDto
 public class GenerateZReportRequest
 {
     public int WorkPeriodId { get; set; }
+    public int? TerminalId { get; set; }
     public decimal ActualCashCounted { get; set; }
     public string? VarianceExplanation { get; set; }
     public bool ForceGenerate { get; set; }
@@ -749,6 +793,9 @@ public class ZReportSummaryDto
 {
     public int Id { get; set; }
     public int ReportNumber { get; set; }
+    public string? ReportNumberFormatted { get; set; }
+    public int? TerminalId { get; set; }
+    public string? TerminalCode { get; set; }
     public DateTime ReportDateTime { get; set; }
     public DateTime PeriodStartDateTime { get; set; }
     public DateTime PeriodEndDateTime { get; set; }

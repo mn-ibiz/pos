@@ -19,15 +19,18 @@ public class ZReportService : IZReportService
     private readonly POSDbContext _context;
     private readonly ILogger _logger;
     private readonly IWorkPeriodService _workPeriodService;
+    private readonly ITerminalSessionContext _terminalContext;
 
     public ZReportService(
         POSDbContext context,
         ILogger logger,
-        IWorkPeriodService workPeriodService)
+        IWorkPeriodService workPeriodService,
+        ITerminalSessionContext terminalContext)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _workPeriodService = workPeriodService ?? throw new ArgumentNullException(nameof(workPeriodService));
+        _terminalContext = terminalContext ?? throw new ArgumentNullException(nameof(terminalContext));
     }
 
     #region Preview & Validation
@@ -143,8 +146,141 @@ public class ZReportService : IZReportService
             .OrderByDescending(u => u.TotalSales)
             .ToList();
 
+        // Cashier session breakdown
+        preview.CashierSessions = await BuildCashierSessionBreakdownAsync(workPeriodId, null, ct);
+
         // Validation
         var validation = await ValidateCanGenerateAsync(workPeriodId, ct);
+        preview.ValidationIssues = validation.Issues;
+
+        return preview;
+    }
+
+    public async Task<ZReportPreview> PreviewZReportForTerminalAsync(int workPeriodId, int terminalId, CancellationToken ct = default)
+    {
+        var terminal = await _context.Terminals
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == terminalId, ct);
+
+        if (terminal == null)
+            throw new InvalidOperationException($"Terminal {terminalId} not found.");
+
+        var workPeriod = await _context.WorkPeriods
+            .AsNoTracking()
+            .Include(wp => wp.OpenedByUser)
+            .FirstOrDefaultAsync(wp => wp.Id == workPeriodId, ct);
+
+        if (workPeriod == null)
+            throw new InvalidOperationException($"Work period {workPeriodId} not found.");
+
+        var preview = new ZReportPreview
+        {
+            WorkPeriodId = workPeriodId,
+            TerminalId = terminalId,
+            TerminalCode = terminal.Code,
+            PeriodStartDateTime = workPeriod.OpenedAt,
+            PeriodEndDateTime = workPeriod.ClosedAt,
+            OpenedByUserName = workPeriod.OpenedByUser?.FullName ?? "Unknown",
+            Duration = (workPeriod.ClosedAt ?? DateTime.UtcNow) - workPeriod.OpenedAt,
+            OpeningCash = workPeriod.OpeningFloat
+        };
+
+        // Get receipts for the work period filtered by terminal
+        var receipts = await _context.Receipts
+            .AsNoTracking()
+            .Include(r => r.Owner)
+            .Include(r => r.Payments)
+                .ThenInclude(p => p.PaymentMethod)
+            .Include(r => r.Order)
+                .ThenInclude(o => o!.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .ThenInclude(p => p!.Category)
+            .Where(r => r.WorkPeriodId == workPeriodId && r.TerminalId == terminalId)
+            .ToListAsync(ct);
+
+        var settledReceipts = receipts.Where(r => r.Status == ReceiptStatus.Settled).ToList();
+        var voidedReceipts = receipts.Where(r => r.Status == ReceiptStatus.Voided).ToList();
+        var refundedReceipts = receipts.Where(r => r.TotalAmount < 0).ToList();
+
+        // Calculate sales summary
+        preview.GrossSales = settledReceipts.Sum(r => r.Subtotal);
+        preview.TotalDiscounts = settledReceipts.Sum(r => r.DiscountAmount);
+        preview.NetSales = preview.GrossSales - preview.TotalDiscounts;
+        preview.TotalTax = settledReceipts.Sum(r => r.TaxAmount);
+        preview.TotalTips = settledReceipts.Sum(r => r.TipAmount);
+        preview.TotalRefunds = Math.Abs(refundedReceipts.Sum(r => r.TotalAmount));
+        preview.TotalVoids = voidedReceipts.Sum(r => r.TotalAmount);
+        preview.GrandTotal = settledReceipts.Sum(r => r.TotalAmount);
+
+        // Transaction stats
+        preview.TransactionCount = settledReceipts.Count;
+        preview.VoidCount = voidedReceipts.Count;
+        preview.RefundCount = refundedReceipts.Count;
+        preview.AverageTransactionValue = preview.TransactionCount > 0
+            ? preview.GrandTotal / preview.TransactionCount
+            : 0;
+
+        // Cash calculations
+        var cashPayments = settledReceipts
+            .SelectMany(r => r.Payments)
+            .Where(p => p.PaymentMethod?.Type == PaymentMethodType.Cash)
+            .Sum(p => p.Amount);
+
+        var cashPayouts = await _context.CashPayouts
+            .Where(p => p.WorkPeriodId == workPeriodId && p.Status == PayoutStatus.Approved)
+            .SumAsync(p => p.Amount, ct);
+
+        preview.CashReceived = cashPayments;
+        preview.CashPaidOut = cashPayouts;
+        preview.ExpectedCash = preview.OpeningCash + preview.CashReceived - preview.CashPaidOut;
+
+        // Category breakdown
+        preview.CategorySales = settledReceipts
+            .SelectMany(r => r.Order?.OrderItems ?? [])
+            .GroupBy(oi => new { Id = oi.Product?.CategoryId, Name = oi.Product?.Category?.Name ?? "Uncategorized" })
+            .Select(g => new CategorySalesSummaryDto
+            {
+                CategoryId = g.Key.Id,
+                CategoryName = g.Key.Name,
+                QuantitySold = (int)Math.Round(g.Sum(oi => oi.Quantity)),
+                GrossAmount = g.Sum(oi => oi.TotalAmount),
+                NetAmount = g.Sum(oi => oi.TotalAmount - oi.DiscountAmount)
+            })
+            .OrderByDescending(c => c.NetAmount)
+            .ToList();
+
+        // Payment breakdown
+        preview.PaymentSummaries = settledReceipts
+            .SelectMany(r => r.Payments)
+            .GroupBy(p => new { Id = p.PaymentMethodId, Name = p.PaymentMethod?.Name ?? "Unknown" })
+            .Select(g => new PaymentSummaryDto
+            {
+                PaymentMethodId = g.Key.Id,
+                PaymentMethodName = g.Key.Name,
+                TransactionCount = g.Count(),
+                TotalAmount = g.Sum(p => p.Amount)
+            })
+            .OrderByDescending(p => p.TotalAmount)
+            .ToList();
+
+        // User breakdown
+        preview.UserSales = settledReceipts
+            .GroupBy(r => new { Id = r.OwnerId, Name = r.Owner?.FullName ?? "Unknown" })
+            .Select(g => new UserSalesSummaryDto
+            {
+                UserId = g.Key.Id,
+                UserName = g.Key.Name,
+                TransactionCount = g.Count(),
+                TotalSales = g.Sum(r => r.TotalAmount)
+            })
+            .OrderByDescending(u => u.TotalSales)
+            .ToList();
+
+        // Cashier session breakdown for this terminal
+        preview.CashierSessions = await BuildCashierSessionBreakdownAsync(workPeriodId, terminalId, ct);
+
+        // Validation
+        var validation = await ValidateCanGenerateForTerminalAsync(workPeriodId, terminalId, ct);
         preview.ValidationIssues = validation.Issues;
 
         return preview;
@@ -245,6 +381,132 @@ public class ZReportService : IZReportService
         return result;
     }
 
+    public async Task<ZReportValidationResult> ValidateCanGenerateForTerminalAsync(int workPeriodId, int terminalId, CancellationToken ct = default)
+    {
+        var result = new ZReportValidationResult { CanGenerate = true };
+
+        var terminal = await _context.Terminals
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == terminalId, ct);
+
+        if (terminal == null)
+        {
+            result.CanGenerate = false;
+            result.Issues.Add(new ZReportValidationIssue
+            {
+                Code = "TERMINAL_NOT_FOUND",
+                Message = "Terminal not found.",
+                IsBlocking = true
+            });
+            return result;
+        }
+
+        var workPeriod = await _context.WorkPeriods
+            .AsNoTracking()
+            .FirstOrDefaultAsync(wp => wp.Id == workPeriodId, ct);
+
+        if (workPeriod == null)
+        {
+            result.CanGenerate = false;
+            result.Issues.Add(new ZReportValidationIssue
+            {
+                Code = "WORK_PERIOD_NOT_FOUND",
+                Message = "Work period not found.",
+                IsBlocking = true
+            });
+            return result;
+        }
+
+        // Verify work period belongs to this terminal
+        if (workPeriod.TerminalId != terminalId)
+        {
+            result.CanGenerate = false;
+            result.Issues.Add(new ZReportValidationIssue
+            {
+                Code = "WORK_PERIOD_TERMINAL_MISMATCH",
+                Message = $"Work period {workPeriodId} does not belong to terminal {terminal.Code}.",
+                IsBlocking = true
+            });
+            return result;
+        }
+
+        // Check if Z Report already exists for this terminal's work period
+        var existingReport = await _context.Set<ZReportRecord>()
+            .AnyAsync(z => z.WorkPeriodId == workPeriodId && z.TerminalId == terminalId && z.IsFinalized, ct);
+
+        if (existingReport)
+        {
+            result.CanGenerate = false;
+            result.HasPreviousPendingReport = true;
+            result.Issues.Add(new ZReportValidationIssue
+            {
+                Code = "REPORT_EXISTS",
+                Message = $"A Z Report has already been generated for terminal {terminal.Code} for this work period.",
+                IsBlocking = true
+            });
+            return result;
+        }
+
+        // Check for unsettled receipts on this terminal
+        var unsettledReceipts = await _context.Receipts
+            .CountAsync(r => r.WorkPeriodId == workPeriodId &&
+                           r.TerminalId == terminalId &&
+                           (r.Status == ReceiptStatus.Open || r.Status == ReceiptStatus.Pending), ct);
+
+        if (unsettledReceipts > 0)
+        {
+            result.HasUnsettledReceipts = true;
+            result.UnsettledReceiptCount = unsettledReceipts;
+            result.Issues.Add(new ZReportValidationIssue
+            {
+                Code = "UNSETTLED_RECEIPTS",
+                Message = $"There are {unsettledReceipts} unsettled receipt(s) on terminal {terminal.Code}. Please settle or void them before generating the Z Report.",
+                IsBlocking = true,
+                Resolution = "Go to the receipts view and settle or void all open receipts."
+            });
+        }
+
+        // Check for open orders on this terminal
+        var openOrders = await _context.Orders
+            .CountAsync(o => o.WorkPeriodId == workPeriodId &&
+                            o.TerminalId == terminalId &&
+                            o.Status != OrderStatus.Completed &&
+                            o.Status != OrderStatus.Cancelled, ct);
+
+        if (openOrders > 0)
+        {
+            result.HasOpenOrders = true;
+            result.OpenOrderCount = openOrders;
+            result.Issues.Add(new ZReportValidationIssue
+            {
+                Code = "OPEN_ORDERS",
+                Message = $"There are {openOrders} open order(s) on terminal {terminal.Code}. Please complete or cancel them before generating the Z Report.",
+                IsBlocking = true,
+                Resolution = "Go to the orders view and complete or cancel all open orders."
+            });
+        }
+
+        // Cash count check (warning only if work period still open)
+        if (workPeriod.Status == WorkPeriodStatus.Open)
+        {
+            result.IsCashCounted = false;
+            result.Issues.Add(new ZReportValidationIssue
+            {
+                Code = "CASH_NOT_COUNTED",
+                Message = "Cash has not been counted yet. You will need to count cash when generating the Z Report.",
+                IsBlocking = false,
+                Resolution = "Count the cash drawer when generating the report."
+            });
+        }
+        else
+        {
+            result.IsCashCounted = workPeriod.ClosingCash.HasValue;
+        }
+
+        result.CanGenerate = !result.Issues.Any(i => i.IsBlocking);
+        return result;
+    }
+
     #endregion
 
     #region Generation
@@ -296,6 +558,17 @@ public class ZReportService : IZReportService
         // Get next report number
         var reportNumber = await GetNextReportNumberAsync(null, ct);
 
+        // Get terminal info from context or work period
+        var terminalId = _terminalContext.CurrentTerminalId ?? workPeriod.TerminalId;
+        var terminalCode = _terminalContext.CurrentTerminalCode ?? workPeriod.TerminalCode;
+
+        // Generate formatted report number
+        string? formattedReportNumber = null;
+        if (terminalId.HasValue)
+        {
+            formattedReportNumber = await GenerateFormattedReportNumberAsync(terminalId.Value, reportNumber, ct);
+        }
+
         // Calculate all report data
         var receipts = await _context.Receipts
             .AsNoTracking()
@@ -333,10 +606,17 @@ public class ZReportService : IZReportService
              (threshold.PercentageThreshold.HasValue && expectedCash > 0 &&
               Math.Abs(cashVariance / expectedCash * 100) >= threshold.PercentageThreshold.Value));
 
+        // Build cashier sessions breakdown
+        var cashierSessions = await BuildCashierSessionBreakdownAsync(workPeriodId, terminalId, ct);
+        var cashierSessionsJson = JsonSerializer.Serialize(cashierSessions);
+
         // Create Z Report record
         var zReportRecord = new ZReportRecord
         {
             ReportNumber = reportNumber,
+            ReportNumberFormatted = formattedReportNumber,
+            TerminalId = terminalId,
+            TerminalCode = terminalCode,
             WorkPeriodId = workPeriodId,
             ReportDateTime = DateTime.UtcNow,
             PeriodStartDateTime = workPeriod.OpenedAt,
@@ -391,6 +671,7 @@ public class ZReportService : IZReportService
         // Store full report data as JSON
         var fullReportData = await BuildFullReportDataAsync(workPeriodId, settledReceipts, voidedReceipts, ct);
         zReportRecord.ReportDataJson = JsonSerializer.Serialize(fullReportData);
+        zReportRecord.CashierSessionsJson = cashierSessionsJson;
 
         await _context.Set<ZReportRecord>().AddAsync(zReportRecord, ct);
         await _context.SaveChangesAsync(ct);
@@ -524,6 +805,275 @@ public class ZReportService : IZReportService
         _logger.Information(
             "Z-Report #{ReportNumber} generated for work period {WorkPeriodId}. Total: {GrandTotal:C}, Variance: {Variance:C}",
             reportNumber, workPeriodId, zReportRecord.GrandTotal, cashVariance);
+
+        return zReportRecord;
+    }
+
+    public async Task<ZReportRecord> GenerateZReportForTerminalAsync(
+        int workPeriodId,
+        int terminalId,
+        decimal actualCashCounted,
+        int generatedByUserId,
+        string? varianceExplanation = null,
+        CancellationToken ct = default)
+    {
+        // Validate for specific terminal
+        var validation = await ValidateCanGenerateForTerminalAsync(workPeriodId, terminalId, ct);
+        if (!validation.CanGenerate)
+        {
+            var blockingIssues = string.Join("; ", validation.Issues.Where(i => i.IsBlocking).Select(i => i.Message));
+            throw new InvalidOperationException($"Cannot generate Z Report for terminal: {blockingIssues}");
+        }
+
+        var terminal = await _context.Terminals
+            .AsNoTracking()
+            .FirstAsync(t => t.Id == terminalId, ct);
+
+        var workPeriod = await _context.WorkPeriods
+            .Include(wp => wp.OpenedByUser)
+            .Include(wp => wp.ClosedByUser)
+            .FirstOrDefaultAsync(wp => wp.Id == workPeriodId, ct);
+
+        if (workPeriod == null)
+            throw new InvalidOperationException($"Work period {workPeriodId} not found.");
+
+        var generatingUser = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == generatedByUserId, ct);
+
+        // If work period is still open, close it
+        if (workPeriod.Status == WorkPeriodStatus.Open)
+        {
+            await _workPeriodService.CloseWorkPeriodAsync(actualCashCounted, generatedByUserId, varianceExplanation, ct);
+            workPeriod = await _context.WorkPeriods
+                .Include(wp => wp.OpenedByUser)
+                .Include(wp => wp.ClosedByUser)
+                .FirstAsync(wp => wp.Id == workPeriodId, ct);
+        }
+
+        // Get business settings
+        var businessName = await GetSystemSettingAsync("BusinessName", "Hospitality POS", ct);
+        var businessAddress = await GetSystemSettingAsync("BusinessAddress", "", ct);
+        var businessPhone = await GetSystemSettingAsync("BusinessPhone", "", ct);
+        var taxId = await GetSystemSettingAsync("TaxId", "", ct);
+
+        // Get next report number
+        var reportNumber = await GetNextReportNumberAsync(null, ct);
+        var formattedReportNumber = await GenerateFormattedReportNumberAsync(terminalId, reportNumber, ct);
+
+        // Get receipts filtered by terminal
+        var receipts = await _context.Receipts
+            .AsNoTracking()
+            .Include(r => r.Owner)
+            .Include(r => r.VoidedByUser)
+            .Include(r => r.Payments)
+                .ThenInclude(p => p.PaymentMethod)
+            .Include(r => r.Order)
+                .ThenInclude(o => o!.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .ThenInclude(p => p!.Category)
+            .Where(r => r.WorkPeriodId == workPeriodId && r.TerminalId == terminalId)
+            .ToListAsync(ct);
+
+        var settledReceipts = receipts.Where(r => r.Status == ReceiptStatus.Settled).ToList();
+        var voidedReceipts = receipts.Where(r => r.Status == ReceiptStatus.Voided).ToList();
+
+        // Calculate expected cash
+        var cashPayments = settledReceipts
+            .SelectMany(r => r.Payments)
+            .Where(p => p.PaymentMethod?.Type == PaymentMethodType.Cash)
+            .Sum(p => p.Amount);
+
+        var cashPayouts = await _context.CashPayouts
+            .Where(p => p.WorkPeriodId == workPeriodId && p.Status == PayoutStatus.Approved)
+            .SumAsync(p => p.Amount, ct);
+
+        var expectedCash = workPeriod.OpeningFloat + cashPayments - cashPayouts;
+        var cashVariance = actualCashCounted - expectedCash;
+
+        // Check variance threshold
+        var threshold = await GetVarianceThresholdAsync(null, ct);
+        var varianceRequiresApproval = threshold != null &&
+            (Math.Abs(cashVariance) >= threshold.AmountThreshold ||
+             (threshold.PercentageThreshold.HasValue && expectedCash > 0 &&
+              Math.Abs(cashVariance / expectedCash * 100) >= threshold.PercentageThreshold.Value));
+
+        // Build cashier sessions breakdown for this terminal
+        var cashierSessions = await BuildCashierSessionBreakdownAsync(workPeriodId, terminalId, ct);
+        var cashierSessionsJson = JsonSerializer.Serialize(cashierSessions);
+
+        // Create Z Report record
+        var zReportRecord = new ZReportRecord
+        {
+            ReportNumber = reportNumber,
+            ReportNumberFormatted = formattedReportNumber,
+            TerminalId = terminalId,
+            TerminalCode = terminal.Code,
+            WorkPeriodId = workPeriodId,
+            ReportDateTime = DateTime.UtcNow,
+            PeriodStartDateTime = workPeriod.OpenedAt,
+            PeriodEndDateTime = workPeriod.ClosedAt ?? DateTime.UtcNow,
+            GeneratedByUserId = generatedByUserId,
+            GeneratedByUserName = generatingUser?.FullName ?? "Unknown",
+
+            // Sales Summary
+            GrossSales = settledReceipts.Sum(r => r.Subtotal),
+            TotalDiscounts = settledReceipts.Sum(r => r.DiscountAmount),
+            NetSales = settledReceipts.Sum(r => r.Subtotal - r.DiscountAmount),
+            TotalTax = settledReceipts.Sum(r => r.TaxAmount),
+            TotalTips = settledReceipts.Sum(r => r.TipAmount),
+            TotalVoids = voidedReceipts.Sum(r => r.TotalAmount),
+            TotalRefunds = receipts.Where(r => r.TotalAmount < 0).Sum(r => Math.Abs(r.TotalAmount)),
+            GrandTotal = settledReceipts.Sum(r => r.TotalAmount),
+
+            // Cash Reconciliation
+            OpeningCash = workPeriod.OpeningFloat,
+            CashReceived = cashPayments,
+            CashPaidOut = cashPayouts,
+            ExpectedCash = expectedCash,
+            ActualCash = actualCashCounted,
+            CashVariance = cashVariance,
+            VarianceExplanation = varianceExplanation,
+            VarianceRequiresApproval = varianceRequiresApproval,
+
+            // Transaction Statistics
+            TransactionCount = settledReceipts.Count,
+            CustomerCount = settledReceipts.Count,
+            AverageTransactionValue = settledReceipts.Count > 0
+                ? settledReceipts.Sum(r => r.TotalAmount) / settledReceipts.Count
+                : 0,
+            VoidCount = voidedReceipts.Count,
+            RefundCount = receipts.Count(r => r.TotalAmount < 0),
+            DiscountCount = settledReceipts.Count(r => r.DiscountAmount > 0),
+
+            // Business Info
+            BusinessName = businessName,
+            BusinessAddress = businessAddress,
+            BusinessPhone = businessPhone,
+            TaxId = taxId,
+
+            // Finalization
+            IsFinalized = true,
+            FinalizedAt = DateTime.UtcNow
+        };
+
+        // Compute hash
+        zReportRecord.ReportHash = zReportRecord.ComputeHash();
+
+        // Store full report data as JSON
+        var fullReportData = await BuildFullReportDataAsync(workPeriodId, settledReceipts, voidedReceipts, ct);
+        zReportRecord.ReportDataJson = JsonSerializer.Serialize(fullReportData);
+        zReportRecord.CashierSessionsJson = cashierSessionsJson;
+
+        await _context.Set<ZReportRecord>().AddAsync(zReportRecord, ct);
+        await _context.SaveChangesAsync(ct);
+
+        // Add category sales breakdown
+        var categorySales = settledReceipts
+            .SelectMany(r => r.Order?.OrderItems ?? [])
+            .GroupBy(oi => new { Id = oi.Product?.CategoryId, Name = oi.Product?.Category?.Name ?? "Uncategorized" })
+            .Select(g => new ZReportCategorySales
+            {
+                ZReportRecordId = zReportRecord.Id,
+                CategoryId = g.Key.Id,
+                CategoryName = g.Key.Name,
+                QuantitySold = (int)Math.Round(g.Sum(oi => oi.Quantity)),
+                GrossAmount = g.Sum(oi => oi.TotalAmount),
+                DiscountAmount = g.Sum(oi => oi.DiscountAmount),
+                NetAmount = g.Sum(oi => oi.TotalAmount - oi.DiscountAmount),
+                TaxAmount = g.Sum(oi => oi.TaxAmount),
+                CostAmount = g.Sum(oi => oi.Quantity * (oi.Product?.CostPrice ?? 0)),
+                PercentageOfSales = zReportRecord.GrandTotal > 0
+                    ? g.Sum(oi => oi.TotalAmount) / zReportRecord.GrandTotal * 100
+                    : 0
+            })
+            .ToList();
+
+        foreach (var cs in categorySales)
+        {
+            cs.GrossProfit = cs.NetAmount - cs.CostAmount;
+        }
+
+        await _context.Set<ZReportCategorySales>().AddRangeAsync(categorySales, ct);
+
+        // Add payment breakdown
+        var paymentSummaries = settledReceipts
+            .SelectMany(r => r.Payments)
+            .GroupBy(p => new
+            {
+                Id = p.PaymentMethodId,
+                Name = p.PaymentMethod?.Name ?? "Unknown",
+                Type = p.PaymentMethod?.Type.ToString() ?? "Unknown"
+            })
+            .Select(g => new ZReportPaymentSummary
+            {
+                ZReportRecordId = zReportRecord.Id,
+                PaymentMethodId = g.Key.Id,
+                PaymentMethodName = g.Key.Name,
+                PaymentMethodType = g.Key.Type,
+                TransactionCount = g.Count(),
+                TotalAmount = g.Sum(p => p.Amount),
+                RefundAmount = g.Where(p => p.Amount < 0).Sum(p => Math.Abs(p.Amount)),
+                NetAmount = g.Sum(p => p.Amount),
+                TipAmount = g.Sum(p => p.TipAmount),
+                PercentageOfSales = zReportRecord.GrandTotal > 0
+                    ? g.Sum(p => p.Amount) / zReportRecord.GrandTotal * 100
+                    : 0
+            })
+            .ToList();
+
+        await _context.Set<ZReportPaymentSummary>().AddRangeAsync(paymentSummaries, ct);
+
+        // Add user sales breakdown
+        var userSales = settledReceipts
+            .GroupBy(r => new { Id = r.OwnerId, Name = r.Owner?.FullName ?? "Unknown" })
+            .Select(g => new ZReportUserSales
+            {
+                ZReportRecordId = zReportRecord.Id,
+                UserId = g.Key.Id,
+                UserName = g.Key.Name,
+                TransactionCount = g.Count(),
+                GrossSales = g.Sum(r => r.Subtotal),
+                DiscountAmount = g.Sum(r => r.DiscountAmount),
+                NetSales = g.Sum(r => r.TotalAmount),
+                TipAmount = g.Sum(r => r.TipAmount),
+                AverageTransaction = g.Count() > 0 ? g.Sum(r => r.TotalAmount) / g.Count() : 0,
+                VoidCount = voidedReceipts.Count(r => r.OwnerId == g.Key.Id),
+                VoidAmount = voidedReceipts.Where(r => r.OwnerId == g.Key.Id).Sum(r => r.TotalAmount),
+                RefundCount = receipts.Count(r => r.OwnerId == g.Key.Id && r.TotalAmount < 0),
+                RefundAmount = Math.Abs(receipts.Where(r => r.OwnerId == g.Key.Id && r.TotalAmount < 0).Sum(r => r.TotalAmount))
+            })
+            .ToList();
+
+        await _context.Set<ZReportUserSales>().AddRangeAsync(userSales, ct);
+        await _context.SaveChangesAsync(ct);
+
+        // Create audit log
+        var auditLog = new AuditLog
+        {
+            UserId = generatedByUserId,
+            Action = "ZReportGenerated",
+            EntityType = nameof(ZReportRecord),
+            EntityId = zReportRecord.Id,
+            NewValues = JsonSerializer.Serialize(new
+            {
+                zReportRecord.ReportNumber,
+                zReportRecord.ReportNumberFormatted,
+                TerminalCode = terminal.Code,
+                zReportRecord.GrandTotal,
+                zReportRecord.TransactionCount,
+                zReportRecord.CashVariance,
+                zReportRecord.ReportHash
+            }),
+            MachineName = Environment.MachineName,
+            CreatedAt = DateTime.UtcNow
+        };
+        await _context.AuditLogs.AddAsync(auditLog, ct);
+        await _context.SaveChangesAsync(ct);
+
+        _logger.Information(
+            "Z-Report #{ReportNumber} ({FormattedNumber}) generated for terminal {TerminalCode}, work period {WorkPeriodId}. Total: {GrandTotal:C}, Variance: {Variance:C}",
+            reportNumber, formattedReportNumber, terminal.Code, workPeriodId, zReportRecord.GrandTotal, cashVariance);
 
         return zReportRecord;
     }
@@ -729,6 +1279,9 @@ public class ZReportService : IZReportService
             {
                 Id = z.Id,
                 ReportNumber = z.ReportNumber,
+                ReportNumberFormatted = z.ReportNumberFormatted,
+                TerminalId = z.TerminalId,
+                TerminalCode = z.TerminalCode,
                 ReportDateTime = z.ReportDateTime,
                 PeriodStartDateTime = z.PeriodStartDateTime,
                 PeriodEndDateTime = z.PeriodEndDateTime,
@@ -1523,6 +2076,104 @@ public class ZReportService : IZReportService
             .FirstOrDefaultAsync(s => s.SettingKey == key, ct);
 
         return setting?.SettingValue ?? defaultValue;
+    }
+
+    public async Task<string> GenerateFormattedReportNumberAsync(int terminalId, int sequentialNumber, CancellationToken ct = default)
+    {
+        var terminal = await _context.Terminals
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == terminalId, ct);
+
+        // Extract numeric part from terminal code (e.g., "REG-001" -> "001")
+        var terminalNumericPart = "000";
+        if (terminal != null && terminal.Code != null)
+        {
+            var numericPart = new string(terminal.Code.Where(char.IsDigit).ToArray());
+            if (!string.IsNullOrEmpty(numericPart))
+            {
+                terminalNumericPart = numericPart.PadLeft(3, '0');
+            }
+        }
+
+        // Format: Z-YYYY-TID-NNNN (e.g., Z-2024-001-0042)
+        return $"Z-{DateTime.UtcNow.Year}-{terminalNumericPart}-{sequentialNumber:D4}";
+    }
+
+    private async Task<List<CashierSessionBreakdown>> BuildCashierSessionBreakdownAsync(
+        int workPeriodId,
+        int? terminalId,
+        CancellationToken ct)
+    {
+        // Get work period sessions
+        var sessionsQuery = _context.Set<WorkPeriodSession>()
+            .AsNoTracking()
+            .Include(s => s.User)
+            .Where(s => s.WorkPeriodId == workPeriodId);
+
+        var sessions = await sessionsQuery.ToListAsync(ct);
+
+        // Get receipts for the work period (optionally filtered by terminal)
+        var receiptsQuery = _context.Receipts
+            .AsNoTracking()
+            .Include(r => r.Payments)
+                .ThenInclude(p => p.PaymentMethod)
+            .Where(r => r.WorkPeriodId == workPeriodId);
+
+        if (terminalId.HasValue)
+        {
+            receiptsQuery = receiptsQuery.Where(r => r.TerminalId == terminalId);
+        }
+
+        var receipts = await receiptsQuery.ToListAsync(ct);
+
+        // Group receipts by owner (cashier)
+        var receiptsByOwner = receipts
+            .GroupBy(r => r.OwnerId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var breakdowns = new List<CashierSessionBreakdown>();
+
+        foreach (var session in sessions)
+        {
+            var userReceipts = receiptsByOwner.GetValueOrDefault(session.UserId, []);
+
+            // Filter receipts within session timeframe
+            var sessionReceipts = userReceipts
+                .Where(r => r.CreatedAt >= session.LoggedInAt &&
+                           (session.LoggedOutAt == null || r.CreatedAt <= session.LoggedOutAt))
+                .ToList();
+
+            var settledReceipts = sessionReceipts.Where(r => r.Status == ReceiptStatus.Settled).ToList();
+            var voidedReceipts = sessionReceipts.Where(r => r.Status == ReceiptStatus.Voided).ToList();
+            var refundedReceipts = sessionReceipts.Where(r => r.TotalAmount < 0).ToList();
+
+            var payments = settledReceipts.SelectMany(r => r.Payments).ToList();
+            var cashPayments = payments.Where(p => p.PaymentMethod?.Type == PaymentMethodType.Cash).Sum(p => p.Amount);
+            var cardPayments = payments.Where(p => p.PaymentMethod?.Type == PaymentMethodType.Card).Sum(p => p.Amount);
+            var otherPayments = payments.Where(p => p.PaymentMethod?.Type != PaymentMethodType.Cash &&
+                                                    p.PaymentMethod?.Type != PaymentMethodType.Card).Sum(p => p.Amount);
+
+            breakdowns.Add(new CashierSessionBreakdown
+            {
+                UserId = session.UserId,
+                UserName = session.User?.FullName ?? "Unknown",
+                SessionId = session.Id,
+                SessionStart = session.LoggedInAt,
+                SessionEnd = session.LoggedOutAt,
+                TransactionCount = settledReceipts.Count,
+                GrossSales = settledReceipts.Sum(r => r.Subtotal),
+                NetSales = settledReceipts.Sum(r => r.TotalAmount),
+                CashPayments = cashPayments,
+                CardPayments = cardPayments,
+                OtherPayments = otherPayments,
+                VoidCount = voidedReceipts.Count,
+                VoidAmount = voidedReceipts.Sum(r => r.TotalAmount),
+                RefundCount = refundedReceipts.Count,
+                RefundAmount = Math.Abs(refundedReceipts.Sum(r => r.TotalAmount))
+            });
+        }
+
+        return breakdowns.OrderBy(b => b.SessionStart).ToList();
     }
 
     #endregion

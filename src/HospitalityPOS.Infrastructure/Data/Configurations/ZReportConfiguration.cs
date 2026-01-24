@@ -19,6 +19,12 @@ public class ZReportRecordConfiguration : IEntityTypeConfiguration<ZReportRecord
         builder.Property(e => e.ReportNumber)
             .IsRequired();
 
+        builder.Property(e => e.ReportNumberFormatted)
+            .HasMaxLength(30);
+
+        builder.Property(e => e.TerminalCode)
+            .HasMaxLength(20);
+
         builder.Property(e => e.ReportDateTime)
             .IsRequired();
 
@@ -115,7 +121,16 @@ public class ZReportRecordConfiguration : IEntityTypeConfiguration<ZReportRecord
         builder.Property(e => e.ReportDataJson)
             .HasColumnType("nvarchar(max)");
 
+        // Cashier sessions breakdown as JSON
+        builder.Property(e => e.CashierSessionsJson)
+            .HasColumnType("nvarchar(max)");
+
         // Relationships
+        builder.HasOne(e => e.Terminal)
+            .WithMany()
+            .HasForeignKey(e => e.TerminalId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasOne(e => e.WorkPeriod)
             .WithMany()
             .HasForeignKey(e => e.WorkPeriodId)
@@ -133,10 +148,12 @@ public class ZReportRecordConfiguration : IEntityTypeConfiguration<ZReportRecord
 
         // Indexes for efficient querying
         builder.HasIndex(e => e.ReportNumber);
+        builder.HasIndex(e => e.ReportNumberFormatted);
         builder.HasIndex(e => e.ReportDateTime);
         builder.HasIndex(e => e.WorkPeriodId);
         builder.HasIndex(e => e.StoreId);
         builder.HasIndex(e => e.TerminalId);
+        builder.HasIndex(e => e.TerminalCode);
         builder.HasIndex(e => e.IsFinalized);
         builder.HasIndex(e => new { e.StoreId, e.ReportNumber }).IsUnique();
         builder.HasIndex(e => new { e.StoreId, e.ReportDateTime });
