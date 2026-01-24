@@ -361,6 +361,7 @@ public static class ServiceCollectionExtensions
 
         // Report Services
         services.AddScoped<IXReportService, XReportService>();
+        services.AddScoped<ICombinedReportService, CombinedReportService>();
 
         return services;
     }
