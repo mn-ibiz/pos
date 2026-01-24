@@ -244,6 +244,26 @@ public class DialogService : IDialogService
     }
 
     /// <inheritdoc />
+    public Task ShowCombinedZReportDialogAsync(int? workPeriodId = null)
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            var viewModel = App.Services.GetRequiredService<CombinedZReportViewModel>();
+            if (workPeriodId.HasValue)
+            {
+                viewModel.SetWorkPeriodId(workPeriodId.Value);
+            }
+            var dialog = new CombinedZReportView(viewModel)
+            {
+                Owner = Application.Current.MainWindow
+            };
+            dialog.ShowDialog();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
     public Task ShowZReportDialogAsync(HospitalityPOS.Core.Models.Reports.ZReport report, bool autoPrint = false)
     {
         ArgumentNullException.ThrowIfNull(report);

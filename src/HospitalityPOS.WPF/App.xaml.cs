@@ -358,6 +358,7 @@ public partial class App : Application
         services.AddTransient<ZReportHistoryViewModel>();
         services.AddTransient<XReportHistoryViewModel>();
         services.AddTransient<CombinedXReportViewModel>();
+        services.AddTransient<CombinedZReportViewModel>();
         services.AddTransient<LoginAuditViewModel>();
         services.AddTransient<GoodsReceivingViewModel>();
         services.AddTransient<DirectReceivingViewModel>();

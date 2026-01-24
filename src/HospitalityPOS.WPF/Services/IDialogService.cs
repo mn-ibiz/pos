@@ -105,6 +105,13 @@ public interface IDialogService
     Task ShowCombinedXReportDialogAsync();
 
     /// <summary>
+    /// Shows the Combined Z-Report preview dialog with data from all terminals.
+    /// </summary>
+    /// <param name="workPeriodId">Optional work period ID. If not specified, uses current work period.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task ShowCombinedZReportDialogAsync(int? workPeriodId = null);
+
+    /// <summary>
     /// Shows the Z-Report dialog.
     /// </summary>
     /// <param name="report">The Z-Report to display.</param>
