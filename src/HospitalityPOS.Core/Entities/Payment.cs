@@ -43,11 +43,26 @@ public class Payment : BaseEntity
     public int ProcessedByUserId { get; set; }
 
     /// <summary>
+    /// Gets or sets the terminal ID where the payment was processed.
+    /// </summary>
+    public int? TerminalId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the terminal code (denormalized for reporting).
+    /// </summary>
+    public string? TerminalCode { get; set; }
+
+    /// <summary>
     /// Gets or sets the date and time when the payment was made.
     /// </summary>
     public DateTime PaymentDate { get; set; }
 
     // Navigation properties
+
+    /// <summary>
+    /// Gets or sets the terminal.
+    /// </summary>
+    public virtual Terminal? Terminal { get; set; }
 
     /// <summary>
     /// Gets or sets the receipt.

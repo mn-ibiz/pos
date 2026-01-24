@@ -10,6 +10,8 @@ namespace HospitalityPOS.WPF.Services;
 public class SessionService : ISessionService
 {
     private readonly ILogger _logger;
+    private readonly ITerminalSessionContext _terminalSession;
+    private readonly IWorkPeriodSessionService _workPeriodSessionService;
     private readonly object _lock = new();
     private User? _currentUser;
     private DateTime? _loginTime;
@@ -18,9 +20,16 @@ public class SessionService : ISessionService
     /// Initializes a new instance of the <see cref="SessionService"/> class.
     /// </summary>
     /// <param name="logger">The logger.</param>
-    public SessionService(ILogger logger)
+    /// <param name="terminalSession">The terminal session context.</param>
+    /// <param name="workPeriodSessionService">The work period session service.</param>
+    public SessionService(
+        ILogger logger,
+        ITerminalSessionContext terminalSession,
+        IWorkPeriodSessionService workPeriodSessionService)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _terminalSession = terminalSession ?? throw new ArgumentNullException(nameof(terminalSession));
+        _workPeriodSessionService = workPeriodSessionService ?? throw new ArgumentNullException(nameof(workPeriodSessionService));
     }
 
     /// <inheritdoc />
@@ -114,8 +123,43 @@ public class SessionService : ISessionService
             _loginTime = DateTime.UtcNow;
         }
 
+        // Update terminal session context
+        _terminalSession.SetCurrentUser(user.Id, user.Username);
+
+        // Start work period session if work period is open
+        _ = StartWorkPeriodSessionAsync(user.Id);
+
         _logger.Information("User session started: {Username} (ID: {UserId})", user.Username, user.Id);
         UserLoggedIn?.Invoke(this, new SessionEventArgs(user));
+    }
+
+    /// <summary>
+    /// Starts a work period session for the user asynchronously.
+    /// </summary>
+    private async Task StartWorkPeriodSessionAsync(int userId)
+    {
+        try
+        {
+            if (!_terminalSession.CurrentWorkPeriodId.HasValue || _terminalSession.TerminalId <= 0)
+            {
+                _logger.Debug("No active work period or terminal not initialized - skipping session start");
+                return;
+            }
+
+            var session = await _workPeriodSessionService.StartSessionAsync(
+                _terminalSession.CurrentWorkPeriodId.Value,
+                _terminalSession.TerminalId,
+                userId).ConfigureAwait(false);
+
+            _terminalSession.SetWorkPeriodSession(session.Id, session.LoginAt);
+
+            _logger.Information("Started work period session {SessionId} for user {UserId}",
+                session.Id, userId);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to start work period session for user {UserId}", userId);
+        }
     }
 
     /// <inheritdoc />
@@ -139,10 +183,40 @@ public class SessionService : ISessionService
             _loginTime = null;
         }
 
+        // End work period session
+        _ = EndWorkPeriodSessionAsync();
+
+        // Clear terminal session context
+        _terminalSession.ClearCurrentUser();
+
         if (previousUser is not null)
         {
             _logger.Information("User session ended: {Username} (Reason: {Reason})", previousUser.Username, reason);
             UserLoggedOut?.Invoke(this, new SessionEventArgs(previousUser, reason));
+        }
+    }
+
+    /// <summary>
+    /// Ends the current work period session asynchronously.
+    /// </summary>
+    private async Task EndWorkPeriodSessionAsync()
+    {
+        try
+        {
+            var sessionId = _terminalSession.CurrentWorkPeriodSessionId;
+            if (!sessionId.HasValue)
+            {
+                return;
+            }
+
+            await _workPeriodSessionService.EndSessionAsync(sessionId.Value).ConfigureAwait(false);
+            _terminalSession.ClearWorkPeriodSession();
+
+            _logger.Information("Ended work period session {SessionId}", sessionId.Value);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to end work period session");
         }
     }
 

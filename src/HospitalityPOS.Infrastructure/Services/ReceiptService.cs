@@ -17,6 +17,8 @@ public class ReceiptService : IReceiptService
     private readonly IWorkPeriodService _workPeriodService;
     private readonly ISessionService _sessionService;
     private readonly IInventoryService _inventoryService;
+    private readonly IWorkPeriodSessionService _workPeriodSessionService;
+    private readonly ITerminalSessionContext _terminalSession;
     private readonly IEtimsService? _etimsService;
     private readonly ILogger _logger;
 
@@ -29,6 +31,8 @@ public class ReceiptService : IReceiptService
         IWorkPeriodService workPeriodService,
         ISessionService sessionService,
         IInventoryService inventoryService,
+        IWorkPeriodSessionService workPeriodSessionService,
+        ITerminalSessionContext terminalSession,
         ILogger logger,
         IEtimsService? etimsService = null)
     {
@@ -37,6 +41,8 @@ public class ReceiptService : IReceiptService
         _workPeriodService = workPeriodService ?? throw new ArgumentNullException(nameof(workPeriodService));
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         _inventoryService = inventoryService ?? throw new ArgumentNullException(nameof(inventoryService));
+        _workPeriodSessionService = workPeriodSessionService ?? throw new ArgumentNullException(nameof(workPeriodSessionService));
+        _terminalSession = terminalSession ?? throw new ArgumentNullException(nameof(terminalSession));
         _etimsService = etimsService; // Optional - eTIMS integration
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -63,6 +69,9 @@ public class ReceiptService : IReceiptService
             ReceiptNumber = receiptNumber,
             OrderId = orderId,
             WorkPeriodId = order.WorkPeriodId,
+            WorkPeriodSessionId = _terminalSession.CurrentWorkPeriodSessionId,
+            TerminalId = _terminalSession.TerminalId > 0 ? _terminalSession.TerminalId : null,
+            TerminalCode = !string.IsNullOrEmpty(_terminalSession.TerminalCode) ? _terminalSession.TerminalCode : null,
             OwnerId = currentUserId,
             TableNumber = order.TableNumber,
             CustomerName = order.CustomerName,
@@ -281,11 +290,13 @@ public class ReceiptService : IReceiptService
             throw new InvalidOperationException("No user is currently logged in.");
         }
 
-        // Add all payments
+        // Add all payments with terminal context
         foreach (var payment in paymentsList)
         {
             payment.ReceiptId = receiptId;
             payment.ProcessedByUserId = currentUserId;
+            payment.TerminalId = _terminalSession.TerminalId > 0 ? _terminalSession.TerminalId : null;
+            payment.TerminalCode = !string.IsNullOrEmpty(_terminalSession.TerminalCode) ? _terminalSession.TerminalCode : null;
             _context.Payments.Add(payment);
         }
 
@@ -298,6 +309,9 @@ public class ReceiptService : IReceiptService
         receipt.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync().ConfigureAwait(false);
+
+        // Update work period session totals (fire-and-forget for non-blocking)
+        _ = UpdateSessionTotalsAsync(receipt, paymentsList);
 
         // Deduct inventory for all items in the receipt
         var stockMovements = await _inventoryService.DeductStockForReceiptAsync(receipt).ConfigureAwait(false);
@@ -382,6 +396,72 @@ public class ReceiptService : IReceiptService
         }
     }
 
+    /// <summary>
+    /// Updates work period session totals after a receipt is settled.
+    /// This runs as fire-and-forget to not block the settlement flow.
+    /// </summary>
+    private async Task UpdateSessionTotalsAsync(Receipt receipt, List<Payment> payments)
+    {
+        if (!receipt.WorkPeriodSessionId.HasValue)
+        {
+            return;
+        }
+
+        try
+        {
+            // Calculate payment breakdowns
+            var cashAmount = 0m;
+            var cardAmount = 0m;
+            var mpesaAmount = 0m;
+
+            foreach (var payment in payments)
+            {
+                // Load payment method if not already loaded
+                var paymentMethod = payment.PaymentMethod ?? await _context.PaymentMethods
+                    .FirstOrDefaultAsync(pm => pm.Id == payment.PaymentMethodId)
+                    .ConfigureAwait(false);
+
+                if (paymentMethod == null) continue;
+
+                switch (paymentMethod.Type)
+                {
+                    case PaymentMethodType.Cash:
+                        cashAmount += payment.Amount;
+                        break;
+                    case PaymentMethodType.Card:
+                        cardAmount += payment.Amount;
+                        break;
+                    case PaymentMethodType.MPesa:
+                        mpesaAmount += payment.Amount;
+                        break;
+                }
+            }
+
+            var update = new SessionTransactionUpdate
+            {
+                SaleAmount = receipt.TotalAmount,
+                CashAmount = cashAmount,
+                CardAmount = cardAmount,
+                MpesaAmount = mpesaAmount,
+                DiscountAmount = receipt.DiscountAmount,
+                IsVoid = false,
+                IsRefund = false
+            };
+
+            await _workPeriodSessionService.UpdateSessionTotalsAsync(
+                receipt.WorkPeriodSessionId.Value,
+                update).ConfigureAwait(false);
+
+            _logger.Debug("Updated session {SessionId} totals: Sale={Sale:C}, Cash={Cash:C}, Card={Card:C}, M-Pesa={MPesa:C}",
+                receipt.WorkPeriodSessionId.Value, receipt.TotalAmount, cashAmount, cardAmount, mpesaAmount);
+        }
+        catch (Exception ex)
+        {
+            // Log but don't fail - session updates are non-critical
+            _logger.Error(ex, "Failed to update session totals for receipt {ReceiptId}", receipt.Id);
+        }
+    }
+
     /// <inheritdoc />
     public async Task<Payment> AddPaymentAsync(Payment payment)
     {
@@ -398,6 +478,8 @@ public class ReceiptService : IReceiptService
         }
 
         payment.ProcessedByUserId = currentUserId;
+        payment.TerminalId = _terminalSession.TerminalId > 0 ? _terminalSession.TerminalId : null;
+        payment.TerminalCode = !string.IsNullOrEmpty(_terminalSession.TerminalCode) ? _terminalSession.TerminalCode : null;
         _context.Payments.Add(payment);
 
         // Update receipt paid amount

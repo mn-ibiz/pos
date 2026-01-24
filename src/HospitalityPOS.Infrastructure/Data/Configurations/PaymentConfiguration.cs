@@ -174,11 +174,18 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(e => e.Reference)
             .HasMaxLength(50);
 
+        builder.Property(e => e.TerminalCode)
+            .HasMaxLength(20);
+
         builder.HasIndex(e => e.ReceiptId);
 
         builder.HasIndex(e => e.PaymentMethodId);
 
         builder.HasIndex(e => e.Reference);
+
+        // Index for terminal-based payment queries
+        builder.HasIndex(e => e.TerminalId)
+            .HasDatabaseName("IX_Payments_TerminalId");
 
         builder.HasOne(e => e.Receipt)
             .WithMany(r => r.Payments)
@@ -193,6 +200,11 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.HasOne(e => e.ProcessedByUser)
             .WithMany()
             .HasForeignKey(e => e.ProcessedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.Terminal)
+            .WithMany()
+            .HasForeignKey(e => e.TerminalId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

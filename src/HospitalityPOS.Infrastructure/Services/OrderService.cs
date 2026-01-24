@@ -14,15 +14,21 @@ public class OrderService : IOrderService
 {
     private readonly POSDbContext _context;
     private readonly IWorkPeriodService _workPeriodService;
+    private readonly ITerminalSessionContext _terminalSession;
     private readonly ILogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OrderService"/> class.
     /// </summary>
-    public OrderService(POSDbContext context, IWorkPeriodService workPeriodService, ILogger logger)
+    public OrderService(
+        POSDbContext context,
+        IWorkPeriodService workPeriodService,
+        ITerminalSessionContext terminalSession,
+        ILogger logger)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _workPeriodService = workPeriodService ?? throw new ArgumentNullException(nameof(workPeriodService));
+        _terminalSession = terminalSession ?? throw new ArgumentNullException(nameof(terminalSession));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -40,6 +46,13 @@ public class OrderService : IOrderService
         {
             var currentPeriod = await _workPeriodService.GetCurrentWorkPeriodAsync().ConfigureAwait(false);
             order.WorkPeriodId = currentPeriod?.Id;
+        }
+
+        // Set terminal context if not set
+        if (!order.TerminalId.HasValue && _terminalSession.IsInitialized)
+        {
+            order.TerminalId = _terminalSession.TerminalId > 0 ? _terminalSession.TerminalId : null;
+            order.TerminalCode = !string.IsNullOrEmpty(_terminalSession.TerminalCode) ? _terminalSession.TerminalCode : null;
         }
 
         _context.Orders.Add(order);

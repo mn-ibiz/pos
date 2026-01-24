@@ -47,6 +47,9 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(e => e.Notes)
             .HasMaxLength(500);
 
+        builder.Property(e => e.TerminalCode)
+            .HasMaxLength(20);
+
         // Ignore computed properties
         builder.Ignore(e => e.TotalOfferSavings);
         builder.Ignore(e => e.HasOffersApplied);
@@ -59,6 +62,10 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.HasIndex(e => e.UserId);
 
+        // Index for terminal-based queries
+        builder.HasIndex(e => e.TerminalId)
+            .HasDatabaseName("IX_Orders_TerminalId");
+
         builder.HasOne(e => e.WorkPeriod)
             .WithMany(w => w.Orders)
             .HasForeignKey(e => e.WorkPeriodId)
@@ -67,6 +74,11 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.HasOne(e => e.User)
             .WithMany(u => u.Orders)
             .HasForeignKey(e => e.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.Terminal)
+            .WithMany()
+            .HasForeignKey(e => e.TerminalId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

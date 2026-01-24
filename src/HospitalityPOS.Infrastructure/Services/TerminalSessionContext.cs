@@ -24,6 +24,8 @@ public class TerminalSessionContext : ITerminalSessionContext
     private int? _currentUserId;
     private string? _currentUserName;
     private int? _currentWorkPeriodId;
+    private int? _currentWorkPeriodSessionId;
+    private DateTime? _currentSessionStartTime;
     private bool _isInitialized;
 
     /// <summary>
@@ -155,6 +157,30 @@ public class TerminalSessionContext : ITerminalSessionContext
             lock (_stateLock)
             {
                 return _currentWorkPeriodId;
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public int? CurrentWorkPeriodSessionId
+    {
+        get
+        {
+            lock (_stateLock)
+            {
+                return _currentWorkPeriodSessionId;
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public DateTime? CurrentSessionStartTime
+    {
+        get
+        {
+            lock (_stateLock)
+            {
+                return _currentSessionStartTime;
             }
         }
     }
@@ -331,6 +357,51 @@ public class TerminalSessionContext : ITerminalSessionContext
     }
 
     /// <inheritdoc />
+    public void SetWorkPeriodSession(int sessionId, DateTime startTime)
+    {
+        lock (_stateLock)
+        {
+            _currentWorkPeriodSessionId = sessionId;
+            _currentSessionStartTime = startTime;
+        }
+
+        _logger.Information("Cashier session started: {SessionId} at {StartTime} on terminal {TerminalCode}",
+            sessionId, startTime, _terminalCode);
+
+        OnSessionChanged(new TerminalSessionChangedEventArgs
+        {
+            ChangeType = TerminalSessionChangeType.CashierSessionStarted,
+            SessionId = sessionId,
+            UserId = _currentUserId,
+            UserName = _currentUserName
+        });
+    }
+
+    /// <inheritdoc />
+    public void ClearWorkPeriodSession()
+    {
+        int? previousSessionId;
+
+        lock (_stateLock)
+        {
+            previousSessionId = _currentWorkPeriodSessionId;
+            _currentWorkPeriodSessionId = null;
+            _currentSessionStartTime = null;
+        }
+
+        _logger.Information("Cashier session ended: {SessionId} on terminal {TerminalCode}",
+            previousSessionId, _terminalCode);
+
+        OnSessionChanged(new TerminalSessionChangedEventArgs
+        {
+            ChangeType = TerminalSessionChangeType.CashierSessionEnded,
+            SessionId = previousSessionId,
+            UserId = _currentUserId,
+            UserName = _currentUserName
+        });
+    }
+
+    /// <inheritdoc />
     public void Reset()
     {
         lock (_stateLock)
@@ -346,6 +417,8 @@ public class TerminalSessionContext : ITerminalSessionContext
             _currentUserId = null;
             _currentUserName = null;
             _currentWorkPeriodId = null;
+            _currentWorkPeriodSessionId = null;
+            _currentSessionStartTime = null;
             _isInitialized = false;
         }
 

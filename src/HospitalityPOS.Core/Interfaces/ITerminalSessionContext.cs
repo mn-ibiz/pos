@@ -58,6 +58,16 @@ public interface ITerminalSessionContext
     int? CurrentWorkPeriodId { get; }
 
     /// <summary>
+    /// Gets the current active work period session ID (cashier session).
+    /// </summary>
+    int? CurrentWorkPeriodSessionId { get; }
+
+    /// <summary>
+    /// Gets the current work period session start time.
+    /// </summary>
+    DateTime? CurrentSessionStartTime { get; }
+
+    /// <summary>
     /// Gets whether the terminal is properly initialized.
     /// </summary>
     bool IsInitialized { get; }
@@ -107,6 +117,18 @@ public interface ITerminalSessionContext
     void ClearWorkPeriod();
 
     /// <summary>
+    /// Sets the current work period session (cashier session).
+    /// </summary>
+    /// <param name="sessionId">The work period session ID.</param>
+    /// <param name="startTime">The session start time.</param>
+    void SetWorkPeriodSession(int sessionId, DateTime startTime);
+
+    /// <summary>
+    /// Clears the work period session (cashier logout).
+    /// </summary>
+    void ClearWorkPeriodSession();
+
+    /// <summary>
     /// Resets the session context (for re-initialization).
     /// </summary>
     void Reset();
@@ -141,6 +163,11 @@ public class TerminalSessionChangedEventArgs : EventArgs
     /// Gets or sets the work period ID (if applicable).
     /// </summary>
     public int? WorkPeriodId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the work period session ID (if applicable).
+    /// </summary>
+    public int? SessionId { get; set; }
 
     /// <summary>
     /// Gets or sets when the change occurred.
@@ -181,5 +208,15 @@ public enum TerminalSessionChangeType
     /// <summary>
     /// Session reset.
     /// </summary>
-    Reset = 6
+    Reset = 6,
+
+    /// <summary>
+    /// Cashier session started.
+    /// </summary>
+    CashierSessionStarted = 7,
+
+    /// <summary>
+    /// Cashier session ended.
+    /// </summary>
+    CashierSessionEnded = 8
 }

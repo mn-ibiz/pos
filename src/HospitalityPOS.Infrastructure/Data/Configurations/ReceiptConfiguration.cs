@@ -71,10 +71,21 @@ public class ReceiptConfiguration : IEntityTypeConfiguration<Receipt>
         builder.Property(e => e.PointsBalanceAfter)
             .HasPrecision(18, 2);
 
+        builder.Property(e => e.TerminalCode)
+            .HasMaxLength(20);
+
         builder.HasIndex(e => e.ReceiptNumber)
             .IsUnique();
 
         builder.HasIndex(e => e.Status);
+
+        // Index for terminal-based queries
+        builder.HasIndex(e => e.TerminalId)
+            .HasDatabaseName("IX_Receipts_TerminalId");
+
+        // Index for session-based queries
+        builder.HasIndex(e => e.WorkPeriodSessionId)
+            .HasDatabaseName("IX_Receipts_WorkPeriodSessionId");
 
         builder.HasOne(e => e.Order)
             .WithMany(o => o.Receipts)
@@ -84,6 +95,16 @@ public class ReceiptConfiguration : IEntityTypeConfiguration<Receipt>
         builder.HasOne(e => e.WorkPeriod)
             .WithMany(w => w.Receipts)
             .HasForeignKey(e => e.WorkPeriodId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.Session)
+            .WithMany()
+            .HasForeignKey(e => e.WorkPeriodSessionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.Terminal)
+            .WithMany()
+            .HasForeignKey(e => e.TerminalId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(e => e.Owner)

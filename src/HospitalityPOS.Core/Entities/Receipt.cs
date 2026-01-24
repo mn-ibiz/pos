@@ -23,6 +23,21 @@ public class Receipt : BaseEntity
     public int? WorkPeriodId { get; set; }
 
     /// <summary>
+    /// Gets or sets the work period session ID (cashier session tracking).
+    /// </summary>
+    public int? WorkPeriodSessionId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the terminal ID where the receipt was processed.
+    /// </summary>
+    public int? TerminalId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the terminal code (denormalized for queries).
+    /// </summary>
+    public string? TerminalCode { get; set; }
+
+    /// <summary>
     /// Gets or sets the store/branch ID for multi-branch operations.
     /// </summary>
     public int? StoreId { get; set; }
@@ -198,6 +213,16 @@ public class Receipt : BaseEntity
     /// Gets or sets the work period.
     /// </summary>
     public virtual WorkPeriod? WorkPeriod { get; set; }
+
+    /// <summary>
+    /// Gets or sets the work period session (cashier session).
+    /// </summary>
+    public virtual WorkPeriodSession? Session { get; set; }
+
+    /// <summary>
+    /// Gets or sets the terminal where the receipt was processed.
+    /// </summary>
+    public virtual Terminal? Terminal { get; set; }
 
     /// <summary>
     /// Gets or sets the store/branch.

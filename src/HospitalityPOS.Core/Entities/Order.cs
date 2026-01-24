@@ -10,6 +10,17 @@ public class Order : BaseEntity
     public string OrderNumber { get; set; } = string.Empty;
     public int? WorkPeriodId { get; set; }
     public int UserId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the terminal ID where the order was created.
+    /// </summary>
+    public int? TerminalId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the terminal code (denormalized for reporting/KDS).
+    /// </summary>
+    public string? TerminalCode { get; set; }
+
     public string? TableNumber { get; set; }
     public string? CustomerName { get; set; }
     public decimal Subtotal { get; set; }
@@ -37,6 +48,7 @@ public class Order : BaseEntity
     // Navigation properties
     public virtual WorkPeriod? WorkPeriod { get; set; }
     public virtual User User { get; set; } = null!;
+    public virtual Terminal? Terminal { get; set; }
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     public virtual ICollection<Receipt> Receipts { get; set; } = new List<Receipt>();
 }
