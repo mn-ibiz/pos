@@ -99,6 +99,12 @@ public interface IDialogService
     Task ShowXReportDialogAsync(HospitalityPOS.Core.DTOs.XReportData report, bool autoPrint = false);
 
     /// <summary>
+    /// Shows the Combined X-Report dialog with data from all terminals.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task ShowCombinedXReportDialogAsync();
+
+    /// <summary>
     /// Shows the Z-Report dialog.
     /// </summary>
     /// <param name="report">The Z-Report to display.</param>
