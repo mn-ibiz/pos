@@ -63,6 +63,10 @@ public partial class LoyaltySettingsViewModel : ViewModelBase
     [ObservableProperty]
     private int _expiryWarningDays = 30;
 
+    // Welcome bonus settings
+    [ObservableProperty]
+    private int _welcomeBonusPoints = 0;
+
     // SMS notification settings
     [ObservableProperty]
     private bool _enableSmsNotifications = true;
@@ -119,6 +123,7 @@ public partial class LoyaltySettingsViewModel : ViewModelBase
                 PointsExpiryMonths = CurrentConfiguration.PointsExpiryDays > 0 ? CurrentConfiguration.PointsExpiryDays / 30 : 12;
                 EnablePointsExpiry = CurrentConfiguration.PointsExpiryDays > 0;
                 ExpiryWarningDays = 30; // Not in Core entity, default to 30
+                WelcomeBonusPoints = CurrentConfiguration.WelcomeBonusPoints;
             }
 
             // Load tier configurations
@@ -142,11 +147,45 @@ public partial class LoyaltySettingsViewModel : ViewModelBase
 
         await ExecuteAsync(async () =>
         {
-            // In a real implementation, this would save to the database
-            // For now, just show success
-            await Task.Delay(100);
-            await DialogService.ShowMessageAsync("Success", "Loyalty settings saved successfully.");
+            // Get existing configuration or create new one
+            var config = CurrentConfiguration ?? new PointsConfiguration
+            {
+                Name = "Default",
+                IsDefault = true,
+                IsActive = true,
+                Description = "Default loyalty points configuration"
+            };
 
+            // Update earning settings
+            config.EarningRate = CurrencyUnitsPerPoint;
+            config.EarnOnDiscountedItems = EarnOnDiscountedItems;
+            config.EarnOnTax = EarnOnTax;
+
+            // Update redemption settings
+            config.RedemptionValue = PointValueInKes;
+            config.MinimumRedemptionPoints = MinimumRedemptionPoints;
+            config.MaxRedemptionPercentage = MaximumRedemptionPercent;
+
+            // Update expiry settings (convert months to days)
+            config.PointsExpiryDays = EnablePointsExpiry ? PointsExpiryMonths * 30 : 0;
+
+            // Update welcome bonus settings
+            config.WelcomeBonusPoints = WelcomeBonusPoints;
+
+            // Save configuration
+            if (config.Id == 0)
+            {
+                await _loyaltyService.CreatePointsConfigurationAsync(config);
+            }
+            else
+            {
+                await _loyaltyService.UpdatePointsConfigurationAsync(config);
+            }
+
+            // Refresh current configuration
+            CurrentConfiguration = config;
+
+            await DialogService.ShowMessageAsync("Success", "Loyalty settings saved successfully.");
             _logger.Information("Loyalty settings updated by user {UserId}", _sessionService.CurrentUserId);
         }, "Saving settings...");
     }

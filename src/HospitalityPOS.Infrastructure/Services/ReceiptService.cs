@@ -476,4 +476,20 @@ public class ReceiptService : IReceiptService
 
         return true;
     }
+
+    /// <inheritdoc />
+    public async Task<decimal> GetSalesTotalAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
+    {
+        var totalSales = await _context.Receipts
+            .AsNoTracking()
+            .Where(r => r.Status == ReceiptStatus.Settled)
+            .Where(r => r.SettledAt >= startDate && r.SettledAt <= endDate)
+            .SumAsync(r => r.TotalAmount, cancellationToken)
+            .ConfigureAwait(false);
+
+        _logger.Information("Retrieved sales total of {TotalSales:C} for period {StartDate:d} to {EndDate:d}",
+            totalSales, startDate, endDate);
+
+        return totalSales;
+    }
 }

@@ -441,34 +441,25 @@ public partial class ModifierGroupsViewModel : ObservableObject, INavigationAwar
         {
             using var scope = _scopeFactory.CreateScope();
             var modifierService = scope.ServiceProvider.GetRequiredService<IModifierService>();
+            var sessionService = scope.ServiceProvider.GetRequiredService<ISessionService>();
 
-            // Get the current group and toggle
-            var group = await modifierService.GetModifierGroupByIdAsync(SelectedGroup.Id);
-            if (group == null) return;
+            // Toggle the active status using the dedicated method
+            var newActiveStatus = !SelectedGroup.IsActive;
+            var success = await modifierService.SetModifierGroupActiveAsync(
+                SelectedGroup.Id,
+                newActiveStatus,
+                sessionService.CurrentUserId);
 
-            var dto = new ModifierGroupDto
+            if (success)
             {
-                Name = group.Name,
-                DisplayName = group.DisplayName,
-                Description = group.Description,
-                SelectionType = group.SelectionType,
-                MinSelections = group.MinSelections,
-                MaxSelections = group.MaxSelections,
-                FreeSelections = group.FreeSelections,
-                IsRequired = group.IsRequired,
-                DisplayOrder = group.DisplayOrder,
-                ColorCode = group.ColorCode,
-                IconPath = group.IconPath,
-                PrintOnKOT = group.PrintOnKOT,
-                ShowOnReceipt = group.ShowOnReceipt,
-                KitchenStation = group.KitchenStation
-            };
-
-            // Note: IsActive is not in DTO - handled directly on entity
-            // We'll need a separate method to toggle active status
-
-            _logger.Information("Toggled modifier group active status: {Name}", SelectedGroup.Name);
-            await LoadDataAsync();
+                _logger.Information("Modifier group '{Name}' active status set to {IsActive}",
+                    SelectedGroup.Name, newActiveStatus);
+                await LoadDataAsync();
+            }
+            else
+            {
+                ErrorMessage = "Failed to update modifier group. Group not found.";
+            }
         }
         catch (Exception ex)
         {
@@ -502,6 +493,90 @@ public partial class ModifierGroupsViewModel : ObservableObject, INavigationAwar
         {
             _logger.Error(ex, "Failed to toggle modifier item availability");
             ErrorMessage = "Failed to update modifier item. Please try again.";
+        }
+    }
+
+    /// <summary>
+    /// Moves a modifier item up in the display order.
+    /// </summary>
+    [RelayCommand]
+    private async Task MoveItemUpAsync(ModifierItem? item)
+    {
+        if (item == null || SelectedGroup == null) return;
+
+        try
+        {
+            var items = SelectedGroup.Items.OrderBy(i => i.DisplayOrder).ToList();
+            var index = items.FindIndex(i => i.Id == item.Id);
+
+            if (index <= 0) return; // Already at top
+
+            // Swap with previous item
+            items.RemoveAt(index);
+            items.Insert(index - 1, item);
+
+            // Get new order as list of IDs
+            var newOrder = items.Select(i => i.Id).ToList();
+
+            using var scope = _scopeFactory.CreateScope();
+            var modifierService = scope.ServiceProvider.GetRequiredService<IModifierService>();
+
+            await modifierService.ReorderModifierItemsAsync(SelectedGroup.Id, newOrder, CurrentUserId);
+
+            _logger.Information("Moved modifier item '{ItemName}' up in group '{GroupName}'",
+                item.Name, SelectedGroup.Name);
+
+            // Reload to show updated order
+            var groupId = SelectedGroup.Id;
+            await LoadDataAsync();
+            SelectedGroup = ModifierGroups.FirstOrDefault(g => g.Id == groupId);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to reorder modifier item");
+            ErrorMessage = "Failed to reorder item. Please try again.";
+        }
+    }
+
+    /// <summary>
+    /// Moves a modifier item down in the display order.
+    /// </summary>
+    [RelayCommand]
+    private async Task MoveItemDownAsync(ModifierItem? item)
+    {
+        if (item == null || SelectedGroup == null) return;
+
+        try
+        {
+            var items = SelectedGroup.Items.OrderBy(i => i.DisplayOrder).ToList();
+            var index = items.FindIndex(i => i.Id == item.Id);
+
+            if (index >= items.Count - 1) return; // Already at bottom
+
+            // Swap with next item
+            items.RemoveAt(index);
+            items.Insert(index + 1, item);
+
+            // Get new order as list of IDs
+            var newOrder = items.Select(i => i.Id).ToList();
+
+            using var scope = _scopeFactory.CreateScope();
+            var modifierService = scope.ServiceProvider.GetRequiredService<IModifierService>();
+
+            await modifierService.ReorderModifierItemsAsync(SelectedGroup.Id, newOrder, CurrentUserId);
+
+            _logger.Information("Moved modifier item '{ItemName}' down in group '{GroupName}'",
+                item.Name, SelectedGroup.Name);
+
+            // Reload to show updated order
+            var groupId = SelectedGroup.Id;
+            await LoadDataAsync();
+            SelectedGroup = ModifierGroups.FirstOrDefault(g => g.Id == groupId);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to reorder modifier item");
+            ErrorMessage = "Failed to reorder item. Please try again.";
         }
     }
 }

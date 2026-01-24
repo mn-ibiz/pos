@@ -701,6 +701,7 @@
                                                     <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
 
                                                 <!-- Color Preview (if applicable) -->
@@ -735,7 +736,7 @@
                                                 </StackPanel>
 
                                                 <!-- Price Adjustment -->
-                                                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="8,0">
                                                     <TextBlock FontSize="12" Foreground="#10B981" FontWeight="SemiBold"
                                                                Visibility="{Binding PriceAdjustment, Converter={StaticResource BoolToVisibility}}">
                                                         <TextBlock.Style>
@@ -751,6 +752,22 @@
                                                             </Style>
                                                         </TextBlock.Style>
                                                     </TextBlock>
+                                                </StackPanel>
+
+                                                <!-- Edit/Delete Buttons -->
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button Style="{StaticResource IconButton}" Width="28" Height="28"
+                                                            Command="{Binding DataContext.EditValueCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            ToolTip="Edit Value">
+                                                        <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" FontSize="10"/>
+                                                    </Button>
+                                                    <Button Style="{StaticResource IconButton}" Width="28" Height="28"
+                                                            Command="{Binding DataContext.DeleteValueCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            ToolTip="Delete Value">
+                                                        <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#EF4444"/>
+                                                    </Button>
                                                 </StackPanel>
                                             </Grid>
                                         </Border>

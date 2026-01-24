@@ -13,6 +13,10 @@
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
         <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
         <converters:PaymentMethodCodeToColorConverter x:Key="PaymentMethodColorConverter"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibility"/>
+        <converters:PositiveToVisibilityConverter x:Key="PositiveToVisibility"/>
+        <converters:SecondsToMinSecConverter x:Key="SecondsToMinSec"/>
+        <converters:MinLengthToBoolConverter x:Key="MinLengthToBool"/>
 
         <!-- Payment Method Button Style -->
         <Style x:Key="PaymentMethodButton" TargetType="Button">
@@ -102,6 +106,78 @@
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Outline Small Button Style for Loyalty Redemption -->
+        <Style x:Key="OutlineSmallButton" TargetType="Button">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#9CA3AF"/>
+            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#22C55E"/>
+                                <Setter TargetName="border" Property="Background" Value="#1E1E2E"/>
+                                <Setter Property="Foreground" Value="#22C55E"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#22C55E"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Numeric Input TextBox Style for Loyalty Points -->
+        <Style x:Key="NumericInputTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Focusable="false"
+                                          HorizontalScrollBarVisibility="Hidden"
+                                          VerticalScrollBarVisibility="Hidden"
+                                          Padding="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#22C55E"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -393,12 +469,173 @@
                 <Grid Visibility="{Binding IsPaymentPanelVisible, Converter={StaticResource InverseBoolToVisibility}}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
+                    <!-- Loyalty Redemption Section -->
+                    <Border Grid.Row="0"
+                            Background="#252538"
+                            CornerRadius="8"
+                            Padding="16"
+                            Margin="40,24,40,0"
+                            Visibility="{Binding ShowRedemptionPanel, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <!-- Header -->
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="Loyalty Points"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="White"/>
+
+                                <TextBlock Grid.Column="2"
+                                           FontSize="14"
+                                           Foreground="#9CA3AF">
+                                    <Run Text="Available: "/>
+                                    <Run Text="{Binding AvailableLoyaltyPoints, StringFormat=N0}"
+                                         FontWeight="SemiBold"
+                                         Foreground="#22C55E"/>
+                                    <Run Text=" pts"/>
+                                </TextBlock>
+                            </Grid>
+
+                            <!-- Member Info Card -->
+                            <Border Background="#1E1E2E"
+                                    CornerRadius="6"
+                                    Padding="12"
+                                    Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding LoyaltyMember.Name}"
+                                                   FontWeight="Medium"
+                                                   FontSize="14"
+                                                   Foreground="White"/>
+                                        <TextBlock Text="{Binding LoyaltyMember.PhoneNumber}"
+                                                   FontSize="12"
+                                                   Foreground="#9CA3AF"/>
+                                    </StackPanel>
+
+                                    <!-- Tier Badge -->
+                                    <Border Grid.Column="1"
+                                            Background="#3B82F6"
+                                            CornerRadius="4"
+                                            Padding="10,4"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding LoyaltyMember.Tier}"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="White"/>
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <!-- Redemption Input Row -->
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="140"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Points to Redeem"
+                                               FontSize="12"
+                                               Foreground="#9CA3AF"
+                                               Margin="0,0,0,4"/>
+                                    <TextBox Text="{Binding PointsToRedeem, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                                             FontSize="18"
+                                             Height="44"
+                                             Padding="12,8"
+                                             HorizontalContentAlignment="Right"
+                                             Style="{StaticResource NumericInputTextBox}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Discount Value"
+                                               FontSize="12"
+                                               Foreground="#9CA3AF"
+                                               Margin="0,0,0,4"/>
+                                    <Border Background="#1E1E2E"
+                                            CornerRadius="4"
+                                            Height="44"
+                                            Padding="12,8">
+                                        <TextBlock VerticalAlignment="Center"
+                                                   HorizontalAlignment="Right"
+                                                   FontSize="18"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#22C55E">
+                                            <Run Text="KES "/>
+                                            <Run Text="{Binding PointsRedemptionValue, StringFormat=N2}"/>
+                                        </TextBlock>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Constraints Info -->
+                            <TextBlock FontSize="11"
+                                       Foreground="#6B7280"
+                                       Margin="0,0,0,8">
+                                <Run Text="Min: "/>
+                                <Run Text="{Binding MinimumRedemptionPoints, StringFormat=N0}"/>
+                                <Run Text=" pts | Max: "/>
+                                <Run Text="{Binding MaxRedeemablePoints, StringFormat=N0}"/>
+                                <Run Text=" pts (50% of total)"/>
+                            </TextBlock>
+
+                            <!-- Error Message -->
+                            <TextBlock Text="{Binding RedemptionError}"
+                                       Foreground="#EF4444"
+                                       FontSize="12"
+                                       TextWrapping="Wrap"
+                                       Visibility="{Binding RedemptionError, Converter={StaticResource NullToVisibility}}"
+                                       Margin="0,0,0,8"/>
+
+                            <!-- Quick Redemption Buttons -->
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Button Content="100 pts"
+                                        Command="{Binding SetRedemptionPointsCommand}"
+                                        CommandParameter="100"
+                                        Style="{StaticResource OutlineSmallButton}"
+                                        Margin="0,0,8,0"
+                                        Padding="12,6"
+                                        IsEnabled="{Binding IsRedemptionEnabled}"/>
+                                <Button Content="500 pts"
+                                        Command="{Binding SetRedemptionPointsCommand}"
+                                        CommandParameter="500"
+                                        Style="{StaticResource OutlineSmallButton}"
+                                        Margin="0,0,8,0"
+                                        Padding="12,6"
+                                        IsEnabled="{Binding IsRedemptionEnabled}"/>
+                                <Button Content="Use Max"
+                                        Command="{Binding RedeemMaxPointsCommand}"
+                                        Style="{StaticResource OutlineSmallButton}"
+                                        Margin="0,0,8,0"
+                                        Padding="12,6"
+                                        IsEnabled="{Binding IsRedemptionEnabled}"/>
+                                <Button Content="Clear"
+                                        Command="{Binding ClearRedemptionCommand}"
+                                        Style="{StaticResource OutlineSmallButton}"
+                                        Padding="12,6"
+                                        Visibility="{Binding PointsToRedeem, Converter={StaticResource PositiveToVisibility}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
                     <!-- Title -->
-                    <TextBlock Grid.Row="0"
+                    <TextBlock Grid.Row="1"
                                Text="Select Payment Method"
                                FontSize="24"
                                FontWeight="Bold"
@@ -407,7 +644,7 @@
                                Margin="0,40,0,20"/>
 
                     <!-- Payment Method Buttons -->
-                    <ItemsControl Grid.Row="1"
+                    <ItemsControl Grid.Row="2"
                                   ItemsSource="{Binding PaymentMethods}"
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Center">
@@ -434,7 +671,7 @@
                     </ItemsControl>
 
                     <!-- Quick Settle with Cash -->
-                    <Button Grid.Row="2"
+                    <Button Grid.Row="3"
                             Content="Quick Settle (Exact Cash)"
                             Background="#22C55E"
                             Style="{StaticResource ActionButton}"
@@ -815,6 +1052,227 @@
                     </Border>
                 </Grid>
             </Grid>
+        </Grid>
+
+        <!-- OTP Verification Dialog Overlay -->
+        <Grid Grid.RowSpan="2"
+              Visibility="{Binding IsAwaitingOtpVerification, Converter={StaticResource BoolToVisibility}}"
+              Background="#C0000000"
+              Panel.ZIndex="100">
+            <Border Background="#252538"
+                    CornerRadius="12"
+                    Padding="32"
+                    MaxWidth="440"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+                <StackPanel>
+                    <!-- Header -->
+                    <StackPanel HorizontalAlignment="Center" Margin="0,0,0,20">
+                        <TextBlock Text="Verify Redemption"
+                                   FontSize="24"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center"
+                                   Foreground="White"/>
+                        <TextBlock FontSize="14"
+                                   HorizontalAlignment="Center"
+                                   Foreground="#9CA3AF"
+                                   Margin="0,8,0,0">
+                            <Run Text="Code sent to "/>
+                            <Run Text="{Binding OtpMaskedPhone}" FontWeight="Medium" Foreground="#22C55E"/>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Redemption Summary Card -->
+                    <Border Background="#1E1E2E"
+                            CornerRadius="8"
+                            Padding="16"
+                            Margin="0,0,0,24">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Redeeming"
+                                           FontSize="12"
+                                           Foreground="#9CA3AF"/>
+                                <TextBlock FontSize="22" FontWeight="SemiBold" Foreground="White">
+                                    <Run Text="{Binding PointsToRedeem, StringFormat=N0}"/>
+                                    <Run Text=" points" FontSize="14" FontWeight="Normal"/>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                                <TextBlock Text="Discount"
+                                           FontSize="12"
+                                           Foreground="#9CA3AF"
+                                           HorizontalAlignment="Right"/>
+                                <TextBlock FontSize="22" FontWeight="SemiBold" Foreground="#22C55E">
+                                    <Run Text="KES "/>
+                                    <Run Text="{Binding PointsRedemptionValue, StringFormat=N2}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- OTP Input Section -->
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="Enter 6-digit verification code"
+                                   FontSize="13"
+                                   Foreground="#9CA3AF"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,0,0,12"/>
+
+                        <!-- Large OTP Input -->
+                        <TextBox Text="{Binding OtpInput, UpdateSourceTrigger=PropertyChanged}"
+                                 FontSize="36"
+                                 FontWeight="Bold"
+                                 FontFamily="Consolas"
+                                 TextAlignment="Center"
+                                 MaxLength="6"
+                                 Height="70"
+                                 Padding="16"
+                                 Background="#2D2D44"
+                                 Foreground="White"
+                                 BorderBrush="#3D3D5C"
+                                 BorderThickness="2"
+                                 CaretBrush="#22C55E">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding VerifyOtpAndRedeemAsyncCommand}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                    </StackPanel>
+
+                    <!-- Timer and Attempts Row -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Expiry Timer -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock Text="&#xE121;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       Foreground="#9CA3AF"
+                                       FontSize="14"
+                                       Margin="0,0,6,0"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock FontSize="13" Foreground="#9CA3AF">
+                                <Run Text="Expires in "/>
+                                <Run Text="{Binding OtpExpiresInSeconds, Converter={StaticResource SecondsToMinSec}}"
+                                     FontWeight="Medium"/>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <!-- Attempts Remaining -->
+                        <TextBlock Grid.Column="1"
+                                   HorizontalAlignment="Right"
+                                   FontSize="13"
+                                   Visibility="{Binding OtpRemainingAttempts, Converter={StaticResource PositiveToVisibility}}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#9CA3AF"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding OtpRemainingAttempts}" Value="1">
+                                            <Setter Property="Foreground" Value="#EF4444"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                            <Run Text="{Binding OtpRemainingAttempts}"/>
+                            <Run Text=" attempts left"/>
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- Error Message -->
+                    <Border Background="#3A1D1D"
+                            CornerRadius="6"
+                            Padding="12"
+                            Margin="0,0,0,16"
+                            Visibility="{Binding OtpError, Converter={StaticResource NullToVisibility}}">
+                        <TextBlock Text="{Binding OtpError}"
+                                   Foreground="#EF4444"
+                                   FontSize="13"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center"/>
+                    </Border>
+
+                    <!-- Action Buttons -->
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Content="Cancel"
+                                Command="{Binding CancelOtpVerificationCommand}"
+                                Background="#4E4E6E"
+                                Style="{StaticResource ActionButton}"
+                                Height="50"
+                                FontSize="15"/>
+
+                        <Button Grid.Column="2"
+                                Command="{Binding VerifyOtpAndRedeemAsyncCommand}"
+                                Background="#22C55E"
+                                Style="{StaticResource ActionButton}"
+                                Height="50"
+                                FontSize="15">
+                            <Button.Content>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE001;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="16"
+                                               Margin="0,0,8,0"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="Verify &amp; Redeem" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button.Content>
+                        </Button>
+                    </Grid>
+
+                    <!-- Resend Link -->
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0,20,0,0">
+                        <TextBlock Text="Didn't receive the code?"
+                                   FontSize="13"
+                                   Foreground="#9CA3AF"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"/>
+
+                        <Button Command="{Binding ResendOtpAsyncCommand}"
+                                IsEnabled="{Binding CanResendOtp}"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                Padding="0">
+                            <TextBlock FontSize="13" Foreground="#22C55E" FontWeight="Medium">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Resend Code"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CanResendOtp}" Value="False">
+                                                <Setter Property="Foreground" Value="#6B7280"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Button>
+
+                        <TextBlock FontSize="13" Foreground="#6B7280" VerticalAlignment="Center"
+                                   Visibility="{Binding CanResendOtp, Converter={StaticResource InverseBoolToVisibility}}">
+                            <Run Text=" ("/>
+                            <Run Text="{Binding ResendCooldownSeconds}"/>
+                            <Run Text="s)"/>
+                        </TextBlock>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
         </Grid>
 
         <!-- Loading Overlay -->

@@ -155,4 +155,23 @@ public interface ILabelTemplateService
     Task ReorderFieldsAsync(int templateId, List<int> fieldIds);
 
     #endregion
+
+    #region Template Export/Import
+
+    /// <summary>
+    /// Exports a template to JSON bytes.
+    /// </summary>
+    Task<byte[]> ExportTemplateAsync(int templateId, TemplateExportOptionsDto options);
+
+    /// <summary>
+    /// Validates an import file without importing.
+    /// </summary>
+    Task<TemplateImportValidationResult> ValidateImportFileAsync(byte[] data, int storeId);
+
+    /// <summary>
+    /// Imports a template from JSON bytes.
+    /// </summary>
+    Task<TemplateImportResultDto> ImportTemplateAsync(byte[] data, TemplateImportOptionsDto options);
+
+    #endregion
 }

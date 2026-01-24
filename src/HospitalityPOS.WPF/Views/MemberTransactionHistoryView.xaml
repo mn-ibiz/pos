@@ -1,0 +1,503 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.MemberTransactionHistoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="800" d:DesignWidth="1200"
+             Background="#1E1E2E">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibility"/>
+        <converters:PositiveToVisibilityConverter x:Key="PositiveToVisibility"/>
+
+        <!-- Transaction Type to Color Converter -->
+        <Style x:Key="TransactionTypeText" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding TransactionType}" Value="Earned">
+                    <Setter Property="Foreground" Value="#22C55E"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TransactionType}" Value="Redeemed">
+                    <Setter Property="Foreground" Value="#F59E0B"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TransactionType}" Value="Adjustment">
+                    <Setter Property="Foreground" Value="#3B82F6"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TransactionType}" Value="Expired">
+                    <Setter Property="Foreground" Value="#EF4444"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header with Back Button -->
+        <Grid Grid.Row="0" Background="#252538" Padding="24,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0"
+                    Command="{Binding GoBackCommand}"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="8"
+                    Cursor="Hand"
+                    VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xE72B;"
+                               FontFamily="Segoe MDL2 Assets"
+                               FontSize="16"
+                               Foreground="#9CA3AF"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="Back"
+                               FontSize="14"
+                               Foreground="#9CA3AF"
+                               Margin="8,0,0,0"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+
+            <TextBlock Grid.Column="1"
+                       Text="{Binding Title}"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+
+            <Button Grid.Column="2"
+                    Content="Export CSV"
+                    Command="{Binding ExportToCsvCommand}"
+                    Background="#3B82F6"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Padding="16,8"
+                    FontWeight="Medium"
+                    Cursor="Hand"/>
+        </Grid>
+
+        <!-- Member Summary Header -->
+        <Border Grid.Row="1" Background="#2D2D44" Padding="24,16"
+                Visibility="{Binding Member, Converter={StaticResource NullToVisibility}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Member Info -->
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Member.Name}"
+                                   FontSize="20"
+                                   FontWeight="SemiBold"
+                                   Foreground="White"/>
+                        <Border Background="#3B82F6"
+                                CornerRadius="4"
+                                Padding="8,2"
+                                Margin="12,0,0,0"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Member.Tier}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="White"/>
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <TextBlock Text="{Binding Member.PhoneNumber}"
+                                   FontSize="14"
+                                   Foreground="#9CA3AF"/>
+                        <TextBlock Text=" | "
+                                   FontSize="14"
+                                   Foreground="#6B7280"/>
+                        <TextBlock Text="{Binding Member.MembershipNumber}"
+                                   FontSize="14"
+                                   Foreground="#9CA3AF"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Current Balance -->
+                <StackPanel Grid.Column="1" Margin="32,0">
+                    <TextBlock Text="Current Balance"
+                               FontSize="12"
+                               Foreground="#9CA3AF"/>
+                    <TextBlock Text="{Binding Member.PointsBalance, StringFormat='{}{0:N0} pts'}"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="#22C55E"/>
+                </StackPanel>
+
+                <!-- Lifetime Points -->
+                <StackPanel Grid.Column="2" Margin="32,0">
+                    <TextBlock Text="Lifetime Earned"
+                               FontSize="12"
+                               Foreground="#9CA3AF"/>
+                    <TextBlock Text="{Binding Member.LifetimePoints, StringFormat='{}{0:N0} pts'}"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="White"/>
+                </StackPanel>
+
+                <!-- Total Spend -->
+                <StackPanel Grid.Column="3">
+                    <TextBlock Text="Total Spend"
+                               FontSize="12"
+                               Foreground="#9CA3AF"/>
+                    <TextBlock Text="{Binding Member.LifetimeSpend, StringFormat='KES {0:N0}'}"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="White"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Filter Controls -->
+        <Border Grid.Row="2" Background="#252538" Padding="24,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Type Filter -->
+                <StackPanel Grid.Column="0" Margin="0,0,24,0">
+                    <TextBlock Text="Type"
+                               FontSize="12"
+                               Foreground="#9CA3AF"
+                               Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding TransactionTypeOptions}"
+                              SelectedItem="{Binding FilterType}"
+                              Width="140"
+                              Padding="8"
+                              Background="#1E1E2E"
+                              Foreground="White"
+                              BorderBrush="#3D3D5C">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Foreground="White">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="{Binding}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                                    <Setter Property="Text" Value="All Types"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Date Range Presets -->
+                <StackPanel Grid.Column="1" Margin="0,0,24,0">
+                    <TextBlock Text="Quick Filter"
+                               FontSize="12"
+                               Foreground="#9CA3AF"
+                               Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding DateRangePresets}"
+                              Width="140"
+                              Padding="8"
+                              Background="#1E1E2E"
+                              Foreground="White"
+                              BorderBrush="#3D3D5C"
+                              DisplayMemberPath="Name"
+                              SelectionChanged="DateRangePreset_SelectionChanged"/>
+                </StackPanel>
+
+                <!-- Start Date -->
+                <StackPanel Grid.Column="2" Margin="0,0,12,0">
+                    <TextBlock Text="From"
+                               FontSize="12"
+                               Foreground="#9CA3AF"
+                               Margin="0,0,0,4"/>
+                    <DatePicker SelectedDate="{Binding FilterStartDate}"
+                                Width="140"
+                                Padding="8"
+                                Background="#1E1E2E"
+                                Foreground="White"
+                                BorderBrush="#3D3D5C"/>
+                </StackPanel>
+
+                <!-- End Date -->
+                <StackPanel Grid.Column="3" Margin="0,0,24,0">
+                    <TextBlock Text="To"
+                               FontSize="12"
+                               Foreground="#9CA3AF"
+                               Margin="0,0,0,4"/>
+                    <DatePicker SelectedDate="{Binding FilterEndDate}"
+                                Width="140"
+                                Padding="8"
+                                Background="#1E1E2E"
+                                Foreground="White"
+                                BorderBrush="#3D3D5C"/>
+                </StackPanel>
+
+                <!-- Filter Buttons -->
+                <StackPanel Grid.Column="5" Orientation="Horizontal" VerticalAlignment="Bottom">
+                    <Button Content="Apply"
+                            Command="{Binding ApplyFilterCommand}"
+                            Background="#22C55E"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Padding="16,8"
+                            FontWeight="Medium"
+                            Cursor="Hand"
+                            Margin="0,0,8,0"/>
+                    <Button Content="Clear"
+                            Command="{Binding ClearFiltersCommand}"
+                            Background="#4E4E6E"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Padding="16,8"
+                            Cursor="Hand"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Transaction List -->
+        <Border Grid.Row="3" Margin="24,16,24,0">
+            <!-- Column Headers -->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Background="#252538" Margin="0,0,0,1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="160"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="DATE" FontSize="12" FontWeight="SemiBold" Foreground="#9CA3AF" Padding="16,12"/>
+                    <TextBlock Grid.Column="1" Text="TYPE" FontSize="12" FontWeight="SemiBold" Foreground="#9CA3AF" Padding="16,12"/>
+                    <TextBlock Grid.Column="2" Text="POINTS" FontSize="12" FontWeight="SemiBold" Foreground="#9CA3AF" Padding="16,12" HorizontalAlignment="Right"/>
+                    <TextBlock Grid.Column="3" Text="BALANCE" FontSize="12" FontWeight="SemiBold" Foreground="#9CA3AF" Padding="16,12" HorizontalAlignment="Right"/>
+                    <TextBlock Grid.Column="4" Text="REFERENCE" FontSize="12" FontWeight="SemiBold" Foreground="#9CA3AF" Padding="16,12"/>
+                    <TextBlock Grid.Column="5" Text="DESCRIPTION" FontSize="12" FontWeight="SemiBold" Foreground="#9CA3AF" Padding="16,12"/>
+                </Grid>
+
+                <!-- Transaction Items -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Transactions}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#252538" Margin="0,0,0,1" Padding="0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="160"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Date -->
+                                        <StackPanel Grid.Column="0" Padding="16,12">
+                                            <TextBlock Text="{Binding TransactionDate, StringFormat='{}{0:MMM dd, yyyy}'}"
+                                                       FontSize="14"
+                                                       Foreground="White"/>
+                                            <TextBlock Text="{Binding TransactionDate, StringFormat='{}{0:HH:mm}'}"
+                                                       FontSize="12"
+                                                       Foreground="#6B7280"/>
+                                        </StackPanel>
+
+                                        <!-- Type -->
+                                        <StackPanel Grid.Column="1" Padding="16,12" Orientation="Horizontal">
+                                            <TextBlock Text="{Binding TransactionTypeName}"
+                                                       Style="{StaticResource TransactionTypeText}"
+                                                       FontSize="14"/>
+                                        </StackPanel>
+
+                                        <!-- Points -->
+                                        <TextBlock Grid.Column="2"
+                                                   Padding="16,12"
+                                                   HorizontalAlignment="Right"
+                                                   FontSize="16"
+                                                   FontWeight="Bold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="{Binding Points, StringFormat='{}{0:+#,##0;-#,##0;0}'}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCredit}" Value="True">
+                                                            <Setter Property="Foreground" Value="#22C55E"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsCredit}" Value="False">
+                                                            <Setter Property="Foreground" Value="#F59E0B"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <!-- Balance After -->
+                                        <TextBlock Grid.Column="3"
+                                                   Text="{Binding BalanceAfter, StringFormat='{}{0:N0}'}"
+                                                   Padding="16,12"
+                                                   HorizontalAlignment="Right"
+                                                   FontSize="14"
+                                                   Foreground="White"/>
+
+                                        <!-- Reference -->
+                                        <TextBlock Grid.Column="4"
+                                                   Padding="16,12"
+                                                   FontSize="13"
+                                                   Foreground="#9CA3AF">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="{Binding ReferenceNumber}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ReferenceNumber}" Value="{x:Null}">
+                                                            <Setter Property="Text" Value="-"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <!-- Description -->
+                                        <StackPanel Grid.Column="5" Padding="16,12">
+                                            <TextBlock Text="{Binding Description}"
+                                                       FontSize="13"
+                                                       Foreground="#9CA3AF"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       MaxWidth="400"/>
+                                            <TextBlock Text="{Binding MonetaryValue, StringFormat='KES {0:N2}'}"
+                                                       FontSize="12"
+                                                       Foreground="#6B7280"
+                                                       Visibility="{Binding MonetaryValue, Converter={StaticResource PositiveToVisibility}}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- Empty State -->
+                <Border Grid.Row="1"
+                        Visibility="{Binding Transactions.Count, Converter={StaticResource InverseBoolToVisibility}}"
+                        Background="#252538">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,60">
+                        <TextBlock Text="&#xE7BA;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="48"
+                                   Foreground="#4E4E6E"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="No transactions found"
+                                   FontSize="16"
+                                   Foreground="#9CA3AF"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,16,0,0"/>
+                        <TextBlock Text="Try adjusting your filter criteria"
+                                   FontSize="13"
+                                   Foreground="#6B7280"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Pagination Footer -->
+        <Border Grid.Row="4" Background="#252538" Padding="24,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Total Count -->
+                <TextBlock Grid.Column="0"
+                           VerticalAlignment="Center"
+                           FontSize="13"
+                           Foreground="#9CA3AF">
+                    <Run Text="Showing"/>
+                    <Run Text="{Binding Transactions.Count}" FontWeight="Medium"/>
+                    <Run Text="of"/>
+                    <Run Text="{Binding TotalCount}" FontWeight="Medium"/>
+                    <Run Text="transactions"/>
+                </TextBlock>
+
+                <!-- Pagination Controls -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="Previous"
+                            Command="{Binding PreviousPageCommand}"
+                            IsEnabled="{Binding HasPreviousPage}"
+                            Background="#3D3D5C"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Padding="16,8"
+                            Cursor="Hand"
+                            Margin="0,0,8,0"/>
+
+                    <TextBlock Text="{Binding PageDisplay}"
+                               FontSize="14"
+                               Foreground="White"
+                               VerticalAlignment="Center"
+                               Margin="16,0"/>
+
+                    <Button Content="Next"
+                            Command="{Binding NextPageCommand}"
+                            IsEnabled="{Binding HasNextPage}"
+                            Background="#3D3D5C"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Padding="16,8"
+                            Cursor="Hand"
+                            Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <!-- Page Size (optional future enhancement) -->
+                <StackPanel Grid.Column="2"/>
+            </Grid>
+        </Border>
+
+        <!-- Loading Overlay -->
+        <Border Grid.RowSpan="5"
+                Background="#80000000"
+                Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True"
+                             Width="200"
+                             Height="4"
+                             Foreground="#22C55E"/>
+                <TextBlock Text="{Binding BusyMessage}"
+                           Foreground="White"
+                           FontSize="14"
+                           HorizontalAlignment="Center"
+                           Margin="0,16,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

@@ -9,6 +9,7 @@ namespace HospitalityPOS.Core.Interfaces;
 /// </summary>
 public class ModifierGroupDto
 {
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? DisplayName { get; set; }
     public string? Description { get; set; }
@@ -23,6 +24,7 @@ public class ModifierGroupDto
     public bool PrintOnKOT { get; set; } = true;
     public bool ShowOnReceipt { get; set; } = true;
     public string? KitchenStation { get; set; }
+    public bool IsActive { get; set; } = true;
     public List<ModifierItemDto> Items { get; set; } = new();
 }
 
@@ -201,6 +203,16 @@ public interface IModifierService
     /// Deletes a modifier group.
     /// </summary>
     Task<bool> DeleteModifierGroupAsync(int id, int deletedByUserId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sets the active status of a modifier group.
+    /// </summary>
+    /// <param name="groupId">The modifier group ID.</param>
+    /// <param name="isActive">The active status to set.</param>
+    /// <param name="modifiedByUserId">The user ID making the change.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if successful; false if group not found.</returns>
+    Task<bool> SetModifierGroupActiveAsync(int groupId, bool isActive, int modifiedByUserId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Duplicates a modifier group.

@@ -1,0 +1,217 @@
+<Window x:Class="HospitalityPOS.WPF.Views.Dialogs.ExpenseBudgetEditorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        mc:Ignorable="d"
+        Title="Expense Budget"
+        Width="480" Height="580"
+        WindowStartupLocation="CenterOwner"
+        Background="#1E1E2E"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <!-- Modern TextBox Style -->
+        <Style x:Key="ModernTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          VerticalAlignment="Center"
+                                          Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#F59E0B"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern ComboBox Style -->
+        <Style x:Key="ModernComboBox" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+        </Style>
+
+        <!-- Modern Button Style -->
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="20,10">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="#3D3D5C"/>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="#1E1E2E" CornerRadius="12" BorderBrush="#3D3D5C" BorderThickness="1">
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row="0" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <TextBlock x:Name="TitleText" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Set spending limits and track expenses" Foreground="#9CA3AF" FontSize="13" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <Button Grid.Column="1" Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets"
+                        Click="CloseButton_Click"
+                        Background="Transparent" BorderThickness="0"
+                        Foreground="#9CA3AF" FontSize="16" Padding="8"
+                        Cursor="Hand" VerticalAlignment="Top"/>
+            </Grid>
+
+            <!-- Form Content -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <!-- Name -->
+                    <TextBlock Text="Budget Name *" Foreground="#9CA3AF" FontSize="12" Margin="0,0,0,6"/>
+                    <TextBox x:Name="NameTextBox" Style="{StaticResource ModernTextBox}"
+                             MaxLength="100"/>
+
+                    <!-- Category (Optional - null for overall budget) -->
+                    <TextBlock Text="Category (leave empty for overall budget)" Foreground="#9CA3AF" FontSize="12" Margin="0,16,0,6"/>
+                    <ComboBox x:Name="CategoryComboBox" Style="{StaticResource ModernComboBox}"
+                              DisplayMemberPath="Name"/>
+
+                    <!-- Amount -->
+                    <TextBlock Text="Budget Amount (KES) *" Foreground="#9CA3AF" FontSize="12" Margin="0,16,0,6"/>
+                    <TextBox x:Name="AmountTextBox" Style="{StaticResource ModernTextBox}"
+                             PreviewTextInput="NumberOnly_PreviewTextInput"/>
+
+                    <!-- Period Type and Year -->
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Period Type *" Foreground="#9CA3AF" FontSize="12" Margin="0,0,0,6"/>
+                            <ComboBox x:Name="PeriodTypeComboBox" Style="{StaticResource ModernComboBox}"
+                                      SelectionChanged="PeriodTypeComboBox_SelectionChanged"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Year *" Foreground="#9CA3AF" FontSize="12" Margin="0,0,0,6"/>
+                            <ComboBox x:Name="YearComboBox" Style="{StaticResource ModernComboBox}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Month/Quarter (depends on period type) -->
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" x:Name="MonthPanel">
+                            <TextBlock Text="Month" Foreground="#9CA3AF" FontSize="12" Margin="0,0,0,6"/>
+                            <ComboBox x:Name="MonthComboBox" Style="{StaticResource ModernComboBox}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" x:Name="QuarterPanel" Visibility="Collapsed">
+                            <TextBlock Text="Quarter" Foreground="#9CA3AF" FontSize="12" Margin="0,0,0,6"/>
+                            <ComboBox x:Name="QuarterComboBox" Style="{StaticResource ModernComboBox}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Alert Threshold %" Foreground="#9CA3AF" FontSize="12" Margin="0,0,0,6"/>
+                            <TextBox x:Name="ThresholdTextBox" Style="{StaticResource ModernTextBox}"
+                                     Text="80" PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Date Range Info -->
+                    <Border Background="#2D2D44" CornerRadius="8" Padding="12" Margin="0,16,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                       Foreground="#3B82F6" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <TextBlock x:Name="DateRangeText" Foreground="#9CA3AF" FontSize="13"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Notes -->
+                    <TextBlock Text="Notes" Foreground="#9CA3AF" FontSize="12" Margin="0,16,0,6"/>
+                    <TextBox x:Name="NotesTextBox" Style="{StaticResource ModernTextBox}"
+                             Height="80" TextWrapping="Wrap" AcceptsReturn="True"
+                             VerticalContentAlignment="Top" MaxLength="500"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Action Buttons -->
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="ErrorText" Foreground="#EF4444" FontSize="12"
+                           VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="200"/>
+
+                <Button Grid.Column="1" Content="Cancel" Style="{StaticResource ModernButton}"
+                        Click="CancelButton_Click" Margin="0,0,12,0"/>
+
+                <Button Grid.Column="2" x:Name="SaveButton" Content="Save" Style="{StaticResource ModernButton}"
+                        Background="#10B981" Click="SaveButton_Click"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

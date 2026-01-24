@@ -211,26 +211,26 @@ public partial class ExpenseCategoryManagementViewModel : ObservableObject, INav
     {
         try
         {
-            var name = await _dialogService.ShowInputAsync("New Category", "Enter category name:");
-            if (string.IsNullOrWhiteSpace(name)) return;
-
-            var description = await _dialogService.ShowInputAsync("Category Description", "Enter description (optional):");
+            var result = await _dialogService.ShowExpenseCategoryEditorDialogAsync(null);
+            if (result == null) return;
 
             using var scope = _scopeFactory.CreateScope();
             var expenseService = scope.ServiceProvider.GetRequiredService<IExpenseService>();
 
             var category = new ExpenseCategory
             {
-                Name = name.Trim(),
-                Description = description?.Trim(),
-                Type = ExpenseCategoryType.Operating,
+                Name = result.Name,
+                Description = result.Description,
+                Type = result.Type,
+                Icon = result.Icon,
+                Color = result.Color,
                 IsActive = true,
                 IsSystemCategory = false,
                 SortOrder = 999
             };
 
             await expenseService.CreateCategoryAsync(category);
-            _logger.Information("Created expense category: {Name}", category.Name);
+            _logger.Information("Created expense category: {Name} with type {Type}", category.Name, category.Type);
 
             await LoadDataAsync();
         }
@@ -285,17 +285,27 @@ public partial class ExpenseCategoryManagementViewModel : ObservableObject, INav
 
         try
         {
-            var newName = await _dialogService.ShowInputAsync("Edit Category", "Enter new name:", category.Name);
-            if (string.IsNullOrWhiteSpace(newName) || newName == category.Name) return;
+            var result = await _dialogService.ShowExpenseCategoryEditorDialogAsync(category);
+            if (result == null) return;
 
             using var scope = _scopeFactory.CreateScope();
             var expenseService = scope.ServiceProvider.GetRequiredService<IExpenseService>();
 
-            category.Name = newName.Trim();
-            await expenseService.UpdateCategoryAsync(category);
-            _logger.Information("Updated expense category: {Name}", category.Name);
+            category.Name = result.Name;
+            category.Description = result.Description;
+            category.Type = result.Type;
+            category.Icon = result.Icon;
+            category.Color = result.Color;
 
+            await expenseService.UpdateCategoryAsync(category);
+            _logger.Information("Updated expense category: {Name} with type {Type}", category.Name, category.Type);
+
+            var selectedId = SelectedCategory?.Id;
             await LoadDataAsync();
+            if (selectedId.HasValue)
+            {
+                SelectedCategory = _allCategories.FirstOrDefault(c => c.Id == selectedId);
+            }
         }
         catch (Exception ex)
         {

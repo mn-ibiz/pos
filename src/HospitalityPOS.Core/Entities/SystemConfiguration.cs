@@ -193,6 +193,85 @@ public class SystemConfiguration
 
     #endregion
 
+    #region Purchase Order Auto-Generation Settings
+
+    /// <summary>
+    /// Gets or sets whether automatic PO generation from reorder suggestions is enabled.
+    /// </summary>
+    public bool AutoGeneratePurchaseOrders { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets whether to auto-send POs to suppliers (vs keep as draft).
+    /// </summary>
+    public bool AutoSendPurchaseOrders { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets the threshold below which POs are auto-approved (0 = always require approval).
+    /// </summary>
+    public decimal AutoApprovalThreshold { get; set; } = 0;
+
+    /// <summary>
+    /// Gets or sets whether manager approval is required for all POs.
+    /// </summary>
+    public bool RequireManagerApproval { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets how often to check stock levels in minutes.
+    /// </summary>
+    public int StockCheckIntervalMinutes { get; set; } = 15;
+
+    /// <summary>
+    /// Gets or sets whether to send notifications when stock is low.
+    /// </summary>
+    public bool NotifyOnLowStock { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets whether to send notifications when a PO is generated.
+    /// </summary>
+    public bool NotifyOnPOGenerated { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets whether to send notifications when a PO is sent to supplier.
+    /// </summary>
+    public bool NotifyOnPOSent { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the low stock warning threshold in days of stock coverage.
+    /// </summary>
+    public int LowStockThresholdDays { get; set; } = 7;
+
+    /// <summary>
+    /// Gets or sets the default supplier lead time in days if not specified on supplier.
+    /// </summary>
+    public int DefaultLeadTimeDays { get; set; } = 3;
+
+    /// <summary>
+    /// Gets or sets whether to combine multiple items into single PO per supplier.
+    /// </summary>
+    public bool ConsolidatePOsBySupplier { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the minimum PO amount (don't generate POs below this value).
+    /// </summary>
+    public decimal MinimumPOAmount { get; set; } = 0;
+
+    /// <summary>
+    /// Gets or sets the maximum items per purchase order.
+    /// </summary>
+    public int MaxItemsPerPO { get; set; } = 50;
+
+    /// <summary>
+    /// Gets or sets whether to send a daily digest of pending POs.
+    /// </summary>
+    public bool SendDailyPendingPODigest { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the hour of day to send the daily PO digest (0-23).
+    /// </summary>
+    public int DailyDigestHour { get; set; } = 8;
+
+    #endregion
+
     /// <summary>
     /// Gets or sets whether setup has been completed.
     /// </summary>

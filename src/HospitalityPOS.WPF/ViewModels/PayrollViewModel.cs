@@ -251,9 +251,11 @@ public partial class PayrollViewModel : ObservableObject
             var payrollService = scope.ServiceProvider.GetRequiredService<IPayrollService>();
 
             var html = await payrollService.GeneratePayslipHtmlAsync(SelectedPayslip.Id);
+            var employeeName = SelectedPayslip.Employee?.FullName ?? "Employee";
+            var periodName = SelectedPeriod?.PeriodName ?? "Payslip";
+            var filename = $"Payslip_{SelectedPayslip.Employee?.EmployeeNumber}_{periodName.Replace(" ", "_")}.pdf";
 
-            // Show in dialog or save as HTML file
-            await _dialogService.ShowInfoAsync("Payslip preview coming soon. The payslip has been generated.");
+            await _dialogService.ShowHtmlPreviewAsync($"Payslip - {employeeName}", periodName, html, filename);
         }
         catch (Exception ex)
         {

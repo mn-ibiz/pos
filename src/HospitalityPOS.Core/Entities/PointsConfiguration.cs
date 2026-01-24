@@ -61,4 +61,14 @@ public class PointsConfiguration : BaseEntity
     /// Gets or sets the description of this configuration.
     /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// Gets or sets the welcome bonus points awarded to new members on enrollment (0 = disabled).
+    /// </summary>
+    public int WelcomeBonusPoints { get; set; } = 0;
+
+    /// <summary>
+    /// Gets or sets the custom welcome bonus message for SMS.
+    /// </summary>
+    public string? WelcomeBonusMessage { get; set; }
 }

@@ -26,9 +26,35 @@ public class Supplier : BaseEntity
     public string? Phone { get; set; }
 
     /// <summary>
-    /// Gets or sets the email address.
+    /// Gets or sets the general email address.
     /// </summary>
     public string? Email { get; set; }
+
+    /// <summary>
+    /// Gets or sets the email specifically for receiving Purchase Orders.
+    /// Falls back to main Email if not set.
+    /// </summary>
+    public string? OrderEmail { get; set; }
+
+    /// <summary>
+    /// Gets or sets the email for accounts/invoices/payments.
+    /// </summary>
+    public string? AccountsEmail { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to automatically send POs by email when submitted.
+    /// </summary>
+    public bool SendPOByEmail { get; set; }
+
+    /// <summary>
+    /// Gets or sets CC email addresses for PO emails (comma-separated).
+    /// </summary>
+    public string? EmailCcAddresses { get; set; }
+
+    /// <summary>
+    /// Gets or sets the preferred language for email communications.
+    /// </summary>
+    public string? PreferredLanguage { get; set; }
 
     /// <summary>
     /// Gets or sets the street address.
@@ -92,5 +118,12 @@ public class Supplier : BaseEntity
     public virtual ICollection<SupplierPayment> SupplierPayments { get; set; } = new List<SupplierPayment>();
     public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();
     public virtual ICollection<RecurringExpense> RecurringExpenses { get; set; } = new List<RecurringExpense>();
+    public virtual ICollection<SupplierContact> Contacts { get; set; } = new List<SupplierContact>();
     public virtual ExpenseCategory? DefaultExpenseCategory { get; set; }
+
+    /// <summary>
+    /// Gets the primary email for PO communications.
+    /// Returns OrderEmail if set, otherwise falls back to general Email.
+    /// </summary>
+    public string? GetPOEmail() => !string.IsNullOrEmpty(OrderEmail) ? OrderEmail : Email;
 }

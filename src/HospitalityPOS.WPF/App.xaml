@@ -4,8 +4,8 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Theme resources (loaded dynamically by ThemeService, Dark is default) -->
-                <ResourceDictionary Source="Resources/Themes/DarkTheme.xaml" />
+                <!-- Theme resources (loaded dynamically by ThemeService, Light is default) -->
+                <ResourceDictionary Source="Resources/Themes/LightTheme.xaml" />
                 <!-- Base colors (accent colors that don't change with theme) -->
                 <ResourceDictionary Source="Resources/Colors.xaml" />
                 <!-- Styles that use theme resources -->

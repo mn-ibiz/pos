@@ -651,6 +651,40 @@ public class DialogService : IDialogService
     }
 
     /// <inheritdoc />
+    public Task ShowSupplierStatementDialogAsync(Supplier supplier)
+    {
+        ArgumentNullException.ThrowIfNull(supplier);
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            var dialog = new HospitalityPOS.WPF.Views.Dialogs.SupplierStatementDialog(supplier)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            dialog.ShowDialog();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public Task ShowHtmlPreviewAsync(string title, string? subtitle, string htmlContent, string? exportFilename = null)
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            var dialog = new HospitalityPOS.WPF.Views.Dialogs.HtmlPreviewDialog(title, subtitle, htmlContent, exportFilename)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            dialog.ShowDialog();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
     public Task<VariantOptionEditorResult?> ShowVariantOptionEditorDialogAsync(VariantOption? existingOption)
     {
         var result = Application.Current.Dispatcher.Invoke(() =>
@@ -814,6 +848,110 @@ public class DialogService : IDialogService
 
             // Initialize with data
             dialog.Initialize(categories, suppliers, paymentMethods);
+
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.Result;
+            }
+
+            return null;
+        });
+
+        return Task.FromResult(result);
+    }
+
+    /// <inheritdoc />
+    public Task<ExpenseCategoryEditorResult?> ShowExpenseCategoryEditorDialogAsync(ExpenseCategory? existingCategory)
+    {
+        var result = Application.Current.Dispatcher.Invoke<ExpenseCategoryEditorResult?>(() =>
+        {
+            var dialog = new ExpenseCategoryEditorDialog(existingCategory)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.Result;
+            }
+
+            return null;
+        });
+
+        return Task.FromResult(result);
+    }
+
+    /// <inheritdoc />
+    public Task<ManualAttendanceEntryResult?> ShowManualAttendanceEntryDialogAsync(Employee? employee)
+    {
+        var result = Application.Current.Dispatcher.Invoke<ManualAttendanceEntryResult?>(() =>
+        {
+            var dialog = new ManualAttendanceEntryDialog(employee)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.Result;
+            }
+
+            return null;
+        });
+
+        return Task.FromResult(result);
+    }
+
+    /// <inheritdoc />
+    public Task<RecurringExpense?> ShowRecurringExpenseEditorDialogAsync(RecurringExpense? existingExpense)
+    {
+        var result = Application.Current.Dispatcher.Invoke<RecurringExpense?>(() =>
+        {
+            // Load required data
+            using var scope = App.Services.CreateScope();
+            var expenseService = scope.ServiceProvider.GetRequiredService<IExpenseService>();
+            var supplierService = scope.ServiceProvider.GetRequiredService<ISupplierService>();
+            var paymentMethodService = scope.ServiceProvider.GetRequiredService<IPaymentMethodService>();
+
+            var categories = expenseService.GetCategoriesAsync().GetAwaiter().GetResult();
+            var suppliers = supplierService.GetAllSuppliersAsync().GetAwaiter().GetResult();
+            var paymentMethods = paymentMethodService.GetAllPaymentMethodsAsync().GetAwaiter().GetResult();
+
+            var dialog = new RecurringExpenseEditorDialog(existingExpense)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            dialog.Initialize(categories.ToList(), suppliers.ToList(), paymentMethods.ToList());
+
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.Result;
+            }
+
+            return null;
+        });
+
+        return Task.FromResult(result);
+    }
+
+    /// <inheritdoc />
+    public Task<ExpenseBudget?> ShowExpenseBudgetEditorDialogAsync(ExpenseBudget? existingBudget)
+    {
+        var result = Application.Current.Dispatcher.Invoke<ExpenseBudget?>(() =>
+        {
+            // Load required data
+            using var scope = App.Services.CreateScope();
+            var expenseService = scope.ServiceProvider.GetRequiredService<IExpenseService>();
+
+            var categories = expenseService.GetCategoriesAsync().GetAwaiter().GetResult();
+
+            var dialog = new ExpenseBudgetEditorDialog(existingBudget)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            dialog.Initialize(categories.ToList());
 
             if (dialog.ShowDialog() == true)
             {

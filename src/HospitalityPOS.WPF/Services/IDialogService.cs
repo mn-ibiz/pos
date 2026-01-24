@@ -265,6 +265,21 @@ public interface IDialogService
         HospitalityPOS.Core.Entities.Supplier supplier);
 
     /// <summary>
+    /// Shows the Supplier Statement dialog displaying transaction history and balances.
+    /// </summary>
+    /// <param name="supplier">The supplier to view statement for.</param>
+    Task ShowSupplierStatementDialogAsync(HospitalityPOS.Core.Entities.Supplier supplier);
+
+    /// <summary>
+    /// Shows an HTML preview dialog for viewing HTML content.
+    /// </summary>
+    /// <param name="title">Dialog title.</param>
+    /// <param name="subtitle">Optional subtitle.</param>
+    /// <param name="htmlContent">HTML content to display.</param>
+    /// <param name="exportFilename">Optional filename for PDF export.</param>
+    Task ShowHtmlPreviewAsync(string title, string? subtitle, string htmlContent, string? exportFilename = null);
+
+    /// <summary>
     /// Shows the Variant Option Editor dialog for creating or editing a variant option.
     /// </summary>
     /// <param name="existingOption">The variant option to edit, or null for creating a new one.</param>
@@ -329,6 +344,38 @@ public interface IDialogService
     /// <returns>The expense editor result if saved, null if cancelled.</returns>
     Task<HospitalityPOS.WPF.Views.Dialogs.ExpenseEditorResult?> ShowExpenseEditorDialogAsync(
         HospitalityPOS.Core.Entities.Expense? existingExpense);
+
+    /// <summary>
+    /// Shows the Expense Category Editor dialog for creating or editing an expense category.
+    /// </summary>
+    /// <param name="existingCategory">The category to edit, or null for creating a new category.</param>
+    /// <returns>The expense category editor result if saved, null if cancelled.</returns>
+    Task<HospitalityPOS.WPF.Views.Dialogs.ExpenseCategoryEditorResult?> ShowExpenseCategoryEditorDialogAsync(
+        HospitalityPOS.Core.Entities.ExpenseCategory? existingCategory);
+
+    /// <summary>
+    /// Shows the Manual Attendance Entry dialog.
+    /// </summary>
+    /// <param name="employee">The employee for the manual entry.</param>
+    /// <returns>The manual attendance entry result if submitted, null if cancelled.</returns>
+    Task<HospitalityPOS.WPF.Views.Dialogs.ManualAttendanceEntryResult?> ShowManualAttendanceEntryDialogAsync(
+        HospitalityPOS.Core.Entities.Employee? employee);
+
+    /// <summary>
+    /// Shows the Recurring Expense Editor dialog for creating or editing a recurring expense.
+    /// </summary>
+    /// <param name="existingExpense">The recurring expense to edit, or null for creating a new one.</param>
+    /// <returns>The recurring expense if saved, null if cancelled.</returns>
+    Task<HospitalityPOS.Core.Entities.RecurringExpense?> ShowRecurringExpenseEditorDialogAsync(
+        HospitalityPOS.Core.Entities.RecurringExpense? existingExpense);
+
+    /// <summary>
+    /// Shows the Expense Budget Editor dialog for creating or editing an expense budget.
+    /// </summary>
+    /// <param name="existingBudget">The budget to edit, or null for creating a new one.</param>
+    /// <returns>The expense budget if saved, null if cancelled.</returns>
+    Task<HospitalityPOS.Core.Entities.ExpenseBudget?> ShowExpenseBudgetEditorDialogAsync(
+        HospitalityPOS.Core.Entities.ExpenseBudget? existingBudget);
 }
 
 /// <summary>

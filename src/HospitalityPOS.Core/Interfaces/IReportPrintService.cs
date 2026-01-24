@@ -41,4 +41,43 @@ public interface IReportPrintService
     /// <param name="content">The CSV content.</param>
     /// <param name="fileName">The base file name (without extension).</param>
     Task ExportToCsvAsync(string content, string fileName);
+
+    #region Inventory Reports
+
+    /// <summary>
+    /// Prints the current stock report.
+    /// </summary>
+    /// <param name="report">The current stock report result.</param>
+    /// <returns>A task representing the async operation.</returns>
+    Task PrintCurrentStockReportAsync(CurrentStockReportResult report);
+
+    /// <summary>
+    /// Prints the low stock alert report.
+    /// </summary>
+    /// <param name="report">The low stock report result.</param>
+    /// <returns>A task representing the async operation.</returns>
+    Task PrintLowStockReportAsync(LowStockReportResult report);
+
+    /// <summary>
+    /// Prints the stock movement report.
+    /// </summary>
+    /// <param name="report">The stock movement report result.</param>
+    /// <returns>A task representing the async operation.</returns>
+    Task PrintStockMovementReportAsync(StockMovementReportResult report);
+
+    /// <summary>
+    /// Prints the stock valuation report.
+    /// </summary>
+    /// <param name="report">The stock valuation report result.</param>
+    /// <returns>A task representing the async operation.</returns>
+    Task PrintStockValuationReportAsync(StockValuationReportResult report);
+
+    /// <summary>
+    /// Prints the dead stock report.
+    /// </summary>
+    /// <param name="report">The dead stock report result.</param>
+    /// <returns>A task representing the async operation.</returns>
+    Task PrintDeadStockReportAsync(DeadStockReportResult report);
+
+    #endregion
 }

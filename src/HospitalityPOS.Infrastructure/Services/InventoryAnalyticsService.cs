@@ -11,10 +11,12 @@ namespace HospitalityPOS.Infrastructure.Services;
 public class InventoryAnalyticsService : IInventoryAnalyticsService
 {
     private readonly POSDbContext _context;
+    private readonly ISystemConfigurationService _configService;
 
-    public InventoryAnalyticsService(POSDbContext context)
+    public InventoryAnalyticsService(POSDbContext context, ISystemConfigurationService configService)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
+        _configService = configService ?? throw new ArgumentNullException(nameof(configService));
     }
 
     #region Stock Valuation Methods
@@ -666,6 +668,95 @@ public class InventoryAnalyticsService : IInventoryAnalyticsService
     }
 
     /// <inheritdoc />
+    public async Task<IEnumerable<ReorderSuggestion>> GenerateLowStockSuggestionsAsync(
+        int storeId,
+        CancellationToken cancellationToken = default)
+    {
+        // Get products with low stock that don't have an explicit reorder rule
+        var productsWithRules = await _context.ReorderRules
+            .Where(r => r.StoreId == storeId)
+            .Select(r => r.ProductId)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var lowStockProducts = await _context.Products
+            .Include(p => p.Inventories.Where(i => i.StoreId == storeId))
+            .Where(p => p.IsActive && !p.IsDeleted)
+            .Where(p => p.MinimumStock > 0) // Only products with MinimumStock configured
+            .Where(p => !productsWithRules.Contains(p.Id)) // Exclude products with explicit rules
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var suggestions = new List<ReorderSuggestion>();
+
+        foreach (var product in lowStockProducts)
+        {
+            var inventory = product.Inventories.FirstOrDefault();
+            var currentStock = inventory?.QuantityOnHand ?? 0;
+
+            if (currentStock <= product.MinimumStock)
+            {
+                // Check for existing pending suggestion
+                var existingSuggestion = await _context.ReorderSuggestions
+                    .AnyAsync(s => s.StoreId == storeId &&
+                                  s.ProductId == product.Id &&
+                                  s.Status == "Pending", cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (!existingSuggestion)
+                {
+                    // Calculate average daily sales (last 30 days)
+                    var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
+                    var salesQty = await _context.OrderItems
+                        .Where(oi => oi.ProductId == product.Id)
+                        .Where(oi => oi.Order != null && oi.Order.CreatedAt >= thirtyDaysAgo)
+                        .SumAsync(oi => (decimal?)oi.Quantity ?? 0, cancellationToken)
+                        .ConfigureAwait(false);
+
+                    var avgDailySales = salesQty / 30m;
+                    var daysUntilStockout = avgDailySales > 0
+                        ? (int)(currentStock / avgDailySales)
+                        : 999;
+
+                    // Suggested quantity: bring stock up to 2x minimum + buffer for lead time
+                    var leadTimeDays = 7; // Default lead time
+                    var suggestedQty = Math.Max(1, (product.MinimumStock * 2) + (int)(avgDailySales * leadTimeDays) - (int)currentStock);
+
+                    var priority = daysUntilStockout switch
+                    {
+                        <= 3 => "Critical",
+                        <= 7 => "High",
+                        <= 14 => "Medium",
+                        _ => "Low"
+                    };
+
+                    var suggestion = new ReorderSuggestion
+                    {
+                        StoreId = storeId,
+                        ProductId = product.Id,
+                        SupplierId = product.PreferredSupplierId,
+                        CurrentStock = currentStock,
+                        ReorderPoint = product.MinimumStock,
+                        SuggestedQuantity = suggestedQty,
+                        EstimatedCost = suggestedQty * product.Cost,
+                        Status = "Pending",
+                        Priority = priority,
+                        DaysUntilStockout = daysUntilStockout,
+                        Notes = "Auto-generated from low stock",
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    _context.ReorderSuggestions.Add(suggestion);
+                    suggestions.Add(suggestion);
+                }
+            }
+        }
+
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return suggestions;
+    }
+
+    /// <inheritdoc />
     public async Task<IEnumerable<ReorderSuggestion>> GetPendingReorderSuggestionsAsync(
         int storeId,
         CancellationToken cancellationToken = default)
@@ -785,6 +876,12 @@ public class InventoryAnalyticsService : IInventoryAnalyticsService
         IEnumerable<int>? suggestionIds = null,
         CancellationToken cancellationToken = default)
     {
+        // Get system configuration for consolidation settings
+        var config = await _configService.GetConfigurationAsync().ConfigureAwait(false);
+        var maxItemsPerPO = config?.MaxItemsPerPO ?? 50;
+        var minimumPOAmount = config?.MinimumPOAmount ?? 0;
+        var consolidateBySupplier = config?.ConsolidatePOsBySupplier ?? true;
+
         var query = _context.ReorderSuggestions
             .Include(s => s.Supplier)
             .Include(s => s.Product)
@@ -800,53 +897,88 @@ public class InventoryAnalyticsService : IInventoryAnalyticsService
             SuggestionsProcessed = suggestions.Count
         };
 
-        // Group by supplier
-        var bySupplier = suggestions.GroupBy(s => s.SupplierId ?? 0);
+        // Group by supplier if consolidation is enabled, otherwise process individually
+        var supplierGroups = consolidateBySupplier
+            ? suggestions.GroupBy(s => s.SupplierId ?? 0).ToList()
+            : suggestions.Select(s => new { Key = s.SupplierId ?? 0, Items = new List<ReorderSuggestion> { s } })
+                        .GroupBy(x => x.Key, x => x.Items.First()).ToList();
 
-        foreach (var group in bySupplier)
+        var poCounter = 0;
+        foreach (var group in supplierGroups)
         {
             var supplierId = group.Key;
             if (supplierId == 0) continue;
 
-            var po = new PurchaseOrder
-            {
-                StoreId = storeId,
-                SupplierId = supplierId,
-                OrderNumber = $"PO-{DateTime.UtcNow:yyyyMMddHHmmss}",
-                OrderDate = DateTime.UtcNow,
-                Status = "Draft",
-                TotalAmount = group.Sum(s => s.EstimatedCost),
-                CreatedAt = DateTime.UtcNow
-            };
+            var supplierSuggestions = group.ToList();
 
-            _context.PurchaseOrders.Add(po);
-            await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            // Split into chunks if exceeding MaxItemsPerPO
+            var chunks = ChunkList(supplierSuggestions, maxItemsPerPO);
 
-            foreach (var suggestion in group)
+            foreach (var chunk in chunks)
             {
-                var poItem = new PurchaseOrderItem
+                var chunkTotal = chunk.Sum(s => s.EstimatedCost);
+
+                // Skip if below minimum PO amount
+                if (chunkTotal < minimumPOAmount)
                 {
-                    PurchaseOrderId = po.Id,
-                    ProductId = suggestion.ProductId,
-                    Quantity = suggestion.SuggestedQuantity,
-                    UnitPrice = suggestion.Product?.Cost ?? 0,
-                    TotalPrice = suggestion.EstimatedCost,
+                    result.SkippedBelowMinimum += chunk.Count;
+                    continue;
+                }
+
+                poCounter++;
+                var po = new PurchaseOrder
+                {
+                    StoreId = storeId,
+                    SupplierId = supplierId,
+                    OrderNumber = $"PO-{DateTime.UtcNow:yyyyMMddHHmmss}-{poCounter:D3}",
+                    OrderDate = DateTime.UtcNow,
+                    Status = "Draft",
+                    TotalAmount = chunkTotal,
                     CreatedAt = DateTime.UtcNow
                 };
-                _context.PurchaseOrderItems.Add(poItem);
 
-                suggestion.Status = "Converted";
-                suggestion.PurchaseOrderId = po.Id;
-                suggestion.UpdatedAt = DateTime.UtcNow;
+                _context.PurchaseOrders.Add(po);
+                await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                foreach (var suggestion in chunk)
+                {
+                    var poItem = new PurchaseOrderItem
+                    {
+                        PurchaseOrderId = po.Id,
+                        ProductId = suggestion.ProductId,
+                        Quantity = suggestion.SuggestedQuantity,
+                        UnitPrice = suggestion.Product?.Cost ?? 0,
+                        TotalPrice = suggestion.EstimatedCost,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.PurchaseOrderItems.Add(poItem);
+
+                    suggestion.Status = "Converted";
+                    suggestion.PurchaseOrderId = po.Id;
+                    suggestion.UpdatedAt = DateTime.UtcNow;
+                }
+
+                result.PurchaseOrderIds.Add(po.Id);
+                result.PurchaseOrdersCreated++;
+                result.TotalOrderValue += po.TotalAmount;
             }
-
-            result.PurchaseOrderIds.Add(po.Id);
-            result.PurchaseOrdersCreated++;
-            result.TotalOrderValue += po.TotalAmount;
         }
 
         await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return result;
+    }
+
+    /// <summary>
+    /// Chunks a list into smaller lists of specified size.
+    /// </summary>
+    private static List<List<T>> ChunkList<T>(List<T> source, int chunkSize)
+    {
+        var chunks = new List<List<T>>();
+        for (var i = 0; i < source.Count; i += chunkSize)
+        {
+            chunks.Add(source.Skip(i).Take(chunkSize).ToList());
+        }
+        return chunks;
     }
 
     /// <inheritdoc />

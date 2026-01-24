@@ -19,6 +19,7 @@ public partial class ExpenseListViewModel : ObservableObject, INavigationAware
     private readonly IDialogService _dialogService;
     private readonly ISessionService _sessionService;
     private readonly INavigationService _navigationService;
+    private readonly IExportService _exportService;
     private readonly ILogger _logger;
 
     #region Observable Properties
@@ -104,12 +105,14 @@ public partial class ExpenseListViewModel : ObservableObject, INavigationAware
         IDialogService dialogService,
         ISessionService sessionService,
         INavigationService navigationService,
+        IExportService exportService,
         ILogger logger)
     {
         _scopeFactory = scopeFactory;
         _dialogService = dialogService;
         _sessionService = sessionService;
         _navigationService = navigationService;
+        _exportService = exportService;
         _logger = logger;
 
         // Default date range - current month
@@ -439,12 +442,59 @@ public partial class ExpenseListViewModel : ObservableObject, INavigationAware
     {
         try
         {
-            await _dialogService.ShowInfoAsync("Export", "Export functionality will be implemented soon.");
+            if (!Expenses.Any())
+            {
+                await _dialogService.ShowInfoAsync("Export", "No expenses to export.");
+                return;
+            }
+
+            IsBusy = true;
+            BusyMessage = "Preparing export...";
+
+            // Transform expenses to export format
+            var exportData = Expenses.Select(e => new
+            {
+                ExpenseNumber = $"EXP-{e.CreatedAt:yyyyMMdd}-{e.Id:D4}",
+                Date = e.ExpenseDate.ToString("yyyy-MM-dd"),
+                e.Description,
+                Category = e.ExpenseCategory?.Name ?? "Uncategorized",
+                Supplier = e.Supplier?.Name ?? "-",
+                Amount = e.Amount,
+                Tax = e.TaxAmount,
+                Total = e.TotalAmount,
+                Status = e.Status.ToString(),
+                PaymentMethod = e.PaymentMethod?.Name ?? "-",
+                Reference = e.PaymentReference ?? "-",
+                Notes = e.Notes ?? "-",
+                IsTaxDeductible = e.IsTaxDeductible ? "Yes" : "No",
+                RecordedBy = e.CreatedByUser?.FullName ?? "Unknown",
+                RecordedAt = e.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+            }).ToList();
+
+            var dateRange = StartDate.HasValue && EndDate.HasValue
+                ? $"_{StartDate:yyyyMMdd}_to_{EndDate:yyyyMMdd}"
+                : $"_{DateTime.Now:yyyyMMdd}";
+            var defaultFileName = $"Expenses{dateRange}";
+
+            var result = await _exportService.ExportToExcelAsync(
+                exportData,
+                defaultFileName,
+                "Expenses");
+
+            if (result)
+            {
+                _logger.Information("Exported {Count} expenses to Excel", Expenses.Count);
+            }
         }
         catch (Exception ex)
         {
             _logger.Error(ex, "Failed to export expenses");
             ErrorMessage = "Failed to export expenses. Please try again.";
+        }
+        finally
+        {
+            IsBusy = false;
+            BusyMessage = string.Empty;
         }
     }
 

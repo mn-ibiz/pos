@@ -357,7 +357,7 @@
                     BorderBrush="#2D2D44">
                 <Grid>
                     <DataGrid ItemsSource="{Binding ModifierGroups}"
-                              SelectedItem="{Binding SelectedModifierGroup}"
+                              SelectedItem="{Binding SelectedGroup}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               Background="Transparent"
@@ -620,7 +620,7 @@
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <!-- No Selection State -->
-                        <StackPanel Visibility="{Binding SelectedModifierGroup, Converter={StaticResource InverseBoolToVisibility}}"
+                        <StackPanel Visibility="{Binding SelectedGroup, Converter={StaticResource InverseBoolToVisibility}}"
                                     VerticalAlignment="Center" Margin="0,40,0,0">
                             <Border Width="64" Height="64" CornerRadius="32" Background="#1F1F33" Margin="0,0,0,16" HorizontalAlignment="Center">
                                 <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="24"
@@ -638,11 +638,11 @@
                         </StackPanel>
 
                         <!-- Selected Group Details -->
-                        <StackPanel Visibility="{Binding SelectedModifierGroup, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel Visibility="{Binding SelectedGroup, Converter={StaticResource BoolToVisibility}}">
                             <!-- Group Avatar -->
                             <Border Width="80" Height="80" CornerRadius="16" HorizontalAlignment="Center" Margin="0,0,0,16"
                                     Background="{StaticResource PrimaryGradient}">
-                                <TextBlock Text="{Binding SelectedModifierGroup.Name[0]}"
+                                <TextBlock Text="{Binding SelectedGroup.Name[0]}"
                                            FontSize="32"
                                            FontWeight="Bold"
                                            Foreground="White"
@@ -651,7 +651,7 @@
                             </Border>
 
                             <!-- Group Name -->
-                            <TextBlock Text="{Binding SelectedModifierGroup.Name}"
+                            <TextBlock Text="{Binding SelectedGroup.Name}"
                                        FontSize="18"
                                        FontWeight="Bold"
                                        Foreground="White"
@@ -662,7 +662,7 @@
                             <!-- Group Type Badge -->
                             <Border CornerRadius="6" Padding="12,6" Margin="0,8,0,0" HorizontalAlignment="Center"
                                     Background="#1F1F33">
-                                <TextBlock Text="{Binding SelectedModifierGroup.SelectionType}"
+                                <TextBlock Text="{Binding SelectedGroup.SelectionType}"
                                            FontSize="12"
                                            Foreground="#9CA3AF"/>
                             </Border>
@@ -687,18 +687,36 @@
                             </Grid>
 
                             <!-- Items List -->
-                            <ItemsControl ItemsSource="{Binding SelectedModifierGroup.Items}">
+                            <ItemsControl ItemsSource="{Binding SelectedGroup.Items}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border Background="#1F1F33" CornerRadius="8" Padding="12" Margin="0,0,0,8">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
 
+                                                <!-- Reorder Buttons -->
+                                                <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0,0,10,0" VerticalAlignment="Center">
+                                                    <Button Style="{StaticResource IconButton}" Width="24" Height="20"
+                                                            Command="{Binding DataContext.MoveItemUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            ToolTip="Move Up">
+                                                        <TextBlock Text="&#xE70E;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#9CA3AF"/>
+                                                    </Button>
+                                                    <Button Style="{StaticResource IconButton}" Width="24" Height="20"
+                                                            Command="{Binding DataContext.MoveItemDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            ToolTip="Move Down">
+                                                        <TextBlock Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#9CA3AF"/>
+                                                    </Button>
+                                                </StackPanel>
+
                                                 <!-- Item Info -->
-                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
                                                     <TextBlock FontSize="11" Foreground="#6B7280" Margin="0,2,0,0">
                                                         <Run Text="KSh "/>
@@ -707,11 +725,27 @@
                                                 </StackPanel>
 
                                                 <!-- Default Badge -->
-                                                <Border Grid.Column="1" CornerRadius="4" Padding="6,2"
+                                                <Border Grid.Column="2" CornerRadius="4" Padding="6,2" Margin="8,0"
                                                         Background="#0D2818"
                                                         Visibility="{Binding IsDefault, Converter={StaticResource BoolToVisibility}}">
                                                     <TextBlock Text="Default" FontSize="10" Foreground="#10B981"/>
                                                 </Border>
+
+                                                <!-- Edit/Delete Buttons -->
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button Style="{StaticResource IconButton}" Width="28" Height="28"
+                                                            Command="{Binding DataContext.EditItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            ToolTip="Edit Item">
+                                                        <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" FontSize="10"/>
+                                                    </Button>
+                                                    <Button Style="{StaticResource IconButton}" Width="28" Height="28"
+                                                            Command="{Binding DataContext.DeleteItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            ToolTip="Delete Item">
+                                                        <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#EF4444"/>
+                                                    </Button>
+                                                </StackPanel>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -720,7 +754,7 @@
 
                             <!-- Empty Items State -->
                             <Border Background="#1F1F33" CornerRadius="8" Padding="20" Margin="0,8,0,0"
-                                    Visibility="{Binding SelectedModifierGroup.Items.Count, Converter={StaticResource InverseBoolToVisibility}}">
+                                    Visibility="{Binding SelectedGroup.Items.Count, Converter={StaticResource InverseBoolToVisibility}}">
                                 <StackPanel HorizontalAlignment="Center">
                                     <TextBlock Text="No items defined"
                                                FontSize="13"

@@ -1,0 +1,295 @@
+<Window x:Class="HospitalityPOS.WPF.Views.Dialogs.ManualAttendanceEntryDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Manual Attendance Entry"
+        Height="620"
+        Width="480"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <Style x:Key="InputTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          VerticalAlignment="Center"
+                                          Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#6E6EAE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="InputPasswordBox" TargetType="PasswordBox">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+        </Style>
+
+        <Style x:Key="InputComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4E4E6E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton"
+                                          Background="{TemplateBinding Background}"
+                                          BorderBrush="{TemplateBinding BorderBrush}"
+                                          BorderThickness="{TemplateBinding BorderThickness}"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          ClickMode="Press">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="32"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ContentPresenter Grid.Column="0"/>
+                                                <Path Grid.Column="1"
+                                                      Data="M 0 0 L 4 4 L 8 0"
+                                                      Fill="White"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"
+                                                      Stroke="White"
+                                                      StrokeThickness="1.5"/>
+                                            </Grid>
+                                        </Border>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter x:Name="ContentSite"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              HorizontalAlignment="Left"
+                                              VerticalAlignment="Center"
+                                              Margin="12,0,32,0"
+                                              IsHitTestVisible="False"/>
+                            <Popup x:Name="Popup"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Border Background="#2D2D44"
+                                        BorderBrush="#4E4E6E"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        MinWidth="{TemplateBinding ActualWidth}"
+                                        MaxHeight="200"
+                                        Margin="0,4,0,0">
+                                    <ScrollViewer>
+                                        <StackPanel IsItemsHost="True"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="8,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="20,10">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#8888AA"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="#1E1E2E"
+            CornerRadius="16"
+            BorderBrush="#3E3E5E"
+            BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0" Background="#252538" CornerRadius="16,16,0,0" Padding="24,16">
+                <StackPanel>
+                    <TextBlock Text="Manual Attendance Entry"
+                               FontSize="22"
+                               FontWeight="SemiBold"
+                               Foreground="White"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Add a missed clock in/out or break entry"
+                               FontSize="13"
+                               Foreground="#8888AA"
+                               HorizontalAlignment="Center"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Form Fields -->
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Padding="24,16">
+                <StackPanel>
+                    <!-- Entry Type -->
+                    <TextBlock Text="Entry Type *" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox x:Name="EntryTypeComboBox" Style="{StaticResource InputComboBox}">
+                        <ComboBoxItem Content="Clock In" Tag="ClockIn" IsSelected="True"/>
+                        <ComboBoxItem Content="Clock Out" Tag="ClockOut"/>
+                        <ComboBoxItem Content="Break Start" Tag="BreakStart"/>
+                        <ComboBoxItem Content="Break End" Tag="BreakEnd"/>
+                    </ComboBox>
+
+                    <!-- Date -->
+                    <TextBlock Text="Date *" Style="{StaticResource FieldLabel}" Margin="0,16,0,4"/>
+                    <DatePicker x:Name="DatePicker"
+                                SelectedDate="{x:Static sys:DateTime.Today}"
+                                Background="#2D2D44"
+                                Foreground="White"
+                                BorderBrush="#4E4E6E"
+                                Height="44"
+                                xmlns:sys="clr-namespace:System;assembly=mscorlib"/>
+
+                    <!-- Time -->
+                    <TextBlock Text="Time *" Style="{StaticResource FieldLabel}" Margin="0,16,0,4"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox x:Name="HourComboBox" Grid.Column="0" Style="{StaticResource InputComboBox}"/>
+                        <TextBlock Grid.Column="1" Text=":" FontSize="20" Foreground="White"
+                                   VerticalAlignment="Center" Margin="10,0"/>
+                        <ComboBox x:Name="MinuteComboBox" Grid.Column="2" Style="{StaticResource InputComboBox}"/>
+                    </Grid>
+
+                    <!-- Reason -->
+                    <TextBlock Text="Reason *" Style="{StaticResource FieldLabel}" Margin="0,16,0,4"/>
+                    <ComboBox x:Name="ReasonComboBox" Style="{StaticResource InputComboBox}">
+                        <ComboBoxItem Content="Forgot to clock in/out" IsSelected="True"/>
+                        <ComboBoxItem Content="System was unavailable"/>
+                        <ComboBoxItem Content="Manager correction"/>
+                        <ComboBoxItem Content="Working offsite"/>
+                        <ComboBoxItem Content="Other"/>
+                    </ComboBox>
+
+                    <!-- Notes -->
+                    <TextBlock Text="Additional Notes" Style="{StaticResource FieldLabel}" Margin="0,16,0,4"/>
+                    <TextBox x:Name="NotesTextBox"
+                             Style="{StaticResource InputTextBox}"
+                             Height="80"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             VerticalContentAlignment="Top"
+                             MaxLength="500"/>
+
+                    <!-- Manager PIN -->
+                    <TextBlock Text="Manager PIN (Required) *" Style="{StaticResource FieldLabel}" Margin="0,16,0,4"/>
+                    <PasswordBox x:Name="ManagerPinBox" Style="{StaticResource InputPasswordBox}" MaxLength="6"/>
+                    <TextBlock Text="A manager PIN is required to authorize manual entries"
+                               FontSize="11"
+                               Foreground="#6B7280"
+                               Margin="0,4,0,0"/>
+
+                    <!-- Error Message -->
+                    <Border x:Name="ErrorBorder"
+                            Background="#3D2030"
+                            CornerRadius="8"
+                            Padding="16"
+                            Margin="0,16,0,0"
+                            Visibility="Collapsed">
+                        <TextBlock x:Name="ErrorTextBlock"
+                                   Foreground="#E74C3C"
+                                   FontSize="13"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Action Buttons -->
+            <Border Grid.Row="2" Background="#252538" CornerRadius="0,0,16,16" Padding="24,16">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancel"
+                            Style="{StaticResource ActionButton}"
+                            Background="#4E4E6E"
+                            Click="CancelButton_Click"/>
+                    <Button Content="Submit Entry"
+                            Style="{StaticResource ActionButton}"
+                            Background="#4CAF50"
+                            Click="SubmitButton_Click"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

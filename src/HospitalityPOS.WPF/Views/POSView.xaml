@@ -1523,5 +1523,124 @@
                 </Grid>
             </Border>
         </Border>
+
+        <!-- Phone Prompt Dialog Overlay -->
+        <Grid Visibility="{Binding ShowPhonePromptDialog, Converter={StaticResource BoolToVisibility}}"
+              Background="#80000000"
+              Panel.ZIndex="100">
+            <Border Background="{DynamicResource ThemeSurface}"
+                    CornerRadius="12"
+                    Padding="32"
+                    MaxWidth="400"
+                    MaxHeight="400"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="20" ShadowDepth="4" Opacity="0.3"/>
+                </Border.Effect>
+                <StackPanel>
+                    <!-- Header -->
+                    <TextBlock Text="&#xE716;" FontFamily="Segoe MDL2 Assets" FontSize="36"
+                               Foreground="#22C55E" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                    <TextBlock Text="Earn Loyalty Points"
+                               FontSize="24"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource ThemeTextPrimary}"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,8"/>
+
+                    <TextBlock Text="Enter customer phone number to earn points"
+                               FontSize="14"
+                               Foreground="{DynamicResource ThemeTextSecondary}"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               Margin="0,0,0,24"/>
+
+                    <!-- Phone Input -->
+                    <TextBox Text="{Binding PhonePromptInput, UpdateSourceTrigger=PropertyChanged}"
+                             FontSize="24"
+                             Height="56"
+                             Padding="16,12"
+                             Margin="0,0,0,8"
+                             MaxLength="13"
+                             HorizontalContentAlignment="Center"
+                             Background="{DynamicResource ThemeInputBackground}"
+                             Foreground="{DynamicResource ThemeTextPrimary}"
+                             BorderBrush="{DynamicResource ThemeBorder}"
+                             BorderThickness="1">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding SubmitPhonePromptCommand}"/>
+                            <KeyBinding Key="Escape" Command="{Binding SkipPhonePromptCommand}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
+
+                    <TextBlock Text="Format: 0712 345 678"
+                               FontSize="12"
+                               Foreground="{DynamicResource ThemeTextMuted}"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,8"/>
+
+                    <!-- Error Message -->
+                    <TextBlock Text="{Binding PhonePromptError}"
+                               Foreground="#EF4444"
+                               FontSize="13"
+                               TextWrapping="Wrap"
+                               HorizontalAlignment="Center"
+                               Visibility="{Binding PhonePromptError, Converter={StaticResource NullToVisibility}}"
+                               Margin="0,0,0,16"/>
+
+                    <!-- Buttons -->
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Content="Skip"
+                                Command="{Binding SkipPhonePromptCommand}"
+                                Height="48"
+                                FontSize="16"
+                                Background="Transparent"
+                                Foreground="{DynamicResource ThemeTextSecondary}"
+                                BorderBrush="{DynamicResource ThemeBorder}"
+                                BorderThickness="1"
+                                Cursor="Hand"/>
+
+                        <Button Grid.Column="2"
+                                Height="48"
+                                FontSize="16"
+                                Background="#10B981"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                Command="{Binding SubmitPhonePromptCommand}"
+                                IsEnabled="{Binding IsProcessingPhonePrompt, Converter={StaticResource InverseBoolConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE72A;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                           Margin="0,0,8,0" VerticalAlignment="Center"
+                                           Visibility="{Binding IsProcessingPhonePrompt, Converter={StaticResource InverseBoolToVisibility}}"/>
+                                <TextBlock Text="&#xE895;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                           Margin="0,0,8,0" VerticalAlignment="Center"
+                                           Visibility="{Binding IsProcessingPhonePrompt, Converter={StaticResource BoolToVisibility}}"/>
+                                <TextBlock VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="Submit"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsProcessingPhonePrompt}" Value="True">
+                                                    <Setter Property="Text" Value="Processing..."/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

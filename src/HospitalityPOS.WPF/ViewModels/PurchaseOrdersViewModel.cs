@@ -23,6 +23,7 @@ public partial class PurchaseOrdersViewModel : ViewModelBase, INavigationAware
     private readonly ISessionService _sessionService;
     private readonly IEmailService _emailService;
     private readonly ISystemConfigurationService _configurationService;
+    private readonly IInventoryAnalyticsService _inventoryAnalyticsService;
 
     [ObservableProperty]
     private ObservableCollection<PurchaseOrder> _purchaseOrders = [];
@@ -98,6 +99,7 @@ public partial class PurchaseOrdersViewModel : ViewModelBase, INavigationAware
         ISessionService sessionService,
         IEmailService emailService,
         ISystemConfigurationService configurationService,
+        IInventoryAnalyticsService inventoryAnalyticsService,
         ILogger logger) : base(logger)
     {
         _purchaseOrderService = purchaseOrderService ?? throw new ArgumentNullException(nameof(purchaseOrderService));
@@ -107,6 +109,7 @@ public partial class PurchaseOrdersViewModel : ViewModelBase, INavigationAware
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
         _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
+        _inventoryAnalyticsService = inventoryAnalyticsService ?? throw new ArgumentNullException(nameof(inventoryAnalyticsService));
 
         Title = "Purchase Orders";
     }
@@ -682,10 +685,19 @@ public partial class PurchaseOrdersViewModel : ViewModelBase, INavigationAware
     /// <summary>
     /// Loads reorder suggestions from analytics service.
     /// </summary>
-    private Task LoadReorderSuggestionsAsync()
+    private async Task LoadReorderSuggestionsAsync()
     {
-        // IInventoryAnalyticsService not available - reorder suggestions disabled
-        return Task.CompletedTask;
+        try
+        {
+            var storeId = _sessionService.CurrentStoreId;
+            var suggestions = await _inventoryAnalyticsService.GetPendingReorderSuggestionsAsync(storeId).ConfigureAwait(true);
+            ReorderSuggestions = new ObservableCollection<ReorderSuggestion>(suggestions);
+        }
+        catch (Exception ex)
+        {
+            Logger.Warning(ex, "Failed to load reorder suggestions");
+            ReorderSuggestions = [];
+        }
     }
 
     /// <summary>
@@ -701,30 +713,79 @@ public partial class PurchaseOrdersViewModel : ViewModelBase, INavigationAware
     /// Creates a purchase order from selected suggestions.
     /// </summary>
     [RelayCommand]
-    private Task CreatePoFromSuggestionsAsync()
+    private async Task CreatePoFromSuggestionsAsync()
     {
-        // IInventoryAnalyticsService not available - reorder suggestions disabled
-        return Task.CompletedTask;
+        var pendingSuggestions = ReorderSuggestions.Where(s => s.Status == "Pending").ToList();
+        if (pendingSuggestions.Count == 0)
+        {
+            await _dialogService.ShowMessageAsync("No Suggestions", "There are no pending suggestions to convert to purchase orders.").ConfigureAwait(true);
+            return;
+        }
+
+        var confirm = await _dialogService.ShowConfirmationAsync(
+            "Create Purchase Orders",
+            $"Create purchase orders from {pendingSuggestions.Count} reorder suggestion(s)?\n\nSuggestions will be grouped by supplier.").ConfigureAwait(true);
+
+        if (!confirm)
+        {
+            return;
+        }
+
+        await ExecuteAsync(async () =>
+        {
+            var storeId = _sessionService.CurrentStoreId;
+            var suggestionIds = pendingSuggestions.Select(s => s.Id).ToList();
+            var result = await _inventoryAnalyticsService.ConvertSuggestionsToPurchaseOrdersAsync(storeId, suggestionIds).ConfigureAwait(true);
+
+            await LoadDataAsync().ConfigureAwait(true);
+
+            await _dialogService.ShowMessageAsync("Success",
+                $"Created {result.PurchaseOrdersCreated} purchase order(s) from {result.SuggestionsProcessed} suggestion(s).").ConfigureAwait(true);
+        }, "Creating purchase orders from suggestions...").ConfigureAwait(true);
     }
 
     /// <summary>
     /// Dismisses a single reorder suggestion.
     /// </summary>
     [RelayCommand]
-    private Task DismissSuggestionAsync(ReorderSuggestion suggestion)
+    private async Task DismissSuggestionAsync(ReorderSuggestion suggestion)
     {
-        // IInventoryAnalyticsService not available - reorder suggestions disabled
-        return Task.CompletedTask;
+        if (suggestion is null)
+        {
+            return;
+        }
+
+        var reason = await _dialogService.ShowInputAsync(
+            "Dismiss Suggestion",
+            $"Enter reason for dismissing the reorder suggestion for {suggestion.Product?.Name}:").ConfigureAwait(true);
+
+        if (reason is null)
+        {
+            return;
+        }
+
+        await ExecuteAsync(async () =>
+        {
+            await _inventoryAnalyticsService.RejectReorderSuggestionAsync(suggestion.Id, reason).ConfigureAwait(true);
+            await LoadReorderSuggestionsAsync().ConfigureAwait(true);
+        }, "Dismissing suggestion...").ConfigureAwait(true);
     }
 
     /// <summary>
-    /// Refreshes reorder suggestions.
+    /// Refreshes reorder suggestions by regenerating them.
     /// </summary>
     [RelayCommand]
-    private Task RefreshSuggestionsAsync()
+    private async Task RefreshSuggestionsAsync()
     {
-        // IInventoryAnalyticsService not available - reorder suggestions disabled
-        return Task.CompletedTask;
+        await ExecuteAsync(async () =>
+        {
+            var storeId = _sessionService.CurrentStoreId;
+            // Generate suggestions from explicit reorder rules
+            await _inventoryAnalyticsService.GenerateReorderSuggestionsAsync(storeId).ConfigureAwait(true);
+            // Also generate suggestions from low stock products without rules
+            await _inventoryAnalyticsService.GenerateLowStockSuggestionsAsync(storeId).ConfigureAwait(true);
+            await LoadReorderSuggestionsAsync().ConfigureAwait(true);
+        }, "Refreshing reorder suggestions...").ConfigureAwait(true);
     }
 
     #endregion

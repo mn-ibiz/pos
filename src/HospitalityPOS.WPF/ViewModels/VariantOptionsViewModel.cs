@@ -337,6 +337,94 @@ public partial class VariantOptionsViewModel : ViewModelBase, INavigationAware
     private bool CanAddValue() => SelectedVariantOption is not null;
 
     /// <summary>
+    /// Edits a variant option value.
+    /// </summary>
+    [RelayCommand]
+    private async Task EditValueAsync(VariantOptionValue? value)
+    {
+        if (value is null || SelectedVariantOption is null) return;
+
+        if (!RequirePermission(PermissionNames.Products.Manage, "edit variant values"))
+        {
+            await _dialogService.ShowErrorAsync("Permission Denied", ErrorMessage ?? "You don't have permission to edit variant values.");
+            return;
+        }
+
+        var result = await _dialogService.ShowVariantValueEditorDialogAsync(value, SelectedVariantOption);
+        if (result is not null)
+        {
+            await ExecuteAsync(async () =>
+            {
+                var dto = new VariantOptionValueDto
+                {
+                    Value = result.Value,
+                    DisplayName = result.DisplayName,
+                    ColorCode = result.ColorCode,
+                    PriceAdjustment = result.PriceAdjustment,
+                    IsPriceAdjustmentPercent = result.IsPriceAdjustmentPercent,
+                    DisplayOrder = result.DisplayOrder,
+                    SkuSuffix = result.SkuSuffix
+                };
+
+                await _variantService.UpdateVariantOptionValueAsync(value.Id, dto, SessionService.CurrentUserId);
+                await _dialogService.ShowMessageAsync("Success", $"Value '{result.Value}' has been updated.");
+
+                var selectedOptionId = SelectedVariantOption.Id;
+                await LoadDataAsync();
+
+                // Re-select the option to show updated values
+                SelectedVariantOption = VariantOptions.FirstOrDefault(o => o.Id == selectedOptionId);
+            }, "Updating variant value...").ConfigureAwait(true);
+        }
+    }
+
+    /// <summary>
+    /// Deletes a variant option value.
+    /// </summary>
+    [RelayCommand]
+    private async Task DeleteValueAsync(VariantOptionValue? value)
+    {
+        if (value is null || SelectedVariantOption is null) return;
+
+        if (!RequirePermission(PermissionNames.Products.Manage, "delete variant values"))
+        {
+            await _dialogService.ShowErrorAsync("Permission Denied", ErrorMessage ?? "You don't have permission to delete variant values.");
+            return;
+        }
+
+        var confirmed = await _dialogService.ShowConfirmationAsync(
+            "Delete Variant Value",
+            $"Are you sure you want to delete the value '{value.Value}'?\n\n" +
+            "This may affect product variants using this value.\n" +
+            "This action cannot be undone.");
+
+        if (!confirmed) return;
+
+        await ExecuteAsync(async () =>
+        {
+            var deleted = await _variantService.DeleteVariantOptionValueAsync(value.Id, SessionService.CurrentUserId);
+            if (deleted)
+            {
+                await _dialogService.ShowMessageAsync(
+                    "Value Deleted",
+                    $"Value '{value.Value}' has been deleted.");
+
+                var selectedOptionId = SelectedVariantOption.Id;
+                await LoadDataAsync();
+
+                // Re-select the option to show updated values
+                SelectedVariantOption = VariantOptions.FirstOrDefault(o => o.Id == selectedOptionId);
+            }
+            else
+            {
+                await _dialogService.ShowErrorAsync(
+                    "Delete Failed",
+                    "Failed to delete the variant value. It may be in use by product variants.");
+            }
+        }, "Deleting variant value...").ConfigureAwait(true);
+    }
+
+    /// <summary>
     /// Goes back to the previous screen.
     /// </summary>
     [RelayCommand]

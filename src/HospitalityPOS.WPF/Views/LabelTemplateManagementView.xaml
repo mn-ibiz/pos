@@ -1,0 +1,679 @@
+<UserControl x:Class="HospitalityPOS.WPF.Views.LabelTemplateManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:HospitalityPOS.WPF.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="700"
+             d:DesignWidth="1200"
+             Background="#1E1E2E">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:Base64ToImageSourceConverter x:Key="Base64ToImageSourceConverter" />
+
+
+        <!-- Form TextBox Style -->
+        <Style x:Key="FormTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Form ComboBox Style -->
+        <Style x:Key="FormComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <!-- Form Label Style -->
+        <Style x:Key="FormLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#9CA3AF"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+
+        <!-- Action Button Style -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#9CA3AF"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}"
+                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3D3D5C"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Expander Style for Groups -->
+        <Style x:Key="GroupExpander" TargetType="Expander">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- Main Content -->
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,24">
+                <TextBlock Text="Label Templates"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           Foreground="White" />
+                <TextBlock Text="Create, manage and organize label templates for your products"
+                           FontSize="14"
+                           Foreground="#8888AA"
+                           Margin="0,4,0,0" />
+            </StackPanel>
+
+            <!-- Toolbar -->
+            <Border Grid.Row="1" Background="#252538" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Filters -->
+                    <ComboBox Grid.Column="0" Width="160"
+                              ItemsSource="{Binding LabelSizes}"
+                              SelectedItem="{Binding SelectedFilterSize}"
+                              DisplayMemberPath="Name"
+                              Style="{StaticResource FormComboBox}"
+                              Margin="0,0,12,0">
+                        <ComboBox.SelectedItem>
+                            <Binding Path="SelectedFilterSize" Mode="TwoWay">
+                                <Binding.FallbackValue>
+                                    <x:Null/>
+                                </Binding.FallbackValue>
+                            </Binding>
+                        </ComboBox.SelectedItem>
+                    </ComboBox>
+
+                    <ComboBox Grid.Column="1" Width="120"
+                              ItemsSource="{Binding TypeFilters}"
+                              SelectedItem="{Binding SelectedTypeFilter}"
+                              Style="{StaticResource FormComboBox}"
+                              Margin="0,0,12,0"/>
+
+                    <!-- Search -->
+                    <Border Grid.Column="2" Background="#2D2D44" CornerRadius="6" Padding="12,0" Width="250">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets"
+                                       Foreground="#6B7280" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="Transparent" BorderThickness="0" Foreground="White"
+                                     VerticalAlignment="Center" Padding="0,8"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Actions -->
+                    <StackPanel Grid.Column="4" Orientation="Horizontal">
+                        <Button Command="{Binding ShowImportFileDialogCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Padding="16,10" Margin="0,0,8,0"
+                                ToolTip="Import template from file (.lbt)">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE8B5;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                           VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="Import File"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Content="Import from Library"
+                                Command="{Binding ShowImportFormCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Padding="16,10" Margin="0,0,8,0"/>
+                        <Button Content="+ New Template"
+                                Command="{Binding ShowCreateFormCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Padding="16,10"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Content Area -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="350"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Template Groups List -->
+                <Border Grid.Column="0" Background="#252538" CornerRadius="8" Margin="0,0,16,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                        <ItemsControl ItemsSource="{Binding TemplateGroups}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Expander IsExpanded="{Binding IsExpanded}" Margin="0,0,0,16">
+                                        <Expander.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="#9CA3AF">
+                                                    <Run Text="{Binding LabelSizeName}"/>
+                                                    <Run Text=" ("/>
+                                                    <Run Text="{Binding TemplateCount}"/>
+                                                    <Run Text=" templates)"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Expander.Header>
+                                        <ItemsControl ItemsSource="{Binding Templates}" Margin="0,8,0,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#2D2D44" CornerRadius="8" Padding="16" Margin="0,0,0,8"
+                                                            Cursor="Hand"
+                                                            MouseLeftButtonDown="TemplateItem_MouseLeftButtonDown">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <!-- Default Star -->
+                                                            <TextBlock Grid.Column="0" Text="&#xE734;"
+                                                                       FontFamily="Segoe MDL2 Assets"
+                                                                       Foreground="#F59E0B" FontSize="18"
+                                                                       Margin="0,0,12,0" VerticalAlignment="Center"
+                                                                       Visibility="{Binding IsDefault, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                                                            <!-- Template Info -->
+                                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
+                                                                               Foreground="White" FontSize="14"/>
+                                                                    <Border Background="#7C3AED" CornerRadius="3" Padding="6,2"
+                                                                            Margin="8,0,0,0"
+                                                                            Visibility="{Binding IsPromoTemplate, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                        <TextBlock Text="PROMO" FontSize="10" FontWeight="Bold"
+                                                                                   Foreground="White"/>
+                                                                    </Border>
+                                                                </StackPanel>
+                                                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                                    <TextBlock Foreground="#6B7280" FontSize="12">
+                                                                        <Run Text="{Binding PrintLanguage}"/>
+                                                                        <Run Text=" • v"/>
+                                                                        <Run Text="{Binding Version}"/>
+                                                                    </TextBlock>
+                                                                    <TextBlock Text="{Binding Description}"
+                                                                               Foreground="#6B7280" FontSize="12"
+                                                                               Margin="8,0,0,0"
+                                                                               TextTrimming="CharacterEllipsis"
+                                                                               MaxWidth="200"/>
+                                                                </StackPanel>
+                                                            </StackPanel>
+
+                                                            <!-- Actions -->
+                                                            <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                                                        VerticalAlignment="Center">
+                                                                <Button Content="Edit" Style="{StaticResource ActionButton}"
+                                                                        Foreground="#3B82F6"
+                                                                        Command="{Binding DataContext.EditTemplateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                        CommandParameter="{Binding}"/>
+                                                                <Button Content="Duplicate" Style="{StaticResource ActionButton}"
+                                                                        Command="{Binding DataContext.DuplicateTemplateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                        CommandParameter="{Binding}"/>
+                                                                <Button Content="Export" Style="{StaticResource ActionButton}"
+                                                                        Command="{Binding DataContext.ExportTemplateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                        CommandParameter="{Binding}"/>
+                                                                <Button Content="&#xE74D;" FontFamily="Segoe MDL2 Assets"
+                                                                        Style="{StaticResource ActionButton}"
+                                                                        Foreground="#EF4444"
+                                                                        Command="{Binding DataContext.DeleteTemplateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                        CommandParameter="{Binding}"/>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Expander>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Empty State -->
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    Visibility="{Binding TemplateGroups.Count, Converter={StaticResource ZeroToVisibilityConverter}, FallbackValue=Collapsed}">
+                            <TextBlock Text="&#xE8F1;" FontFamily="Segoe MDL2 Assets"
+                                       FontSize="64" Foreground="#3D3D5C"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="No templates found" FontSize="18" Foreground="#8888AA"
+                                       HorizontalAlignment="Center" Margin="0,16,0,8"/>
+                            <TextBlock Text="Create a new template or import from the library"
+                                       FontSize="14" Foreground="#555577"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- Preview Panel -->
+                <Border Grid.Column="1" Background="#252538" CornerRadius="8" Padding="16">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock Text="Preview" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="White" Margin="0,0,0,16"/>
+
+                            <!-- Preview Content -->
+                            <Border Background="#FFFFFF" CornerRadius="8" MinHeight="200"
+                                    Padding="8" Margin="0,0,0,16">
+                                <Grid>
+                                    <!-- Loading -->
+                                    <ProgressBar IsIndeterminate="True" Width="100" Height="4"
+                                                 Visibility="{Binding IsPreviewLoading, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                                    <!-- Preview Image (rendered label) -->
+                                    <Image x:Name="PreviewImage"
+                                           Source="{Binding PreviewImageBase64, Converter={StaticResource Base64ToImageSourceConverter}}"
+                                           Stretch="Uniform" MaxHeight="250"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Visibility="{Binding PreviewImageBase64, Converter={StaticResource NullToCollapsedConverter}, FallbackValue=Collapsed}"/>
+
+                                    <!-- Text Preview (fallback) -->
+                                    <Border Background="#16162B" CornerRadius="4" Padding="12"
+                                            Visibility="{Binding PreviewContent, Converter={StaticResource NullToCollapsedConverter}, FallbackValue=Collapsed}">
+                                        <TextBlock Text="{Binding PreviewContent}"
+                                                   Foreground="#9CA3AF" FontFamily="Consolas"
+                                                   FontSize="11" TextWrapping="Wrap"/>
+                                    </Border>
+
+                                    <!-- No Selection -->
+                                    <TextBlock Text="Select a template to preview"
+                                               Foreground="#6B7280" FontStyle="Italic"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Visibility="{Binding SelectedTemplate, Converter={StaticResource NullToVisibleConverter}, FallbackValue=Visible}"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Template Details -->
+                            <StackPanel Visibility="{Binding SelectedTemplate, Converter={StaticResource NullToCollapsedConverter}, FallbackValue=Collapsed}">
+                                <TextBlock Text="Template Details" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="White" Margin="0,0,0,12"/>
+
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Name:" Foreground="#6B7280"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding SelectedTemplate.Name}"
+                                               Foreground="White"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Label Size:" Foreground="#6B7280"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding SelectedTemplate.LabelSizeName}"
+                                               Foreground="White"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Language:" Foreground="#6B7280"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding SelectedTemplate.PrintLanguage}"
+                                               Foreground="White"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Version:" Foreground="#6B7280"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding SelectedTemplate.Version}"
+                                               Foreground="White"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Fields:" Foreground="#6B7280"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding SelectedTemplate.Fields.Count}"
+                                               Foreground="White"/>
+                                </Grid>
+
+                                <!-- Quick Actions -->
+                                <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                                    <Button Content="Set as Default"
+                                            Command="{Binding SetDefaultTemplateCommand}"
+                                            CommandParameter="{Binding SelectedTemplate}"
+                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            Padding="12,8" Margin="0,0,8,0"/>
+                                    <Button Content="Open Designer"
+                                            Command="{Binding EditTemplateCommand}"
+                                            CommandParameter="{Binding SelectedTemplate}"
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            Padding="12,8"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Available Placeholders -->
+                            <TextBlock Text="Available Placeholders" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="White" Margin="0,24,0,12"/>
+                            <ItemsControl ItemsSource="{Binding AvailablePlaceholders}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#2D2D44" CornerRadius="4" Padding="8,4" Margin="0,0,4,4">
+                                            <TextBlock Text="{Binding}" Foreground="#10B981" FontFamily="Consolas"
+                                                       FontSize="11"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+
+            <!-- Status Bar -->
+            <Border Grid.Row="3" Background="#16162B" CornerRadius="8" Padding="16,10" Margin="0,16,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal"
+                                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <ProgressBar IsIndeterminate="True" Width="100" Height="4" Margin="0,0,12,0"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="1" Text="{Binding StatusMessage}"
+                               Foreground="#8888AA" VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Create Template Form Overlay -->
+        <Border Background="#80000000"
+                Visibility="{Binding IsCreateFormVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Border Background="#1E1E2E" CornerRadius="12" Padding="24"
+                    Width="500" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="Create New Template" FontSize="20" FontWeight="SemiBold"
+                               Foreground="White" Margin="0,0,0,20"/>
+
+                    <TextBlock Text="Template Name" Style="{StaticResource FormLabel}"/>
+                    <TextBox Text="{Binding NewTemplateName, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource FormTextBox}" Margin="0,0,0,16"/>
+
+                    <TextBlock Text="Label Size" Style="{StaticResource FormLabel}"/>
+                    <ComboBox ItemsSource="{Binding LabelSizes}"
+                              SelectedValue="{Binding NewTemplateSizeId}"
+                              SelectedValuePath="Id"
+                              DisplayMemberPath="Name"
+                              Style="{StaticResource FormComboBox}" Margin="0,0,0,16"/>
+
+                    <TextBlock Text="Print Language" Style="{StaticResource FormLabel}"/>
+                    <ComboBox ItemsSource="{Binding PrintLanguages}"
+                              SelectedItem="{Binding NewTemplateLanguage}"
+                              Style="{StaticResource FormComboBox}" Margin="0,0,0,16"/>
+
+                    <TextBlock Text="Create From" Style="{StaticResource FormLabel}"/>
+                    <ComboBox ItemsSource="{Binding CreateFromOptions}"
+                              SelectedItem="{Binding CreateFromOption}"
+                              Style="{StaticResource FormComboBox}" Margin="0,0,0,16"/>
+
+                    <CheckBox IsChecked="{Binding NewTemplateIsPromo}" Margin="0,0,0,16">
+                        <TextBlock Text="This is a promotional template" Foreground="#9CA3AF"/>
+                    </CheckBox>
+
+                    <TextBlock Text="Description (optional)" Style="{StaticResource FormLabel}"/>
+                    <TextBox Text="{Binding NewTemplateDescription, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource FormTextBox}" Margin="0,0,0,24"
+                             TextWrapping="Wrap" AcceptsReturn="True" Height="60"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Cancel"
+                                Command="{Binding CancelCreateFormCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Padding="20,10" Margin="0,0,8,0"/>
+                        <Button Content="Create Template"
+                                Command="{Binding CreateTemplateCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Padding="20,10"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- Import Library Form Overlay -->
+        <Border Background="#80000000"
+                Visibility="{Binding IsImportFormVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Border Background="#1E1E2E" CornerRadius="12" Padding="24"
+                    Width="600" MaxHeight="600" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Import from Library" FontSize="20" FontWeight="SemiBold"
+                               Foreground="White" Margin="0,0,0,16"/>
+
+                    <ListBox Grid.Row="1" ItemsSource="{Binding LibraryTemplates}"
+                             SelectedItem="{Binding SelectedLibraryTemplate}"
+                             Background="Transparent" BorderThickness="0"
+                             MaxHeight="350">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Margin" Value="0,0,0,8"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="Bd" Background="#2D2D44" CornerRadius="8" Padding="12">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="#3D3D5C"/>
+                                                    <Setter TargetName="Bd" Property="BorderBrush" Value="#3B82F6"/>
+                                                    <Setter TargetName="Bd" Property="BorderThickness" Value="1"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="White"/>
+                                        <Border Background="#374151" CornerRadius="3" Padding="6,2" Margin="8,0,0,0">
+                                            <TextBlock Text="{Binding Category}" FontSize="10" Foreground="#9CA3AF"/>
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Foreground="#6B7280" FontSize="12" Margin="0,4,0,0">
+                                        <Run Text="{Binding WidthMm, StringFormat=N0}"/>
+                                        <Run Text="x"/>
+                                        <Run Text="{Binding HeightMm, StringFormat=N0}"/>
+                                        <Run Text="mm • "/>
+                                        <Run Text="{Binding PrintLanguage}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding Description}" Foreground="#6B7280" FontSize="12"
+                                               TextTrimming="CharacterEllipsis" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <StackPanel Grid.Row="2" Margin="0,16,0,0">
+                        <TextBlock Text="Template Name" Style="{StaticResource FormLabel}"/>
+                        <TextBox Text="{Binding ImportTemplateName, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FormTextBox}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                        <Button Content="Cancel"
+                                Command="{Binding CancelImportFormCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Padding="20,10" Margin="0,0,8,0"/>
+                        <Button Content="Import"
+                                Command="{Binding ImportFromLibraryCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Padding="20,10"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Border>
+
+        <!-- Import File Form Overlay -->
+        <Border Background="#80000000"
+                Visibility="{Binding IsImportFileFormVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Border Background="#1E1E2E" CornerRadius="12" Padding="24"
+                    Width="500" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="Import Template from File" FontSize="20" FontWeight="SemiBold"
+                               Foreground="White" Margin="0,0,0,16"/>
+
+                    <!-- File Info -->
+                    <Border Background="#16162B" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets"
+                                           Foreground="#3B82F6" FontSize="24" Margin="0,0,12,0"
+                                           VerticalAlignment="Center"/>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding ImportValidation.TemplateName}"
+                                               Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Foreground="#6B7280" FontSize="12">
+                                        <Run Text="v"/>
+                                        <Run Text="{Binding ImportValidation.Version}"/>
+                                        <Run Text=" • "/>
+                                        <Run Text="{Binding ImportValidation.PrintLanguage}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </StackPanel>
+                            <TextBlock Foreground="#6B7280" FontSize="12">
+                                <Run Text="Size: "/>
+                                <Run Text="{Binding ImportValidation.SizeName}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Validation Warnings -->
+                    <Border Background="#332600" CornerRadius="8" Padding="12" Margin="0,0,0,16"
+                            Visibility="{Binding ImportValidation.HasNameConflict, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets"
+                                       Foreground="#F59E0B" FontSize="16" Margin="0,0,8,0"/>
+                            <TextBlock Text="A template with this name already exists in your store."
+                                       Foreground="#F59E0B" FontSize="12" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="#1E2A37" CornerRadius="8" Padding="12" Margin="0,0,0,16"
+                            Visibility="{Binding NeedsSizeCreation, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets"
+                                       Foreground="#3B82F6" FontSize="16" Margin="0,0,8,0"/>
+                            <TextBlock Text="No matching label size found. A new size will be created."
+                                       Foreground="#3B82F6" FontSize="12" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Conflict Resolution -->
+                    <StackPanel Visibility="{Binding ImportValidation.HasNameConflict, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Text="Name Conflict Resolution" Style="{StaticResource FormLabel}"/>
+                        <ComboBox ItemsSource="{Binding ConflictResolutions}"
+                                  SelectedItem="{Binding SelectedConflictResolution}"
+                                  Style="{StaticResource FormComboBox}" Margin="0,0,0,16"/>
+                    </StackPanel>
+
+                    <!-- Create Missing Size -->
+                    <CheckBox IsChecked="{Binding ImportCreateMissingSize}" Margin="0,0,0,24"
+                              Visibility="{Binding NeedsSizeCreation, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}">
+                        <TextBlock Text="Create missing label size automatically" Foreground="#9CA3AF"/>
+                    </CheckBox>
+
+                    <!-- Actions -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Cancel"
+                                Command="{Binding CancelImportFileFormCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Padding="20,10" Margin="0,0,8,0"/>
+                        <Button Content="Import Template"
+                                Command="{Binding ImportFromFileCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Padding="20,10"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- Loading Overlay -->
+        <Border Background="#80000000"
+                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200" Height="4" Foreground="#F59E0B"/>
+                <TextBlock Text="{Binding StatusMessage}" Foreground="White" FontSize="14"
+                           HorizontalAlignment="Center" Margin="0,16,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

@@ -413,6 +413,103 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
     [ObservableProperty]
     private decimal _maxRedeemablePoints;
 
+    /// <summary>
+    /// Gets or sets whether the loyalty search is in progress.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isSearchingLoyalty;
+
+    /// <summary>
+    /// Gets or sets whether customer enrollment is in progress.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isEnrollingCustomer;
+
+    /// <summary>
+    /// Gets or sets the loyalty search error message.
+    /// </summary>
+    [ObservableProperty]
+    private string? _loyaltySearchError;
+
+    /// <summary>
+    /// Gets or sets whether to show the enrollment prompt.
+    /// </summary>
+    [ObservableProperty]
+    private bool _showEnrollmentPrompt;
+
+    /// <summary>
+    /// Gets or sets the name for quick enrollment.
+    /// </summary>
+    [ObservableProperty]
+    private string? _enrollmentName;
+
+    /// <summary>
+    /// Gets or sets the estimated bonus points from tier.
+    /// </summary>
+    [ObservableProperty]
+    private decimal _estimatedBonusPoints;
+
+    /// <summary>
+    /// Gets or sets the points calculation description.
+    /// </summary>
+    [ObservableProperty]
+    private string? _pointsCalculationDescription;
+
+    /// <summary>
+    /// Gets or sets the available points for the attached member.
+    /// </summary>
+    [ObservableProperty]
+    private decimal _availablePoints;
+
+    /// <summary>
+    /// Gets or sets the minimum points required for redemption.
+    /// </summary>
+    [ObservableProperty]
+    private decimal _minimumRedemptionPoints;
+
+    /// <summary>
+    /// Gets or sets the suggested redemption points.
+    /// </summary>
+    [ObservableProperty]
+    private decimal _suggestedRedemptionPoints;
+
+    /// <summary>
+    /// Gets or sets the maximum redemption value in KES.
+    /// </summary>
+    [ObservableProperty]
+    private decimal _maxRedemptionValue;
+
+    // ==================== Phone Prompt Properties ====================
+
+    /// <summary>
+    /// Gets or sets whether to show the post-transaction phone prompt dialog.
+    /// </summary>
+    [ObservableProperty]
+    private bool _showPhonePromptDialog;
+
+    /// <summary>
+    /// Gets or sets the phone number input for post-transaction prompt.
+    /// </summary>
+    [ObservableProperty]
+    private string? _phonePromptInput;
+
+    /// <summary>
+    /// Gets or sets whether the phone prompt is being processed.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isProcessingPhonePrompt;
+
+    /// <summary>
+    /// Gets or sets the phone prompt error message.
+    /// </summary>
+    [ObservableProperty]
+    private string? _phonePromptError;
+
+    /// <summary>
+    /// Stores the pending receipt for loyalty points award.
+    /// </summary>
+    private Receipt? _pendingReceiptForLoyalty;
+
     #endregion
 
     /// <summary>
@@ -2346,6 +2443,31 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
 
         try
         {
+            IsSearchingLoyalty = true;
+            LoyaltySearchError = null;
+            ShowEnrollmentPrompt = false;
+
+            // Validate phone number format
+            if (!_loyaltyService.ValidatePhoneNumber(LoyaltySearchPhone))
+            {
+                LoyaltySearchError = "Invalid phone number format. Use format: 07XX or 254XXX";
+                return;
+            }
+
+            // Try direct phone lookup first (normalized)
+            var normalizedPhone = _loyaltyService.NormalizePhoneNumber(LoyaltySearchPhone);
+            if (!string.IsNullOrEmpty(normalizedPhone))
+            {
+                var directMember = await _loyaltyService.GetByPhoneAsync(normalizedPhone);
+                if (directMember != null)
+                {
+                    LoyaltySearchResults.Clear();
+                    LoyaltySearchResults.Add(directMember);
+                    return;
+                }
+            }
+
+            // Fall back to search
             var results = await _loyaltyService.SearchMembersAsync(LoyaltySearchPhone, 10);
             LoyaltySearchResults.Clear();
             foreach (var member in results)
@@ -2355,13 +2477,19 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
 
             if (!LoyaltySearchResults.Any())
             {
-                await _dialogService.ShowInfoAsync("No Results", "No customers found matching the search criteria.");
+                // Offer to enroll new customer
+                ShowEnrollmentPrompt = true;
+                EnrollmentName = string.Empty;
             }
         }
         catch (Exception ex)
         {
             _logger.Error(ex, "Failed to search loyalty members");
-            await _dialogService.ShowErrorAsync("Search Failed", "Failed to search for customers.");
+            LoyaltySearchError = "Failed to search for customers. Please try again.";
+        }
+        finally
+        {
+            IsSearchingLoyalty = false;
         }
     }
 
@@ -2396,77 +2524,427 @@ public partial class POSViewModel : ViewModelBase, INavigationAware
         PointsRedemptionValue = 0;
         MaxRedeemablePoints = 0;
         EstimatedPointsToEarn = 0;
+        EstimatedBonusPoints = 0;
+        PointsCalculationDescription = null;
+        AvailablePoints = 0;
+        MinimumRedemptionPoints = 0;
+        SuggestedRedemptionPoints = 0;
+        MaxRedemptionValue = 0;
+        LoyaltySearchPhone = string.Empty;
+        ShowEnrollmentPrompt = false;
+        EnrollmentName = null;
+    }
+
+    /// <summary>
+    /// Quick enrolls a new customer in the loyalty program.
+    /// </summary>
+    [RelayCommand]
+    private async Task QuickEnrollCustomerAsync()
+    {
+        if (_loyaltyService == null || string.IsNullOrWhiteSpace(LoyaltySearchPhone)) return;
+
+        try
+        {
+            IsEnrollingCustomer = true;
+            LoyaltySearchError = null;
+
+            var normalizedPhone = _loyaltyService.NormalizePhoneNumber(LoyaltySearchPhone);
+            if (string.IsNullOrEmpty(normalizedPhone))
+            {
+                LoyaltySearchError = "Invalid phone number format.";
+                return;
+            }
+
+            var enrollDto = new EnrollCustomerDto
+            {
+                PhoneNumber = normalizedPhone,
+                Name = string.IsNullOrWhiteSpace(EnrollmentName) ? null : EnrollmentName.Trim()
+            };
+
+            var result = await _loyaltyService.EnrollCustomerAsync(enrollDto, _sessionService.CurrentUserId);
+
+            if (result.Success && result.Member != null)
+            {
+                AttachedLoyaltyMember = result.Member;
+                ShowEnrollmentPrompt = false;
+                IsLoyaltyPanelVisible = false;
+                LoyaltySearchResults.Clear();
+
+                await UpdateEstimatedPointsAsync();
+                await UpdateRedemptionPreviewAsync();
+
+                _logger.Information("Quick enrolled customer {Phone} as {MembershipNumber}",
+                    normalizedPhone, result.Member.MembershipNumber);
+            }
+            else
+            {
+                LoyaltySearchError = result.ErrorMessage ?? "Failed to enroll customer.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to quick enroll customer");
+            LoyaltySearchError = "Failed to enroll customer. Please try again.";
+        }
+        finally
+        {
+            IsEnrollingCustomer = false;
+        }
+    }
+
+    /// <summary>
+    /// Cancels the enrollment prompt.
+    /// </summary>
+    [RelayCommand]
+    private void CancelEnrollment()
+    {
+        ShowEnrollmentPrompt = false;
+        EnrollmentName = null;
     }
 
     /// <summary>
     /// Sets the points to redeem.
     /// </summary>
     [RelayCommand]
-    private Task SetPointsToRedeemAsync(decimal points)
+    private async Task SetPointsToRedeemAsync(decimal points)
     {
-        // Loyalty feature requires ILoyaltyService which is not yet available
-        return Task.CompletedTask;
+        if (_loyaltyService == null || AttachedLoyaltyMember == null) return;
+
+        // Validate against available and maximum
+        if (points < 0) points = 0;
+        if (points > MaxRedeemablePoints) points = MaxRedeemablePoints;
+        if (points > AvailablePoints) points = AvailablePoints;
+
+        PointsToRedeem = points;
+
+        // Calculate the redemption value
+        if (points > 0)
+        {
+            PointsRedemptionValue = await _loyaltyService.ConvertPointsToValueAsync(points);
+        }
+        else
+        {
+            PointsRedemptionValue = 0;
+        }
+
+        // Recalculate totals
+        await RecalculateTotalsAsync();
     }
 
     /// <summary>
     /// Redeems maximum available points.
     /// </summary>
     [RelayCommand]
-    private Task RedeemMaxPointsAsync()
+    private async Task RedeemMaxPointsAsync()
     {
-        // Loyalty feature requires ILoyaltyService which is not yet available
-        return Task.CompletedTask;
+        if (MaxRedeemablePoints > 0)
+        {
+            await SetPointsToRedeemAsync(MaxRedeemablePoints);
+        }
     }
 
     /// <summary>
     /// Clears any points redemption.
     /// </summary>
     [RelayCommand]
-    private Task ClearPointsRedemptionAsync()
+    private async Task ClearPointsRedemptionAsync()
     {
         PointsToRedeem = 0;
         PointsRedemptionValue = 0;
-        return Task.CompletedTask;
+        await RecalculateTotalsAsync();
     }
 
     /// <summary>
     /// Updates the estimated points to be earned for the current order.
     /// </summary>
-    private Task UpdateEstimatedPointsAsync()
+    private async Task UpdateEstimatedPointsAsync()
     {
-        // Loyalty feature requires ILoyaltyService which is not yet available
-        EstimatedPointsToEarn = 0;
-        return Task.CompletedTask;
+        if (_loyaltyService == null || AttachedLoyaltyMember == null)
+        {
+            EstimatedPointsToEarn = 0;
+            EstimatedBonusPoints = 0;
+            PointsCalculationDescription = null;
+            return;
+        }
+
+        try
+        {
+            var result = await _loyaltyService.CalculatePointsAsync(
+                OrderTotal,
+                DiscountTotal,
+                TaxTotal,
+                AttachedLoyaltyMember.Id);
+
+            EstimatedPointsToEarn = result.TotalPoints;
+            EstimatedBonusPoints = result.BonusPoints;
+            PointsCalculationDescription = result.Description;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to calculate estimated points");
+            EstimatedPointsToEarn = 0;
+            EstimatedBonusPoints = 0;
+        }
     }
 
     /// <summary>
     /// Updates the redemption preview for the current order.
     /// </summary>
-    private Task UpdateRedemptionPreviewAsync()
+    private async Task UpdateRedemptionPreviewAsync()
     {
-        // Loyalty feature requires ILoyaltyService which is not yet available
-        MaxRedeemablePoints = 0;
-        return Task.CompletedTask;
+        if (_loyaltyService == null || AttachedLoyaltyMember == null)
+        {
+            MaxRedeemablePoints = 0;
+            MaxRedemptionValue = 0;
+            AvailablePoints = 0;
+            MinimumRedemptionPoints = 0;
+            SuggestedRedemptionPoints = 0;
+            return;
+        }
+
+        try
+        {
+            var preview = await _loyaltyService.CalculateRedemptionAsync(
+                AttachedLoyaltyMember.Id,
+                OrderTotal);
+
+            MaxRedeemablePoints = preview.MaxRedeemablePoints;
+            MaxRedemptionValue = preview.MaxValue;
+            AvailablePoints = preview.AvailablePoints;
+            MinimumRedemptionPoints = preview.MinimumPoints;
+            SuggestedRedemptionPoints = preview.SuggestedPoints;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to calculate redemption preview");
+            MaxRedeemablePoints = 0;
+            MaxRedemptionValue = 0;
+        }
     }
 
     /// <summary>
     /// Awards points to the attached loyalty member after settlement.
     /// </summary>
-    private Task AwardLoyaltyPointsAsync(int receiptId, string receiptNumber, decimal totalAmount)
+    private async Task AwardLoyaltyPointsAsync(int receiptId, string receiptNumber, decimal totalAmount)
     {
-        // Loyalty feature requires ILoyaltyService which is not yet available
-        return Task.CompletedTask;
+        if (_loyaltyService == null || AttachedLoyaltyMember == null) return;
+
+        try
+        {
+            var result = await _loyaltyService.AwardPointsAsync(
+                AttachedLoyaltyMember.Id,
+                receiptId,
+                receiptNumber,
+                totalAmount,
+                DiscountTotal,
+                TaxTotal,
+                _sessionService.CurrentUserId);
+
+            if (result.Success)
+            {
+                _logger.Information(
+                    "Awarded {Points} points to member {MembershipNumber} for receipt {ReceiptNumber}",
+                    result.PointsAwarded, AttachedLoyaltyMember.MembershipNumber, receiptNumber);
+            }
+            else
+            {
+                _logger.Warning(
+                    "Failed to award points: {Error}",
+                    result.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to award loyalty points for receipt {ReceiptNumber}", receiptNumber);
+        }
     }
 
     /// <summary>
     /// Redeems points as payment for the current order.
     /// Call this before processing other payments if points are being redeemed.
     /// </summary>
-    private Task<decimal> RedeemLoyaltyPointsAsync(int receiptId, string receiptNumber, decimal totalAmount)
+    private async Task<decimal> RedeemLoyaltyPointsAsync(int receiptId, string receiptNumber, decimal totalAmount)
     {
-        // Loyalty feature requires ILoyaltyService which is not yet available
-        return Task.FromResult(0m);
+        if (_loyaltyService == null || AttachedLoyaltyMember == null || PointsToRedeem <= 0)
+            return 0m;
+
+        try
+        {
+            var result = await _loyaltyService.RedeemPointsAsync(
+                AttachedLoyaltyMember.Id,
+                PointsToRedeem,
+                receiptId,
+                receiptNumber,
+                totalAmount,
+                _sessionService.CurrentUserId);
+
+            if (result.Success)
+            {
+                _logger.Information(
+                    "Redeemed {Points} points (KES {Value}) from member {MembershipNumber} for receipt {ReceiptNumber}",
+                    result.PointsRedeemed, result.ValueApplied, AttachedLoyaltyMember.MembershipNumber, receiptNumber);
+                return result.ValueApplied;
+            }
+            else
+            {
+                _logger.Warning("Failed to redeem points: {Error}", result.ErrorMessage);
+                return 0m;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to redeem loyalty points for receipt {ReceiptNumber}", receiptNumber);
+            return 0m;
+        }
     }
+
+    #region Phone Prompt Commands
+
+    /// <summary>
+    /// Shows the phone prompt dialog after a transaction completes.
+    /// </summary>
+    /// <param name="receipt">The receipt from the completed transaction.</param>
+    private void ShowPostTransactionPhonePrompt(Receipt receipt)
+    {
+        if (_loyaltyService == null) return;
+
+        // Only show prompt if no loyalty member was attached during the transaction
+        if (AttachedLoyaltyMember == null)
+        {
+            ShowPhonePromptDialog = true;
+            PhonePromptInput = string.Empty;
+            PhonePromptError = null;
+            _pendingReceiptForLoyalty = receipt;
+        }
+    }
+
+    /// <summary>
+    /// Submits the phone prompt and processes loyalty points.
+    /// </summary>
+    [RelayCommand]
+    private async Task SubmitPhonePromptAsync()
+    {
+        if (_loyaltyService == null) return;
+
+        if (string.IsNullOrWhiteSpace(PhonePromptInput))
+        {
+            // Customer declined to provide phone - skip loyalty
+            await SkipPhonePromptAsync();
+            return;
+        }
+
+        try
+        {
+            IsProcessingPhonePrompt = true;
+            PhonePromptError = null;
+
+            // Validate phone format
+            if (!_loyaltyService.ValidatePhoneNumber(PhonePromptInput))
+            {
+                PhonePromptError = "Invalid phone number. Use format: 0712345678";
+                return;
+            }
+
+            var normalizedPhone = _loyaltyService.NormalizePhoneNumber(PhonePromptInput);
+            if (string.IsNullOrEmpty(normalizedPhone))
+            {
+                PhonePromptError = "Invalid phone number format.";
+                return;
+            }
+
+            var member = await _loyaltyService.GetByPhoneAsync(normalizedPhone);
+
+            if (member == null)
+            {
+                // Auto-enroll new customer
+                var enrollResult = await _loyaltyService.EnrollCustomerAsync(
+                    new EnrollCustomerDto { PhoneNumber = normalizedPhone },
+                    _sessionService.CurrentUserId);
+
+                if (enrollResult.Success && enrollResult.Member != null)
+                {
+                    member = enrollResult.Member;
+                    _logger.Information("Auto-enrolled new customer {Phone} as {MembershipNumber}",
+                        normalizedPhone, member.MembershipNumber);
+                }
+                else
+                {
+                    PhonePromptError = enrollResult.ErrorMessage ?? "Failed to enroll customer.";
+                    return;
+                }
+            }
+
+            // Award points for the pending receipt
+            if (_pendingReceiptForLoyalty != null && member != null)
+            {
+                await AwardPointsForMemberReceiptAsync(_pendingReceiptForLoyalty, member.Id);
+            }
+
+            ShowPhonePromptDialog = false;
+            _pendingReceiptForLoyalty = null;
+
+            _logger.Information("Post-transaction loyalty points awarded to {Phone}", normalizedPhone);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Error processing phone prompt");
+            PhonePromptError = "An error occurred. Please try again.";
+        }
+        finally
+        {
+            IsProcessingPhonePrompt = false;
+        }
+    }
+
+    /// <summary>
+    /// Skips the phone prompt dialog.
+    /// </summary>
+    [RelayCommand]
+    private Task SkipPhonePromptAsync()
+    {
+        ShowPhonePromptDialog = false;
+        _pendingReceiptForLoyalty = null;
+        PhonePromptInput = null;
+        PhonePromptError = null;
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Awards points to a specific member for a receipt.
+    /// </summary>
+    private async Task AwardPointsForMemberReceiptAsync(Receipt receipt, int memberId)
+    {
+        if (_loyaltyService == null) return;
+
+        try
+        {
+            var result = await _loyaltyService.AwardPointsAsync(
+                memberId,
+                receipt.Id,
+                receipt.ReceiptNumber,
+                receipt.TotalAmount,
+                receipt.DiscountAmount,
+                receipt.TaxAmount,
+                _sessionService.CurrentUserId);
+
+            if (result.Success)
+            {
+                _logger.Information(
+                    "Awarded {Points} points to member ID {MemberId} for receipt {ReceiptNumber}",
+                    result.PointsAwarded, memberId, receipt.ReceiptNumber);
+            }
+            else
+            {
+                _logger.Warning("Failed to award points: {Error}", result.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to award loyalty points for receipt {ReceiptNumber}", receipt.ReceiptNumber);
+        }
+    }
+
+    #endregion
 
     /// <summary>
     /// Navigates to the customer enrollment screen.

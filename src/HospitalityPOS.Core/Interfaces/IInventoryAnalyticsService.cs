@@ -94,6 +94,11 @@ public interface IInventoryAnalyticsService
     Task<IEnumerable<ReorderSuggestion>> GenerateReorderSuggestionsAsync(int storeId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Generates reorder suggestions from low stock products without explicit reorder rules.
+    /// </summary>
+    Task<IEnumerable<ReorderSuggestion>> GenerateLowStockSuggestionsAsync(int storeId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets pending reorder suggestions.
     /// </summary>
     Task<IEnumerable<ReorderSuggestion>> GetPendingReorderSuggestionsAsync(int storeId, CancellationToken cancellationToken = default);
@@ -347,6 +352,8 @@ public class ConvertSuggestionsResult
     public int PurchaseOrdersCreated { get; set; }
     public List<int> PurchaseOrderIds { get; set; } = new();
     public decimal TotalOrderValue { get; set; }
+    public int SkippedBelowMinimum { get; set; }
+    public int SkippedNoSupplier { get; set; }
 }
 
 /// <summary>

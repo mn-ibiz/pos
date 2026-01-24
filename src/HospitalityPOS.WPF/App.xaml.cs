@@ -98,6 +98,13 @@ public partial class App : Application
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });
 
+        // SMS API client (Africa's Talking, etc.)
+        services.AddHttpClient("SmsApi", client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(30);
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+        });
+
         // Configure Cloud API settings
         services.Configure<CloudApiSettings>(Configuration.GetSection(CloudApiSettings.SectionName));
 
@@ -119,6 +126,9 @@ public partial class App : Application
 
         // Work period service (Scoped - accesses DbContext directly)
         services.AddScoped<IWorkPeriodService, WorkPeriodService>();
+
+        // Cash payout service (Scoped - accesses DbContext directly)
+        services.AddScoped<ICashPayoutService, CashPayoutService>();
 
         // Category service (Scoped - accesses DbContext directly)
         services.AddScoped<ICategoryService, CategoryService>();
@@ -155,6 +165,15 @@ public partial class App : Application
 
         // Barcode service (Scoped - accesses DbContext directly)
         services.AddScoped<IBarcodeService, BarcodeService>();
+
+        // Label preview service (Scoped - renders visual label previews)
+        services.AddScoped<ILabelPreviewService, LabelPreviewService>();
+
+        // Labelary API client for ZPL preview
+        services.AddHttpClient("LabelaryApi", client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(10);
+        });
 
         // Order service (Scoped - accesses DbContext directly)
         services.AddScoped<IOrderService, OrderService>();
@@ -319,7 +338,7 @@ public partial class App : Application
         services.AddTransient<EmployeeEditorViewModel>();
         services.AddTransient<AttendanceViewModel>();
         services.AddTransient<PayrollViewModel>();
-        // services.AddTransient<PayslipHistoryViewModel>(); // Excluded
+        services.AddTransient<PayslipHistoryViewModel>();
         services.AddTransient<ChartOfAccountsViewModel>();
         // services.AddTransient<JournalEntriesViewModel>(); // Excluded - API mismatches with JournalEntry entity
         services.AddTransient<FinancialReportsViewModel>();
@@ -328,6 +347,7 @@ public partial class App : Application
         services.AddTransient<MpesaDashboardViewModel>();
         services.AddTransient<MpesaSettingsViewModel>();
         services.AddTransient<QrPaymentDialogViewModel>();
+        services.AddTransient<SmsSettingsViewModel>();
         // services.AddTransient<PLUManagementViewModel>(); // Excluded
         services.AddTransient<BarcodeSettingsViewModel>();
         // services.AddTransient<CustomerEnrollmentViewModel>(); // EXCLUDED - API mismatches
@@ -337,6 +357,9 @@ public partial class App : Application
         services.AddTransient<ExpenseDashboardViewModel>();
         services.AddTransient<ExpenseListViewModel>();
         services.AddTransient<ExpenseCategoryManagementViewModel>();
+        services.AddTransient<ExpenseReportsViewModel>();
+        services.AddTransient<RecurringExpenseListViewModel>();
+        services.AddTransient<ExpenseBudgetViewModel>();
 
         // Analytics ViewModels
         services.AddTransient<AIInsightsDashboardViewModel>();
@@ -344,8 +367,16 @@ public partial class App : Application
         services.AddTransient<MenuEngineeringViewModel>();
         services.AddTransient<CustomerAnalyticsViewModel>();
 
+        // Marketing ViewModels
+        services.AddTransient<Marketing.SmsCampaignDashboardViewModel>();
+        services.AddTransient<Marketing.SmsTemplateListViewModel>();
+        services.AddTransient<Marketing.CustomerSegmentListViewModel>();
+
         // Label Printing ViewModels
         services.AddTransient<LabelPrinterConfigurationViewModel>();
+        services.AddTransient<LabelTemplateManagementViewModel>();
+        services.AddTransient<LabelSizeConfigurationViewModel>();
+        services.AddTransient<LabelTemplateDesignerViewModel>();
 
         // Stock Transfer ViewModels (Epic 23) - NOW ENABLED after API fixes
         services.AddTransient<StockTransferViewModel>();

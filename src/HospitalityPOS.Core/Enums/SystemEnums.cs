@@ -375,24 +375,177 @@ public enum StockStatus
 public enum StockTakeStatus
 {
     /// <summary>
+    /// Stock take is in draft mode, not yet started.
+    /// </summary>
+    Draft = 0,
+
+    /// <summary>
     /// Stock take is in progress.
     /// </summary>
     InProgress = 1,
 
     /// <summary>
+    /// All counting is complete, ready for review.
+    /// </summary>
+    CountingComplete = 2,
+
+    /// <summary>
     /// Stock take is pending approval.
     /// </summary>
-    PendingApproval = 2,
+    PendingApproval = 3,
 
     /// <summary>
     /// Stock take has been approved and adjustments applied.
     /// </summary>
-    Approved = 3,
+    Approved = 4,
+
+    /// <summary>
+    /// Stock take adjustments have been posted to inventory.
+    /// </summary>
+    Posted = 5,
 
     /// <summary>
     /// Stock take has been cancelled.
     /// </summary>
-    Cancelled = 4
+    Cancelled = 6
+}
+
+/// <summary>
+/// Stock count type for different counting scenarios.
+/// </summary>
+public enum StockCountType
+{
+    /// <summary>
+    /// Full count of all inventory items.
+    /// </summary>
+    FullCount = 1,
+
+    /// <summary>
+    /// Cycle count - subset of items by rotation.
+    /// </summary>
+    CycleCount = 2,
+
+    /// <summary>
+    /// Spot count - specific items only.
+    /// </summary>
+    SpotCount = 3,
+
+    /// <summary>
+    /// Category-specific count.
+    /// </summary>
+    CategoryCount = 4,
+
+    /// <summary>
+    /// Location-specific count.
+    /// </summary>
+    LocationCount = 5,
+
+    /// <summary>
+    /// ABC class count - high-value items.
+    /// </summary>
+    ABCClassCount = 6
+}
+
+/// <summary>
+/// Cause of inventory variance.
+/// </summary>
+public enum VarianceCause
+{
+    /// <summary>
+    /// Unknown or unassigned cause.
+    /// </summary>
+    Unknown = 0,
+
+    /// <summary>
+    /// Theft or pilferage.
+    /// </summary>
+    Theft = 1,
+
+    /// <summary>
+    /// Physical damage to product.
+    /// </summary>
+    Damage = 2,
+
+    /// <summary>
+    /// Product expired or spoiled.
+    /// </summary>
+    Spoilage = 3,
+
+    /// <summary>
+    /// Administrative or data entry error.
+    /// </summary>
+    AdminError = 4,
+
+    /// <summary>
+    /// Error during receiving process.
+    /// </summary>
+    ReceivingError = 5,
+
+    /// <summary>
+    /// POS or system error.
+    /// </summary>
+    SystemError = 6,
+
+    /// <summary>
+    /// Product transferred to another location.
+    /// </summary>
+    Transfer = 7,
+
+    /// <summary>
+    /// Product used for sampling or tasting.
+    /// </summary>
+    Sampling = 8,
+
+    /// <summary>
+    /// Vendor/supplier short shipment.
+    /// </summary>
+    VendorShortage = 9,
+
+    /// <summary>
+    /// Found extra stock (overage).
+    /// </summary>
+    Found = 10
+}
+
+/// <summary>
+/// Recurrence frequency for scheduled counts.
+/// </summary>
+public enum RecurrenceFrequency
+{
+    /// <summary>
+    /// No recurrence - one time only.
+    /// </summary>
+    None = 0,
+
+    /// <summary>
+    /// Daily count.
+    /// </summary>
+    Daily = 1,
+
+    /// <summary>
+    /// Weekly count.
+    /// </summary>
+    Weekly = 2,
+
+    /// <summary>
+    /// Bi-weekly count (every 2 weeks).
+    /// </summary>
+    BiWeekly = 3,
+
+    /// <summary>
+    /// Monthly count.
+    /// </summary>
+    Monthly = 4,
+
+    /// <summary>
+    /// Quarterly count.
+    /// </summary>
+    Quarterly = 5,
+
+    /// <summary>
+    /// Annual count.
+    /// </summary>
+    Annual = 6
 }
 
 /// <summary>

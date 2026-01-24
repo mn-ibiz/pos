@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace HospitalityPOS.WPF.ViewModels;
 
-public partial class AttendanceViewModel : ObservableObject
+public partial class AttendanceViewModel : ObservableObject, INavigationAware
 {
     private readonly INavigationService _navigationService;
     private readonly IDialogService _dialogService;
@@ -79,6 +79,27 @@ public partial class AttendanceViewModel : ObservableObject
 
         await LoadAttendanceAsync();
     }
+
+    #region INavigationAware
+
+    public void OnNavigatedTo(object? parameter)
+    {
+        int? employeeId = parameter switch
+        {
+            int id => id,
+            Employee emp => emp.Id,
+            _ => null
+        };
+
+        _ = InitializeAsync(employeeId);
+    }
+
+    public void OnNavigatedFrom()
+    {
+        // Nothing to clean up
+    }
+
+    #endregion
 
     private async Task LoadEmployeeAsync(int employeeId)
     {
@@ -236,8 +257,45 @@ public partial class AttendanceViewModel : ObservableObject
     {
         if (SelectedEmployee == null) return;
 
-        // Show dialog for manual entry
-        await _dialogService.ShowInfoAsync("Manual attendance entry dialog coming soon.");
+        try
+        {
+            var result = await _dialogService.ShowManualAttendanceEntryDialogAsync(SelectedEmployee);
+            if (result == null) return;
+
+            using var scope = App.Services.CreateScope();
+            var attendanceService = scope.ServiceProvider.GetRequiredService<IAttendanceService>();
+            var sessionService = scope.ServiceProvider.GetRequiredService<ISessionService>();
+
+            var request = new HospitalityPOS.Core.Models.HR.MissedPunchRequest
+            {
+                EmployeeId = SelectedEmployee.Id,
+                Date = DateOnly.FromDateTime(result.PunchTime),
+                PunchType = result.EntryType,
+                PunchTime = result.PunchTime,
+                ManagerUserId = sessionService.CurrentUser?.Id ?? 0,
+                ManagerPin = result.ManagerPin,
+                Reason = string.IsNullOrWhiteSpace(result.Notes)
+                    ? result.Reason
+                    : $"{result.Reason} - {result.Notes}"
+            };
+
+            var clockResult = await attendanceService.AddMissedPunchAsync(request);
+
+            if (clockResult.Success)
+            {
+                await _dialogService.ShowSuccessAsync("Manual Entry Added",
+                    $"Manual {result.EntryType} entry has been added for {SelectedEmployee.FullName}.");
+                await LoadAttendanceAsync();
+            }
+            else
+            {
+                await _dialogService.ShowErrorAsync("Failed to Add Entry", clockResult.Message ?? "Unknown error occurred.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await _dialogService.ShowErrorAsync("Error", $"Failed to add manual entry: {ex.Message}");
+        }
     }
 
     [RelayCommand]

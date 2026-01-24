@@ -102,4 +102,13 @@ public interface IReceiptService
     /// <param name="paymentId">The payment ID to remove.</param>
     /// <returns>True if removed, false otherwise.</returns>
     Task<bool> RemovePaymentAsync(int paymentId);
+
+    /// <summary>
+    /// Gets the total sales amount for settled receipts within a date range.
+    /// </summary>
+    /// <param name="startDate">The start date of the period.</param>
+    /// <param name="endDate">The end date of the period.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The total sales amount for the period.</returns>
+    Task<decimal> GetSalesTotalAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
 }

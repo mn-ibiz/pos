@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using HospitalityPOS.Core.DTOs;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Enums;
 using HospitalityPOS.Core.Interfaces;
@@ -218,7 +219,14 @@ public class WorkPeriodService : IWorkPeriodService
 
         expectedCash += cashPayments;
 
-        // TODO: Subtract cash refunds when refund functionality is implemented
+        // Subtract cash payouts
+        var cashPayouts = await _context.CashPayouts
+            .Where(p => p.WorkPeriodId == workPeriodId)
+            .Where(p => p.Status == PayoutStatus.Approved)
+            .SumAsync(p => p.Amount, cancellationToken)
+            .ConfigureAwait(false);
+
+        expectedCash -= cashPayouts;
 
         return expectedCash;
     }
@@ -553,8 +561,12 @@ public class WorkPeriodService : IWorkPeriodService
             .Where(p => p.PaymentMethod?.Type == PaymentMethodType.Cash)
             .Sum(p => p.Amount);
 
-        // Cash payouts - placeholder, would need CashPayout entity in real implementation
-        var cashPayouts = 0m;
+        // Cash payouts from approved payouts
+        var cashPayouts = await _context.CashPayouts
+            .Where(p => p.WorkPeriodId == workPeriodId)
+            .Where(p => p.Status == PayoutStatus.Approved)
+            .SumAsync(p => p.Amount, cancellationToken)
+            .ConfigureAwait(false);
 
         // Top selling items
         var topSellingItems = settledReceipts
@@ -678,4 +690,447 @@ public class WorkPeriodService : IWorkPeriodService
 
         return setting?.SettingValue ?? defaultValue;
     }
+
+    #region Denomination-Aware Methods
+
+    /// <inheritdoc />
+    public async Task<List<CashDenominationDto>> GetActiveDenominationsAsync(string currencyCode = "KES", CancellationToken cancellationToken = default)
+    {
+        return await _context.CashDenominations
+            .AsNoTracking()
+            .Where(d => d.CurrencyCode == currencyCode && d.IsActive)
+            .OrderBy(d => d.SortOrder)
+            .Select(d => new CashDenominationDto
+            {
+                Id = d.Id,
+                CurrencyCode = d.CurrencyCode,
+                Type = d.Type,
+                Value = d.Value,
+                DisplayName = d.DisplayName,
+                SortOrder = d.SortOrder,
+                IsActive = d.IsActive
+            })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task<WorkPeriod> OpenWorkPeriodWithDenominationsAsync(
+        CashDenominationCountDto openingCount,
+        int userId,
+        string? notes = null,
+        CancellationToken cancellationToken = default)
+    {
+        // Validate no existing open work period
+        if (await IsWorkPeriodOpenAsync(cancellationToken).ConfigureAwait(false))
+        {
+            throw new InvalidOperationException("A work period is already open. Please close the current work period before opening a new one.");
+        }
+
+        // Calculate totals from denomination count
+        var (totalNotes, totalCoins, grandTotal) = await CalculateDenominationTotalsAsync(openingCount.Denominations, cancellationToken);
+
+        var workPeriod = new WorkPeriod
+        {
+            OpenedAt = DateTime.UtcNow,
+            OpenedByUserId = userId,
+            OpeningFloat = grandTotal,
+            Status = WorkPeriodStatus.Open,
+            Notes = notes?.Trim()
+        };
+
+        await _context.WorkPeriods.AddAsync(workPeriod, cancellationToken).ConfigureAwait(false);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        // Create the denomination count record
+        var cashCount = await CreateCashCountAsync(
+            workPeriod.Id,
+            CashCountType.Opening,
+            openingCount,
+            userId,
+            totalNotes,
+            totalCoins,
+            grandTotal,
+            cancellationToken);
+
+        // Create audit log
+        var auditLog = new AuditLog
+        {
+            UserId = userId,
+            Action = "WorkPeriodOpenedWithDenominations",
+            EntityType = nameof(WorkPeriod),
+            EntityId = workPeriod.Id,
+            NewValues = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                OpeningFloat = grandTotal,
+                TotalNotes = totalNotes,
+                TotalCoins = totalCoins,
+                DenominationCount = openingCount.Denominations.Count,
+                OpenedAt = workPeriod.OpenedAt,
+                Notes = notes
+            }),
+            MachineName = Environment.MachineName,
+            CreatedAt = DateTime.UtcNow
+        };
+        await _context.AuditLogs.AddAsync(auditLog, cancellationToken).ConfigureAwait(false);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        _logger.Information(
+            "Work period opened by user {UserId} with denomination count. Total: {Total:C} (Notes: {Notes:C}, Coins: {Coins:C})",
+            userId, grandTotal, totalNotes, totalCoins);
+
+        return (await GetByIdAsync(workPeriod.Id, cancellationToken).ConfigureAwait(false))!;
+    }
+
+    /// <inheritdoc />
+    public async Task<WorkPeriod> CloseWorkPeriodWithDenominationsAsync(
+        CashDenominationCountDto closingCount,
+        int userId,
+        string? varianceExplanation = null,
+        CancellationToken cancellationToken = default)
+    {
+        var workPeriod = await _context.WorkPeriods
+            .Where(wp => wp.Status == WorkPeriodStatus.Open)
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (workPeriod is null)
+        {
+            throw new InvalidOperationException("No work period is currently open.");
+        }
+
+        // Calculate totals from denomination count
+        var (totalNotes, totalCoins, grandTotal) = await CalculateDenominationTotalsAsync(closingCount.Denominations, cancellationToken);
+
+        // Calculate expected cash
+        var expectedCash = await CalculateExpectedCashAsync(workPeriod.Id, cancellationToken).ConfigureAwait(false);
+
+        // Get next Z-report number
+        var lastZReport = await _context.WorkPeriods
+            .Where(wp => wp.ZReportNumber.HasValue)
+            .MaxAsync(wp => (int?)wp.ZReportNumber, cancellationToken)
+            .ConfigureAwait(false);
+
+        workPeriod.ClosedAt = DateTime.UtcNow;
+        workPeriod.ClosedByUserId = userId;
+        workPeriod.ClosingCash = grandTotal;
+        workPeriod.ExpectedCash = expectedCash;
+        workPeriod.Variance = grandTotal - expectedCash;
+        workPeriod.Status = WorkPeriodStatus.Closed;
+        workPeriod.ZReportNumber = (lastZReport ?? 0) + 1;
+
+        // Add variance explanation to notes
+        if (!string.IsNullOrWhiteSpace(varianceExplanation))
+        {
+            var varianceNote = $"Variance Explanation: {varianceExplanation.Trim()}";
+            workPeriod.Notes = string.IsNullOrEmpty(workPeriod.Notes)
+                ? varianceNote
+                : $"{workPeriod.Notes}\n---\n{varianceNote}";
+        }
+
+        // Create the denomination count record
+        var cashCount = await CreateCashCountAsync(
+            workPeriod.Id,
+            CashCountType.Closing,
+            closingCount,
+            userId,
+            totalNotes,
+            totalCoins,
+            grandTotal,
+            cancellationToken);
+
+        // Create audit log
+        var auditLog = new AuditLog
+        {
+            UserId = userId,
+            Action = "WorkPeriodClosedWithDenominations",
+            EntityType = nameof(WorkPeriod),
+            EntityId = workPeriod.Id,
+            NewValues = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                ClosingCash = grandTotal,
+                TotalNotes = totalNotes,
+                TotalCoins = totalCoins,
+                ExpectedCash = expectedCash,
+                Variance = workPeriod.Variance,
+                VarianceExplanation = varianceExplanation,
+                ZReportNumber = workPeriod.ZReportNumber,
+                ClosedAt = workPeriod.ClosedAt
+            }),
+            MachineName = Environment.MachineName,
+            CreatedAt = DateTime.UtcNow
+        };
+        await _context.AuditLogs.AddAsync(auditLog, cancellationToken).ConfigureAwait(false);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        _logger.Information(
+            "Work period {WorkPeriodId} closed by user {UserId} with denominations. Expected: {Expected:C}, Actual: {Actual:C}, Variance: {Variance:C}",
+            workPeriod.Id, userId, expectedCash, grandTotal, workPeriod.Variance);
+
+        return workPeriod;
+    }
+
+    /// <inheritdoc />
+    public async Task<CashCountResultDto> RecordMidShiftCountAsync(
+        int workPeriodId,
+        CashDenominationCountDto count,
+        int userId,
+        CancellationToken cancellationToken = default)
+    {
+        var workPeriod = await _context.WorkPeriods
+            .FirstOrDefaultAsync(wp => wp.Id == workPeriodId && wp.Status == WorkPeriodStatus.Open, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (workPeriod is null)
+        {
+            throw new InvalidOperationException($"Work period {workPeriodId} is not open or does not exist.");
+        }
+
+        var (totalNotes, totalCoins, grandTotal) = await CalculateDenominationTotalsAsync(count.Denominations, cancellationToken);
+
+        var cashCount = await CreateCashCountAsync(
+            workPeriodId,
+            CashCountType.MidShift,
+            count,
+            userId,
+            totalNotes,
+            totalCoins,
+            grandTotal,
+            cancellationToken);
+
+        _logger.Information(
+            "Mid-shift cash count recorded for work period {WorkPeriodId}. Total: {Total:C}",
+            workPeriodId, grandTotal);
+
+        return await GetCashCountResultAsync(cashCount.Id, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<CashCountResultDto?> GetDenominationCountAsync(
+        int workPeriodId,
+        CashCountType countType,
+        CancellationToken cancellationToken = default)
+    {
+        var cashCount = await _context.CashDenominationCounts
+            .AsNoTracking()
+            .Include(c => c.CountedByUser)
+            .Include(c => c.VerifiedByUser)
+            .Include(c => c.Lines)
+                .ThenInclude(l => l.Denomination)
+            .Where(c => c.WorkPeriodId == workPeriodId && c.CountType == countType)
+            .OrderByDescending(c => c.CountedAt)
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (cashCount is null)
+            return null;
+
+        return MapToCashCountResultDto(cashCount);
+    }
+
+    /// <inheritdoc />
+    public async Task<List<CashCountResultDto>> GetAllDenominationCountsAsync(
+        int workPeriodId,
+        CancellationToken cancellationToken = default)
+    {
+        var cashCounts = await _context.CashDenominationCounts
+            .AsNoTracking()
+            .Include(c => c.CountedByUser)
+            .Include(c => c.VerifiedByUser)
+            .Include(c => c.Lines)
+                .ThenInclude(l => l.Denomination)
+            .Where(c => c.WorkPeriodId == workPeriodId)
+            .OrderBy(c => c.CountedAt)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return cashCounts.Select(MapToCashCountResultDto).ToList();
+    }
+
+    /// <inheritdoc />
+    public async Task<FloatRecommendationDto> GetRecommendedFloatAsync(
+        string currencyCode = "KES",
+        CancellationToken cancellationToken = default)
+    {
+        // Get float recommendation from settings or use default
+        var recommendedTotal = decimal.Parse(
+            await GetSystemSettingAsync("RecommendedFloat", "15000", cancellationToken));
+
+        // Standard recommended float composition for Kenya
+        var recommendations = new Dictionary<decimal, int>
+        {
+            { 1000, 5 },   // 5 x KES 1,000 = 5,000
+            { 500, 6 },    // 6 x KES 500 = 3,000
+            { 200, 5 },    // 5 x KES 200 = 1,000
+            { 100, 20 },   // 20 x KES 100 = 2,000
+            { 50, 40 },    // 40 x KES 50 = 2,000
+            { 20, 50 },    // 50 x KES 20 = 1,000
+            { 10, 50 },    // 50 x KES 10 = 500
+            { 5, 100 },    // 100 x KES 5 = 500
+        };
+
+        return new FloatRecommendationDto
+        {
+            TotalAmount = recommendedTotal,
+            RecommendedDenominations = recommendations,
+            Notes = "Standard float composition for adequate change. Adjust based on typical transaction patterns."
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> VerifyCashCountAsync(
+        int cashCountId,
+        int verifierUserId,
+        CancellationToken cancellationToken = default)
+    {
+        var cashCount = await _context.CashDenominationCounts
+            .FirstOrDefaultAsync(c => c.Id == cashCountId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (cashCount is null)
+            return false;
+
+        cashCount.VerifiedByUserId = verifierUserId;
+        cashCount.VerifiedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        _logger.Information(
+            "Cash count {CashCountId} verified by user {VerifierUserId}",
+            cashCountId, verifierUserId);
+
+        return true;
+    }
+
+    #endregion
+
+    #region Private Helpers
+
+    private async Task<(decimal TotalNotes, decimal TotalCoins, decimal GrandTotal)> CalculateDenominationTotalsAsync(
+        Dictionary<decimal, int> denominations,
+        CancellationToken cancellationToken)
+    {
+        var activeDenominations = await _context.CashDenominations
+            .AsNoTracking()
+            .Where(d => d.IsActive)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        decimal totalNotes = 0;
+        decimal totalCoins = 0;
+
+        foreach (var (value, quantity) in denominations)
+        {
+            var denomination = activeDenominations.FirstOrDefault(d => d.Value == value);
+            if (denomination is null) continue;
+
+            var lineTotal = value * quantity;
+            if (denomination.Type == DenominationType.Note)
+                totalNotes += lineTotal;
+            else
+                totalCoins += lineTotal;
+        }
+
+        return (totalNotes, totalCoins, totalNotes + totalCoins);
+    }
+
+    private async Task<CashDenominationCount> CreateCashCountAsync(
+        int workPeriodId,
+        CashCountType countType,
+        CashDenominationCountDto countDto,
+        int userId,
+        decimal totalNotes,
+        decimal totalCoins,
+        decimal grandTotal,
+        CancellationToken cancellationToken)
+    {
+        var cashCount = new CashDenominationCount
+        {
+            WorkPeriodId = workPeriodId,
+            CountType = countType,
+            CountedByUserId = userId,
+            CountedAt = DateTime.UtcNow,
+            TotalNotes = totalNotes,
+            TotalCoins = totalCoins,
+            GrandTotal = grandTotal,
+            Notes = countDto.Notes
+        };
+
+        await _context.CashDenominationCounts.AddAsync(cashCount, cancellationToken).ConfigureAwait(false);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        // Create lines for each denomination
+        var activeDenominations = await _context.CashDenominations
+            .AsNoTracking()
+            .Where(d => d.IsActive)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        foreach (var (value, quantity) in countDto.Denominations)
+        {
+            if (quantity <= 0) continue;
+
+            var denomination = activeDenominations.FirstOrDefault(d => d.Value == value);
+            if (denomination is null) continue;
+
+            var line = new CashCountLine
+            {
+                CashDenominationCountId = cashCount.Id,
+                DenominationId = denomination.Id,
+                Quantity = quantity,
+                LineTotal = value * quantity
+            };
+
+            await _context.CashCountLines.AddAsync(line, cancellationToken).ConfigureAwait(false);
+        }
+
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return cashCount;
+    }
+
+    private async Task<CashCountResultDto> GetCashCountResultAsync(int cashCountId, CancellationToken cancellationToken)
+    {
+        var cashCount = await _context.CashDenominationCounts
+            .AsNoTracking()
+            .Include(c => c.CountedByUser)
+            .Include(c => c.VerifiedByUser)
+            .Include(c => c.Lines)
+                .ThenInclude(l => l.Denomination)
+            .FirstAsync(c => c.Id == cashCountId, cancellationToken)
+            .ConfigureAwait(false);
+
+        return MapToCashCountResultDto(cashCount);
+    }
+
+    private static CashCountResultDto MapToCashCountResultDto(CashDenominationCount cashCount)
+    {
+        return new CashCountResultDto
+        {
+            Id = cashCount.Id,
+            WorkPeriodId = cashCount.WorkPeriodId,
+            CountType = cashCount.CountType,
+            CountedByUserId = cashCount.CountedByUserId,
+            CountedByUserName = cashCount.CountedByUser?.FullName ?? "Unknown",
+            CountedAt = cashCount.CountedAt,
+            VerifiedByUserId = cashCount.VerifiedByUserId,
+            VerifiedByUserName = cashCount.VerifiedByUser?.FullName,
+            VerifiedAt = cashCount.VerifiedAt,
+            TotalNotes = cashCount.TotalNotes,
+            TotalCoins = cashCount.TotalCoins,
+            GrandTotal = cashCount.GrandTotal,
+            Notes = cashCount.Notes,
+            Lines = cashCount.Lines.Select(l => new CashCountLineDto
+            {
+                DenominationId = l.DenominationId,
+                Type = l.Denomination?.Type ?? DenominationType.Note,
+                DenominationValue = l.Denomination?.Value ?? 0,
+                DisplayName = l.Denomination?.DisplayName ?? "Unknown",
+                Quantity = l.Quantity,
+                LineTotal = l.LineTotal
+            }).OrderBy(l => l.Type).ThenByDescending(l => l.DenominationValue).ToList()
+        };
+    }
+
+    #endregion
 }

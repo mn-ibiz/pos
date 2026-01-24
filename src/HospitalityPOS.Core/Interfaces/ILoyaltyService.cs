@@ -164,6 +164,22 @@ public interface ILoyaltyService
     Task<PointsConfiguration?> GetPointsConfigurationAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Creates a new points configuration.
+    /// </summary>
+    /// <param name="configuration">The configuration to create.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The created configuration.</returns>
+    Task<PointsConfiguration> CreatePointsConfigurationAsync(PointsConfiguration configuration, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates an existing points configuration.
+    /// </summary>
+    /// <param name="configuration">The configuration to update.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The updated configuration.</returns>
+    Task<PointsConfiguration> UpdatePointsConfigurationAsync(PointsConfiguration configuration, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the tier-based bonus multiplier for a member.
     /// </summary>
     /// <param name="memberId">The member ID.</param>
@@ -194,6 +210,26 @@ public interface ILoyaltyService
         DateTime? startDate = null,
         DateTime? endDate = null,
         int maxResults = 50,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets paginated transaction history for a member with filtering options.
+    /// </summary>
+    /// <param name="memberId">The member ID.</param>
+    /// <param name="type">Optional transaction type filter.</param>
+    /// <param name="startDate">Optional start date filter.</param>
+    /// <param name="endDate">Optional end date filter.</param>
+    /// <param name="page">Page number (1-based).</param>
+    /// <param name="pageSize">Number of items per page.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A paginated result of loyalty transactions.</returns>
+    Task<PagedTransactionHistoryResult> GetPagedTransactionHistoryAsync(
+        int memberId,
+        LoyaltyTransactionType? type = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        int page = 1,
+        int pageSize = 20,
         CancellationToken cancellationToken = default);
 
     // ================== Points Redemption Methods ==================

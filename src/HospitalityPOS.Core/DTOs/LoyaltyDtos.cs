@@ -60,12 +60,18 @@ public class EnrollmentResult
     public LoyaltyMemberDto? ExistingMember { get; set; }
 
     /// <summary>
+    /// Welcome bonus points awarded (if any).
+    /// </summary>
+    public int WelcomeBonusPoints { get; set; }
+
+    /// <summary>
     /// Creates a successful enrollment result.
     /// </summary>
-    public static EnrollmentResult Success(LoyaltyMemberDto member) => new()
+    public static EnrollmentResult Success(LoyaltyMemberDto member, int welcomeBonus = 0) => new()
     {
         IsSuccess = true,
-        Member = member
+        Member = member,
+        WelcomeBonusPoints = welcomeBonus
     };
 
     /// <summary>
@@ -404,6 +410,57 @@ public class LoyaltyTransactionDto
     /// Whether this was a credit (points added) or debit (points removed).
     /// </summary>
     public bool IsCredit => Points > 0;
+
+    /// <summary>
+    /// Name of user who processed the transaction.
+    /// </summary>
+    public string? ProcessedByUserName { get; set; }
+
+    /// <summary>
+    /// Receipt ID if linked to a transaction.
+    /// </summary>
+    public int? ReceiptId { get; set; }
+}
+
+/// <summary>
+/// Paginated result of loyalty transaction history.
+/// </summary>
+public class PagedTransactionHistoryResult
+{
+    /// <summary>
+    /// The list of transactions for the current page.
+    /// </summary>
+    public List<LoyaltyTransactionDto> Transactions { get; set; } = new();
+
+    /// <summary>
+    /// The current page number (1-based).
+    /// </summary>
+    public int CurrentPage { get; set; }
+
+    /// <summary>
+    /// The number of items per page.
+    /// </summary>
+    public int PageSize { get; set; }
+
+    /// <summary>
+    /// The total number of transactions matching the filter.
+    /// </summary>
+    public int TotalCount { get; set; }
+
+    /// <summary>
+    /// The total number of pages.
+    /// </summary>
+    public int TotalPages => PageSize > 0 ? (int)Math.Ceiling((double)TotalCount / PageSize) : 0;
+
+    /// <summary>
+    /// Whether there's a next page.
+    /// </summary>
+    public bool HasNextPage => CurrentPage < TotalPages;
+
+    /// <summary>
+    /// Whether there's a previous page.
+    /// </summary>
+    public bool HasPreviousPage => CurrentPage > 1;
 }
 
 /// <summary>

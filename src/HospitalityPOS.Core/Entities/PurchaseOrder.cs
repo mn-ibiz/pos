@@ -142,6 +142,16 @@ public class PurchaseOrder : BaseEntity
     /// </summary>
     public string? Priority { get; set; }
 
+    /// <summary>
+    /// Gets or sets when the PO was last emailed to the supplier.
+    /// </summary>
+    public DateTime? LastEmailedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of times this PO has been emailed.
+    /// </summary>
+    public int EmailCount { get; set; }
+
     // Navigation properties
     public virtual Store? Store { get; set; }
     public virtual Supplier Supplier { get; set; } = null!;
@@ -149,4 +159,5 @@ public class PurchaseOrder : BaseEntity
     public virtual ICollection<PurchaseOrderItem> PurchaseOrderItems { get; set; } = new List<PurchaseOrderItem>();
     public virtual ICollection<GoodsReceivedNote> GoodsReceivedNotes { get; set; } = new List<GoodsReceivedNote>();
     public virtual ICollection<SupplierInvoice> SupplierInvoices { get; set; } = new List<SupplierInvoice>();
+    public virtual ICollection<POEmailLog> EmailLogs { get; set; } = new List<POEmailLog>();
 }

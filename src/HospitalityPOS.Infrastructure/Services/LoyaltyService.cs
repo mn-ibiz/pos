@@ -83,6 +83,10 @@ public partial class LoyaltyService : ILoyaltyService
             var membershipNumber = await GenerateMembershipNumberAsync(cancellationToken)
                 .ConfigureAwait(false);
 
+            // Check for welcome bonus configuration
+            var config = await GetPointsConfigurationAsync(cancellationToken).ConfigureAwait(false);
+            var welcomeBonus = config?.WelcomeBonusPoints ?? 0;
+
             // Create new member
             var member = new LoyaltyMember
             {
@@ -91,8 +95,8 @@ public partial class LoyaltyService : ILoyaltyService
                 Email = dto.Email?.Trim(),
                 MembershipNumber = membershipNumber,
                 Tier = MembershipTier.Bronze,
-                PointsBalance = 0,
-                LifetimePoints = 0,
+                PointsBalance = welcomeBonus,
+                LifetimePoints = welcomeBonus,
                 LifetimeSpend = 0,
                 EnrolledAt = DateTime.UtcNow,
                 VisitCount = 0,
@@ -103,9 +107,31 @@ public partial class LoyaltyService : ILoyaltyService
             await _memberRepository.AddAsync(member, cancellationToken).ConfigureAwait(false);
             await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
+            // Create welcome bonus transaction if bonus was awarded
+            if (welcomeBonus > 0)
+            {
+                var bonusTransaction = new LoyaltyTransaction
+                {
+                    LoyaltyMemberId = member.Id,
+                    TransactionType = LoyaltyTransactionType.Adjustment,
+                    Points = welcomeBonus,
+                    BalanceAfter = welcomeBonus,
+                    Description = "Welcome bonus for joining loyalty program",
+                    TransactionDate = DateTime.UtcNow,
+                    ProcessedByUserId = enrolledByUserId
+                };
+
+                _context.LoyaltyTransactions.Add(bonusTransaction);
+                await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                _logger.LogInformation(
+                    "Welcome bonus of {Points} points awarded to member {MembershipNumber}",
+                    welcomeBonus, membershipNumber);
+            }
+
             _logger.LogInformation(
-                "New loyalty member enrolled: {MembershipNumber}, Phone: {Phone}, By User: {UserId}",
-                membershipNumber, normalizedPhone, enrolledByUserId);
+                "New loyalty member enrolled: {MembershipNumber}, Phone: {Phone}, By User: {UserId}, WelcomeBonus: {Bonus}",
+                membershipNumber, normalizedPhone, enrolledByUserId, welcomeBonus);
 
             // Send welcome SMS (fire-and-forget, don't fail enrollment if SMS fails)
             // Using ThreadPool.QueueUserWorkItem for true fire-and-forget with proper exception handling
@@ -117,7 +143,7 @@ public partial class LoyaltyService : ILoyaltyService
                         normalizedPhone,
                         dto.Name,
                         membershipNumber,
-                        0,
+                        welcomeBonus,
                         CancellationToken.None).ConfigureAwait(false);
                 }
                 catch (Exception ex)
@@ -127,7 +153,7 @@ public partial class LoyaltyService : ILoyaltyService
                 }
             });
 
-            return EnrollmentResult.Success(MapToDto(member));
+            return EnrollmentResult.Success(MapToDto(member), welcomeBonus);
         }
         catch (Exception ex)
         {
@@ -528,6 +554,90 @@ public partial class LoyaltyService : ILoyaltyService
     }
 
     /// <inheritdoc />
+    public async Task<PointsConfiguration> CreatePointsConfigurationAsync(PointsConfiguration configuration, CancellationToken cancellationToken = default)
+    {
+        if (configuration == null)
+        {
+            throw new ArgumentNullException(nameof(configuration));
+        }
+
+        configuration.CreatedAt = DateTime.UtcNow;
+        configuration.UpdatedAt = DateTime.UtcNow;
+
+        // If this is set as default, unset other defaults
+        if (configuration.IsDefault)
+        {
+            var existingConfigs = await _pointsConfigRepository
+                .FindAsync(c => c.IsDefault && c.IsActive, cancellationToken)
+                .ConfigureAwait(false);
+
+            foreach (var existing in existingConfigs)
+            {
+                existing.IsDefault = false;
+                existing.UpdatedAt = DateTime.UtcNow;
+                _pointsConfigRepository.Update(existing);
+            }
+        }
+
+        await _pointsConfigRepository.AddAsync(configuration, cancellationToken).ConfigureAwait(false);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        _logger.Information("Points configuration created: {ConfigId} - {ConfigName}", configuration.Id, configuration.Name);
+        return configuration;
+    }
+
+    /// <inheritdoc />
+    public async Task<PointsConfiguration> UpdatePointsConfigurationAsync(PointsConfiguration configuration, CancellationToken cancellationToken = default)
+    {
+        if (configuration == null)
+        {
+            throw new ArgumentNullException(nameof(configuration));
+        }
+
+        var existing = await _pointsConfigRepository.GetByIdAsync(configuration.Id, cancellationToken).ConfigureAwait(false);
+        if (existing == null)
+        {
+            throw new InvalidOperationException($"Points configuration with ID {configuration.Id} not found.");
+        }
+
+        // Update properties
+        existing.Name = configuration.Name;
+        existing.Description = configuration.Description;
+        existing.EarningRate = configuration.EarningRate;
+        existing.EarnOnDiscountedItems = configuration.EarnOnDiscountedItems;
+        existing.EarnOnTax = configuration.EarnOnTax;
+        existing.RedemptionValue = configuration.RedemptionValue;
+        existing.MinimumRedemptionPoints = configuration.MinimumRedemptionPoints;
+        existing.MaximumRedemptionPoints = configuration.MaximumRedemptionPoints;
+        existing.MaxRedemptionPercentage = configuration.MaxRedemptionPercentage;
+        existing.PointsExpiryDays = configuration.PointsExpiryDays;
+        existing.IsDefault = configuration.IsDefault;
+        existing.IsActive = configuration.IsActive;
+        existing.UpdatedAt = DateTime.UtcNow;
+
+        // If this is set as default, unset other defaults
+        if (configuration.IsDefault)
+        {
+            var otherConfigs = await _pointsConfigRepository
+                .FindAsync(c => c.IsDefault && c.IsActive && c.Id != configuration.Id, cancellationToken)
+                .ConfigureAwait(false);
+
+            foreach (var other in otherConfigs)
+            {
+                other.IsDefault = false;
+                other.UpdatedAt = DateTime.UtcNow;
+                _pointsConfigRepository.Update(other);
+            }
+        }
+
+        _pointsConfigRepository.Update(existing);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        _logger.Information("Points configuration updated: {ConfigId} - {ConfigName}", existing.Id, existing.Name);
+        return existing;
+    }
+
+    /// <inheritdoc />
     public async Task<decimal> GetTierBonusMultiplierAsync(int memberId, CancellationToken cancellationToken = default)
     {
         var member = await _memberRepository.GetByIdAsync(memberId, cancellationToken).ConfigureAwait(false);
@@ -593,6 +703,72 @@ public partial class LoyaltyService : ILoyaltyService
             .ConfigureAwait(false);
 
         return transactions.Select(MapTransactionToDto);
+    }
+
+    /// <inheritdoc />
+    public async Task<PagedTransactionHistoryResult> GetPagedTransactionHistoryAsync(
+        int memberId,
+        LoyaltyTransactionType? type = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _transactionRepository.QueryNoTracking()
+            .Where(t => t.LoyaltyMemberId == memberId && t.IsActive);
+
+        // Apply type filter
+        if (type.HasValue)
+        {
+            query = query.Where(t => t.TransactionType == type.Value);
+        }
+
+        // Apply date range filters
+        if (startDate.HasValue)
+        {
+            query = query.Where(t => t.TransactionDate >= startDate.Value);
+        }
+
+        if (endDate.HasValue)
+        {
+            query = query.Where(t => t.TransactionDate <= endDate.Value);
+        }
+
+        // Get total count
+        var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
+
+        // Get paginated results
+        var skipAmount = (page - 1) * pageSize;
+        var transactions = await query
+            .OrderByDescending(t => t.TransactionDate)
+            .Skip(skipAmount)
+            .Take(pageSize)
+            .Include(t => t.ProcessedByUser)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return new PagedTransactionHistoryResult
+        {
+            Transactions = transactions.Select(t => new LoyaltyTransactionDto
+            {
+                Id = t.Id,
+                TransactionType = t.TransactionType,
+                Points = t.Points,
+                MonetaryValue = t.MonetaryValue,
+                BalanceAfter = t.BalanceAfter,
+                BonusPoints = t.BonusPoints,
+                BonusMultiplier = t.BonusMultiplier,
+                TransactionDate = t.TransactionDate,
+                Description = t.Description,
+                ReferenceNumber = t.ReferenceNumber,
+                ProcessedByUserName = t.ProcessedByUser?.FullName,
+                ReceiptId = t.ReceiptId
+            }).ToList(),
+            CurrentPage = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
     }
 
     private static LoyaltyTransactionDto MapTransactionToDto(LoyaltyTransaction transaction)

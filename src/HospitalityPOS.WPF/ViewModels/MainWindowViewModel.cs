@@ -7,6 +7,7 @@ using HospitalityPOS.Core.Entities;
 using WorkPeriodStatusEnum = HospitalityPOS.Core.Enums.WorkPeriodStatus;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.WPF.Services;
+using Marketing = HospitalityPOS.WPF.ViewModels.Marketing;
 
 namespace HospitalityPOS.WPF.ViewModels;
 
@@ -291,6 +292,12 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [RelayCommand]
     private void NavigateToLabelPrinters() => NavigateWithSidebar<LabelPrinterConfigurationViewModel>("Label Printers");
 
+    [RelayCommand]
+    private void NavigateToLabelTemplates() => NavigateWithSidebar<LabelTemplateManagementViewModel>("Label Templates");
+
+    [RelayCommand]
+    private void NavigateToLabelSizes() => NavigateWithSidebar<LabelSizeConfigurationViewModel>("Label Sizes");
+
     // Marketing & Offers
     [RelayCommand]
     private void NavigateToOffers() => NavigateWithSidebar<OffersViewModel>("Offers");
@@ -363,6 +370,19 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     [RelayCommand]
     private void NavigateToMpesaSettings() => NavigateWithSidebar<MpesaSettingsViewModel>("M-Pesa Settings");
+
+    [RelayCommand]
+    private void NavigateToSmsSettings() => NavigateWithSidebar<SmsSettingsViewModel>("SMS Settings");
+
+    // Marketing
+    [RelayCommand]
+    private void NavigateToSmsCampaigns() => NavigateWithSidebar<Marketing.SmsCampaignDashboardViewModel>("SMS Campaigns");
+
+    [RelayCommand]
+    private void NavigateToSmsTemplates() => NavigateWithSidebar<Marketing.SmsTemplateListViewModel>("SMS Templates");
+
+    [RelayCommand]
+    private void NavigateToCustomerSegments() => NavigateWithSidebar<Marketing.CustomerSegmentListViewModel>("Customer Segments");
 
     // Device Settings
     [RelayCommand]

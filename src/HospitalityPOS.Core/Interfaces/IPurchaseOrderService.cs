@@ -173,4 +173,66 @@ public interface IPurchaseOrderService
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The newly created duplicate purchase order.</returns>
     Task<PurchaseOrder> DuplicatePurchaseOrderAsync(int purchaseOrderId, int createdByUserId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Archives a purchase order. Only Draft, Complete, and Cancelled POs can be archived.
+    /// </summary>
+    /// <param name="purchaseOrderId">The PO ID.</param>
+    /// <param name="userId">The ID of the user archiving the PO.</param>
+    /// <param name="reason">Optional reason for archiving.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if archived successfully; otherwise, false.</returns>
+    Task<bool> ArchivePurchaseOrderAsync(int purchaseOrderId, int userId, string? reason = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Restores an archived purchase order back to Draft status.
+    /// </summary>
+    /// <param name="purchaseOrderId">The PO ID.</param>
+    /// <param name="userId">The ID of the user restoring the PO.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if restored successfully; otherwise, false.</returns>
+    Task<bool> RestorePurchaseOrderAsync(int purchaseOrderId, int userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Soft deletes a purchase order. Only Draft, Archived, and Cancelled POs can be deleted.
+    /// </summary>
+    /// <param name="purchaseOrderId">The PO ID.</param>
+    /// <param name="userId">The ID of the user deleting the PO.</param>
+    /// <param name="reason">Reason for deletion.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if deleted successfully; otherwise, false.</returns>
+    Task<bool> DeletePurchaseOrderAsync(int purchaseOrderId, int userId, string? reason = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Permanently deletes a purchase order. Admin only, for cleanup.
+    /// </summary>
+    /// <param name="purchaseOrderId">The PO ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if permanently deleted; otherwise, false.</returns>
+    Task<bool> PermanentlyDeletePurchaseOrderAsync(int purchaseOrderId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets archived purchase orders.
+    /// </summary>
+    /// <param name="fromDate">Optional start date filter.</param>
+    /// <param name="toDate">Optional end date filter.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A list of archived purchase orders.</returns>
+    Task<IReadOnlyList<PurchaseOrder>> GetArchivedPurchaseOrdersAsync(DateTime? fromDate = null, DateTime? toDate = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets soft-deleted purchase orders for admin recovery.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A list of deleted purchase orders.</returns>
+    Task<IReadOnlyList<PurchaseOrder>> GetDeletedPurchaseOrdersAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Recovers a soft-deleted purchase order.
+    /// </summary>
+    /// <param name="purchaseOrderId">The PO ID.</param>
+    /// <param name="userId">The ID of the user recovering the PO.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if recovered successfully; otherwise, false.</returns>
+    Task<bool> RecoverPurchaseOrderAsync(int purchaseOrderId, int userId, CancellationToken cancellationToken = default);
 }

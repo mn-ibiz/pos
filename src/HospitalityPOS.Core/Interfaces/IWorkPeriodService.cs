@@ -1,3 +1,4 @@
+using HospitalityPOS.Core.DTOs;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Models.Reports;
 
@@ -114,4 +115,102 @@ public interface IWorkPeriodService
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The count of unsettled receipts.</returns>
     Task<int> GetUnsettledReceiptsCountAsync(int workPeriodId, CancellationToken cancellationToken = default);
+
+    #region Denomination-Aware Methods
+
+    /// <summary>
+    /// Gets all active cash denominations for the specified currency.
+    /// </summary>
+    /// <param name="currencyCode">The currency code (default: KES).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>List of active denominations.</returns>
+    Task<List<CashDenominationDto>> GetActiveDenominationsAsync(string currencyCode = "KES", CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Opens a new work period with denomination breakdown.
+    /// </summary>
+    /// <param name="openingCount">The opening cash count with denominations.</param>
+    /// <param name="userId">The ID of the user opening the work period.</param>
+    /// <param name="notes">Optional notes for the work period.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The newly created work period.</returns>
+    Task<WorkPeriod> OpenWorkPeriodWithDenominationsAsync(
+        CashDenominationCountDto openingCount,
+        int userId,
+        string? notes = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Closes the current work period with denomination breakdown.
+    /// </summary>
+    /// <param name="closingCount">The closing cash count with denominations.</param>
+    /// <param name="userId">The ID of the user closing the work period.</param>
+    /// <param name="varianceExplanation">Explanation for any variance.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The closed work period with variance.</returns>
+    Task<WorkPeriod> CloseWorkPeriodWithDenominationsAsync(
+        CashDenominationCountDto closingCount,
+        int userId,
+        string? varianceExplanation = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Records a mid-shift cash count (e.g., cash drop).
+    /// </summary>
+    /// <param name="workPeriodId">The work period ID.</param>
+    /// <param name="count">The cash count with denominations.</param>
+    /// <param name="userId">The ID of the user performing the count.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The recorded cash count.</returns>
+    Task<CashCountResultDto> RecordMidShiftCountAsync(
+        int workPeriodId,
+        CashDenominationCountDto count,
+        int userId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a denomination count for a work period.
+    /// </summary>
+    /// <param name="workPeriodId">The work period ID.</param>
+    /// <param name="countType">The type of count to retrieve.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The cash count if found.</returns>
+    Task<CashCountResultDto?> GetDenominationCountAsync(
+        int workPeriodId,
+        CashCountType countType,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets all denomination counts for a work period.
+    /// </summary>
+    /// <param name="workPeriodId">The work period ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>List of all cash counts for the work period.</returns>
+    Task<List<CashCountResultDto>> GetAllDenominationCountsAsync(
+        int workPeriodId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the recommended float composition.
+    /// </summary>
+    /// <param name="currencyCode">The currency code (default: KES).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The recommended float composition.</returns>
+    Task<FloatRecommendationDto> GetRecommendedFloatAsync(
+        string currencyCode = "KES",
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Verifies a cash count (manager verification).
+    /// </summary>
+    /// <param name="cashCountId">The cash count ID to verify.</param>
+    /// <param name="verifierUserId">The ID of the user verifying.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if verification successful.</returns>
+    Task<bool> VerifyCashCountAsync(
+        int cashCountId,
+        int verifierUserId,
+        CancellationToken cancellationToken = default);
+
+    #endregion
 }

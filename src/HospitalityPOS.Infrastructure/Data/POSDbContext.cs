@@ -48,6 +48,21 @@ public class POSDbContext : DbContext
 
     #region Work Period
     public DbSet<WorkPeriod> WorkPeriods => Set<WorkPeriod>();
+    public DbSet<CashDenomination> CashDenominations => Set<CashDenomination>();
+    public DbSet<CashDenominationCount> CashDenominationCounts => Set<CashDenominationCount>();
+    public DbSet<CashCountLine> CashCountLines => Set<CashCountLine>();
+    public DbSet<CashPayout> CashPayouts => Set<CashPayout>();
+    #endregion
+
+    #region Z Reports
+    public DbSet<ZReportRecord> ZReportRecords => Set<ZReportRecord>();
+    public DbSet<ZReportCategorySales> ZReportCategorySales => Set<ZReportCategorySales>();
+    public DbSet<ZReportPaymentSummary> ZReportPaymentSummaries => Set<ZReportPaymentSummary>();
+    public DbSet<ZReportHourlySales> ZReportHourlySales => Set<ZReportHourlySales>();
+    public DbSet<ZReportUserSales> ZReportUserSales => Set<ZReportUserSales>();
+    public DbSet<ZReportTaxSummary> ZReportTaxSummaries => Set<ZReportTaxSummary>();
+    public DbSet<ZReportSchedule> ZReportSchedules => Set<ZReportSchedule>();
+    public DbSet<ZReportVarianceThreshold> ZReportVarianceThresholds => Set<ZReportVarianceThreshold>();
     #endregion
 
     #region Products & Categories
@@ -93,16 +108,21 @@ public class POSDbContext : DbContext
     public DbSet<AdjustmentReason> AdjustmentReasons => Set<AdjustmentReason>();
     public DbSet<StockTake> StockTakes => Set<StockTake>();
     public DbSet<StockTakeItem> StockTakeItems => Set<StockTakeItem>();
+    public DbSet<StockCountCounter> StockCountCounters => Set<StockCountCounter>();
+    public DbSet<StockCountSchedule> StockCountSchedules => Set<StockCountSchedule>();
+    public DbSet<VarianceThreshold> VarianceThresholds => Set<VarianceThreshold>();
     #endregion
 
     #region Suppliers & Purchasing
     public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<SupplierContact> SupplierContacts => Set<SupplierContact>();
     public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
     public DbSet<PurchaseOrderItem> PurchaseOrderItems => Set<PurchaseOrderItem>();
     public DbSet<GoodsReceivedNote> GoodsReceivedNotes => Set<GoodsReceivedNote>();
     public DbSet<GRNItem> GRNItems => Set<GRNItem>();
     public DbSet<SupplierInvoice> SupplierInvoices => Set<SupplierInvoice>();
     public DbSet<SupplierPayment> SupplierPayments => Set<SupplierPayment>();
+    public DbSet<POEmailLog> POEmailLogs => Set<POEmailLog>();
     #endregion
 
     #region Employees & Payroll
@@ -142,6 +162,13 @@ public class POSDbContext : DbContext
     public DbSet<EmployeeTermination> EmployeeTerminations => Set<EmployeeTermination>();
     #endregion
 
+    #region HR - Tax Reliefs, HELB & Statutory Returns
+    public DbSet<EmployeeTaxRelief> EmployeeTaxReliefs => Set<EmployeeTaxRelief>();
+    public DbSet<HelbDeduction> HelbDeductions => Set<HelbDeduction>();
+    public DbSet<P9Record> P9Records => Set<P9Record>();
+    public DbSet<StatutoryReturn> StatutoryReturns => Set<StatutoryReturn>();
+    #endregion
+
     #region Expenses
     public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
     public DbSet<Expense> Expenses => Set<Expense>();
@@ -155,6 +182,14 @@ public class POSDbContext : DbContext
     public DbSet<AccountingPeriod> AccountingPeriods => Set<AccountingPeriod>();
     public DbSet<JournalEntry> JournalEntries => Set<JournalEntry>();
     public DbSet<JournalEntryLine> JournalEntryLines => Set<JournalEntryLine>();
+    public DbSet<GLAccountMapping> GLAccountMappings => Set<GLAccountMapping>();
+    public DbSet<BankReconciliation> BankReconciliations => Set<BankReconciliation>();
+    public DbSet<BankReconciliationItem> BankReconciliationItems => Set<BankReconciliationItem>();
+    public DbSet<PeriodClose> PeriodCloses => Set<PeriodClose>();
+    public DbSet<FinancialStatement> FinancialStatements => Set<FinancialStatement>();
+    public DbSet<AccountBalance> AccountBalances => Set<AccountBalance>();
+    public DbSet<AccountBudget> AccountBudgets => Set<AccountBudget>();
+    public DbSet<AccountingAuditLog> AccountingAuditLogs => Set<AccountingAuditLog>();
     #endregion
 
     #region eTIMS
@@ -221,6 +256,7 @@ public class POSDbContext : DbContext
     public DbSet<LoyaltyTransaction> LoyaltyTransactions => Set<LoyaltyTransaction>();
     public DbSet<PointsConfiguration> PointsConfigurations => Set<PointsConfiguration>();
     public DbSet<TierConfiguration> TierConfigurations => Set<TierConfiguration>();
+    public DbSet<RedemptionOtp> RedemptionOtps => Set<RedemptionOtp>();
     #endregion
 
     #region Multi-Store Management
@@ -373,6 +409,7 @@ public class POSDbContext : DbContext
     public DbSet<EmailSchedule> EmailSchedules => Set<EmailSchedule>();
     public DbSet<EmailLog> EmailLogs => Set<EmailLog>();
     public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
+    public DbSet<SmsConfiguration> SmsConfigurations => Set<SmsConfiguration>();
     public DbSet<LowStockAlertConfig> LowStockAlertConfigs => Set<LowStockAlertConfig>();
     public DbSet<ExpiryAlertConfig> ExpiryAlertConfigs => Set<ExpiryAlertConfig>();
     public DbSet<Notification> Notifications => Set<Notification>();

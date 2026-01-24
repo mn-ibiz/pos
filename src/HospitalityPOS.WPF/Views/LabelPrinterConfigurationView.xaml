@@ -6,307 +6,711 @@
              mc:Ignorable="d"
              d:DesignHeight="700"
              d:DesignWidth="1200"
-             Background="#1E1E2E"
-             Loaded="UserControl_Loaded">
+             Background="#1E1E2E">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+
+        <!-- Inverse Boolean to Visibility Converter -->
+        <Style x:Key="InverseVisibility" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsFormVisible}" Value="False">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Form TextBox Style -->
+        <Style x:Key="FormTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Form ComboBox Style -->
+        <Style x:Key="FormComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#2D2D44"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#3D3D5C"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <!-- Form Label Style -->
+        <Style x:Key="FormLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#9CA3AF"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+
+        <!-- Action Button Style -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}"
+                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3D3D5C"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
-    <Grid Margin="24">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <Grid>
+        <!-- Main Content -->
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,24">
-            <TextBlock Text="Label Printer Configuration"
-                       FontSize="28"
-                       FontWeight="SemiBold"
-                       Foreground="White" />
-            <TextBlock Text="Configure label printers, design templates, and manage label sizes"
-                       FontSize="14"
-                       Foreground="#8888AA"
-                       Margin="0,4,0,0" />
-        </StackPanel>
-
-        <!-- Tab Control -->
-        <TabControl Grid.Row="1"
-                    SelectedIndex="{Binding SelectedTabIndex}"
-                    Background="Transparent"
-                    BorderThickness="0">
-
-            <TabControl.Resources>
-                <Style TargetType="TabItem">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="TabItem">
-                                <Border x:Name="Border"
-                                        Background="#252538"
-                                        BorderThickness="0"
-                                        Padding="20,12"
-                                        Margin="0,0,4,0"
-                                        CornerRadius="8,8,0,0"
-                                        Cursor="Hand">
-                                    <ContentPresenter x:Name="ContentSite"
-                                                      ContentSource="Header"
-                                                      HorizontalAlignment="Center"
-                                                      VerticalAlignment="Center" />
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="Border" Property="Background" Value="#2D2D44" />
-                                    </Trigger>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Border" Property="Background" Value="#3D3D5C" />
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                    <Setter Property="Foreground" Value="#8888AA" />
-                    <Setter Property="FontSize" Value="14" />
-                </Style>
-            </TabControl.Resources>
-
-            <!-- Printers Tab -->
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center" />
-                        <TextBlock Text="Printers" VerticalAlignment="Center" />
-                    </StackPanel>
-                </TabItem.Header>
-                <Border Background="#252538" CornerRadius="0,8,8,8" Padding="24">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-
-                        <!-- Toolbar -->
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
-                            <Button Content="+ Add Printer"
-                                    Style="{StaticResource PrimaryButtonStyle}"
-                                    Padding="16,10"
-                                    Margin="0,0,8,0" />
-                            <Button Content="Refresh"
-                                    Command="{Binding RefreshDataCommand}"
-                                    Style="{StaticResource SecondaryButtonStyle}"
-                                    Padding="16,10"
-                                    Margin="0,0,8,0" />
-                            <Button Content="Test Connection"
-                                    Command="{Binding TestPrinterConnectionCommand}"
-                                    Style="{StaticResource SecondaryButtonStyle}"
-                                    Padding="16,10"
-                                    Margin="0,0,8,0" />
-                            <Button Content="Print Test Label"
-                                    Command="{Binding PrintTestLabelCommand}"
-                                    Style="{StaticResource SecondaryButtonStyle}"
-                                    Padding="16,10" />
-                        </StackPanel>
-
-                        <!-- Printers List -->
-                        <DataGrid Grid.Row="1"
-                                  ItemsSource="{Binding Printers}"
-                                  SelectedItem="{Binding SelectedPrinter}"
-                                  AutoGenerateColumns="False"
-                                  IsReadOnly="True"
-                                  Background="#2D2D44"
-                                  Foreground="White"
-                                  BorderThickness="0"
-                                  GridLinesVisibility="Horizontal"
-                                  HorizontalGridLinesBrush="#3D3D5C"
-                                  RowBackground="#2D2D44"
-                                  AlternatingRowBackground="#252538">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="200" />
-                                <DataGridTextColumn Header="Type" Binding="{Binding PrinterType}" Width="100" />
-                                <DataGridTextColumn Header="Language" Binding="{Binding PrintLanguage}" Width="100" />
-                                <DataGridTextColumn Header="Connection" Binding="{Binding ConnectionString}" Width="200" />
-                                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100" />
-                                <DataGridCheckBoxColumn Header="Default" Binding="{Binding IsDefault}" Width="80" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-
-                        <!-- Empty State -->
-                        <StackPanel Grid.Row="1"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Visibility="{Binding Printers.Count, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=inverse}">
-                            <TextBlock Text="&#xE749;"
-                                       FontFamily="Segoe MDL2 Assets"
-                                       FontSize="64"
-                                       Foreground="#3D3D5C"
-                                       HorizontalAlignment="Center" />
-                            <TextBlock Text="No label printers configured"
-                                       FontSize="18"
-                                       Foreground="#8888AA"
-                                       HorizontalAlignment="Center"
-                                       Margin="0,16,0,8" />
-                            <TextBlock Text="Click 'Add Printer' to configure your first label printer"
-                                       FontSize="14"
-                                       Foreground="#555577"
-                                       HorizontalAlignment="Center" />
-                        </StackPanel>
-                    </Grid>
-                </Border>
-            </TabItem>
-
-            <!-- Templates Tab -->
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="&#xE8F1;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center" />
-                        <TextBlock Text="Templates" VerticalAlignment="Center" />
-                    </StackPanel>
-                </TabItem.Header>
-                <Border Background="#252538" CornerRadius="0,8,8,8" Padding="24">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-
-                        <!-- Toolbar -->
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
-                            <Button Content="+ New Template"
-                                    Style="{StaticResource PrimaryButtonStyle}"
-                                    Padding="16,10"
-                                    Margin="0,0,8,0" />
-                            <Button Content="Import from Library"
-                                    Style="{StaticResource SecondaryButtonStyle}"
-                                    Padding="16,10"
-                                    Margin="0,0,8,0" />
-                            <Button Content="Export"
-                                    Style="{StaticResource SecondaryButtonStyle}"
-                                    Padding="16,10" />
-                        </StackPanel>
-
-                        <!-- Templates List -->
-                        <DataGrid Grid.Row="1"
-                                  ItemsSource="{Binding Templates}"
-                                  SelectedItem="{Binding SelectedTemplate}"
-                                  AutoGenerateColumns="False"
-                                  IsReadOnly="True"
-                                  Background="#2D2D44"
-                                  Foreground="White"
-                                  BorderThickness="0"
-                                  GridLinesVisibility="Horizontal"
-                                  HorizontalGridLinesBrush="#3D3D5C"
-                                  RowBackground="#2D2D44"
-                                  AlternatingRowBackground="#252538">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="200" />
-                                <DataGridTextColumn Header="Label Size" Binding="{Binding LabelSizeName}" Width="120" />
-                                <DataGridTextColumn Header="Language" Binding="{Binding PrintLanguage}" Width="100" />
-                                <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="80" />
-                                <DataGridCheckBoxColumn Header="Default" Binding="{Binding IsDefault}" Width="80" />
-                                <DataGridCheckBoxColumn Header="Promo" Binding="{Binding IsPromoTemplate}" Width="80" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-
-                        <!-- Empty State -->
-                        <StackPanel Grid.Row="1"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Visibility="{Binding Templates.Count, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=inverse}">
-                            <TextBlock Text="&#xE8F1;"
-                                       FontFamily="Segoe MDL2 Assets"
-                                       FontSize="64"
-                                       Foreground="#3D3D5C"
-                                       HorizontalAlignment="Center" />
-                            <TextBlock Text="No label templates configured"
-                                       FontSize="18"
-                                       Foreground="#8888AA"
-                                       HorizontalAlignment="Center"
-                                       Margin="0,16,0,8" />
-                            <TextBlock Text="Click 'New Template' to create your first label template"
-                                       FontSize="14"
-                                       Foreground="#555577"
-                                       HorizontalAlignment="Center" />
-                        </StackPanel>
-                    </Grid>
-                </Border>
-            </TabItem>
-
-            <!-- Label Sizes Tab -->
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="&#xE799;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center" />
-                        <TextBlock Text="Label Sizes" VerticalAlignment="Center" />
-                    </StackPanel>
-                </TabItem.Header>
-                <Border Background="#252538" CornerRadius="0,8,8,8" Padding="24">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-
-                        <!-- Toolbar -->
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
-                            <Button Content="+ Add Custom Size"
-                                    Style="{StaticResource PrimaryButtonStyle}"
-                                    Padding="16,10" />
-                        </StackPanel>
-
-                        <!-- Label Sizes List -->
-                        <DataGrid Grid.Row="1"
-                                  ItemsSource="{Binding LabelSizes}"
-                                  AutoGenerateColumns="False"
-                                  IsReadOnly="True"
-                                  Background="#2D2D44"
-                                  Foreground="White"
-                                  BorderThickness="0"
-                                  GridLinesVisibility="Horizontal"
-                                  HorizontalGridLinesBrush="#3D3D5C"
-                                  RowBackground="#2D2D44"
-                                  AlternatingRowBackground="#252538">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="200" />
-                                <DataGridTextColumn Header="Width (mm)" Binding="{Binding WidthMm}" Width="100" />
-                                <DataGridTextColumn Header="Height (mm)" Binding="{Binding HeightMm}" Width="100" />
-                                <DataGridTextColumn Header="DPI" Binding="{Binding DotsPerMm, StringFormat='{}{0} dots/mm'}" Width="100" />
-                                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>
-                </Border>
-            </TabItem>
-        </TabControl>
-
-        <!-- Status Bar -->
-        <Border Grid.Row="2"
-                Background="#16162B"
-                CornerRadius="8"
-                Padding="16,10"
-                Margin="0,16,0,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <!-- Loading Indicator -->
-                <StackPanel Grid.Column="0"
-                            Orientation="Horizontal"
-                            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <ProgressBar IsIndeterminate="True"
-                                 Width="100"
-                                 Height="4"
-                                 Margin="0,0,12,0" />
-                </StackPanel>
-
-                <!-- Status Message -->
-                <TextBlock Grid.Column="1"
-                           Text="{Binding StatusMessage}"
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,24">
+                <TextBlock Text="Label Printer Configuration"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           Foreground="White" />
+                <TextBlock Text="Configure label printers, design templates, and manage label sizes"
+                           FontSize="14"
                            Foreground="#8888AA"
-                           VerticalAlignment="Center" />
-            </Grid>
+                           Margin="0,4,0,0" />
+            </StackPanel>
+
+            <!-- Tab Control -->
+            <TabControl Grid.Row="1"
+                        SelectedIndex="{Binding SelectedTabIndex}"
+                        Background="Transparent"
+                        BorderThickness="0">
+
+                <TabControl.Resources>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TabItem">
+                                    <Border x:Name="Border"
+                                            Background="#252538"
+                                            BorderThickness="0"
+                                            Padding="20,12"
+                                            Margin="0,0,4,0"
+                                            CornerRadius="8,8,0,0"
+                                            Cursor="Hand">
+                                        <ContentPresenter x:Name="ContentSite"
+                                                          ContentSource="Header"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Border" Property="Background" Value="#2D2D44" />
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Border" Property="Background" Value="#3D3D5C" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Foreground" Value="#8888AA" />
+                        <Setter Property="FontSize" Value="14" />
+                    </Style>
+                </TabControl.Resources>
+
+                <!-- Printers Tab -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Printers" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <Border Background="#252538" CornerRadius="0,8,8,8" Padding="24">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Printers List Panel -->
+                            <Grid Grid.Column="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Toolbar -->
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                                    <Button Content="+ Add Printer"
+                                            Command="{Binding ShowAddPrinterFormCommand}"
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            Padding="16,10"
+                                            Margin="0,0,8,0" />
+                                    <Button Content="Refresh"
+                                            Command="{Binding RefreshDataCommand}"
+                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            Padding="16,10"
+                                            Margin="0,0,8,0" />
+                                    <Button Content="Test Connection"
+                                            Command="{Binding TestPrinterConnectionCommand}"
+                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            Padding="16,10"
+                                            Margin="0,0,8,0" />
+                                    <Button Content="Print Test Label"
+                                            Command="{Binding PrintTestLabelCommand}"
+                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            Padding="16,10" />
+                                </StackPanel>
+
+                                <!-- Printers DataGrid -->
+                                <DataGrid Grid.Row="1"
+                                          ItemsSource="{Binding Printers}"
+                                          SelectedItem="{Binding SelectedPrinter}"
+                                          AutoGenerateColumns="False"
+                                          IsReadOnly="True"
+                                          Background="#2D2D44"
+                                          Foreground="White"
+                                          BorderThickness="0"
+                                          GridLinesVisibility="Horizontal"
+                                          HorizontalGridLinesBrush="#3D3D5C"
+                                          RowBackground="#2D2D44"
+                                          AlternatingRowBackground="#252538"
+                                          CanUserAddRows="False"
+                                          CanUserDeleteRows="False"
+                                          SelectionMode="Single"
+                                          HeadersVisibility="Column">
+                                    <DataGrid.ColumnHeaderStyle>
+                                        <Style TargetType="DataGridColumnHeader">
+                                            <Setter Property="Background" Value="#16162B"/>
+                                            <Setter Property="Foreground" Value="#9CA3AF"/>
+                                            <Setter Property="Padding" Value="12,8"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                        </Style>
+                                    </DataGrid.ColumnHeaderStyle>
+                                    <DataGrid.CellStyle>
+                                        <Style TargetType="DataGridCell">
+                                            <Setter Property="Padding" Value="12,8"/>
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter Property="Background" Value="#3D3D5C"/>
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </DataGrid.CellStyle>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="180" />
+                                        <DataGridTextColumn Header="Type" Binding="{Binding PrinterType}" Width="90" />
+                                        <DataGridTextColumn Header="Language" Binding="{Binding PrintLanguage}" Width="90" />
+                                        <DataGridTextColumn Header="Connection" Binding="{Binding ConnectionString}" Width="150" />
+                                        <DataGridTemplateColumn Header="Status" Width="100">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Border CornerRadius="4" Padding="8,4"
+                                                            Background="{Binding Status, Converter={StaticResource StatusToBrushConverter}, FallbackValue=#374151}">
+                                                        <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold"
+                                                                   Foreground="White" HorizontalAlignment="Center"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="Default" Width="70">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="&#xE735;" FontFamily="Segoe MDL2 Assets"
+                                                               Foreground="#10B981" FontSize="16"
+                                                               Visibility="{Binding IsDefault, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                               HorizontalAlignment="Center"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="Actions" Width="150">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                        <Button Content="&#xE8FB;" Style="{StaticResource ActionButton}"
+                                                                Foreground="#F59E0B" ToolTip="Set as Default"
+                                                                Command="{Binding DataContext.SetDefaultPrinterCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                CommandParameter="{Binding}"/>
+                                                        <Button Content="&#xE70F;" Style="{StaticResource ActionButton}"
+                                                                Foreground="#3B82F6" ToolTip="Edit"
+                                                                Command="{Binding DataContext.ShowEditPrinterFormCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                CommandParameter="{Binding}"/>
+                                                        <Button Content="&#xE74D;" Style="{StaticResource ActionButton}"
+                                                                Foreground="#EF4444" ToolTip="Delete"
+                                                                Command="{Binding DataContext.DeletePrinterCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                CommandParameter="{Binding}"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+
+                                <!-- Empty State -->
+                                <StackPanel Grid.Row="1"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Visibility="{Binding Printers.Count, Converter={StaticResource ZeroToVisibilityConverter}, FallbackValue=Visible}">
+                                    <TextBlock Text="&#xE749;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="64"
+                                               Foreground="#3D3D5C"
+                                               HorizontalAlignment="Center" />
+                                    <TextBlock Text="No label printers configured"
+                                               FontSize="18"
+                                               Foreground="#8888AA"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,16,0,8" />
+                                    <TextBlock Text="Click 'Add Printer' to configure your first label printer"
+                                               FontSize="14"
+                                               Foreground="#555577"
+                                               HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Printer Form Panel -->
+                            <Border Grid.Column="1" Width="350" Background="#16162B" CornerRadius="8"
+                                    Margin="16,0,0,0" Padding="20"
+                                    Visibility="{Binding IsFormVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <StackPanel>
+                                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,20">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="Add Printer"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                                            <Setter Property="Text" Value="Edit Printer"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <!-- Name -->
+                                        <TextBlock Text="Printer Name" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource FormTextBox}" Margin="0,0,0,16"/>
+
+                                        <!-- Printer Type -->
+                                        <TextBlock Text="Connection Type" Style="{StaticResource FormLabel}"/>
+                                        <ComboBox ItemsSource="{Binding PrinterTypes}"
+                                                  SelectedItem="{Binding FormPrinterType}"
+                                                  Style="{StaticResource FormComboBox}" Margin="0,0,0,16"/>
+
+                                        <!-- Connection String -->
+                                        <TextBlock Text="Connection String" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding FormConnectionString, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource FormTextBox}" Margin="0,0,0,16"/>
+
+                                        <!-- Serial Port Settings (visible for Serial type) -->
+                                        <StackPanel Visibility="{Binding ShowSerialFields, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <TextBlock Text="Baud Rate" Style="{StaticResource FormLabel}"/>
+                                            <ComboBox SelectedItem="{Binding FormBaudRate}"
+                                                      Style="{StaticResource FormComboBox}" Margin="0,0,0,16">
+                                                <ComboBoxItem Content="9600"/>
+                                                <ComboBoxItem Content="19200"/>
+                                                <ComboBoxItem Content="38400"/>
+                                                <ComboBoxItem Content="57600"/>
+                                                <ComboBoxItem Content="115200"/>
+                                            </ComboBox>
+                                        </StackPanel>
+
+                                        <!-- Network Settings (visible for Network type) -->
+                                        <StackPanel Visibility="{Binding ShowNetworkFields, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <TextBlock Text="Port" Style="{StaticResource FormLabel}"/>
+                                            <TextBox Text="{Binding FormPort, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource FormTextBox}" Margin="0,0,0,16"/>
+                                        </StackPanel>
+
+                                        <!-- Timeout -->
+                                        <TextBlock Text="Timeout (ms)" Style="{StaticResource FormLabel}"/>
+                                        <TextBox Text="{Binding FormTimeoutMs, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource FormTextBox}" Margin="0,0,0,16"/>
+
+                                        <!-- Print Language -->
+                                        <TextBlock Text="Print Language" Style="{StaticResource FormLabel}"/>
+                                        <ComboBox ItemsSource="{Binding PrintLanguages}"
+                                                  SelectedItem="{Binding FormPrintLanguage}"
+                                                  Style="{StaticResource FormComboBox}" Margin="0,0,0,16"/>
+
+                                        <!-- Default Label Size -->
+                                        <TextBlock Text="Default Label Size" Style="{StaticResource FormLabel}"/>
+                                        <ComboBox ItemsSource="{Binding LabelSizes}"
+                                                  SelectedValue="{Binding FormDefaultLabelSizeId}"
+                                                  SelectedValuePath="Id"
+                                                  DisplayMemberPath="Name"
+                                                  Style="{StaticResource FormComboBox}" Margin="0,0,0,16"/>
+
+                                        <!-- Is Default -->
+                                        <CheckBox IsChecked="{Binding FormIsDefault}" Margin="0,0,0,20">
+                                            <TextBlock Text="Set as default printer" Foreground="#9CA3AF"/>
+                                        </CheckBox>
+
+                                        <!-- Buttons -->
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Content="Cancel"
+                                                    Command="{Binding CancelPrinterFormCommand}"
+                                                    Style="{StaticResource SecondaryButtonStyle}"
+                                                    Padding="20,10" Margin="0,0,8,0"/>
+                                            <Button Content="Save"
+                                                    Command="{Binding SavePrinterCommand}"
+                                                    Style="{StaticResource PrimaryButtonStyle}"
+                                                    Padding="20,10"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </TabItem>
+
+                <!-- Templates Tab -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8F1;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Templates" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <Border Background="#252538" CornerRadius="0,8,8,8" Padding="24">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Toolbar -->
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                                <Button Content="+ New Template"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        Padding="16,10"
+                                        Margin="0,0,8,0" />
+                                <Button Content="Import from Library"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Padding="16,10"
+                                        Margin="0,0,8,0" />
+                                <Button Content="Export"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Padding="16,10" />
+                            </StackPanel>
+
+                            <!-- Templates List -->
+                            <DataGrid Grid.Row="1"
+                                      ItemsSource="{Binding Templates}"
+                                      SelectedItem="{Binding SelectedTemplate}"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      Background="#2D2D44"
+                                      Foreground="White"
+                                      BorderThickness="0"
+                                      GridLinesVisibility="Horizontal"
+                                      HorizontalGridLinesBrush="#3D3D5C"
+                                      RowBackground="#2D2D44"
+                                      AlternatingRowBackground="#252538">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="#16162B"/>
+                                        <Setter Property="Foreground" Value="#9CA3AF"/>
+                                        <Setter Property="Padding" Value="12,8"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="Padding" Value="12,8"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="#3D3D5C"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.CellStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="200" />
+                                    <DataGridTextColumn Header="Label Size" Binding="{Binding LabelSizeName}" Width="120" />
+                                    <DataGridTextColumn Header="Language" Binding="{Binding PrintLanguage}" Width="100" />
+                                    <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="80" />
+                                    <DataGridTemplateColumn Header="Default" Width="80">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="&#xE735;" FontFamily="Segoe MDL2 Assets"
+                                                           Foreground="#10B981" FontSize="16"
+                                                           Visibility="{Binding IsDefault, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                           HorizontalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Promo" Width="80">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#7C3AED" CornerRadius="4" Padding="6,2"
+                                                        Visibility="{Binding IsPromoTemplate, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                        HorizontalAlignment="Center">
+                                                    <TextBlock Text="PROMO" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <!-- Empty State -->
+                            <StackPanel Grid.Row="1"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding Templates.Count, Converter={StaticResource ZeroToVisibilityConverter}, FallbackValue=Visible}">
+                                <TextBlock Text="&#xE8F1;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="64"
+                                           Foreground="#3D3D5C"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock Text="No label templates configured"
+                                           FontSize="18"
+                                           Foreground="#8888AA"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,16,0,8" />
+                                <TextBlock Text="Click 'New Template' to create your first label template"
+                                           FontSize="14"
+                                           Foreground="#555577"
+                                           HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </TabItem>
+
+                <!-- Label Sizes Tab -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE799;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Label Sizes" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <Border Background="#252538" CornerRadius="0,8,8,8" Padding="24">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Label Sizes List -->
+                            <Grid Grid.Column="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Toolbar -->
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                                    <Button Content="+ Add Custom Size"
+                                            Command="{Binding ShowAddLabelSizeFormCommand}"
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            Padding="16,10" />
+                                </StackPanel>
+
+                                <!-- Label Sizes List -->
+                                <DataGrid Grid.Row="1"
+                                          ItemsSource="{Binding LabelSizes}"
+                                          SelectedItem="{Binding SelectedLabelSize}"
+                                          AutoGenerateColumns="False"
+                                          IsReadOnly="True"
+                                          Background="#2D2D44"
+                                          Foreground="White"
+                                          BorderThickness="0"
+                                          GridLinesVisibility="Horizontal"
+                                          HorizontalGridLinesBrush="#3D3D5C"
+                                          RowBackground="#2D2D44"
+                                          AlternatingRowBackground="#252538">
+                                    <DataGrid.ColumnHeaderStyle>
+                                        <Style TargetType="DataGridColumnHeader">
+                                            <Setter Property="Background" Value="#16162B"/>
+                                            <Setter Property="Foreground" Value="#9CA3AF"/>
+                                            <Setter Property="Padding" Value="12,8"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                        </Style>
+                                    </DataGrid.ColumnHeaderStyle>
+                                    <DataGrid.CellStyle>
+                                        <Style TargetType="DataGridCell">
+                                            <Setter Property="Padding" Value="12,8"/>
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter Property="Background" Value="#3D3D5C"/>
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </DataGrid.CellStyle>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="200" />
+                                        <DataGridTextColumn Header="Width (mm)" Binding="{Binding WidthMm, StringFormat=N1}" Width="100" />
+                                        <DataGridTextColumn Header="Height (mm)" Binding="{Binding HeightMm, StringFormat=N1}" Width="100" />
+                                        <DataGridTextColumn Header="DPI" Binding="{Binding DotsPerMm, StringFormat='{}{0} dots/mm'}" Width="100" />
+                                        <DataGridTextColumn Header="Templates" Binding="{Binding TemplateCount}" Width="90" />
+                                        <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" />
+                                        <DataGridTemplateColumn Header="Actions" Width="100">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                        <Button Content="&#xE70F;" Style="{StaticResource ActionButton}"
+                                                                Foreground="#3B82F6" ToolTip="Edit"
+                                                                Command="{Binding DataContext.ShowEditLabelSizeFormCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                CommandParameter="{Binding}"/>
+                                                        <Button Content="&#xE74D;" Style="{StaticResource ActionButton}"
+                                                                Foreground="#EF4444" ToolTip="Delete"
+                                                                Command="{Binding DataContext.DeleteLabelSizeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                CommandParameter="{Binding}"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+
+                            <!-- Label Size Form Panel -->
+                            <Border Grid.Column="1" Width="320" Background="#16162B" CornerRadius="8"
+                                    Margin="16,0,0,0" Padding="20"
+                                    Visibility="{Binding IsLabelSizeFormVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <StackPanel>
+                                    <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,20">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="Add Label Size"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsLabelSizeEditMode}" Value="True">
+                                                        <Setter Property="Text" Value="Edit Label Size"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+
+                                    <!-- Name -->
+                                    <TextBlock Text="Size Name" Style="{StaticResource FormLabel}"/>
+                                    <TextBox Text="{Binding LabelSizeFormName, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource FormTextBox}" Margin="0,0,0,16"/>
+
+                                    <!-- Width -->
+                                    <TextBlock Text="Width (mm)" Style="{StaticResource FormLabel}"/>
+                                    <TextBox Text="{Binding LabelSizeFormWidth, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource FormTextBox}" Margin="0,0,0,16"/>
+
+                                    <!-- Height -->
+                                    <TextBlock Text="Height (mm)" Style="{StaticResource FormLabel}"/>
+                                    <TextBox Text="{Binding LabelSizeFormHeight, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource FormTextBox}" Margin="0,0,0,16"/>
+
+                                    <!-- DPI -->
+                                    <TextBlock Text="Resolution (dots/mm)" Style="{StaticResource FormLabel}"/>
+                                    <ComboBox SelectedItem="{Binding LabelSizeFormDotsPerMm}"
+                                              Style="{StaticResource FormComboBox}" Margin="0,0,0,16">
+                                        <ComboBoxItem Content="8" Tag="8"/>
+                                        <ComboBoxItem Content="12" Tag="12"/>
+                                        <ComboBoxItem Content="24" Tag="24"/>
+                                    </ComboBox>
+
+                                    <!-- Description -->
+                                    <TextBlock Text="Description (optional)" Style="{StaticResource FormLabel}"/>
+                                    <TextBox Text="{Binding LabelSizeFormDescription, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource FormTextBox}" Margin="0,0,0,20"
+                                             TextWrapping="Wrap" AcceptsReturn="True" Height="60"/>
+
+                                    <!-- Buttons -->
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="Cancel"
+                                                Command="{Binding CancelLabelSizeFormCommand}"
+                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                Padding="20,10" Margin="0,0,8,0"/>
+                                        <Button Content="Save"
+                                                Command="{Binding SaveLabelSizeCommand}"
+                                                Style="{StaticResource PrimaryButtonStyle}"
+                                                Padding="20,10"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </TabItem>
+            </TabControl>
+
+            <!-- Status Bar -->
+            <Border Grid.Row="2"
+                    Background="#16162B"
+                    CornerRadius="8"
+                    Padding="16,10"
+                    Margin="0,16,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Loading Indicator -->
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
+                                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <ProgressBar IsIndeterminate="True"
+                                     Width="100"
+                                     Height="4"
+                                     Margin="0,0,12,0" />
+                    </StackPanel>
+
+                    <!-- Status Message -->
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding StatusMessage}"
+                               Foreground="#8888AA"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Loading Overlay -->
+        <Border Background="#80000000"
+                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200" Height="4" Foreground="#F59E0B"/>
+                <TextBlock Text="{Binding StatusMessage}" Foreground="White" FontSize="14"
+                           HorizontalAlignment="Center" Margin="0,16,0,0"/>
+            </StackPanel>
         </Border>
     </Grid>
 </UserControl>

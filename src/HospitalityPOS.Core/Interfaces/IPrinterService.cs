@@ -72,6 +72,24 @@ public interface IPrinterService
     Task<PrintTestResult> TestPrintAsync(Printer printer, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Prints a receipt to the specified or default receipt printer.
+    /// </summary>
+    /// <param name="receipt">The receipt to print.</param>
+    /// <param name="printerId">Optional printer ID (uses default if not specified).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The print result.</returns>
+    Task<PrintTestResult> PrintReceiptAsync(Receipt receipt, int? printerId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Generates receipt content as ESC/POS commands.
+    /// </summary>
+    /// <param name="receipt">The receipt to generate content for.</param>
+    /// <param name="printer">The target printer for formatting.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The receipt content as ESC/POS commands.</returns>
+    Task<byte[]> GenerateReceiptContentAsync(Receipt receipt, Printer printer, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Checks the status of a printer.
     /// </summary>
     /// <param name="printer">The printer to check.</param>

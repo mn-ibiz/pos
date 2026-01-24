@@ -21,8 +21,8 @@ public class ThemeService : IThemeService
         "HospitalityPOS",
         SettingsFileName);
 
-    private ThemeMode _currentTheme = ThemeMode.Dark;
-    private ThemeMode _savedThemePreference = ThemeMode.Dark;
+    private ThemeMode _currentTheme = ThemeMode.Light;
+    private ThemeMode _savedThemePreference = ThemeMode.Light;
     private ResourceDictionary? _currentThemeDictionary;
 
     /// <inheritdoc />
@@ -87,13 +87,13 @@ public class ThemeService : IThemeService
                 }
             }
 
-            // Default to Dark theme
-            SetTheme(ThemeMode.Dark);
+            // Default to Light theme
+            SetTheme(ThemeMode.Light);
         }
         catch (Exception ex)
         {
-            Log.Warning(ex, "Failed to load saved theme preference, defaulting to Dark theme");
-            SetTheme(ThemeMode.Dark);
+            Log.Warning(ex, "Failed to load saved theme preference, defaulting to Light theme");
+            SetTheme(ThemeMode.Light);
         }
     }
 
@@ -168,7 +168,7 @@ public class ThemeService : IThemeService
             Log.Warning(ex, "Failed to detect system theme");
         }
 
-        // Default to Dark theme if detection fails
-        return ThemeMode.Dark;
+        // Default to Light theme if detection fails
+        return ThemeMode.Light;
     }
 }

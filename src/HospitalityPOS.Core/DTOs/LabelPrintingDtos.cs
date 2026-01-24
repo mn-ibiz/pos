@@ -449,6 +449,115 @@ public class ImportTemplateFromLibraryDto
 
 #endregion
 
+#region Template Export/Import DTOs
+
+/// <summary>
+/// Export options for template export.
+/// </summary>
+public class TemplateExportOptionsDto
+{
+    public bool IncludeLabelSize { get; set; } = true;
+    public bool IncludeFields { get; set; } = true;
+    public bool Minify { get; set; } = false;
+}
+
+/// <summary>
+/// Import options for template import.
+/// </summary>
+public class TemplateImportOptionsDto
+{
+    public string? NewName { get; set; }
+    public int? LabelSizeId { get; set; }
+    public ConflictResolution ConflictResolution { get; set; } = ConflictResolution.Rename;
+    public int StoreId { get; set; }
+}
+
+/// <summary>
+/// Conflict resolution strategy for imports.
+/// </summary>
+public enum ConflictResolution
+{
+    Rename = 0,
+    Replace = 1,
+    Skip = 2
+}
+
+/// <summary>
+/// Exported template file format.
+/// </summary>
+public class TemplateExportFileDto
+{
+    public string FormatVersion { get; set; } = "1.0";
+    public TemplateExportMetadata Metadata { get; set; } = new();
+    public TemplateExportData Template { get; set; } = new();
+}
+
+/// <summary>
+/// Metadata for exported template file.
+/// </summary>
+public class TemplateExportMetadata
+{
+    public DateTime ExportedAt { get; set; }
+    public string? ExportedBy { get; set; }
+    public int SourceStoreId { get; set; }
+    public string? Checksum { get; set; }
+}
+
+/// <summary>
+/// Template data within export file.
+/// </summary>
+public class TemplateExportData
+{
+    public string Name { get; set; } = string.Empty;
+    public string PrintLanguage { get; set; } = "ZPL";
+    public bool IsPromoTemplate { get; set; }
+    public string? Description { get; set; }
+    public string TemplateContent { get; set; } = string.Empty;
+    public int Version { get; set; }
+    public LabelSizeExportData? LabelSize { get; set; }
+    public List<LabelTemplateFieldDto> Fields { get; set; } = new();
+}
+
+/// <summary>
+/// Label size data within export file.
+/// </summary>
+public class LabelSizeExportData
+{
+    public string Name { get; set; } = string.Empty;
+    public decimal WidthMm { get; set; }
+    public decimal HeightMm { get; set; }
+    public int DotsPerMm { get; set; }
+    public string? Description { get; set; }
+}
+
+/// <summary>
+/// Result of validating an import file.
+/// </summary>
+public class TemplateImportValidationResult
+{
+    public bool IsValid { get; set; }
+    public List<string> Errors { get; set; } = new();
+    public List<string> Warnings { get; set; } = new();
+    public TemplateExportFileDto? ParsedFile { get; set; }
+    public bool NameConflict { get; set; }
+    public string? ConflictingTemplateName { get; set; }
+    public bool SizeExists { get; set; }
+    public int? MatchingLabelSizeId { get; set; }
+}
+
+/// <summary>
+/// Result of importing a template.
+/// </summary>
+public class TemplateImportResultDto
+{
+    public bool Success { get; set; }
+    public string? ErrorMessage { get; set; }
+    public LabelTemplateDto? ImportedTemplate { get; set; }
+    public string? Action { get; set; } // "Created", "Replaced", "Skipped"
+}
+
+#endregion
+
 #region Statistics DTOs
 
 public class LabelPrintingStatisticsDto

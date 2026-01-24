@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace HospitalityPOS.WPF.ViewModels;
 
-public partial class PayslipHistoryViewModel : ObservableObject
+public partial class PayslipHistoryViewModel : ObservableObject, INavigationAware
 {
     private readonly INavigationService _navigationService;
     private readonly IDialogService _dialogService;
@@ -36,13 +36,16 @@ public partial class PayslipHistoryViewModel : ObservableObject
     private ObservableCollection<int> _years = [];
 
     [ObservableProperty]
-    private decimal _totalEarningsYTD;
+    private int _payslipCount;
 
     [ObservableProperty]
-    private decimal _totalDeductionsYTD;
+    private decimal _totalGrossEarnings;
 
     [ObservableProperty]
-    private decimal _totalNetPayYTD;
+    private decimal _totalDeductions;
+
+    [ObservableProperty]
+    private decimal _totalNetPay;
 
     public PayslipHistoryViewModel(
         INavigationService navigationService,
@@ -64,6 +67,30 @@ public partial class PayslipHistoryViewModel : ObservableObject
         await LoadEmployeeAsync();
         await LoadPayslipsAsync();
     }
+
+    #region INavigationAware
+
+    public void OnNavigatedTo(object? parameter)
+    {
+        int? employeeId = parameter switch
+        {
+            int id => id,
+            Employee emp => emp.Id,
+            _ => null
+        };
+
+        if (employeeId.HasValue)
+        {
+            _ = InitializeAsync(employeeId.Value);
+        }
+    }
+
+    public void OnNavigatedFrom()
+    {
+        // Nothing to clean up
+    }
+
+    #endregion
 
     private async Task LoadEmployeeAsync()
     {
@@ -92,12 +119,13 @@ public partial class PayslipHistoryViewModel : ObservableObject
             var payrollService = scope.ServiceProvider.GetRequiredService<IPayrollService>();
 
             var payslips = await payrollService.GetEmployeePayslipsAsync(_employeeId, FilterYear);
-            Payslips = new ObservableCollection<Payslip>(payslips);
+            Payslips = new ObservableCollection<Payslip>(payslips.OrderByDescending(p => p.PayrollPeriod?.PayDate));
 
             // Calculate YTD totals
-            TotalEarningsYTD = payslips.Sum(p => p.TotalEarnings);
-            TotalDeductionsYTD = payslips.Sum(p => p.TotalDeductions);
-            TotalNetPayYTD = payslips.Sum(p => p.NetPay);
+            PayslipCount = Payslips.Count;
+            TotalGrossEarnings = payslips.Sum(p => p.GrossEarnings);
+            TotalDeductions = payslips.Sum(p => p.TotalDeductions);
+            TotalNetPay = payslips.Sum(p => p.NetPay);
         }
         finally
         {
@@ -116,7 +144,11 @@ public partial class PayslipHistoryViewModel : ObservableObject
             var payrollService = scope.ServiceProvider.GetRequiredService<IPayrollService>();
 
             var html = await payrollService.GeneratePayslipHtmlAsync(SelectedPayslip.Id);
-            await _dialogService.ShowInfoAsync("Payslip preview coming soon.");
+            var employeeName = Employee?.FullName ?? "Employee";
+            var periodName = SelectedPayslip.PayrollPeriod?.PeriodName ?? "Payslip";
+            var filename = $"Payslip_{Employee?.EmployeeNumber}_{periodName.Replace(" ", "_")}.pdf";
+
+            await _dialogService.ShowHtmlPreviewAsync($"Payslip - {employeeName}", periodName, html, filename);
         }
         catch (Exception ex)
         {
@@ -144,6 +176,55 @@ public partial class PayslipHistoryViewModel : ObservableObject
         catch (Exception ex)
         {
             await _dialogService.ShowErrorAsync($"Error printing payslip: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private async Task ExportAllPayslipsAsync()
+    {
+        if (!Payslips.Any())
+        {
+            await _dialogService.ShowInfoAsync("No Payslips", "There are no payslips to export.");
+            return;
+        }
+
+        try
+        {
+            IsLoading = true;
+
+            using var scope = App.Services.CreateScope();
+            var exportService = scope.ServiceProvider.GetRequiredService<IExportService>();
+
+            var exportData = Payslips.Select(p => new
+            {
+                Period = p.PayrollPeriod?.PeriodName ?? "Unknown",
+                PayDate = p.PayrollPeriod?.PayDate.ToString("d") ?? "",
+                BasicSalary = p.BasicSalary,
+                Allowances = p.Allowances,
+                Overtime = p.OvertimePay,
+                GrossEarnings = p.GrossEarnings,
+                NHIF = p.NhifDeduction,
+                NSSF = p.NssfDeduction,
+                PAYE = p.PayeDeduction,
+                OtherDeductions = p.OtherDeductions,
+                TotalDeductions = p.TotalDeductions,
+                NetPay = p.NetPay,
+                Status = p.IsPaid ? "Paid" : "Pending"
+            }).ToList();
+
+            var employeeName = Employee?.FullName?.Replace(" ", "_") ?? "Employee";
+            var filename = $"PayslipHistory_{employeeName}_{FilterYear}";
+
+            await exportService.ExportToExcelAsync(exportData, filename, "Payslip History");
+            await _dialogService.ShowSuccessAsync("Export Complete", $"Payslip history exported to {filename}.xlsx");
+        }
+        catch (Exception ex)
+        {
+            await _dialogService.ShowErrorAsync($"Error exporting payslips: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 

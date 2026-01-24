@@ -344,7 +344,7 @@ public partial class InventoryReportsViewModel : ViewModelBase, INavigationAware
     [RelayCommand]
     private async Task PrintReportAsync()
     {
-        if (!HasReport)
+        if (!HasReport || SelectedReportType == null)
         {
             ErrorMessage = "No report to print. Please generate a report first.";
             return;
@@ -352,10 +352,35 @@ public partial class InventoryReportsViewModel : ViewModelBase, INavigationAware
 
         await ExecuteAsync(async () =>
         {
-            // Inventory report printing will be implemented in Story 10-5
-            await DialogService.ShowMessageAsync(
-                "Print Report",
-                "Inventory report printing will be fully implemented in Story 10-5 with export functionality.");
+            switch (SelectedReportType.ReportType)
+            {
+                case "CurrentStock":
+                    if (CurrentStockReport != null)
+                        await _reportPrintService.PrintCurrentStockReportAsync(CurrentStockReport);
+                    break;
+
+                case "LowStock":
+                    if (LowStockReport != null)
+                        await _reportPrintService.PrintLowStockReportAsync(LowStockReport);
+                    break;
+
+                case "StockMovement":
+                    if (StockMovementReport != null)
+                        await _reportPrintService.PrintStockMovementReportAsync(StockMovementReport);
+                    break;
+
+                case "StockValuation":
+                    if (StockValuationReport != null)
+                        await _reportPrintService.PrintStockValuationReportAsync(StockValuationReport);
+                    break;
+
+                case "DeadStock":
+                    if (DeadStockReport != null)
+                        await _reportPrintService.PrintDeadStockReportAsync(DeadStockReport);
+                    break;
+            }
+
+            _logger.Information("Printed {ReportType} report", SelectedReportType.Name);
 
         }, "Preparing print...");
     }

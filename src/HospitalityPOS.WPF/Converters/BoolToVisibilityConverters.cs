@@ -152,6 +152,88 @@ public class ZeroToVisibilityConverter : IValueConverter
 }
 
 /// <summary>
+/// Converts a positive numeric value to Visibility (positive = Visible, zero/negative = Collapsed).
+/// Supports int, decimal, and double values.
+/// </summary>
+public class PositiveToVisibilityConverter : IValueConverter
+{
+    /// <inheritdoc />
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        var isPositive = value switch
+        {
+            int i => i > 0,
+            decimal d => d > 0,
+            double db => db > 0,
+            float f => f > 0,
+            long l => l > 0,
+            _ => false
+        };
+
+        return isPositive ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <inheritdoc />
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
+    }
+}
+
+/// <summary>
+/// Converts seconds to a minutes:seconds or seconds format (e.g., "4:30" or "45s").
+/// </summary>
+public class SecondsToMinSecConverter : IValueConverter
+{
+    /// <inheritdoc />
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is int seconds)
+        {
+            var minutes = seconds / 60;
+            var secs = seconds % 60;
+            return minutes > 0 ? $"{minutes}:{secs:D2}" : $"{secs}s";
+        }
+        return "0s";
+    }
+
+    /// <inheritdoc />
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
+    }
+}
+
+/// <summary>
+/// Converts a string/int length to boolean based on minimum length parameter.
+/// </summary>
+public class MinLengthToBoolConverter : IValueConverter
+{
+    /// <inheritdoc />
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        var length = value switch
+        {
+            int i => i,
+            string s => s?.Length ?? 0,
+            _ => 0
+        };
+
+        if (parameter is string minStr && int.TryParse(minStr, out int min))
+        {
+            return length >= min;
+        }
+        return false;
+    }
+
+    /// <inheritdoc />
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
+    }
+}
+
+/// <summary>
 /// Converts a string to Visibility by comparing with ConverterParameter.
 /// Visible if string equals parameter, Collapsed otherwise.
 /// </summary>

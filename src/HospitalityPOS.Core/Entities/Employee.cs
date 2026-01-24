@@ -112,6 +112,9 @@ public class Employee : BaseEntity
     public virtual ICollection<LeaveAllocation> LeaveAllocations { get; set; } = new List<LeaveAllocation>();
     public virtual ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
     public virtual ICollection<DisciplinaryDeduction> DisciplinaryDeductions { get; set; } = new List<DisciplinaryDeduction>();
+    public virtual ICollection<EmployeeTaxRelief> TaxReliefs { get; set; } = new List<EmployeeTaxRelief>();
+    public virtual ICollection<HelbDeduction> HelbDeductions { get; set; } = new List<HelbDeduction>();
+    public virtual ICollection<P9Record> P9Records { get; set; } = new List<P9Record>();
 }
 
 /// <summary>

@@ -253,6 +253,23 @@ public class ModifierService : IModifierService
         return true;
     }
 
+    public async Task<bool> SetModifierGroupActiveAsync(int groupId, bool isActive, int modifiedByUserId, CancellationToken cancellationToken = default)
+    {
+        var group = await _context.ModifierGroups.FindAsync(new object[] { groupId }, cancellationToken);
+        if (group == null) return false;
+
+        group.IsActive = isActive;
+        group.UpdatedAt = DateTime.UtcNow;
+        group.UpdatedByUserId = modifiedByUserId;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.Information("Modifier group '{GroupName}' (ID: {GroupId}) active status set to {IsActive} by user {UserId}",
+            group.Name, groupId, isActive, modifiedByUserId);
+
+        return true;
+    }
+
     public async Task<ModifierGroup> DuplicateModifierGroupAsync(int id, string newName, int createdByUserId, CancellationToken cancellationToken = default)
     {
         var source = await _context.ModifierGroups
@@ -263,6 +280,7 @@ public class ModifierService : IModifierService
 
         var dto = new ModifierGroupDto
         {
+            Id = source.Id,
             Name = newName.Trim(),
             DisplayName = source.DisplayName,
             Description = source.Description,
@@ -277,6 +295,7 @@ public class ModifierService : IModifierService
             PrintOnKOT = source.PrintOnKOT,
             ShowOnReceipt = source.ShowOnReceipt,
             KitchenStation = source.KitchenStation,
+            IsActive = source.IsActive,
             Items = source.Items.Select(i => new ModifierItemDto
             {
                 Name = i.Name,

@@ -324,8 +324,7 @@ public partial class SuppliersViewModel : ViewModelBase, INavigationAware
             return;
         }
 
-        // SupplierStatementViewModel is not yet available
-        await _dialogService.ShowInfoAsync("Coming Soon", "Supplier statement view is coming soon.");
+        await _dialogService.ShowSupplierStatementDialogAsync(SelectedSupplier);
     }
 
     /// <summary>

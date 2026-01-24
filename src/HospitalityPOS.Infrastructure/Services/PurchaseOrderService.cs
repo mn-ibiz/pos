@@ -584,4 +584,188 @@ public class PurchaseOrderService : IPurchaseOrderService
         // Total = SubTotal + Tax
         purchaseOrder.TotalAmount = purchaseOrder.SubTotal + purchaseOrder.TaxAmount;
     }
+
+    /// <inheritdoc />
+    public async Task<bool> ArchivePurchaseOrderAsync(int purchaseOrderId, int userId, string? reason = null, CancellationToken cancellationToken = default)
+    {
+        var po = await _context.PurchaseOrders
+            .FirstOrDefaultAsync(p => p.Id == purchaseOrderId && !p.IsDeleted, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (po == null)
+        {
+            _logger.Warning("Cannot archive PO {POId}: not found", purchaseOrderId);
+            return false;
+        }
+
+        // Only Draft, Complete, and Cancelled POs can be archived
+        if (po.Status != PurchaseOrderStatus.Draft &&
+            po.Status != PurchaseOrderStatus.Complete &&
+            po.Status != PurchaseOrderStatus.Cancelled)
+        {
+            _logger.Warning("Cannot archive PO {PONumber}: status {Status} is not archivable", po.PONumber, po.Status);
+            return false;
+        }
+
+        po.Status = PurchaseOrderStatus.Archived;
+        po.ArchivedAt = DateTime.UtcNow;
+        po.ArchivedByUserId = userId;
+        po.ArchiveReason = reason;
+        po.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        _logger.Information("Archived purchase order {PONumber} by user {UserId}", po.PONumber, userId);
+        return true;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> RestorePurchaseOrderAsync(int purchaseOrderId, int userId, CancellationToken cancellationToken = default)
+    {
+        var po = await _context.PurchaseOrders
+            .FirstOrDefaultAsync(p => p.Id == purchaseOrderId && !p.IsDeleted, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (po == null)
+        {
+            _logger.Warning("Cannot restore PO {POId}: not found", purchaseOrderId);
+            return false;
+        }
+
+        if (po.Status != PurchaseOrderStatus.Archived)
+        {
+            _logger.Warning("Cannot restore PO {PONumber}: status {Status} is not Archived", po.PONumber, po.Status);
+            return false;
+        }
+
+        po.Status = PurchaseOrderStatus.Draft;
+        po.ArchivedAt = null;
+        po.ArchivedByUserId = null;
+        po.ArchiveReason = null;
+        po.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        _logger.Information("Restored purchase order {PONumber} to Draft by user {UserId}", po.PONumber, userId);
+        return true;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DeletePurchaseOrderAsync(int purchaseOrderId, int userId, string? reason = null, CancellationToken cancellationToken = default)
+    {
+        var po = await _context.PurchaseOrders
+            .FirstOrDefaultAsync(p => p.Id == purchaseOrderId && !p.IsDeleted, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (po == null)
+        {
+            _logger.Warning("Cannot delete PO {POId}: not found", purchaseOrderId);
+            return false;
+        }
+
+        // Only Draft, Archived, and Cancelled POs can be deleted
+        if (po.Status != PurchaseOrderStatus.Draft &&
+            po.Status != PurchaseOrderStatus.Archived &&
+            po.Status != PurchaseOrderStatus.Cancelled)
+        {
+            _logger.Warning("Cannot delete PO {PONumber}: status {Status} is not deletable", po.PONumber, po.Status);
+            return false;
+        }
+
+        po.IsDeleted = true;
+        po.DeletedAt = DateTime.UtcNow;
+        po.DeletedByUserId = userId;
+        po.DeletionReason = reason;
+        po.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        _logger.Information("Soft deleted purchase order {PONumber} by user {UserId}", po.PONumber, userId);
+        return true;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> PermanentlyDeletePurchaseOrderAsync(int purchaseOrderId, CancellationToken cancellationToken = default)
+    {
+        var po = await _context.PurchaseOrders
+            .Include(p => p.PurchaseOrderItems)
+            .FirstOrDefaultAsync(p => p.Id == purchaseOrderId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (po == null)
+        {
+            _logger.Warning("Cannot permanently delete PO {POId}: not found", purchaseOrderId);
+            return false;
+        }
+
+        // Remove all items first
+        _context.PurchaseOrderItems.RemoveRange(po.PurchaseOrderItems);
+
+        // Remove the PO
+        _context.PurchaseOrders.Remove(po);
+
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        _logger.Information("Permanently deleted purchase order {PONumber}", po.PONumber);
+        return true;
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<PurchaseOrder>> GetArchivedPurchaseOrdersAsync(DateTime? fromDate = null, DateTime? toDate = null, CancellationToken cancellationToken = default)
+    {
+        var query = _context.PurchaseOrders
+            .AsNoTracking()
+            .Include(po => po.Supplier)
+            .Include(po => po.CreatedByUser)
+            .Where(po => po.Status == PurchaseOrderStatus.Archived && !po.IsDeleted);
+
+        if (fromDate.HasValue)
+        {
+            query = query.Where(po => po.ArchivedAt >= fromDate.Value);
+        }
+
+        if (toDate.HasValue)
+        {
+            query = query.Where(po => po.ArchivedAt <= toDate.Value);
+        }
+
+        return await query
+            .OrderByDescending(po => po.ArchivedAt)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<PurchaseOrder>> GetDeletedPurchaseOrdersAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.PurchaseOrders
+            .AsNoTracking()
+            .Include(po => po.Supplier)
+            .Include(po => po.CreatedByUser)
+            .Where(po => po.IsDeleted)
+            .OrderByDescending(po => po.DeletedAt)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> RecoverPurchaseOrderAsync(int purchaseOrderId, int userId, CancellationToken cancellationToken = default)
+    {
+        var po = await _context.PurchaseOrders
+            .FirstOrDefaultAsync(p => p.Id == purchaseOrderId && p.IsDeleted, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (po == null)
+        {
+            _logger.Warning("Cannot recover PO {POId}: not found or not deleted", purchaseOrderId);
+            return false;
+        }
+
+        po.IsDeleted = false;
+        po.DeletedAt = null;
+        po.DeletedByUserId = null;
+        po.DeletionReason = null;
+        po.Status = PurchaseOrderStatus.Draft; // Restore to Draft
+        po.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        _logger.Information("Recovered deleted purchase order {PONumber} by user {UserId}", po.PONumber, userId);
+        return true;
+    }
 }

@@ -827,4 +827,315 @@ public class LabelTemplateService : ILabelTemplateService
     }
 
     #endregion
+
+    #region Template Export/Import
+
+    public async Task<byte[]> ExportTemplateAsync(int templateId, TemplateExportOptionsDto options)
+    {
+        var template = await _context.LabelTemplates
+            .Include(t => t.LabelSize)
+            .Include(t => t.Fields)
+            .FirstOrDefaultAsync(t => t.Id == templateId && !t.IsDeleted);
+
+        if (template == null)
+            throw new InvalidOperationException($"Template {templateId} not found");
+
+        var exportData = new TemplateExportFileDto
+        {
+            FormatVersion = "1.0",
+            Metadata = new TemplateExportMetadata
+            {
+                ExportedAt = DateTime.UtcNow,
+                SourceStoreId = template.StoreId
+            },
+            Template = new TemplateExportData
+            {
+                Name = template.Name,
+                PrintLanguage = template.PrintLanguage.ToString(),
+                IsPromoTemplate = template.IsPromoTemplate,
+                Description = template.Description,
+                TemplateContent = template.TemplateContent,
+                Version = template.Version
+            }
+        };
+
+        if (options.IncludeLabelSize && template.LabelSize != null)
+        {
+            exportData.Template.LabelSize = new LabelSizeExportData
+            {
+                Name = template.LabelSize.Name,
+                WidthMm = template.LabelSize.WidthMm,
+                HeightMm = template.LabelSize.HeightMm,
+                DotsPerMm = template.LabelSize.DotsPerMm,
+                Description = template.LabelSize.Description
+            };
+        }
+
+        if (options.IncludeFields)
+        {
+            exportData.Template.Fields = template.Fields
+                .OrderBy(f => f.DisplayOrder)
+                .Select(MapToFieldDto)
+                .ToList();
+        }
+
+        var jsonOptions = new System.Text.Json.JsonSerializerOptions
+        {
+            WriteIndented = !options.Minify,
+            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+        };
+
+        var json = System.Text.Json.JsonSerializer.Serialize(exportData, jsonOptions);
+
+        // Calculate checksum
+        using var sha256 = System.Security.Cryptography.SHA256.Create();
+        var contentBytes = System.Text.Encoding.UTF8.GetBytes(exportData.Template.TemplateContent);
+        var hashBytes = sha256.ComputeHash(contentBytes);
+        exportData.Metadata.Checksum = $"sha256:{Convert.ToHexString(hashBytes).ToLowerInvariant()}";
+
+        json = System.Text.Json.JsonSerializer.Serialize(exportData, jsonOptions);
+        return System.Text.Encoding.UTF8.GetBytes(json);
+    }
+
+    public async Task<TemplateImportValidationResult> ValidateImportFileAsync(byte[] data, int storeId)
+    {
+        var result = new TemplateImportValidationResult();
+
+        try
+        {
+            var json = System.Text.Encoding.UTF8.GetString(data);
+            var options = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true
+            };
+
+            var exportFile = System.Text.Json.JsonSerializer.Deserialize<TemplateExportFileDto>(json, options);
+
+            if (exportFile == null)
+            {
+                result.Errors.Add("Invalid file format: could not parse JSON");
+                return result;
+            }
+
+            result.ParsedFile = exportFile;
+
+            // Validate required fields
+            if (string.IsNullOrWhiteSpace(exportFile.Template?.Name))
+                result.Errors.Add("Template name is required");
+
+            if (string.IsNullOrWhiteSpace(exportFile.Template?.TemplateContent))
+                result.Errors.Add("Template content is required");
+
+            if (string.IsNullOrWhiteSpace(exportFile.Template?.PrintLanguage))
+                result.Errors.Add("Print language is required");
+
+            // Check for name conflict
+            var existingTemplate = await _context.LabelTemplates
+                .FirstOrDefaultAsync(t => t.Name == exportFile.Template.Name && t.StoreId == storeId && !t.IsDeleted);
+
+            if (existingTemplate != null)
+            {
+                result.NameConflict = true;
+                result.ConflictingTemplateName = existingTemplate.Name;
+                result.Warnings.Add($"A template named '{exportFile.Template.Name}' already exists");
+            }
+
+            // Check for matching label size
+            if (exportFile.Template?.LabelSize != null)
+            {
+                var matchingSize = await _context.LabelSizes
+                    .FirstOrDefaultAsync(s =>
+                        Math.Abs(s.WidthMm - exportFile.Template.LabelSize.WidthMm) < 0.5m &&
+                        Math.Abs(s.HeightMm - exportFile.Template.LabelSize.HeightMm) < 0.5m &&
+                        !s.IsDeleted);
+
+                if (matchingSize != null)
+                {
+                    result.SizeExists = true;
+                    result.MatchingLabelSizeId = matchingSize.Id;
+                }
+                else
+                {
+                    result.Warnings.Add($"Label size {exportFile.Template.LabelSize.WidthMm}x{exportFile.Template.LabelSize.HeightMm}mm does not exist. It will be created.");
+                }
+            }
+            else
+            {
+                result.Errors.Add("Label size information is required for import");
+            }
+
+            result.IsValid = result.Errors.Count == 0;
+        }
+        catch (System.Text.Json.JsonException ex)
+        {
+            result.Errors.Add($"Invalid JSON format: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            result.Errors.Add($"Validation error: {ex.Message}");
+        }
+
+        return result;
+    }
+
+    public async Task<TemplateImportResultDto> ImportTemplateAsync(byte[] data, TemplateImportOptionsDto options)
+    {
+        var result = new TemplateImportResultDto();
+
+        // Validate first
+        var validation = await ValidateImportFileAsync(data, options.StoreId);
+        if (!validation.IsValid)
+        {
+            result.Success = false;
+            result.ErrorMessage = string.Join("; ", validation.Errors);
+            return result;
+        }
+
+        var exportFile = validation.ParsedFile!;
+
+        try
+        {
+            // Handle name conflict
+            var templateName = options.NewName ?? exportFile.Template.Name;
+
+            if (validation.NameConflict)
+            {
+                switch (options.ConflictResolution)
+                {
+                    case ConflictResolution.Skip:
+                        result.Success = true;
+                        result.Action = "Skipped";
+                        return result;
+
+                    case ConflictResolution.Replace:
+                        var existing = await _context.LabelTemplates
+                            .FirstOrDefaultAsync(t => t.Name == templateName && t.StoreId == options.StoreId && !t.IsDeleted);
+                        if (existing != null)
+                        {
+                            existing.IsDeleted = true;
+                            existing.DeletedAt = DateTime.UtcNow;
+                        }
+                        result.Action = "Replaced";
+                        break;
+
+                    case ConflictResolution.Rename:
+                    default:
+                        var counter = 1;
+                        var baseName = templateName;
+                        while (await _context.LabelTemplates.AnyAsync(t => t.Name == templateName && t.StoreId == options.StoreId && !t.IsDeleted))
+                        {
+                            templateName = $"{baseName} ({counter++})";
+                        }
+                        result.Action = "Created";
+                        break;
+                }
+            }
+            else
+            {
+                result.Action = "Created";
+            }
+
+            // Resolve label size
+            int labelSizeId;
+            if (options.LabelSizeId.HasValue)
+            {
+                labelSizeId = options.LabelSizeId.Value;
+            }
+            else if (validation.MatchingLabelSizeId.HasValue)
+            {
+                labelSizeId = validation.MatchingLabelSizeId.Value;
+            }
+            else if (exportFile.Template.LabelSize != null)
+            {
+                // Create the label size
+                var newSize = new LabelSize
+                {
+                    Name = exportFile.Template.LabelSize.Name,
+                    WidthMm = exportFile.Template.LabelSize.WidthMm,
+                    HeightMm = exportFile.Template.LabelSize.HeightMm,
+                    DotsPerMm = exportFile.Template.LabelSize.DotsPerMm,
+                    Description = exportFile.Template.LabelSize.Description,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.LabelSizes.Add(newSize);
+                await _context.SaveChangesAsync();
+                labelSizeId = newSize.Id;
+            }
+            else
+            {
+                result.Success = false;
+                result.ErrorMessage = "Could not determine label size for import";
+                return result;
+            }
+
+            // Parse print language
+            if (!Enum.TryParse<LabelPrintLanguage>(exportFile.Template.PrintLanguage, true, out var printLanguage))
+            {
+                printLanguage = LabelPrintLanguage.ZPL;
+            }
+
+            // Create the template
+            var template = new LabelTemplate
+            {
+                Name = templateName,
+                LabelSizeId = labelSizeId,
+                StoreId = options.StoreId,
+                PrintLanguage = printLanguage,
+                TemplateContent = exportFile.Template.TemplateContent,
+                IsDefault = false,
+                IsPromoTemplate = exportFile.Template.IsPromoTemplate,
+                Description = exportFile.Template.Description,
+                Version = 1,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.LabelTemplates.Add(template);
+            await _context.SaveChangesAsync();
+
+            // Add fields if included
+            if (exportFile.Template.Fields?.Any() == true)
+            {
+                foreach (var fieldDto in exportFile.Template.Fields)
+                {
+                    var field = new LabelTemplateField
+                    {
+                        LabelTemplateId = template.Id,
+                        TemplateId = template.Id,
+                        FieldName = fieldDto.FieldName,
+                        FieldType = (LabelFieldType)fieldDto.FieldType,
+                        PositionX = fieldDto.PositionX,
+                        PositionY = fieldDto.PositionY,
+                        Width = fieldDto.Width,
+                        Height = fieldDto.Height,
+                        FontName = fieldDto.FontName,
+                        FontSize = fieldDto.FontSize,
+                        Alignment = (TextAlignment)fieldDto.Alignment,
+                        IsBold = fieldDto.IsBold,
+                        Rotation = fieldDto.Rotation,
+                        BarcodeType = fieldDto.BarcodeType.HasValue ? (BarcodeType)fieldDto.BarcodeType.Value : null,
+                        BarcodeHeight = fieldDto.BarcodeHeight,
+                        ShowBarcodeText = fieldDto.ShowBarcodeText,
+                        DisplayOrder = fieldDto.DisplayOrder,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.LabelTemplateFields.Add(field);
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            result.Success = true;
+            result.ImportedTemplate = await GetTemplateAsync(template.Id);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to import template");
+            result.Success = false;
+            result.ErrorMessage = ex.Message;
+        }
+
+        return result;
+    }
+
+    #endregion
 }

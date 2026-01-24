@@ -26,4 +26,5 @@ public class WorkPeriod : BaseEntity
     public virtual User? ClosedByUser { get; set; }
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
     public virtual ICollection<Receipt> Receipts { get; set; } = new List<Receipt>();
+    public virtual ICollection<CashDenominationCount> CashDenominationCounts { get; set; } = new List<CashDenominationCount>();
 }

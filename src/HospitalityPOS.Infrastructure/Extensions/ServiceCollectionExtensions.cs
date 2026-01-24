@@ -1,8 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using HospitalityPOS.Core.Interfaces;
+using HospitalityPOS.Infrastructure.BackgroundJobs;
 using HospitalityPOS.Infrastructure.Data;
+using HospitalityPOS.Infrastructure.Jobs;
 using HospitalityPOS.Infrastructure.Repositories;
 using HospitalityPOS.Infrastructure.Services;
 
@@ -93,6 +96,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ILoyaltyMemberRepository, LoyaltyMemberRepository>();
         services.AddScoped<ILoyaltyService, LoyaltyService>();
         services.AddSingleton<ISmsService, SmsService>();
+        services.AddScoped<IOtpService, OtpService>();
 
         // Advanced Promotions
         services.AddScoped<IAdvancedPromotionService, AdvancedPromotionService>();
@@ -134,7 +138,18 @@ public static class ServiceCollectionExtensions
         // services.AddScoped<ICheckoutEnhancementService, CheckoutEnhancementService>(); // Excluded from compilation
 
         // Inventory Analytics
-        // services.AddScoped<IInventoryAnalyticsService, InventoryAnalyticsService>(); // Excluded from compilation
+        services.AddScoped<IInventoryAnalyticsService, InventoryAnalyticsService>();
+
+        // Stock Monitoring Background Job
+        services.Configure<StockMonitoringOptions>(options => { });
+        services.AddSingleton<StockMonitoringJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<StockMonitoringJob>());
+        services.AddSingleton<IStockMonitoringService>(sp => sp.GetRequiredService<StockMonitoringJob>());
+
+        // Loyalty Points Expiry Background Job
+        services.AddSingleton<ExpirePointsJob>();
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<ExpirePointsJob>());
+        services.AddSingleton<IExpirePointsJob>(sp => sp.GetRequiredService<ExpirePointsJob>());
 
         // Stock Transfer Services (Epic 23)
         // services.AddScoped<IStockTransferService, StockTransferService>(); // Excluded from compilation
@@ -232,6 +247,12 @@ public static class ServiceCollectionExtensions
 
         // Expense Management Services
         services.AddScoped<IExpenseService, ExpenseService>();
+
+        // Notification Services
+        services.AddScoped<INotificationService, NotificationService>();
+
+        // Email Digest Services
+        services.AddScoped<IEmailDigestService, EmailDigestService>();
 
         return services;
     }

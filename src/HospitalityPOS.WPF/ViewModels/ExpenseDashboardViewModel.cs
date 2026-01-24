@@ -274,9 +274,11 @@ public partial class ExpenseDashboardViewModel : ObservableObject, INavigationAw
             UpcomingRecurringCount = upcomingRecurring.Count;
             RecurringAmount = upcomingRecurring.Sum(r => r.Amount);
 
-            // Load Prime Cost metrics (assuming we have sales data)
-            // For now, using placeholder - in real implementation, this would come from sales service
-            var totalSales = 1000000m; // Placeholder - should come from sales data
+            // Load actual sales data from settled receipts
+            var receiptService = scope.ServiceProvider.GetRequiredService<IReceiptService>();
+            var totalSales = await receiptService.GetSalesTotalAsync(_periodStart, _periodEnd);
+
+            // Calculate Prime Cost metrics using actual sales data
             var primeCost = await expenseService.CalculatePrimeCostAsync(_periodStart, _periodEnd, totalSales);
             PrimeCostPercent = primeCost.PrimeCostPercentage;
             FoodCostPercent = primeCost.FoodCostPercentage;
@@ -415,24 +417,21 @@ public partial class ExpenseDashboardViewModel : ObservableObject, INavigationAw
     }
 
     [RelayCommand]
-    private async Task NavigateToRecurring()
+    private void NavigateToRecurring()
     {
-        // TODO: Implement RecurringExpenseViewModel when feature is needed
-        await _dialogService.ShowInfoAsync("Coming Soon", "Recurring expense management will be available in a future update.");
+        _navigationService.NavigateTo<RecurringExpenseListViewModel>();
     }
 
     [RelayCommand]
-    private async Task NavigateToBudgets()
+    private void NavigateToBudgets()
     {
-        // TODO: Implement ExpenseBudgetViewModel when feature is needed
-        await _dialogService.ShowInfoAsync("Coming Soon", "Budget management will be available in a future update.");
+        _navigationService.NavigateTo<ExpenseBudgetViewModel>();
     }
 
     [RelayCommand]
-    private async Task NavigateToReports()
+    private void NavigateToReports()
     {
-        // TODO: Implement ExpenseReportsViewModel when feature is needed
-        await _dialogService.ShowInfoAsync("Coming Soon", "Expense reports will be available in a future update.");
+        _navigationService.NavigateTo<ExpenseReportsViewModel>();
     }
 
     #endregion

@@ -159,19 +159,17 @@ public partial class EmployeesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task ViewAttendanceAsync()
+    private void ViewAttendance()
     {
         if (SelectedEmployee == null) return;
-        // AttendanceViewModel is not yet available
-        await _dialogService.ShowInfoAsync("Coming Soon", "Attendance view is coming soon.");
+        _navigationService.NavigateTo<AttendanceViewModel>(SelectedEmployee.Id);
     }
 
     [RelayCommand]
-    private async Task ViewPayslipsAsync()
+    private void ViewPayslips()
     {
         if (SelectedEmployee == null) return;
-        // PayslipHistoryViewModel is not yet available
-        await _dialogService.ShowInfoAsync("Coming Soon", "Payslip history view is coming soon.");
+        _navigationService.NavigateTo<PayslipHistoryViewModel>(SelectedEmployee.Id);
     }
 
     [RelayCommand]

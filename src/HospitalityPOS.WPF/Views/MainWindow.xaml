@@ -8,6 +8,8 @@
         xmlns:inventoryViews="clr-namespace:HospitalityPOS.WPF.Views.Inventory"
         xmlns:expenseViews="clr-namespace:HospitalityPOS.WPF.Views.Expenses"
         xmlns:analyticsViews="clr-namespace:HospitalityPOS.WPF.Views.Analytics"
+        xmlns:marketingViews="clr-namespace:HospitalityPOS.WPF.Views.Marketing"
+        xmlns:marketingVm="clr-namespace:HospitalityPOS.WPF.ViewModels.Marketing"
         xmlns:controls="clr-namespace:HospitalityPOS.WPF.Controls"
         mc:Ignorable="d"
         Title="{Binding ApplicationTitle}"
@@ -176,6 +178,12 @@
         <DataTemplate DataType="{x:Type vm:ExpenseCategoryManagementViewModel}">
             <expenseViews:ExpenseCategoryManagementView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:RecurringExpenseListViewModel}">
+            <expenseViews:RecurringExpenseListView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ExpenseBudgetViewModel}">
+            <expenseViews:ExpenseBudgetView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:AIInsightsDashboardViewModel}">
             <analyticsViews:AIInsightsDashboardView />
         </DataTemplate>
@@ -190,6 +198,27 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:LabelPrinterConfigurationViewModel}">
             <views:LabelPrinterConfigurationView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:LabelTemplateManagementViewModel}">
+            <views:LabelTemplateManagementView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:LabelSizeConfigurationViewModel}">
+            <views:LabelSizeConfigurationView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:LabelTemplateDesignerViewModel}">
+            <views:LabelTemplateDesignerView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SmsSettingsViewModel}">
+            <views:SmsSettingsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type marketingVm:SmsCampaignDashboardViewModel}">
+            <marketingViews:SmsCampaignDashboardView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type marketingVm:SmsTemplateListViewModel}">
+            <marketingViews:SmsTemplateListView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type marketingVm:CustomerSegmentListViewModel}">
+            <marketingViews:CustomerSegmentListView />
         </DataTemplate>
     </Window.Resources>
 
@@ -641,6 +670,40 @@
                                 </StackPanel>
                             </Button>
 
+                            <!-- LOYALTY Group -->
+                            <TextBlock Text="LOYALTY"
+                                       Style="{StaticResource SidebarGroupHeaderStyle}" />
+
+                            <!-- Program Settings -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToLoyaltySettingsCommand}"
+                                    ToolTip="Configure loyalty program settings">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Program Settings" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Members -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToCustomerListCommand}"
+                                    ToolTip="View loyalty program members">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE716;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Members" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Enroll Customer -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToCustomerEnrollmentCommand}"
+                                    ToolTip="Enroll new customers in loyalty program">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8FA;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Enroll Customer" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
                             <!-- HR Group -->
                             <TextBlock Text="HR"
                                        Style="{StaticResource SidebarGroupHeaderStyle}" />
@@ -722,6 +785,24 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
                                     <TextBlock Text="Label Printers" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Label Templates -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToLabelTemplatesCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8F1;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Label Templates" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Label Sizes -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToLabelSizesCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE799;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Label Sizes" Margin="12,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
 
@@ -834,6 +915,46 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
                                     <TextBlock Text="M-Pesa Settings" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- SMS Settings -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToSmsSettingsCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8BD;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="SMS Settings" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Marketing Group -->
+                            <TextBlock Text="MARKETING"
+                                       Style="{StaticResource SidebarGroupHeaderStyle}" />
+
+                            <!-- SMS Campaigns -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToSmsCampaignsCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8BD;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="SMS Campaigns" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- SMS Templates -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToSmsTemplatesCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8C1;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="SMS Templates" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Customer Segments -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToCustomerSegmentsCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE902;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Customer Segments" Margin="12,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
 

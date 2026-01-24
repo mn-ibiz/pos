@@ -488,6 +488,312 @@ public class PrinterService : IPrinterService
         }
     }
 
+    #region Receipt Printing Methods
+
+    /// <inheritdoc />
+    public async Task<PrintTestResult> PrintReceiptAsync(Receipt receipt, int? printerId = null, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Get printer
+            Printer? printer;
+            if (printerId.HasValue)
+            {
+                printer = await GetPrinterByIdAsync(printerId.Value, cancellationToken);
+            }
+            else
+            {
+                printer = await GetDefaultPrinterAsync(PrinterType.Receipt, cancellationToken);
+            }
+
+            if (printer == null)
+            {
+                return PrintTestResult.Failed("No receipt printer configured.");
+            }
+
+            // Test connection first
+            var isConnected = await _discoveryService.TestConnectionAsync(printer);
+            if (!isConnected)
+            {
+                return PrintTestResult.Failed("Printer is not connected or not responding.");
+            }
+
+            // Generate receipt content
+            var content = await GenerateReceiptContentAsync(receipt, printer, cancellationToken);
+
+            // Send to printer based on connection type
+            switch (printer.ConnectionType)
+            {
+                case PrinterConnectionType.WindowsDriver:
+                    return await PrintViaWindowsDriverAsync(printer, content);
+
+                case PrinterConnectionType.Network:
+                    return await PrintViaNetworkAsync(printer, content);
+
+                default:
+                    return PrintTestResult.Failed("Unsupported connection type.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Error printing receipt {ReceiptNumber}", receipt.ReceiptNumber);
+            return PrintTestResult.Failed(ex.Message);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<byte[]> GenerateReceiptContentAsync(Receipt receipt, Printer printer, CancellationToken cancellationToken = default)
+    {
+        var commands = new List<byte>();
+        var charsPerLine = printer.CharsPerLine > 0 ? printer.CharsPerLine : 42;
+        var half = charsPerLine / 2;
+
+        // Get template settings
+        var template = await GetDefaultReceiptTemplateAsync(cancellationToken) ?? new ReceiptTemplate();
+
+        // ESC/POS Initialize
+        commands.AddRange(new byte[] { 0x1B, 0x40 }); // ESC @
+
+        // Header - Center aligned
+        commands.AddRange(new byte[] { 0x1B, 0x61, 0x01 }); // Center
+
+        // Business name (double width)
+        commands.AddRange(new byte[] { 0x1D, 0x21, 0x10 }); // Double width
+        commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+            template.BusinessName ?? "HOSPITALITY POS" + "\n"));
+        commands.AddRange(new byte[] { 0x1D, 0x21, 0x00 }); // Normal
+
+        if (!string.IsNullOrEmpty(template.HeaderLine1))
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(template.HeaderLine1 + "\n"));
+        if (!string.IsNullOrEmpty(template.HeaderLine2))
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(template.HeaderLine2 + "\n"));
+
+        commands.AddRange(System.Text.Encoding.ASCII.GetBytes(new string('=', charsPerLine) + "\n"));
+
+        // Receipt info - Left aligned
+        commands.AddRange(new byte[] { 0x1B, 0x61, 0x00 }); // Left
+        commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+            $"Receipt: {receipt.ReceiptNumber}\n"));
+        commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+            $"Date: {receipt.CreatedAt:dd/MM/yyyy HH:mm}\n"));
+
+        if (!string.IsNullOrEmpty(receipt.TableNumber))
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes($"Table: {receipt.TableNumber}\n"));
+
+        if (!string.IsNullOrEmpty(receipt.ServerName))
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes($"Server: {receipt.ServerName}\n"));
+
+        commands.AddRange(System.Text.Encoding.ASCII.GetBytes(new string('-', charsPerLine) + "\n"));
+
+        // Items
+        foreach (var item in receipt.Items ?? new List<ReceiptItem>())
+        {
+            var qty = item.Quantity.ToString("0");
+            var name = item.ProductName ?? "Item";
+            var price = item.LineTotal.ToString("N2");
+
+            // Format: Qty x Item         Price
+            var itemLine = $"{qty}x {TruncateText(name, charsPerLine - qty.Length - 3 - price.Length - 1)}";
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+                PadRight(itemLine, charsPerLine - price.Length) + price + "\n"));
+
+            // Show modifiers if any
+            foreach (var modifier in item.Modifiers ?? new List<ReceiptItemModifier>())
+            {
+                var modLine = $"  + {modifier.ModifierName}";
+                if (modifier.Price > 0)
+                {
+                    var modPrice = modifier.Price.ToString("N2");
+                    commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+                        PadRight(modLine, charsPerLine - modPrice.Length) + modPrice + "\n"));
+                }
+                else
+                {
+                    commands.AddRange(System.Text.Encoding.ASCII.GetBytes(modLine + "\n"));
+                }
+            }
+        }
+
+        commands.AddRange(System.Text.Encoding.ASCII.GetBytes(new string('-', charsPerLine) + "\n"));
+
+        // Totals - Right aligned values
+        var subtotalLabel = "Subtotal:";
+        var subtotalValue = receipt.SubTotal.ToString("N2");
+        commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+            PadRight(subtotalLabel, charsPerLine - subtotalValue.Length) + subtotalValue + "\n"));
+
+        if (receipt.DiscountAmount > 0)
+        {
+            var discLabel = "Discount:";
+            var discValue = $"-{receipt.DiscountAmount:N2}";
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+                PadRight(discLabel, charsPerLine - discValue.Length) + discValue + "\n"));
+        }
+
+        // Loyalty discount (from points redemption)
+        if (receipt.PointsDiscountAmount > 0)
+        {
+            var loyaltyDiscLabel = "Points Discount:";
+            var loyaltyDiscValue = $"-{receipt.PointsDiscountAmount:N2}";
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+                PadRight(loyaltyDiscLabel, charsPerLine - loyaltyDiscValue.Length) + loyaltyDiscValue + "\n"));
+        }
+
+        if (receipt.TaxAmount > 0)
+        {
+            var taxLabel = $"VAT ({receipt.TaxRate:0}%):";
+            var taxValue = receipt.TaxAmount.ToString("N2");
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+                PadRight(taxLabel, charsPerLine - taxValue.Length) + taxValue + "\n"));
+        }
+
+        // Total - Bold and larger
+        commands.AddRange(new byte[] { 0x1B, 0x45, 0x01 }); // Bold on
+        commands.AddRange(new byte[] { 0x1D, 0x21, 0x10 }); // Double width
+        var totalLabel = "TOTAL:";
+        var totalValue = $"KES {receipt.TotalAmount:N2}";
+        commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+            PadRight(totalLabel, half - totalValue.Length / 2) + totalValue + "\n"));
+        commands.AddRange(new byte[] { 0x1D, 0x21, 0x00 }); // Normal
+        commands.AddRange(new byte[] { 0x1B, 0x45, 0x00 }); // Bold off
+
+        // Payment info
+        commands.AddRange(System.Text.Encoding.ASCII.GetBytes(new string('-', charsPerLine) + "\n"));
+        foreach (var payment in receipt.Payments ?? new List<ReceiptPayment>())
+        {
+            var payLabel = $"{payment.PaymentMethodName}:";
+            var payValue = payment.Amount.ToString("N2");
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+                PadRight(payLabel, charsPerLine - payValue.Length) + payValue + "\n"));
+        }
+
+        if (receipt.ChangeAmount > 0)
+        {
+            var changeLabel = "Change:";
+            var changeValue = receipt.ChangeAmount.ToString("N2");
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+                PadRight(changeLabel, charsPerLine - changeValue.Length) + changeValue + "\n"));
+        }
+
+        // ==================== LOYALTY SECTION ====================
+        if (receipt.LoyaltyMemberId.HasValue)
+        {
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes("\n"));
+            commands.AddRange(new byte[] { 0x1B, 0x61, 0x01 }); // Center
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(new string('=', charsPerLine) + "\n"));
+            commands.AddRange(new byte[] { 0x1B, 0x45, 0x01 }); // Bold on
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes("LOYALTY PROGRAM\n"));
+            commands.AddRange(new byte[] { 0x1B, 0x45, 0x00 }); // Bold off
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(new string('-', charsPerLine) + "\n"));
+
+            commands.AddRange(new byte[] { 0x1B, 0x61, 0x00 }); // Left align
+
+            // Member info - mask phone number for privacy
+            if (!string.IsNullOrEmpty(receipt.LoyaltyMemberName))
+            {
+                var memberPhone = receipt.LoyaltyMemberPhone ?? "";
+                var maskedPhone = memberPhone.Length >= 9
+                    ? $"{memberPhone[..4]}XXX{memberPhone[^3..]}"
+                    : "";
+                commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+                    $"Member: {receipt.LoyaltyMemberName}\n"));
+                if (!string.IsNullOrEmpty(maskedPhone))
+                    commands.AddRange(System.Text.Encoding.ASCII.GetBytes($"Phone: {maskedPhone}\n"));
+            }
+
+            // Points earned
+            if (receipt.PointsEarned > 0)
+            {
+                var earnedLabel = "Points Earned:";
+                var earnedValue = $"+{receipt.PointsEarned:N0} pts";
+                commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+                    PadRight(earnedLabel, charsPerLine - earnedValue.Length) + earnedValue + "\n"));
+
+                // Show bonus points if applicable
+                if (receipt.BonusPointsEarned > 0)
+                {
+                    var bonusLabel = "  Bonus Points:";
+                    var bonusValue = $"+{receipt.BonusPointsEarned:N0} pts";
+                    commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+                        PadRight(bonusLabel, charsPerLine - bonusValue.Length) + bonusValue + "\n"));
+                }
+            }
+
+            // Points redeemed
+            if (receipt.PointsRedeemed > 0)
+            {
+                var redeemedLabel = "Points Redeemed:";
+                var redeemedValue = $"-{receipt.PointsRedeemed:N0} pts";
+                commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+                    PadRight(redeemedLabel, charsPerLine - redeemedValue.Length) + redeemedValue + "\n"));
+
+                var discountLabel = "Redemption Value:";
+                var discountValue = $"KES {receipt.PointsDiscountAmount:N2}";
+                commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+                    PadRight(discountLabel, charsPerLine - discountValue.Length) + discountValue + "\n"));
+            }
+
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(new string('-', charsPerLine) + "\n"));
+
+            // New balance - Bold
+            commands.AddRange(new byte[] { 0x1B, 0x45, 0x01 }); // Bold on
+            var balanceLabel = "New Balance:";
+            var balanceValue = $"{receipt.PointsBalanceAfter:N0} pts";
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(
+                PadRight(balanceLabel, charsPerLine - balanceValue.Length) + balanceValue + "\n"));
+            commands.AddRange(new byte[] { 0x1B, 0x45, 0x00 }); // Bold off
+
+            commands.AddRange(new byte[] { 0x1B, 0x61, 0x01 }); // Center
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(new string('=', charsPerLine) + "\n"));
+        }
+
+        // Footer
+        commands.AddRange(new byte[] { 0x1B, 0x61, 0x01 }); // Center
+        commands.AddRange(System.Text.Encoding.ASCII.GetBytes("\n"));
+        if (!string.IsNullOrEmpty(template.FooterLine1))
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(template.FooterLine1 + "\n"));
+        if (!string.IsNullOrEmpty(template.FooterLine2))
+            commands.AddRange(System.Text.Encoding.ASCII.GetBytes(template.FooterLine2 + "\n"));
+
+        commands.AddRange(System.Text.Encoding.ASCII.GetBytes("\nThank you for your business!\n\n"));
+
+        // Feed and cut
+        if (printer.Settings?.AutoCut == true)
+        {
+            var feedLines = printer.Settings?.CutFeedLines ?? 3;
+            for (int i = 0; i < feedLines; i++)
+            {
+                commands.Add(0x0A);
+            }
+
+            if (printer.Settings?.PartialCut == true)
+            {
+                commands.AddRange(new byte[] { 0x1D, 0x56, 0x01 }); // Partial cut
+            }
+            else
+            {
+                commands.AddRange(new byte[] { 0x1D, 0x56, 0x00 }); // Full cut
+            }
+        }
+
+        return commands.ToArray();
+    }
+
+    private static string PadRight(string text, int totalWidth)
+    {
+        if (text.Length >= totalWidth) return text;
+        return text + new string(' ', totalWidth - text.Length);
+    }
+
+    private static string TruncateText(string text, int maxLength)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+        if (text.Length <= maxLength) return text;
+        return text[..(maxLength - 2)] + "..";
+    }
+
+    #endregion
+
     #region Kitchen Printer Methods
 
     /// <inheritdoc />
