@@ -464,6 +464,9 @@ public partial class App : Application
         // Terminal Status Dashboard ViewModel (MT-029)
         services.AddTransient<TerminalStatusDashboardViewModel>();
 
+        // Terminal Configuration ViewModel (MT-030)
+        services.AddTransient<TerminalConfigurationViewModel>();
+
         // Batch/Expiry ViewModels (Epic 24) - Excluded
         // services.AddTransient<BatchManagementViewModel>();
         // services.AddTransient<ExpiryAlertsViewModel>();

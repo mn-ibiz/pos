@@ -1,12 +1,14 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using HospitalityPOS.Core.DTOs;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Enums;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.WPF.Services;
+using HospitalityPOS.WPF.Views;
 
 namespace HospitalityPOS.WPF.ViewModels;
 
@@ -19,6 +21,7 @@ public partial class TerminalManagementViewModel : ViewModelBase, INavigationAwa
     private readonly ISessionService _sessionService;
     private readonly INavigationService _navigationService;
     private readonly IDialogService _dialogService;
+    private readonly IServiceProvider _serviceProvider;
 
     [ObservableProperty]
     private ObservableCollection<TerminalDisplayItem> _terminals = [];
@@ -52,12 +55,14 @@ public partial class TerminalManagementViewModel : ViewModelBase, INavigationAwa
         ISessionService sessionService,
         INavigationService navigationService,
         IDialogService dialogService,
+        IServiceProvider serviceProvider,
         ILogger logger) : base(logger)
     {
         _terminalService = terminalService ?? throw new ArgumentNullException(nameof(terminalService));
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
         // Initialize terminal type options
         TerminalTypeOptions =
@@ -192,6 +197,41 @@ public partial class TerminalManagementViewModel : ViewModelBase, INavigationAwa
         }
 
         _navigationService.NavigateTo<TerminalEditorViewModel>(SelectedTerminal.Id);
+    }
+
+    /// <summary>
+    /// Opens the configuration editor for the selected terminal.
+    /// </summary>
+    [RelayCommand]
+    private void ConfigureTerminal()
+    {
+        if (SelectedTerminal is null)
+        {
+            return;
+        }
+
+        try
+        {
+            // Create and configure the dialog
+            var viewModel = _serviceProvider.GetRequiredService<TerminalConfigurationViewModel>();
+            viewModel.OnNavigatedTo(SelectedTerminal.Id);
+
+            var dialog = new TerminalConfigurationView
+            {
+                DataContext = viewModel,
+                Owner = System.Windows.Application.Current.MainWindow
+            };
+
+            dialog.ShowDialog();
+
+            // Refresh the list after configuration
+            _ = LoadTerminalsAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Error opening terminal configuration for {TerminalId}", SelectedTerminal.Id);
+            _dialogService.ShowErrorAsync("Error", $"Failed to open configuration: {ex.Message}");
+        }
     }
 
     /// <summary>

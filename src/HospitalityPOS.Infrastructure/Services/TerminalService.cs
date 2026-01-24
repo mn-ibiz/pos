@@ -609,6 +609,53 @@ public class TerminalService : ITerminalService
 
     #endregion
 
+    #region Configuration
+
+    /// <inheritdoc />
+    public async Task<bool> UpdateTerminalConfigurationAsync(
+        int terminalId,
+        string? printerConfiguration,
+        string? hardwareConfiguration,
+        int modifiedByUserId,
+        CancellationToken cancellationToken = default)
+    {
+        var terminal = await _context.Terminals
+            .FirstOrDefaultAsync(t => t.Id == terminalId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (terminal is null)
+        {
+            return false;
+        }
+
+        var oldValues = new
+        {
+            terminal.PrinterConfiguration,
+            terminal.HardwareConfiguration
+        };
+
+        terminal.PrinterConfiguration = printerConfiguration;
+        terminal.HardwareConfiguration = hardwareConfiguration;
+        terminal.UpdatedAt = DateTime.UtcNow;
+        terminal.UpdatedByUserId = modifiedByUserId;
+
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        var newValues = new
+        {
+            PrinterConfiguration = printerConfiguration,
+            HardwareConfiguration = hardwareConfiguration
+        };
+
+        await CreateAuditLogAsync("TerminalConfigurationUpdated", terminal.Id, oldValues, newValues, modifiedByUserId, cancellationToken).ConfigureAwait(false);
+
+        _logger.Information("Terminal '{Code}' configuration updated by user {UserId}", terminal.Code, modifiedByUserId);
+
+        return true;
+    }
+
+    #endregion
+
     #region Private Helpers
 
     private static string GetTerminalCodePrefix(TerminalType type)

@@ -272,4 +272,24 @@ public interface ITerminalService
         CancellationToken cancellationToken = default);
 
     #endregion
+
+    #region Configuration
+
+    /// <summary>
+    /// Updates the terminal's printer and hardware configuration.
+    /// </summary>
+    /// <param name="terminalId">The terminal ID.</param>
+    /// <param name="printerConfiguration">The printer configuration JSON.</param>
+    /// <param name="hardwareConfiguration">The hardware configuration JSON.</param>
+    /// <param name="modifiedByUserId">The ID of the user performing the action.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if update was successful.</returns>
+    Task<bool> UpdateTerminalConfigurationAsync(
+        int terminalId,
+        string? printerConfiguration,
+        string? hardwareConfiguration,
+        int modifiedByUserId,
+        CancellationToken cancellationToken = default);
+
+    #endregion
 }

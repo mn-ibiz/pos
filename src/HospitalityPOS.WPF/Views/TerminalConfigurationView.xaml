@@ -1,0 +1,418 @@
+<Window x:Class="HospitalityPOS.WPF.Views.TerminalConfigurationView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="{Binding PageTitle}"
+        Height="850"
+        Width="1000"
+        WindowStartupLocation="CenterOwner"
+        Background="#1E1E2E">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+
+        <Style x:Key="SubHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="Margin" Value="0,16,0,8" />
+        </Style>
+
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+
+        <Style x:Key="ConfigCard" TargetType="Border">
+            <Setter Property="Background" Value="#252538" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#16162B" Padding="20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="{Binding PageTitle}"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}" />
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <TextBlock Text="{Binding TerminalCode}"
+                                   FontSize="14"
+                                   Foreground="{StaticResource PrimaryBrush}"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text=" - "
+                                   FontSize="14"
+                                   Foreground="{StaticResource TextSecondaryBrush}" />
+                        <TextBlock Text="{Binding TerminalName}"
+                                   FontSize="14"
+                                   Foreground="{StaticResource TextSecondaryBrush}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Content="Reset to Defaults"
+                        Command="{Binding ResetToDefaultsCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Padding="16,8" />
+            </Grid>
+        </Border>
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" Padding="20" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Column -->
+                <StackPanel Grid.Column="0">
+                    <!-- Receipt Printer Configuration -->
+                    <Border Style="{StaticResource ConfigCard}">
+                        <StackPanel>
+                            <TextBlock Text="Receipt Printer" Style="{StaticResource SectionHeaderStyle}" />
+
+                            <CheckBox Content="Enable Receipt Printing"
+                                      IsChecked="{Binding EnableReceiptPrinting}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,12" />
+
+                            <TextBlock Text="Receipt Printer" Style="{StaticResource LabelStyle}" />
+                            <ComboBox ItemsSource="{Binding AvailablePrinters}"
+                                      SelectedItem="{Binding SelectedReceiptPrinter}"
+                                      DisplayMemberPath="Name"
+                                      Style="{StaticResource ComboBoxStyle}"
+                                      Margin="0,0,0,12"
+                                      IsEnabled="{Binding EnableReceiptPrinting}" />
+
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Paper Width (mm)" Style="{StaticResource LabelStyle}" />
+                                    <ComboBox Style="{StaticResource ComboBoxStyle}"
+                                              SelectedValue="{Binding ReceiptPaperWidth}"
+                                              IsEnabled="{Binding EnableReceiptPrinting}">
+                                        <ComboBoxItem Content="58" Tag="58" />
+                                        <ComboBoxItem Content="80" Tag="80" IsSelected="True" />
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Copies" Style="{StaticResource LabelStyle}" />
+                                    <TextBox Text="{Binding ReceiptCopies}"
+                                             Style="{StaticResource TextBoxStyle}"
+                                             IsEnabled="{Binding EnableReceiptPrinting}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <CheckBox Content="Auto-print Receipt on Sale"
+                                      IsChecked="{Binding AutoPrintReceipt}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,8"
+                                      IsEnabled="{Binding EnableReceiptPrinting}" />
+
+                            <Button Content="Test Print"
+                                    Command="{Binding TestReceiptPrinterCommand}"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HorizontalAlignment="Left"
+                                    Padding="16,6"
+                                    IsEnabled="{Binding EnableReceiptPrinting}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Kitchen Printer Configuration -->
+                    <Border Style="{StaticResource ConfigCard}">
+                        <StackPanel>
+                            <TextBlock Text="Kitchen Printer" Style="{StaticResource SectionHeaderStyle}" />
+
+                            <CheckBox Content="Enable Kitchen Printing"
+                                      IsChecked="{Binding EnableKitchenPrinting}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,12" />
+
+                            <TextBlock Text="Kitchen Printer" Style="{StaticResource LabelStyle}" />
+                            <ComboBox ItemsSource="{Binding AvailablePrinters}"
+                                      SelectedItem="{Binding SelectedKitchenPrinter}"
+                                      DisplayMemberPath="Name"
+                                      Style="{StaticResource ComboBoxStyle}"
+                                      IsEnabled="{Binding EnableKitchenPrinting}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Label Printer Configuration -->
+                    <Border Style="{StaticResource ConfigCard}">
+                        <StackPanel>
+                            <TextBlock Text="Label Printer" Style="{StaticResource SectionHeaderStyle}" />
+
+                            <CheckBox Content="Enable Label Printing"
+                                      IsChecked="{Binding EnableLabelPrinting}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,12" />
+
+                            <TextBlock Text="Label Printer" Style="{StaticResource LabelStyle}" />
+                            <ComboBox ItemsSource="{Binding AvailablePrinters}"
+                                      SelectedItem="{Binding SelectedLabelPrinter}"
+                                      DisplayMemberPath="Name"
+                                      Style="{StaticResource ComboBoxStyle}"
+                                      IsEnabled="{Binding EnableLabelPrinting}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Cash Drawer Configuration -->
+                    <Border Style="{StaticResource ConfigCard}">
+                        <StackPanel>
+                            <TextBlock Text="Cash Drawer" Style="{StaticResource SectionHeaderStyle}" />
+
+                            <CheckBox Content="Enable Cash Drawer"
+                                      IsChecked="{Binding EnableCashDrawer}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,12" />
+
+                            <TextBlock Text="Port" Style="{StaticResource LabelStyle}" />
+                            <ComboBox ItemsSource="{Binding AvailablePorts}"
+                                      SelectedItem="{Binding CashDrawerPort}"
+                                      Style="{StaticResource ComboBoxStyle}"
+                                      Margin="0,0,0,12"
+                                      IsEnabled="{Binding EnableCashDrawer}" />
+
+                            <CheckBox Content="Auto-open on Cash Payment"
+                                      IsChecked="{Binding AutoOpenOnCash}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,8"
+                                      IsEnabled="{Binding EnableCashDrawer}" />
+
+                            <Button Content="Test Drawer"
+                                    Command="{Binding TestCashDrawerCommand}"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HorizontalAlignment="Left"
+                                    Padding="16,6"
+                                    IsEnabled="{Binding EnableCashDrawer}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Right Column -->
+                <StackPanel Grid.Column="2">
+                    <!-- Barcode Scanner Configuration -->
+                    <Border Style="{StaticResource ConfigCard}">
+                        <StackPanel>
+                            <TextBlock Text="Barcode Scanner" Style="{StaticResource SectionHeaderStyle}" />
+
+                            <CheckBox Content="Enable Barcode Scanner"
+                                      IsChecked="{Binding EnableBarcodeScanner}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,12" />
+
+                            <TextBlock Text="Scanner Mode" Style="{StaticResource LabelStyle}" />
+                            <ComboBox ItemsSource="{Binding ScannerModes}"
+                                      SelectedItem="{Binding ScannerMode}"
+                                      Style="{StaticResource ComboBoxStyle}"
+                                      Margin="0,0,0,12"
+                                      IsEnabled="{Binding EnableBarcodeScanner}" />
+
+                            <TextBlock Text="Port (for Serial mode)" Style="{StaticResource LabelStyle}" />
+                            <ComboBox ItemsSource="{Binding AvailablePorts}"
+                                      SelectedItem="{Binding ScannerPort}"
+                                      Style="{StaticResource ComboBoxStyle}"
+                                      IsEnabled="{Binding EnableBarcodeScanner}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Customer Display Configuration -->
+                    <Border Style="{StaticResource ConfigCard}">
+                        <StackPanel>
+                            <TextBlock Text="Customer Display" Style="{StaticResource SectionHeaderStyle}" />
+
+                            <CheckBox Content="Enable Customer Display"
+                                      IsChecked="{Binding EnableCustomerDisplay}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,12" />
+
+                            <TextBlock Text="Port" Style="{StaticResource LabelStyle}" />
+                            <ComboBox ItemsSource="{Binding AvailablePorts}"
+                                      SelectedItem="{Binding CustomerDisplayPort}"
+                                      Style="{StaticResource ComboBoxStyle}"
+                                      Margin="0,0,0,12"
+                                      IsEnabled="{Binding EnableCustomerDisplay}" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Display Lines" Style="{StaticResource LabelStyle}" />
+                                    <TextBox Text="{Binding CustomerDisplayLines}"
+                                             Style="{StaticResource TextBoxStyle}"
+                                             IsEnabled="{Binding EnableCustomerDisplay}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Chars/Line" Style="{StaticResource LabelStyle}" />
+                                    <TextBox Text="{Binding CustomerDisplayCharsPerLine}"
+                                             Style="{StaticResource TextBoxStyle}"
+                                             IsEnabled="{Binding EnableCustomerDisplay}" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Scale Configuration -->
+                    <Border Style="{StaticResource ConfigCard}">
+                        <StackPanel>
+                            <TextBlock Text="Weighing Scale" Style="{StaticResource SectionHeaderStyle}" />
+
+                            <CheckBox Content="Enable Scale"
+                                      IsChecked="{Binding EnableScale}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,12" />
+
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Port" Style="{StaticResource LabelStyle}" />
+                                    <ComboBox ItemsSource="{Binding AvailablePorts}"
+                                              SelectedItem="{Binding ScalePort}"
+                                              Style="{StaticResource ComboBoxStyle}"
+                                              IsEnabled="{Binding EnableScale}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Baud Rate" Style="{StaticResource LabelStyle}" />
+                                    <ComboBox ItemsSource="{Binding BaudRates}"
+                                              SelectedItem="{Binding ScaleBaudRate}"
+                                              Style="{StaticResource ComboBoxStyle}"
+                                              IsEnabled="{Binding EnableScale}" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Feature Toggles -->
+                    <Border Style="{StaticResource ConfigCard}">
+                        <StackPanel>
+                            <TextBlock Text="Feature Permissions" Style="{StaticResource SectionHeaderStyle}" />
+
+                            <TextBlock Text="Transaction Permissions" Style="{StaticResource SubHeaderStyle}" />
+                            <CheckBox Content="Allow Refunds"
+                                      IsChecked="{Binding AllowRefunds}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,8" />
+                            <CheckBox Content="Allow Voids"
+                                      IsChecked="{Binding AllowVoids}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,8" />
+                            <CheckBox Content="Allow Discounts"
+                                      IsChecked="{Binding AllowDiscounts}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,8" />
+                            <CheckBox Content="Allow Price Override"
+                                      IsChecked="{Binding AllowPriceOverride}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,16" />
+
+                            <TextBlock Text="Manager Approval Required" Style="{StaticResource SubHeaderStyle}" />
+                            <CheckBox Content="Require Manager for Refund"
+                                      IsChecked="{Binding RequireManagerForRefund}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,8" />
+                            <CheckBox Content="Require Manager for Void"
+                                      IsChecked="{Binding RequireManagerForVoid}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,8" />
+                            <CheckBox Content="Require Manager for Discount"
+                                      IsChecked="{Binding RequireManagerForDiscount}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,16" />
+
+                            <TextBlock Text="Special Modes" Style="{StaticResource SubHeaderStyle}" />
+                            <CheckBox Content="Enable Offline Mode"
+                                      IsChecked="{Binding EnableOfflineMode}"
+                                      Foreground="{StaticResource TextPrimaryBrush}"
+                                      Margin="0,0,0,8" />
+                            <CheckBox Content="Enable Training Mode"
+                                      IsChecked="{Binding EnableTrainingMode}"
+                                      Foreground="{StaticResource TextPrimaryBrush}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="#16162B" Padding="20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="1"
+                        Content="Cancel"
+                        Command="{Binding CancelCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Width="120"
+                        Margin="0,0,12,0" />
+
+                <Button Grid.Column="2"
+                        Content="Save Configuration"
+                        Command="{Binding SaveConfigurationCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Width="160" />
+            </Grid>
+        </Border>
+
+        <!-- Loading Overlay -->
+        <Border Grid.RowSpan="3"
+                Background="#CC000000"
+                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200" Height="4" />
+                <TextBlock Text="Loading configuration..."
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           Margin="0,12,0,0"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
