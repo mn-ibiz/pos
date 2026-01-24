@@ -85,7 +85,7 @@ public class BadgeConfiguration : IEntityTypeConfiguration<Badge>
             .OnDelete(DeleteBehavior.SetNull);
 
         // Foreign key to Category
-        builder.HasOne(e => e.Category)
+        builder.HasOne(e => e.ProductCategory)
             .WithMany()
             .HasForeignKey(e => e.CategoryId)
             .OnDelete(DeleteBehavior.SetNull);
@@ -263,7 +263,7 @@ public class ChallengeConfiguration : IEntityTypeConfiguration<Challenge>
             .OnDelete(DeleteBehavior.SetNull);
 
         // Foreign key to Category
-        builder.HasOne(e => e.Category)
+        builder.HasOne(e => e.ProductCategory)
             .WithMany()
             .HasForeignKey(e => e.CategoryId)
             .OnDelete(DeleteBehavior.SetNull);

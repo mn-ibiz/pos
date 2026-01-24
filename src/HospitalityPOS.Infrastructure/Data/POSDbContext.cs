@@ -468,6 +468,18 @@ public class POSDbContext : DbContext
     public DbSet<UpsellDailyMetrics> UpsellDailyMetrics => Set<UpsellDailyMetrics>();
     #endregion
 
+    #region KDS (Kitchen Display System)
+    public DbSet<KdsStation> KdsStations => Set<KdsStation>();
+    public DbSet<KdsStationCategory> KdsStationCategories => Set<KdsStationCategory>();
+    public DbSet<KdsDisplaySettings> KdsDisplaySettings => Set<KdsDisplaySettings>();
+    public DbSet<KdsOrder> KdsOrders => Set<KdsOrder>();
+    public DbSet<KdsOrderItem> KdsOrderItems => Set<KdsOrderItem>();
+    public DbSet<KdsOrderStatusLog> KdsOrderStatusLogs => Set<KdsOrderStatusLog>();
+    public DbSet<AllCallMessage> AllCallMessages => Set<AllCallMessage>();
+    public DbSet<AllCallMessageTarget> AllCallMessageTargets => Set<AllCallMessageTarget>();
+    public DbSet<AllCallMessageDismissal> AllCallMessageDismissals => Set<AllCallMessageDismissal>();
+    #endregion
+
     #region KDS Prep Timing
     public DbSet<PrepTimingConfiguration> PrepTimingConfigurations => Set<PrepTimingConfiguration>();
     public DbSet<ItemFireSchedule> ItemFireSchedules => Set<ItemFireSchedule>();

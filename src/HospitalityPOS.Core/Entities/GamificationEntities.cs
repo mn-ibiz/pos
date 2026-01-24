@@ -211,7 +211,7 @@ public class Badge : BaseEntity
 
     // Navigation properties
     public virtual Product? Product { get; set; }
-    public virtual Category? Category { get; set; }
+    public virtual Category? ProductCategory { get; set; }
     public virtual Store? Store { get; set; }
     public virtual ICollection<MemberBadge> MemberBadges { get; set; } = new List<MemberBadge>();
 }
@@ -401,7 +401,7 @@ public class Challenge : BaseEntity
     // Navigation properties
     public virtual Badge? RewardBadge { get; set; }
     public virtual Product? Product { get; set; }
-    public virtual Category? Category { get; set; }
+    public virtual Category? ProductCategory { get; set; }
     public virtual Store? Store { get; set; }
     public virtual ICollection<MemberChallenge> MemberChallenges { get; set; } = new List<MemberChallenge>();
 }
