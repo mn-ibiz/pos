@@ -3,6 +3,7 @@ using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.Infrastructure.Extensions;
@@ -34,6 +35,11 @@ public partial class App : Application
     public static IConfiguration Configuration { get; private set; } = null!;
 
     /// <summary>
+    /// Gets the resolved database connection string (from saved config or appsettings.json).
+    /// </summary>
+    private static string? _resolvedConnectionString;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="App"/> class.
     /// </summary>
     public App()
@@ -55,6 +61,9 @@ public partial class App : Application
                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
             .CreateLogger();
 
+        // Resolve connection string before building host
+        ResolveConnectionString();
+
         _host = Host.CreateDefaultBuilder()
             .UseSerilog()
             .ConfigureServices((context, services) =>
@@ -66,11 +75,48 @@ public partial class App : Application
         Services = _host.Services;
     }
 
+    /// <summary>
+    /// Resolves the database connection string from saved configuration or appsettings.json.
+    /// </summary>
+    private static void ResolveConnectionString()
+    {
+        // Create a temporary connection service to check for saved configuration
+        using var loggerFactory = LoggerFactory.Create(builder => builder.AddSerilog(Log.Logger));
+        var tempConnectionService = new DatabaseConnectionService(
+            loggerFactory.CreateLogger<DatabaseConnectionService>());
+
+        if (tempConnectionService.HasConnectionConfiguration)
+        {
+            var savedConnectionString = tempConnectionService.GetConnectionString();
+            if (!string.IsNullOrEmpty(savedConnectionString))
+            {
+                _resolvedConnectionString = savedConnectionString;
+                Log.Information("Using saved database connection configuration");
+                return;
+            }
+        }
+
+        // Fall back to appsettings.json
+        _resolvedConnectionString = Configuration.GetConnectionString("DefaultConnection");
+        if (!string.IsNullOrEmpty(_resolvedConnectionString))
+        {
+            Log.Information("Using connection string from appsettings.json");
+        }
+        else
+        {
+            Log.Warning("No database connection string configured - will prompt for configuration");
+        }
+    }
+
     private static void ConfigureServices(IServiceCollection services)
     {
-        // Get connection string from configuration
-        var connectionString = Configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found in configuration.");
+        // Register database connection service early (for configuration management)
+        services.AddDatabaseConnectionService();
+
+        // Get connection string - use resolved value or fallback
+        var connectionString = _resolvedConnectionString
+            ?? Configuration.GetConnectionString("DefaultConnection")
+            ?? "Server=(localdb)\\mssqllocaldb;Database=HospitalityPOS;Trusted_Connection=True;";
 
         // Register Infrastructure services (DbContext, UnitOfWork, Repositories)
         services.AddInfrastructureServices(connectionString);
@@ -449,6 +495,18 @@ public partial class App : Application
 
             Log.Information("Application starting up");
 
+            // Check if we have a valid database connection before proceeding
+            var connectionService = Services.GetRequiredService<IDatabaseConnectionService>();
+            var needsConfiguration = !await EnsureDatabaseConnectionAsync(connectionService);
+
+            if (needsConfiguration)
+            {
+                // User cancelled configuration - shutdown
+                Log.Warning("Database configuration was cancelled by user");
+                Shutdown(0);
+                return;
+            }
+
             // Initialize database - apply migrations and seed data
             Log.Information("Initializing database...");
             await Services.InitializeDatabaseAsync(seed: true);
@@ -493,12 +551,92 @@ public partial class App : Application
         {
             Log.Error(ex, "Failed during application startup");
             MessageBox.Show(
-                $"Failed to start application: {ex.Message}\n\nPlease ensure SQL Server Express is running.",
+                $"Failed to start application: {ex.Message}\n\nPlease ensure SQL Server is running and the database is configured correctly.\n\nYou can reconfigure the database connection from the login screen.",
                 "Startup Error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
             Shutdown(1);
         }
+    }
+
+    /// <summary>
+    /// Ensures a valid database connection exists, prompting for configuration if needed.
+    /// </summary>
+    /// <param name="connectionService">The database connection service.</param>
+    /// <returns>True if a valid connection is configured, false if user cancelled.</returns>
+    private async Task<bool> EnsureDatabaseConnectionAsync(IDatabaseConnectionService connectionService)
+    {
+        // First check if we have any configuration at all
+        if (!connectionService.HasConnectionConfiguration && string.IsNullOrEmpty(_resolvedConnectionString))
+        {
+            Log.Information("No database configuration found - showing configuration dialog");
+            return await ShowDatabaseConfigurationDialogAsync(connectionService);
+        }
+
+        // Test the current connection
+        try
+        {
+            var testResult = await connectionService.TestCurrentConnectionAsync();
+            if (testResult.IsSuccess)
+            {
+                Log.Information("Database connection verified successfully");
+                return true;
+            }
+
+            Log.Warning("Database connection test failed: {Error}", testResult.ErrorMessage);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Error testing database connection");
+        }
+
+        // Connection failed - ask user if they want to reconfigure
+        var result = MessageBox.Show(
+            "Unable to connect to the database.\n\n" +
+            "Would you like to configure the database connection?",
+            "Database Connection",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            return await ShowDatabaseConfigurationDialogAsync(connectionService);
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Shows the database configuration dialog and returns true if configuration was saved.
+    /// </summary>
+    private async Task<bool> ShowDatabaseConfigurationDialogAsync(IDatabaseConnectionService connectionService)
+    {
+        var configWindow = new DatabaseConfigurationWindow(connectionService);
+        var dialogResult = configWindow.ShowDialog();
+
+        if (dialogResult == true && configWindow.ConfigurationSaved)
+        {
+            Log.Information("Database configuration saved - restarting to apply changes");
+
+            // Need to restart the application to use the new connection string
+            RestartApplication();
+            return false; // Return false to stop current startup
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Restarts the application to apply new database configuration.
+    /// </summary>
+    private void RestartApplication()
+    {
+        var exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+        if (!string.IsNullOrEmpty(exePath))
+        {
+            System.Diagnostics.Process.Start(exePath);
+        }
+        Shutdown(0);
     }
 
     /// <inheritdoc />

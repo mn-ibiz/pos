@@ -17,6 +17,18 @@ namespace HospitalityPOS.Infrastructure.Extensions;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
+    /// Adds the database connection service for connection configuration management.
+    /// This should be called early, before other infrastructure services.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddDatabaseConnectionService(this IServiceCollection services)
+    {
+        services.AddSingleton<IDatabaseConnectionService, DatabaseConnectionService>();
+        return services;
+    }
+
+    /// <summary>
     /// Adds all infrastructure layer services to the service collection.
     /// </summary>
     /// <param name="services">The service collection.</param>
