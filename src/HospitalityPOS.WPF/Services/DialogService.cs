@@ -2,6 +2,8 @@ using System.Windows;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.Core.Models.Reports;
+using HospitalityPOS.WPF.ViewModels;
+using HospitalityPOS.WPF.Views;
 using HospitalityPOS.WPF.Views.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -216,6 +218,22 @@ public class DialogService : IDialogService
         Application.Current.Dispatcher.Invoke(() =>
         {
             var dialog = new XReportDataDialog(report, autoPrint)
+            {
+                Owner = Application.Current.MainWindow
+            };
+            dialog.ShowDialog();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public Task ShowCombinedXReportDialogAsync()
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            var viewModel = App.Services.GetRequiredService<CombinedXReportViewModel>();
+            var dialog = new CombinedXReportView(viewModel)
             {
                 Owner = Application.Current.MainWindow
             };
