@@ -7,6 +7,16 @@ namespace HospitalityPOS.Core.Entities;
 /// </summary>
 public class WorkPeriod : BaseEntity
 {
+    /// <summary>
+    /// Gets or sets the terminal ID this work period belongs to.
+    /// </summary>
+    public int? TerminalId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the terminal code (denormalized for reporting).
+    /// </summary>
+    public string? TerminalCode { get; set; }
+
     public DateTime OpenedAt { get; set; }
     public DateTime StartTime { get => OpenedAt; set => OpenedAt = value; }
     public DateTime? ClosedAt { get; set; }
@@ -22,9 +32,11 @@ public class WorkPeriod : BaseEntity
     public string? Notes { get; set; }
 
     // Navigation properties
+    public virtual Terminal? Terminal { get; set; }
     public virtual User OpenedByUser { get; set; } = null!;
     public virtual User? ClosedByUser { get; set; }
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
     public virtual ICollection<Receipt> Receipts { get; set; } = new List<Receipt>();
     public virtual ICollection<CashDenominationCount> CashDenominationCounts { get; set; } = new List<CashDenominationCount>();
+    public virtual ICollection<WorkPeriodSession> Sessions { get; set; } = new List<WorkPeriodSession>();
 }

@@ -48,6 +48,7 @@ public class POSDbContext : DbContext
 
     #region Work Period
     public DbSet<WorkPeriod> WorkPeriods => Set<WorkPeriod>();
+    public DbSet<WorkPeriodSession> WorkPeriodSessions => Set<WorkPeriodSession>();
     public DbSet<CashDenomination> CashDenominations => Set<CashDenomination>();
     public DbSet<CashDenominationCount> CashDenominationCounts => Set<CashDenominationCount>();
     public DbSet<CashCountLine> CashCountLines => Set<CashCountLine>();
@@ -280,6 +281,10 @@ public class POSDbContext : DbContext
     public DbSet<StreakMilestoneDefinition> StreakMilestoneDefinitions => Set<StreakMilestoneDefinition>();
     public DbSet<StreakMilestone> StreakMilestones => Set<StreakMilestone>();
     public DbSet<GamificationConfiguration> GamificationConfigurations => Set<GamificationConfiguration>();
+    #endregion
+
+    #region Terminal Management
+    public DbSet<Terminal> Terminals => Set<Terminal>();
     #endregion
 
     #region Multi-Store Management

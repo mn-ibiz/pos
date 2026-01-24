@@ -339,6 +339,14 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<LaborForecastCleanupJob>();
         services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<LaborForecastCleanupJob>());
 
+        // Terminal Management Services (Multi-Terminal Support)
+        services.AddScoped<ITerminalService, TerminalService>();
+        services.AddSingleton<IMachineIdentifierService, MachineIdentifierService>();
+        services.AddSingleton<ITerminalConfigurationService, TerminalConfigurationService>();
+        services.AddSingleton<ITerminalSessionContext, TerminalSessionContext>();
+        services.AddScoped<ITerminalRegistrationService, TerminalRegistrationService>();
+        services.AddScoped<IWorkPeriodSessionService, WorkPeriodSessionService>();
+
         return services;
     }
 
