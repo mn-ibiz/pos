@@ -100,7 +100,17 @@ public partial class ZReportDialog : Window
         }
 
         // Z-Report Number
-        ZReportNumberText.Text = $"Z-Report #: Z-{_report.ZReportNumber:D4}";
+        ZReportNumberText.Text = !string.IsNullOrEmpty(_report.ReportNumberFormatted)
+            ? $"Z-Report #: {_report.ReportNumberFormatted}"
+            : $"Z-Report #: Z-{_report.ZReportNumber:D4}";
+
+        // Terminal Info
+        if (!string.IsNullOrEmpty(_report.TerminalCode))
+        {
+            TerminalInfoText.Text = $"Terminal: {_report.TerminalCode}" +
+                (!string.IsNullOrEmpty(_report.TerminalName) ? $" ({_report.TerminalName})" : "");
+            TerminalInfoText.Visibility = Visibility.Visible;
+        }
 
         // Work Period Info
         OpenedAtText.Text = _report.WorkPeriodOpenedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
@@ -115,6 +125,34 @@ public partial class ZReportDialog : Window
         NetSalesText.Text = $"KSh {_report.NetSales:N2}";
         TaxText.Text = $"KSh {_report.TaxCollected:N2}";
         GrandTotalText.Text = $"KSh {_report.GrandTotal:N2}";
+
+        // Cashier Sessions (Enhanced Breakdown)
+        if (_report.CashierSessions?.Count > 0)
+        {
+            // Convert session times to local time for display
+            var localSessions = _report.CashierSessions.Select(s => new
+            {
+                s.CashierName,
+                SessionStart = s.SessionStart.ToLocalTime(),
+                SessionEnd = s.SessionEnd?.ToLocalTime(),
+                s.DurationFormatted,
+                s.TransactionCount,
+                s.GrossSales,
+                s.NetSales,
+                s.CashPayments,
+                s.CardPayments,
+                s.OtherPayments,
+                s.VoidCount,
+                s.VoidAmount,
+                s.RefundCount,
+                s.RefundAmount
+            }).ToList();
+            CashierSessionItems.ItemsSource = localSessions;
+        }
+        else
+        {
+            NoCashierSessionsText.Visibility = Visibility.Visible;
+        }
 
         // Sales by User
         UserSalesItems.ItemsSource = _report.SalesByUser;
@@ -232,7 +270,14 @@ public partial class ZReportDialog : Window
 
         sb.AppendLine(new string('=', lineWidth));
         sb.AppendLine(CenterText("*** Z REPORT ***", lineWidth));
-        sb.AppendLine(CenterText($"Z-Report #: Z-{_report.ZReportNumber:D4}", lineWidth));
+        var reportNum = !string.IsNullOrEmpty(_report.ReportNumberFormatted)
+            ? _report.ReportNumberFormatted
+            : $"Z-{_report.ZReportNumber:D4}";
+        sb.AppendLine(CenterText($"Z-Report #: {reportNum}", lineWidth));
+        if (!string.IsNullOrEmpty(_report.TerminalCode))
+        {
+            sb.AppendLine(CenterText($"Terminal: {_report.TerminalCode}", lineWidth));
+        }
         sb.AppendLine(new string('=', lineWidth));
 
         // Work Period
@@ -255,7 +300,31 @@ public partial class ZReportDialog : Window
 
         sb.AppendLine(new string('=', lineWidth));
 
-        // Sales by Cashier
+        // Cashier Sessions (Enhanced)
+        if (_report.CashierSessions?.Count > 0)
+        {
+            sb.AppendLine("CASHIER SESSIONS");
+            sb.AppendLine(new string('-', lineWidth));
+            foreach (var session in _report.CashierSessions)
+            {
+                sb.AppendLine($"{session.CashierName}");
+                var endTime = session.SessionEnd?.ToLocalTime().ToString("HH:mm") ?? "Active";
+                sb.AppendLine($"  {session.SessionStart.ToLocalTime():HH:mm} - {endTime} ({session.DurationFormatted})");
+                sb.AppendLine(FormatLine($"  Transactions:", session.TransactionCount.ToString(), lineWidth));
+                sb.AppendLine(FormatLine($"  Net Sales:", $"KSh {session.NetSales:N2}", lineWidth));
+                sb.AppendLine(FormatLine($"    Cash:", $"KSh {session.CashPayments:N2}", lineWidth));
+                sb.AppendLine(FormatLine($"    Card:", $"KSh {session.CardPayments:N2}", lineWidth));
+                sb.AppendLine(FormatLine($"    Other:", $"KSh {session.OtherPayments:N2}", lineWidth));
+                if (session.VoidCount > 0)
+                {
+                    sb.AppendLine(FormatLine($"  Voids ({session.VoidCount}):", $"-KSh {session.VoidAmount:N2}", lineWidth));
+                }
+                sb.AppendLine();
+            }
+            sb.AppendLine(new string('=', lineWidth));
+        }
+
+        // Sales by Cashier (Summary)
         sb.AppendLine("SALES BY CASHIER");
         sb.AppendLine(new string('-', lineWidth));
         foreach (var user in _report.SalesByUser)

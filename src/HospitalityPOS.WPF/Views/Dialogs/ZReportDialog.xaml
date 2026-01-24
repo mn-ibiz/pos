@@ -1,6 +1,7 @@
 <Window x:Class="HospitalityPOS.WPF.Views.Dialogs.ZReportDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:HospitalityPOS.WPF.Converters"
         Title="Z Report"
         Width="600"
         Height="800"
@@ -12,6 +13,11 @@
         Background="#2D2D44">
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+
+        <!-- PositiveToVisibilityConverter: shows element when int > 0 -->
+        <local:PositiveToVisibilityConverter x:Key="PositiveToVisibilityConverter" />
+
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="#4CAF50" />
             <Setter Property="FontSize" Value="14" />
@@ -113,6 +119,14 @@
                            HorizontalAlignment="Center"
                            Margin="0,4,0,0" />
 
+                <TextBlock x:Name="TerminalInfoText"
+                           Text=""
+                           Foreground="#8888AA"
+                           FontSize="12"
+                           HorizontalAlignment="Center"
+                           Margin="0,4,0,0"
+                           Visibility="Collapsed" />
+
                 <Border Style="{StaticResource DoubleDividerStyle}" />
 
                 <!-- Work Period Info -->
@@ -176,7 +190,78 @@
 
                 <Border Style="{StaticResource DividerStyle}" />
 
-                <!-- Sales by Cashier -->
+                <!-- Cashier Sessions (Enhanced) -->
+                <TextBlock Text="CASHIER SESSIONS" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,8" />
+                <ItemsControl x:Name="CashierSessionItems">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#252538" CornerRadius="6" Margin="0,0,0,8" Padding="12">
+                                <StackPanel>
+                                    <!-- Cashier Name and Time -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding CashierName}" Foreground="White" FontWeight="SemiBold" FontSize="13" />
+                                        <TextBlock Grid.Column="1" Foreground="#8888AA" FontSize="11">
+                                            <Run Text="{Binding SessionStart, StringFormat='{}{0:HH:mm}'}" />
+                                            <Run Text=" - " />
+                                            <Run Text="{Binding SessionEnd, StringFormat='{}{0:HH:mm}', TargetNullValue='Active'}" />
+                                            <Run Text=" (" /><Run Text="{Binding DurationFormatted}" /><Run Text=")" />
+                                        </TextBlock>
+                                    </Grid>
+
+                                    <!-- Session Details -->
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Transactions:" Style="{StaticResource LabelStyle}" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding TransactionCount}" Style="{StaticResource ValueStyle}" />
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Net Sales:" Style="{StaticResource LabelStyle}" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding NetSales, StringFormat='KSh {0:N2}'}" Style="{StaticResource ValueStyle}" />
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="  └ Cash:" Style="{StaticResource LabelStyle}" FontSize="11" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CashPayments, StringFormat='KSh {0:N2}'}" Foreground="#8888AA" FontFamily="Consolas" FontSize="11" HorizontalAlignment="Right" />
+
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="  └ Card:" Style="{StaticResource LabelStyle}" FontSize="11" />
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CardPayments, StringFormat='KSh {0:N2}'}" Foreground="#8888AA" FontFamily="Consolas" FontSize="11" HorizontalAlignment="Right" />
+
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="  └ Other:" Style="{StaticResource LabelStyle}" FontSize="11" />
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding OtherPayments, StringFormat='KSh {0:N2}'}" Foreground="#8888AA" FontFamily="Consolas" FontSize="11" HorizontalAlignment="Right" />
+
+                                        <TextBlock Grid.Row="5" Grid.Column="0" Foreground="#FF6B6B" FontSize="11" Visibility="{Binding VoidCount, Converter={StaticResource PositiveToVisibilityConverter}}">
+                                            <Run Text="Voids: " /><Run Text="{Binding VoidCount}" />
+                                        </TextBlock>
+                                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding VoidAmount, StringFormat='-KSh {0:N2}'}" Foreground="#FF6B6B" FontFamily="Consolas" FontSize="11" HorizontalAlignment="Right"
+                                                   Visibility="{Binding VoidCount, Converter={StaticResource PositiveToVisibilityConverter}}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock x:Name="NoCashierSessionsText"
+                           Text="No cashier sessions recorded"
+                           Foreground="#8888AA"
+                           FontStyle="Italic"
+                           Visibility="Collapsed" />
+
+                <Border Style="{StaticResource DividerStyle}" />
+
+                <!-- Sales by Cashier (Summary) -->
                 <TextBlock Text="SALES BY CASHIER" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,8" />
                 <ItemsControl x:Name="UserSalesItems">
                     <ItemsControl.ItemTemplate>

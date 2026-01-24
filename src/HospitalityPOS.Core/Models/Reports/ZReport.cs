@@ -27,6 +27,27 @@ public class ZReport
     /// </summary>
     public int ZReportNumber { get; set; }
 
+    /// <summary>
+    /// Gets or sets the formatted report number (e.g., Z-2026-001-0001).
+    /// </summary>
+    public string ReportNumberFormatted { get; set; } = string.Empty;
+
+    // Terminal Information
+    /// <summary>
+    /// Gets or sets the terminal ID.
+    /// </summary>
+    public int TerminalId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the terminal code.
+    /// </summary>
+    public string TerminalCode { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the terminal name.
+    /// </summary>
+    public string TerminalName { get; set; } = string.Empty;
+
     // Work Period Information
     /// <summary>
     /// Gets or sets the work period ID.
@@ -99,6 +120,11 @@ public class ZReport
     /// Gets or sets the sales by user/cashier breakdown.
     /// </summary>
     public List<UserSalesSummary> SalesByUser { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the cashier session breakdown with detailed time periods and payment splits.
+    /// </summary>
+    public List<ZReportCashierSession> CashierSessions { get; set; } = [];
 
     // Transaction Statistics
     /// <summary>
@@ -230,4 +256,102 @@ public class ItemSoldSummary
     /// Gets or sets the total value sold.
     /// </summary>
     public decimal TotalValue { get; set; }
+}
+
+/// <summary>
+/// Cashier session breakdown for Z-Report display.
+/// </summary>
+public class ZReportCashierSession
+{
+    /// <summary>
+    /// Gets or sets the user/cashier ID.
+    /// </summary>
+    public int UserId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the cashier name.
+    /// </summary>
+    public string CashierName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the session ID.
+    /// </summary>
+    public int SessionId { get; set; }
+
+    /// <summary>
+    /// Gets or sets when the session started.
+    /// </summary>
+    public DateTime SessionStart { get; set; }
+
+    /// <summary>
+    /// Gets or sets when the session ended.
+    /// </summary>
+    public DateTime? SessionEnd { get; set; }
+
+    /// <summary>
+    /// Gets the session duration.
+    /// </summary>
+    public TimeSpan Duration => (SessionEnd ?? DateTime.UtcNow) - SessionStart;
+
+    /// <summary>
+    /// Gets the formatted duration string.
+    /// </summary>
+    public string DurationFormatted
+    {
+        get
+        {
+            var d = Duration;
+            return $"{(int)d.TotalHours}h {d.Minutes:D2}m";
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the number of transactions.
+    /// </summary>
+    public int TransactionCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the gross sales.
+    /// </summary>
+    public decimal GrossSales { get; set; }
+
+    /// <summary>
+    /// Gets or sets the net sales.
+    /// </summary>
+    public decimal NetSales { get; set; }
+
+    /// <summary>
+    /// Gets or sets cash payments total.
+    /// </summary>
+    public decimal CashPayments { get; set; }
+
+    /// <summary>
+    /// Gets or sets card payments total.
+    /// </summary>
+    public decimal CardPayments { get; set; }
+
+    /// <summary>
+    /// Gets or sets other payments total (M-Pesa, etc.).
+    /// </summary>
+    public decimal OtherPayments { get; set; }
+
+    /// <summary>
+    /// Gets or sets the void count.
+    /// </summary>
+    public int VoidCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the void amount.
+    /// </summary>
+    public decimal VoidAmount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the refund count.
+    /// </summary>
+    public int RefundCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the refund amount.
+    /// </summary>
+    public decimal RefundAmount { get; set; }
 }
