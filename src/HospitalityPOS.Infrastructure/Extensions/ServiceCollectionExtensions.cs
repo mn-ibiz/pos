@@ -347,6 +347,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITerminalRegistrationService, TerminalRegistrationService>();
         services.AddScoped<IWorkPeriodSessionService, WorkPeriodSessionService>();
 
+        // Report Services
+        services.AddScoped<IXReportService, XReportService>();
+
         return services;
     }
 
