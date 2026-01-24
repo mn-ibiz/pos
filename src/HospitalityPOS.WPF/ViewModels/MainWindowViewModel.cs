@@ -242,6 +242,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private void NavigateToZReportHistory() => NavigateWithSidebar<ZReportHistoryViewModel>("Z-Report History");
 
     [RelayCommand]
+    private void NavigateToXReportHistory() => NavigateWithSidebar<XReportHistoryViewModel>("X-Report History");
+
+    [RelayCommand]
     private void NavigateToProductManagement() => NavigateWithSidebar<ProductManagementViewModel>("Products");
 
     [RelayCommand]

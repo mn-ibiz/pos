@@ -310,6 +310,7 @@ public partial class App : Application
         services.AddTransient<InventoryReportsViewModel>();
         services.AddTransient<AuditReportsViewModel>();
         services.AddTransient<ZReportHistoryViewModel>();
+        services.AddTransient<XReportHistoryViewModel>();
         services.AddTransient<LoginAuditViewModel>();
         services.AddTransient<GoodsReceivingViewModel>();
         services.AddTransient<DirectReceivingViewModel>();

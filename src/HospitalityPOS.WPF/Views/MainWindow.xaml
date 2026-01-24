@@ -154,6 +154,9 @@
         <DataTemplate DataType="{x:Type vm:ZReportHistoryViewModel}">
             <views:ZReportHistoryView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:XReportHistoryViewModel}">
+            <views:XReportHistoryView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:GoodsReceivingViewModel}">
             <views:GoodsReceivingView />
         </DataTemplate>
@@ -614,6 +617,15 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
                                     <TextBlock Text="Z-Report History" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- X-Report History -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToXReportHistoryCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE9F9;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="X-Report History" Margin="12,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
 

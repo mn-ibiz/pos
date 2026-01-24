@@ -209,6 +209,23 @@ public class DialogService : IDialogService
     }
 
     /// <inheritdoc />
+    public Task ShowXReportDialogAsync(HospitalityPOS.Core.DTOs.XReportData report, bool autoPrint = false)
+    {
+        ArgumentNullException.ThrowIfNull(report);
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            var dialog = new XReportDataDialog(report, autoPrint)
+            {
+                Owner = Application.Current.MainWindow
+            };
+            dialog.ShowDialog();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
     public Task ShowZReportDialogAsync(HospitalityPOS.Core.Models.Reports.ZReport report, bool autoPrint = false)
     {
         ArgumentNullException.ThrowIfNull(report);

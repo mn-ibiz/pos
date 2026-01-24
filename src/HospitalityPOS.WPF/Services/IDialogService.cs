@@ -91,6 +91,14 @@ public interface IDialogService
     Task ShowXReportDialogAsync(HospitalityPOS.Core.Models.Reports.XReport report);
 
     /// <summary>
+    /// Shows the X-Report dialog for the new XReportData DTO.
+    /// </summary>
+    /// <param name="report">The X-Report data to display.</param>
+    /// <param name="autoPrint">If true, automatically prints the report when shown.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task ShowXReportDialogAsync(HospitalityPOS.Core.DTOs.XReportData report, bool autoPrint = false);
+
+    /// <summary>
     /// Shows the Z-Report dialog.
     /// </summary>
     /// <param name="report">The Z-Report to display.</param>
