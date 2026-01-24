@@ -422,16 +422,18 @@ public class XReportService : IXReportService
             .ConfigureAwait(false);
 
         var breakdown = payments
-            .GroupBy(p => new { p.PaymentMethodId, p.PaymentMethod?.Name, p.PaymentMethod?.Code })
-            .Select(g => new PaymentMethodSummary
+            .GroupBy(p => new { p.PaymentMethodId, p.PaymentMethod?.Name, p.PaymentMethod?.Code, p.PaymentMethod?.Type })
+            .Select(g => new Core.DTOs.PaymentMethodSummary
             {
                 PaymentMethodId = g.Key.PaymentMethodId,
                 PaymentMethodName = g.Key.Name ?? "Unknown",
                 PaymentMethodCode = g.Key.Code ?? "UNKNOWN",
+                PaymentMethodType = g.Key.Type ?? PaymentMethodType.Cash,
                 Amount = g.Sum(p => p.Amount),
                 TransactionCount = g.Count()
             })
-            .OrderBy(p => p.PaymentMethodName)
+            .OrderBy(p => p.PaymentMethodType)
+            .ThenBy(p => p.PaymentMethodName)
             .ToList();
 
         report.TotalPayments = breakdown.Sum(b => b.Amount);
@@ -445,6 +447,30 @@ public class XReportService : IXReportService
         }
 
         report.PaymentBreakdown = breakdown;
+
+        // Build PaymentTypeBreakdown (grouped by type)
+        var typeBreakdown = breakdown
+            .GroupBy(p => p.PaymentMethodType)
+            .Select(g => new Core.DTOs.PaymentTypeBreakdown
+            {
+                PaymentType = g.Key,
+                PaymentTypeName = Core.DTOs.PaymentTypeBreakdown.GetPaymentTypeName(g.Key),
+                TotalAmount = g.Sum(m => m.Amount),
+                TotalTransactionCount = g.Sum(m => m.TransactionCount),
+                Methods = g.ToList()
+            })
+            .OrderBy(t => t.PaymentType)
+            .ToList();
+
+        // Calculate type percentages
+        foreach (var item in typeBreakdown)
+        {
+            item.Percentage = report.TotalPayments > 0
+                ? Math.Round(item.TotalAmount / report.TotalPayments * 100, 1)
+                : 0;
+        }
+
+        report.PaymentTypeBreakdown = typeBreakdown;
     }
 
     private async Task LoadCashDrawerInfoAsync(

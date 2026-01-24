@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using HospitalityPOS.Core.DTOs;
+using HospitalityPOS.Core.Enums;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.WPF.Services;
 
@@ -104,6 +106,9 @@ public partial class CombinedXReportViewModel : ObservableObject, INavigationAwa
 
     [ObservableProperty]
     private ObservableCollection<PaymentBreakdownItem> _paymentBreakdown = [];
+
+    [ObservableProperty]
+    private ObservableCollection<PaymentTypeBreakdownItem> _paymentTypeBreakdown = [];
 
     [ObservableProperty]
     private ObservableCollection<CashierSessionItem> _cashierSessions = [];
@@ -252,10 +257,37 @@ public partial class CombinedXReportViewModel : ObservableObject, INavigationAwa
                 report.PaymentBreakdown.Select(p => new PaymentBreakdownItem
                 {
                     PaymentMethodName = p.PaymentMethodName,
+                    PaymentMethodType = p.PaymentMethodType,
                     Amount = p.Amount,
                     TransactionCount = p.TransactionCount,
                     Percentage = report.GrandTotal > 0 ? (p.Amount / report.GrandTotal) * 100 : 0
                 }));
+
+            // Populate payment type breakdown (grouped by type)
+            var totalPayments = report.PaymentBreakdown.Sum(p => p.Amount);
+            var typeBreakdown = report.PaymentBreakdown
+                .GroupBy(p => p.PaymentMethodType)
+                .Select(g => new PaymentTypeBreakdownItem
+                {
+                    PaymentType = g.Key,
+                    PaymentTypeName = Core.DTOs.PaymentTypeBreakdown.GetPaymentTypeName(g.Key),
+                    TotalAmount = g.Sum(m => m.Amount),
+                    TotalTransactionCount = g.Sum(m => m.TransactionCount),
+                    Percentage = totalPayments > 0 ? Math.Round(g.Sum(m => m.Amount) / totalPayments * 100, 1) : 0,
+                    Methods = new ObservableCollection<PaymentBreakdownItem>(
+                        g.Select(m => new PaymentBreakdownItem
+                        {
+                            PaymentMethodName = m.PaymentMethodName,
+                            PaymentMethodType = m.PaymentMethodType,
+                            Amount = m.Amount,
+                            TransactionCount = m.TransactionCount,
+                            Percentage = totalPayments > 0 ? (m.Amount / totalPayments) * 100 : 0
+                        }))
+                })
+                .OrderBy(t => t.PaymentType)
+                .ToList();
+
+            PaymentTypeBreakdown = new ObservableCollection<PaymentTypeBreakdownItem>(typeBreakdown);
 
             // Populate cashier sessions
             CashierSessions = new ObservableCollection<CashierSessionItem>(
@@ -317,9 +349,23 @@ public class TerminalSummaryItem
 public class PaymentBreakdownItem
 {
     public string PaymentMethodName { get; set; } = string.Empty;
+    public PaymentMethodType PaymentMethodType { get; set; }
     public decimal Amount { get; set; }
     public int TransactionCount { get; set; }
     public decimal Percentage { get; set; }
+}
+
+/// <summary>
+/// Payment type breakdown item for display (grouped by type).
+/// </summary>
+public class PaymentTypeBreakdownItem
+{
+    public PaymentMethodType PaymentType { get; set; }
+    public string PaymentTypeName { get; set; } = string.Empty;
+    public decimal TotalAmount { get; set; }
+    public int TotalTransactionCount { get; set; }
+    public decimal Percentage { get; set; }
+    public ObservableCollection<PaymentBreakdownItem> Methods { get; set; } = [];
 }
 
 /// <summary>

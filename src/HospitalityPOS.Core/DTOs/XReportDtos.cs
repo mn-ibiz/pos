@@ -42,6 +42,7 @@ public class XReportData
 
     // Payment Breakdown
     public List<PaymentMethodSummary> PaymentBreakdown { get; set; } = new();
+    public List<PaymentTypeBreakdown> PaymentTypeBreakdown { get; set; } = new();
     public decimal TotalPayments { get; set; }
 
     // Cash Drawer
@@ -110,9 +111,37 @@ public class PaymentMethodSummary
     public int PaymentMethodId { get; set; }
     public string PaymentMethodName { get; set; } = string.Empty;
     public string PaymentMethodCode { get; set; } = string.Empty;
+    public HospitalityPOS.Core.Enums.PaymentMethodType PaymentMethodType { get; set; }
     public decimal Amount { get; set; }
     public int TransactionCount { get; set; }
     public decimal Percentage { get; set; }
+}
+
+/// <summary>
+/// Groups payment methods by their type for enhanced report breakdown.
+/// </summary>
+public class PaymentTypeBreakdown
+{
+    public HospitalityPOS.Core.Enums.PaymentMethodType PaymentType { get; set; }
+    public string PaymentTypeName { get; set; } = string.Empty;
+    public decimal TotalAmount { get; set; }
+    public int TotalTransactionCount { get; set; }
+    public decimal Percentage { get; set; }
+    public List<PaymentMethodSummary> Methods { get; set; } = [];
+
+    /// <summary>
+    /// Gets display name for payment type.
+    /// </summary>
+    public static string GetPaymentTypeName(HospitalityPOS.Core.Enums.PaymentMethodType type) => type switch
+    {
+        HospitalityPOS.Core.Enums.PaymentMethodType.Cash => "Cash",
+        HospitalityPOS.Core.Enums.PaymentMethodType.Card => "Card",
+        HospitalityPOS.Core.Enums.PaymentMethodType.MPesa => "M-Pesa",
+        HospitalityPOS.Core.Enums.PaymentMethodType.BankTransfer => "Bank Transfer",
+        HospitalityPOS.Core.Enums.PaymentMethodType.Credit => "Credit",
+        HospitalityPOS.Core.Enums.PaymentMethodType.LoyaltyPoints => "Loyalty Points",
+        _ => type.ToString()
+    };
 }
 
 /// <summary>

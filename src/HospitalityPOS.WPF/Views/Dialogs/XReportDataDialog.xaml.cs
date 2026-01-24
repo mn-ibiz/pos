@@ -72,10 +72,30 @@ public partial class XReportDataDialog : Window
         TipsText.Text = $"KSh {_report.TipsCollected:N2}";
         GrandTotalText.Text = $"KSh {_report.GrandTotal:N2}";
 
-        // Payment Breakdown
-        if (_report.PaymentBreakdown.Count > 0)
+        // Payment Breakdown by Type
+        if (_report.PaymentTypeBreakdown.Count > 0)
         {
-            PaymentBreakdownItems.ItemsSource = _report.PaymentBreakdown;
+            PaymentTypeBreakdownItems.ItemsSource = _report.PaymentTypeBreakdown;
+        }
+        else if (_report.PaymentBreakdown.Count > 0)
+        {
+            // Fallback: create type breakdown from flat list
+            var typeBreakdown = _report.PaymentBreakdown
+                .GroupBy(p => p.PaymentMethodType)
+                .Select(g => new PaymentTypeBreakdown
+                {
+                    PaymentType = g.Key,
+                    PaymentTypeName = PaymentTypeBreakdown.GetPaymentTypeName(g.Key),
+                    TotalAmount = g.Sum(m => m.Amount),
+                    TotalTransactionCount = g.Sum(m => m.TransactionCount),
+                    Percentage = _report.TotalPayments > 0
+                        ? Math.Round(g.Sum(m => m.Amount) / _report.TotalPayments * 100, 1)
+                        : 0,
+                    Methods = g.ToList()
+                })
+                .OrderBy(t => t.PaymentType)
+                .ToList();
+            PaymentTypeBreakdownItems.ItemsSource = typeBreakdown;
         }
         else
         {
@@ -217,13 +237,35 @@ public partial class XReportDataDialog : Window
 
         sb.AppendLine(new string('-', lineWidth));
 
-        // Payment Breakdown
+        // Payment Breakdown by Type
         sb.AppendLine("PAYMENT BREAKDOWN");
-        if (_report.PaymentBreakdown.Count > 0)
+        var paymentTypes = _report.PaymentTypeBreakdown.Count > 0
+            ? _report.PaymentTypeBreakdown
+            : _report.PaymentBreakdown
+                .GroupBy(p => p.PaymentMethodType)
+                .Select(g => new PaymentTypeBreakdown
+                {
+                    PaymentTypeName = PaymentTypeBreakdown.GetPaymentTypeName(g.Key),
+                    TotalAmount = g.Sum(m => m.Amount),
+                    TotalTransactionCount = g.Sum(m => m.TransactionCount),
+                    Percentage = _report.TotalPayments > 0
+                        ? Math.Round(g.Sum(m => m.Amount) / _report.TotalPayments * 100, 1)
+                        : 0,
+                    Methods = g.ToList()
+                })
+                .ToList();
+
+        if (paymentTypes.Count > 0)
         {
-            foreach (var pm in _report.PaymentBreakdown)
+            foreach (var pt in paymentTypes)
             {
-                sb.AppendLine(FormatLine($"{pm.PaymentMethodName} ({pm.TransactionCount}):", $"KSh {pm.Amount:N2}", lineWidth));
+                // Type header
+                sb.AppendLine(FormatLine($"[{pt.PaymentTypeName}] ({pt.TotalTransactionCount}):", $"KSh {pt.TotalAmount:N2}", lineWidth));
+                // Individual methods within type
+                foreach (var pm in pt.Methods)
+                {
+                    sb.AppendLine(FormatLine($"  {pm.PaymentMethodName} ({pm.TransactionCount}):", $"KSh {pm.Amount:N2}", lineWidth));
+                }
             }
         }
         else

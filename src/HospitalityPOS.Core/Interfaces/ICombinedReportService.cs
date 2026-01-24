@@ -1,4 +1,5 @@
 using HospitalityPOS.Core.DTOs;
+using HospitalityPOS.Core.Enums;
 using HospitalityPOS.Core.Models.Reports;
 
 namespace HospitalityPOS.Core.Interfaces;
@@ -508,6 +509,11 @@ public class PaymentMethodBreakdownItem
     /// Payment method name.
     /// </summary>
     public string PaymentMethodName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Payment method type (Cash, Card, MPesa, etc.).
+    /// </summary>
+    public PaymentMethodType PaymentMethodType { get; set; }
 
     /// <summary>
     /// Total amount.

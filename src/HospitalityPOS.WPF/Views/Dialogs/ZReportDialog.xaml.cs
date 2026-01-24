@@ -1,6 +1,8 @@
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
+using HospitalityPOS.Core.DTOs;
+using HospitalityPOS.Core.Enums;
 using HospitalityPOS.Core.Models.Reports;
 using HospitalityPOS.WPF.Converters;
 
@@ -157,8 +159,43 @@ public partial class ZReportDialog : Window
         // Sales by User
         UserSalesItems.ItemsSource = _report.SalesByUser;
 
-        // Payment Methods
-        PaymentMethodItems.ItemsSource = _report.SalesByPaymentMethod;
+        // Payment Methods (Grouped by Type)
+        if (_report.SalesByPaymentMethod?.Count > 0)
+        {
+            var totalPayments = _report.SalesByPaymentMethod.Sum(p => p.TotalAmount);
+
+            // Group by payment type based on method name patterns
+            var typeBreakdown = _report.SalesByPaymentMethod
+                .Select(p => new
+                {
+                    Method = p,
+                    Type = InferPaymentType(p.PaymentMethod)
+                })
+                .GroupBy(x => x.Type)
+                .Select(g => new
+                {
+                    PaymentTypeName = PaymentTypeBreakdown.GetPaymentTypeName(g.Key),
+                    TotalAmount = g.Sum(m => m.Method.TotalAmount),
+                    TotalTransactionCount = g.Sum(m => m.Method.TransactionCount),
+                    Percentage = totalPayments > 0
+                        ? Math.Round(g.Sum(m => m.Method.TotalAmount) / totalPayments * 100, 1)
+                        : 0m,
+                    Methods = g.Select(m => new
+                    {
+                        PaymentMethodName = m.Method.PaymentMethod,
+                        TotalAmount = m.Method.TotalAmount,
+                        TransactionCount = m.Method.TransactionCount
+                    }).ToList()
+                })
+                .OrderBy(t => t.PaymentTypeName)
+                .ToList();
+
+            PaymentTypeItems.ItemsSource = typeBreakdown;
+        }
+        else
+        {
+            NoPaymentMethodsText.Visibility = Visibility.Visible;
+        }
 
         // Receipts Summary
         SettledCountRun.Text = _report.SettledReceiptsCount.ToString();
@@ -338,12 +375,40 @@ public partial class ZReportDialog : Window
 
         sb.AppendLine(new string('=', lineWidth));
 
-        // Payment Methods
-        sb.AppendLine("PAYMENT METHODS");
+        // Payment Methods (Grouped by Type)
+        sb.AppendLine("PAYMENT BREAKDOWN");
         sb.AppendLine(new string('-', lineWidth));
-        foreach (var pm in _report.SalesByPaymentMethod)
+
+        if (_report.SalesByPaymentMethod?.Count > 0)
         {
-            sb.AppendLine(FormatLine($"{pm.PaymentMethod} ({pm.TransactionCount}):", $"KSh {pm.TotalAmount:N2}", lineWidth));
+            var totalPayments = _report.SalesByPaymentMethod.Sum(p => p.TotalAmount);
+            var typeBreakdown = _report.SalesByPaymentMethod
+                .Select(p => new { Method = p, Type = InferPaymentType(p.PaymentMethod) })
+                .GroupBy(x => x.Type)
+                .Select(g => new
+                {
+                    TypeName = PaymentTypeBreakdown.GetPaymentTypeName(g.Key),
+                    TotalAmount = g.Sum(m => m.Method.TotalAmount),
+                    TotalCount = g.Sum(m => m.Method.TransactionCount),
+                    Methods = g.Select(m => m.Method).ToList()
+                })
+                .OrderBy(t => t.TypeName)
+                .ToList();
+
+            foreach (var pt in typeBreakdown)
+            {
+                // Type header
+                sb.AppendLine(FormatLine($"[{pt.TypeName}] ({pt.TotalCount}):", $"KSh {pt.TotalAmount:N2}", lineWidth));
+                // Individual methods
+                foreach (var pm in pt.Methods)
+                {
+                    sb.AppendLine(FormatLine($"  {pm.PaymentMethod} ({pm.TransactionCount}):", $"KSh {pm.TotalAmount:N2}", lineWidth));
+                }
+            }
+        }
+        else
+        {
+            sb.AppendLine("No payments recorded");
         }
 
         sb.AppendLine(new string('=', lineWidth));
@@ -434,6 +499,24 @@ public partial class ZReportDialog : Window
         var spaces = width - label.Length - value.Length;
         if (spaces < 1) spaces = 1;
         return label + new string(' ', spaces) + value;
+    }
+
+    /// <summary>
+    /// Infers the payment method type from the method name.
+    /// </summary>
+    private static PaymentMethodType InferPaymentType(string methodName)
+    {
+        var name = methodName.ToUpperInvariant();
+        return name switch
+        {
+            _ when name.Contains("CASH") => PaymentMethodType.Cash,
+            _ when name.Contains("CARD") || name.Contains("VISA") || name.Contains("MASTER") || name.Contains("DEBIT") || name.Contains("CREDIT") => PaymentMethodType.Card,
+            _ when name.Contains("MPESA") || name.Contains("M-PESA") => PaymentMethodType.MPesa,
+            _ when name.Contains("BANK") || name.Contains("TRANSFER") || name.Contains("EFT") => PaymentMethodType.BankTransfer,
+            _ when name.Contains("CREDIT") && !name.Contains("CARD") => PaymentMethodType.Credit,
+            _ when name.Contains("LOYALTY") || name.Contains("POINTS") => PaymentMethodType.LoyaltyPoints,
+            _ => PaymentMethodType.Cash // Default to Cash for unknown methods
+        };
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)

@@ -238,22 +238,51 @@
 
                 <Border Style="{StaticResource DividerStyle}" />
 
-                <!-- Payment Breakdown -->
+                <!-- Payment Breakdown by Type -->
                 <TextBlock Text="PAYMENT BREAKDOWN" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,8" />
-                <ItemsControl x:Name="PaymentBreakdownItems">
+                <ItemsControl x:Name="PaymentTypeBreakdownItems">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Grid Margin="0,2">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}">
-                                    <Run Text="{Binding PaymentMethodName}" />
-                                    <Run Text=" (" /><Run Text="{Binding TransactionCount}" /><Run Text=")" />
-                                </TextBlock>
-                                <TextBlock Grid.Column="1" Text="{Binding Amount, StringFormat='KSh {0:N2}'}" Style="{StaticResource ValueStyle}" />
-                            </Grid>
+                            <StackPanel Margin="0,4,0,8">
+                                <!-- Payment Type Header -->
+                                <Border Background="#1A1A2E" CornerRadius="4" Padding="8,6" Margin="0,0,0,4">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Foreground="White" FontWeight="SemiBold" FontSize="13">
+                                            <Run Text="{Binding PaymentTypeName}" />
+                                            <Run Text=" (" Foreground="#6B7280" /><Run Text="{Binding TotalTransactionCount}" Foreground="#6B7280" /><Run Text=")" Foreground="#6B7280" />
+                                        </TextBlock>
+                                        <TextBlock Grid.Column="1" Foreground="#10B981" FontWeight="Bold" FontFamily="Consolas" FontSize="13" Margin="0,0,8,0">
+                                            <Run Text="KSh " /><Run Text="{Binding TotalAmount, StringFormat='N2'}" />
+                                        </TextBlock>
+                                        <TextBlock Grid.Column="2" Foreground="#6B7280" FontFamily="Consolas" FontSize="11" VerticalAlignment="Center">
+                                            <Run Text="{Binding Percentage, StringFormat='({0:N1}%)'}" />
+                                        </TextBlock>
+                                    </Grid>
+                                </Border>
+                                <!-- Payment Methods within Type -->
+                                <ItemsControl ItemsSource="{Binding Methods}" Margin="16,0,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" FontSize="12">
+                                                    <Run Text="{Binding PaymentMethodName}" />
+                                                    <Run Text=" (" /><Run Text="{Binding TransactionCount}" /><Run Text=")" />
+                                                </TextBlock>
+                                                <TextBlock Grid.Column="1" Text="{Binding Amount, StringFormat='KSh {0:N2}'}" Style="{StaticResource ValueStyle}" FontSize="12" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

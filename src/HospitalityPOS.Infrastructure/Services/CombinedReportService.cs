@@ -464,15 +464,17 @@ public class CombinedReportService : ICombinedReportService
             .ThenInclude(p => p.PaymentMethod)
             .Where(r => r.WorkPeriodId == workPeriodId && r.Status == Core.Enums.ReceiptStatus.Settled)
             .SelectMany(r => r.Payments)
-            .GroupBy(p => new { p.PaymentMethodId, p.PaymentMethod.Name })
+            .GroupBy(p => new { p.PaymentMethodId, p.PaymentMethod.Name, p.PaymentMethod.Type })
             .Select(g => new PaymentMethodBreakdownItem
             {
                 PaymentMethodId = g.Key.PaymentMethodId,
                 PaymentMethodName = g.Key.Name,
+                PaymentMethodType = g.Key.Type,
                 Amount = g.Sum(p => p.Amount),
                 TransactionCount = g.Count()
             })
-            .OrderByDescending(pb => pb.Amount)
+            .OrderBy(pb => pb.PaymentMethodType)
+            .ThenByDescending(pb => pb.Amount)
             .ToListAsync(cancellationToken);
 
         return paymentBreakdown;
