@@ -290,6 +290,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private void NavigateToTerminalManagement() => NavigateWithSidebar<TerminalManagementViewModel>("Terminal Management");
 
     [RelayCommand]
+    private void NavigateToTerminalStatusDashboard() => NavigateWithSidebar<TerminalStatusDashboardViewModel>("Terminal Status");
+
+    [RelayCommand]
     private void NavigateToPaymentMethods() => NavigateWithSidebar<PaymentMethodsViewModel>("Payment Methods");
 
     [RelayCommand]

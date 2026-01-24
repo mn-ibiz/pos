@@ -230,6 +230,10 @@
         <DataTemplate DataType="{x:Type vm:TerminalEditorViewModel}">
             <views:TerminalEditorView />
         </DataTemplate>
+        <!-- Terminal Status Dashboard (MT-029) -->
+        <DataTemplate DataType="{x:Type vm:TerminalStatusDashboardViewModel}">
+            <views:TerminalStatusDashboardView />
+        </DataTemplate>
     </Window.Resources>
 
     <Grid>
@@ -782,6 +786,15 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE7F4;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
                                     <TextBlock Text="Terminals" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Terminal Status (MT-029) -->
+                            <Button Style="{StaticResource SidebarMenuItemStyle}"
+                                    Command="{Binding NavigateToTerminalStatusDashboardCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="24" />
+                                    <TextBlock Text="Terminal Status" Margin="12,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
 
