@@ -6,6 +6,7 @@ using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using SkiaSharp;
 
 namespace HospitalityPOS.Infrastructure.Services;
 
@@ -264,11 +265,212 @@ public class PurchaseOrderEmailService : IPurchaseOrderEmailService
         var po = await GetPurchaseOrderWithDetailsAsync(purchaseOrderId, cancellationToken)
             ?? throw new InvalidOperationException($"Purchase Order {purchaseOrderId} not found");
 
-        var html = GeneratePOHtml(po);
+        return GeneratePOPdfWithSkia(po);
+    }
 
-        // For now, return HTML as UTF-8 bytes (in production, use a PDF library like QuestPDF or iText)
-        // TODO: Integrate proper PDF generation library
-        return Encoding.UTF8.GetBytes(html);
+    private byte[] GeneratePOPdfWithSkia(PurchaseOrder po)
+    {
+        // A4 page size at 72 DPI
+        const float pageWidth = 595f;
+        const float pageHeight = 842f;
+        const float margin = 40f;
+        const float contentWidth = pageWidth - (margin * 2);
+
+        using var stream = new MemoryStream();
+        using var document = SKDocument.CreatePdf(stream);
+
+        using var pageCanvas = document.BeginPage(pageWidth, pageHeight);
+
+        // Fonts
+        using var titleFont = new SKPaint
+        {
+            Color = SKColors.Black,
+            TextSize = 24,
+            IsAntialias = true,
+            Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold)
+        };
+
+        using var headerFont = new SKPaint
+        {
+            Color = SKColors.Black,
+            TextSize = 14,
+            IsAntialias = true,
+            Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold)
+        };
+
+        using var normalFont = new SKPaint
+        {
+            Color = SKColors.Black,
+            TextSize = 10,
+            IsAntialias = true,
+            Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Normal)
+        };
+
+        using var smallFont = new SKPaint
+        {
+            Color = SKColors.Gray,
+            TextSize = 8,
+            IsAntialias = true,
+            Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Normal)
+        };
+
+        using var linePaint = new SKPaint
+        {
+            Color = SKColors.Black,
+            StrokeWidth = 1,
+            Style = SKPaintStyle.Stroke
+        };
+
+        using var headerBgPaint = new SKPaint
+        {
+            Color = new SKColor(240, 240, 240),
+            Style = SKPaintStyle.Fill
+        };
+
+        float y = margin;
+
+        // Title
+        var titleText = "PURCHASE ORDER";
+        var titleWidth = titleFont.MeasureText(titleText);
+        pageCanvas.DrawText(titleText, (pageWidth - titleWidth) / 2, y + 24, titleFont);
+        y += 35;
+
+        // PO Number
+        var poNumText = po.PONumber;
+        var poNumWidth = headerFont.MeasureText(poNumText);
+        pageCanvas.DrawText(poNumText, (pageWidth - poNumWidth) / 2, y + 14, headerFont);
+        y += 25;
+
+        // Separator line
+        pageCanvas.DrawLine(margin, y, pageWidth - margin, y, linePaint);
+        y += 20;
+
+        // Two-column layout: Supplier info (left) and Order info (right)
+        float leftColX = margin;
+        float rightColX = pageWidth / 2 + 10;
+        float colStartY = y;
+
+        // Left column - Supplier info
+        pageCanvas.DrawText("Order To:", leftColX, y + 14, headerFont);
+        y += 20;
+        pageCanvas.DrawText(po.Supplier.Name, leftColX, y + 10, normalFont);
+        y += 14;
+        if (!string.IsNullOrEmpty(po.Supplier.Address))
+        {
+            pageCanvas.DrawText(po.Supplier.Address, leftColX, y + 10, normalFont);
+            y += 14;
+        }
+        if (!string.IsNullOrEmpty(po.Supplier.City))
+        {
+            pageCanvas.DrawText($"{po.Supplier.City}, {po.Supplier.Country}", leftColX, y + 10, normalFont);
+            y += 14;
+        }
+        pageCanvas.DrawText($"Phone: {po.Supplier.Phone}", leftColX, y + 10, normalFont);
+        y += 14;
+        pageCanvas.DrawText($"Email: {po.Supplier.Email}", leftColX, y + 10, normalFont);
+
+        // Right column - Order info (positioned from colStartY)
+        float rightY = colStartY;
+        pageCanvas.DrawText("Order Details:", rightColX, rightY + 14, headerFont);
+        rightY += 20;
+        pageCanvas.DrawText($"PO Number: {po.PONumber}", rightColX, rightY + 10, normalFont);
+        rightY += 14;
+        pageCanvas.DrawText($"Order Date: {po.OrderDate:dd/MM/yyyy}", rightColX, rightY + 10, normalFont);
+        rightY += 14;
+        pageCanvas.DrawText($"Expected Date: {po.ExpectedDate:dd/MM/yyyy}", rightColX, rightY + 10, normalFont);
+        rightY += 14;
+        pageCanvas.DrawText($"Status: {po.Status}", rightColX, rightY + 10, normalFont);
+
+        y = Math.Max(y, rightY) + 30;
+
+        // Items table
+        float[] colWidths = { 30f, 180f, 80f, 60f, 80f, 85f };
+        string[] headers = { "#", "Item", "SKU", "Qty", "Unit Price", "Total" };
+
+        // Table header background
+        pageCanvas.DrawRect(margin, y, contentWidth, 20, headerBgPaint);
+
+        // Table header text
+        float colX = margin + 5;
+        for (int i = 0; i < headers.Length; i++)
+        {
+            pageCanvas.DrawText(headers[i], colX, y + 14, headerFont);
+            colX += colWidths[i];
+        }
+        y += 20;
+
+        // Table header border
+        pageCanvas.DrawLine(margin, y, pageWidth - margin, y, linePaint);
+
+        // Table rows
+        int lineNo = 1;
+        foreach (var item in po.PurchaseOrderItems)
+        {
+            y += 4;
+            colX = margin + 5;
+
+            pageCanvas.DrawText(lineNo.ToString(), colX, y + 10, normalFont);
+            colX += colWidths[0];
+
+            var itemName = item.Product?.Name ?? "N/A";
+            if (itemName.Length > 30) itemName = itemName[..27] + "...";
+            pageCanvas.DrawText(itemName, colX, y + 10, normalFont);
+            colX += colWidths[1];
+
+            pageCanvas.DrawText(item.Product?.SKU ?? "N/A", colX, y + 10, normalFont);
+            colX += colWidths[2];
+
+            pageCanvas.DrawText(item.Quantity.ToString("N0"), colX, y + 10, normalFont);
+            colX += colWidths[3];
+
+            pageCanvas.DrawText(item.UnitPrice.ToString("N2"), colX, y + 10, normalFont);
+            colX += colWidths[4];
+
+            pageCanvas.DrawText(item.TotalPrice.ToString("N2"), colX, y + 10, normalFont);
+
+            y += 16;
+            lineNo++;
+
+            // Row separator
+            pageCanvas.DrawLine(margin, y, pageWidth - margin, y, linePaint);
+        }
+
+        y += 10;
+
+        // Totals
+        float totalsX = pageWidth - margin - 150;
+        pageCanvas.DrawText("Subtotal:", totalsX, y + 10, normalFont);
+        pageCanvas.DrawText($"KES {po.SubTotal:N2}", totalsX + 70, y + 10, normalFont);
+        y += 16;
+
+        pageCanvas.DrawText("Tax:", totalsX, y + 10, normalFont);
+        pageCanvas.DrawText($"KES {po.TaxAmount:N2}", totalsX + 70, y + 10, normalFont);
+        y += 16;
+
+        pageCanvas.DrawLine(totalsX, y, pageWidth - margin, y, linePaint);
+        y += 4;
+
+        pageCanvas.DrawText("TOTAL:", totalsX, y + 14, headerFont);
+        pageCanvas.DrawText($"KES {po.TotalAmount:N2}", totalsX + 70, y + 14, headerFont);
+        y += 30;
+
+        // Notes section
+        if (!string.IsNullOrEmpty(po.Notes))
+        {
+            pageCanvas.DrawText("Notes:", margin, y + 14, headerFont);
+            y += 20;
+            pageCanvas.DrawText(po.Notes, margin, y + 10, normalFont);
+            y += 20;
+        }
+
+        // Footer
+        y = pageHeight - margin - 20;
+        pageCanvas.DrawText($"Generated: {DateTime.Now:dd/MM/yyyy HH:mm}", margin, y + 8, smallFont);
+
+        document.EndPage();
+        document.Close();
+
+        return stream.ToArray();
     }
 
     public async Task<POEmailLog> RetryFailedEmailAsync(

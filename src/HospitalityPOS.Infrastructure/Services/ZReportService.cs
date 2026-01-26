@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using SkiaSharp;
 using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Enums;
 using HospitalityPOS.Core.Interfaces;
@@ -1361,10 +1362,160 @@ public class ZReportService : IZReportService
 
     public async Task<byte[]> ExportToPdfAsync(int reportId, CancellationToken ct = default)
     {
-        var html = await GenerateHtmlReportAsync(reportId, ct);
-        // In a real implementation, use a library like IronPDF, wkhtmltopdf, or PuppeteerSharp
-        // For now, return HTML bytes as placeholder
-        return Encoding.UTF8.GetBytes(html);
+        var report = await GetZReportAsync(reportId, ct);
+        if (report == null)
+            throw new InvalidOperationException($"Z Report {reportId} not found.");
+
+        // Generate PDF using SkiaSharp
+        const int pageWidth = 595;  // A4 width in points
+        const int pageHeight = 842; // A4 height in points
+        const int margin = 40;
+        const int contentWidth = pageWidth - (2 * margin);
+
+        using var surface = SKSurface.Create(new SKImageInfo(pageWidth, pageHeight));
+        var canvas = surface.Canvas;
+        canvas.Clear(SKColors.White);
+
+        using var titlePaint = new SKPaint
+        {
+            Color = SKColors.Black,
+            TextSize = 24,
+            IsAntialias = true,
+            Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold)
+        };
+
+        using var headerPaint = new SKPaint
+        {
+            Color = SKColors.Black,
+            TextSize = 14,
+            IsAntialias = true,
+            Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold)
+        };
+
+        using var textPaint = new SKPaint
+        {
+            Color = SKColors.Black,
+            TextSize = 11,
+            IsAntialias = true,
+            Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Normal)
+        };
+
+        using var linePaint = new SKPaint
+        {
+            Color = SKColors.Gray,
+            StrokeWidth = 1,
+            IsAntialias = true
+        };
+
+        var y = margin + 30;
+
+        // Title
+        canvas.DrawText($"Z REPORT #{report.ReportNumber}", margin, y, titlePaint);
+        y += 35;
+
+        // Date and period
+        canvas.DrawText($"Generated: {report.ReportDateTime:yyyy-MM-dd HH:mm}", margin, y, textPaint);
+        y += 18;
+        canvas.DrawText($"Period: {report.PeriodStartDateTime:yyyy-MM-dd HH:mm} - {report.PeriodEndDateTime:yyyy-MM-dd HH:mm}", margin, y, textPaint);
+        y += 25;
+
+        // Line separator
+        canvas.DrawLine(margin, y, pageWidth - margin, y, linePaint);
+        y += 20;
+
+        // Sales Summary Section
+        canvas.DrawText("SALES SUMMARY", margin, y, headerPaint);
+        y += 20;
+
+        var salesData = new[]
+        {
+            ("Gross Sales", report.GrossSales),
+            ("Total Discounts", report.TotalDiscounts),
+            ("Net Sales", report.NetSales),
+            ("Tax Collected", report.TotalTax),
+            ("Tips", report.TotalTips),
+            ("Grand Total", report.GrandTotal)
+        };
+
+        foreach (var (label, value) in salesData)
+        {
+            canvas.DrawText(label, margin, y, textPaint);
+            canvas.DrawText($"KES {value:N2}", pageWidth - margin - 100, y, textPaint);
+            y += 16;
+        }
+        y += 10;
+
+        // Line separator
+        canvas.DrawLine(margin, y, pageWidth - margin, y, linePaint);
+        y += 20;
+
+        // Cash Reconciliation Section
+        canvas.DrawText("CASH RECONCILIATION", margin, y, headerPaint);
+        y += 20;
+
+        var cashData = new[]
+        {
+            ("Opening Cash", report.OpeningCash),
+            ("Cash Received", report.CashReceived),
+            ("Cash Paid Out", report.CashPaidOut),
+            ("Expected Cash", report.ExpectedCash),
+            ("Actual Cash", report.ActualCash),
+            ("Variance", report.CashVariance)
+        };
+
+        foreach (var (label, value) in cashData)
+        {
+            canvas.DrawText(label, margin, y, textPaint);
+            var valueText = $"KES {value:N2}";
+            if (label == "Variance" && value != 0)
+            {
+                using var variancePaint = new SKPaint
+                {
+                    Color = value > 0 ? SKColors.Green : SKColors.Red,
+                    TextSize = 11,
+                    IsAntialias = true
+                };
+                canvas.DrawText(valueText, pageWidth - margin - 100, y, variancePaint);
+            }
+            else
+            {
+                canvas.DrawText(valueText, pageWidth - margin - 100, y, textPaint);
+            }
+            y += 16;
+        }
+        y += 10;
+
+        // Line separator
+        canvas.DrawLine(margin, y, pageWidth - margin, y, linePaint);
+        y += 20;
+
+        // Transaction Counts
+        canvas.DrawText("TRANSACTION COUNTS", margin, y, headerPaint);
+        y += 20;
+
+        canvas.DrawText($"Total Receipts: {report.TotalReceipts}", margin, y, textPaint);
+        y += 16;
+        canvas.DrawText($"Paid Receipts: {report.PaidReceipts}", margin, y, textPaint);
+        y += 16;
+        canvas.DrawText($"Voided Receipts: {report.VoidedReceipts}", margin, y, textPaint);
+        y += 16;
+        canvas.DrawText($"Total Items Sold: {report.TotalItemsSold}", margin, y, textPaint);
+        y += 25;
+
+        // Footer
+        canvas.DrawLine(margin, pageHeight - 60, pageWidth - margin, pageHeight - 60, linePaint);
+        using var footerPaint = new SKPaint
+        {
+            Color = SKColors.Gray,
+            TextSize = 9,
+            IsAntialias = true
+        };
+        canvas.DrawText($"Generated by HospitalityPOS - {DateTime.Now:yyyy-MM-dd HH:mm:ss}", margin, pageHeight - 40, footerPaint);
+
+        // Export to PDF bytes
+        using var image = surface.Snapshot();
+        using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+        return data.ToArray();
     }
 
     public async Task<byte[]> ExportToExcelAsync(int reportId, CancellationToken ct = default)

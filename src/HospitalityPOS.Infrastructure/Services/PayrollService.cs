@@ -1134,6 +1134,13 @@ public class PayrollService : IPayrollService
         var employee = await _context.Employees.FindAsync([employeeId], cancellationToken)
             ?? throw new InvalidOperationException($"Employee {employeeId} not found");
 
+        // Get Employer PIN from the headquarters store (or first store)
+        var store = await _context.Set<Store>()
+            .Where(s => s.IsHeadquarters)
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? await _context.Set<Store>().FirstOrDefaultAsync(cancellationToken);
+        var employerPin = store?.TaxRegistrationNumber ?? string.Empty;
+
         // Get all payslips for the tax year
         var payslips = await _context.Payslips
             .Include(p => p.PayrollPeriod)
@@ -1178,7 +1185,7 @@ public class PayrollService : IPayrollService
             EmployeeId = employeeId,
             TaxYear = taxYear,
             EmployeePIN = employee.TaxId ?? "",
-            EmployerPIN = "P051234567X", // TODO: Get from settings
+            EmployerPIN = employerPin,
             TotalGrossPay = totalGross,
             TotalDefinedContribution = totalNssf,
             TotalChargeablePay = totalGross - totalNssf,

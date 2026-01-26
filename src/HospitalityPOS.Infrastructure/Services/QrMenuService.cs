@@ -4,6 +4,7 @@
 
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.Core.Models.QrMenu;
+using QRCoder;
 
 namespace HospitalityPOS.Infrastructure.Services;
 
@@ -308,15 +309,11 @@ public class QrMenuService : IQrMenuService
 
     private string GenerateQrCodeImage(string content)
     {
-        // In production, use QRCoder NuGet package:
-        // var qrGenerator = new QRCodeGenerator();
-        // var qrCodeData = qrGenerator.CreateQrCode(content, QRCodeGenerator.ECCLevel.Q);
-        // var qrCode = new PngByteQRCode(qrCodeData);
-        // return Convert.ToBase64String(qrCode.GetGraphic(20));
-
-        // For now, return a placeholder that indicates what would be generated
-        var placeholder = $"QR_CODE_FOR:{content}";
-        return Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(placeholder));
+        using var qrGenerator = new QRCodeGenerator();
+        var qrCodeData = qrGenerator.CreateQrCode(content, QRCodeGenerator.ECCLevel.Q);
+        using var qrCode = new PngByteQRCode(qrCodeData);
+        var qrCodeBytes = qrCode.GetGraphic(20);
+        return Convert.ToBase64String(qrCodeBytes);
     }
 
     #endregion

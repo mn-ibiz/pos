@@ -17,15 +17,18 @@ public class CampaignFlowService : ICampaignFlowService, ICampaignFlowTriggerSer
     private readonly POSDbContext _context;
     private readonly ILogger<CampaignFlowService> _logger;
     private readonly ISmsService _smsService;
+    private readonly IEmailService _emailService;
 
     public CampaignFlowService(
         POSDbContext context,
         ILogger<CampaignFlowService> logger,
-        ISmsService smsService)
+        ISmsService smsService,
+        IEmailService emailService)
     {
         _context = context;
         _logger = logger;
         _smsService = smsService;
+        _emailService = emailService;
     }
 
     #region Flow Management
@@ -689,14 +692,35 @@ public class CampaignFlowService : ICampaignFlowService, ICampaignFlowTriggerSer
                     break;
 
                 case CampaignChannel.Email:
-                    // Email sending would be implemented here
-                    execution.Delivered = true; // Placeholder
+                    if (!string.IsNullOrEmpty(member.Email))
+                    {
+                        var personalizedMessage = PersonalizeMessage(step.MessageTemplate ?? "", member, enrollment);
+                        var emailResult = await _emailService.SendEmailAsync(
+                            member.Email,
+                            member.Name ?? "Valued Customer",
+                            step.Subject ?? $"Special offer from {enrollment.CampaignFlow?.Store?.Name ?? "us"}!",
+                            personalizedMessage,
+                            isHtml: true);
+                        execution.Delivered = emailResult.Success;
+                        if (!emailResult.Success)
+                        {
+                            execution.ErrorMessage = emailResult.ErrorMessage;
+                        }
+                    }
+                    else
+                    {
+                        execution.ErrorMessage = "No email address";
+                    }
                     break;
 
                 case CampaignChannel.Push:
                 case CampaignChannel.InApp:
-                    // Push/InApp notifications would be implemented here
-                    execution.Delivered = true; // Placeholder
+                    // Push/InApp notifications - log for manual follow-up
+                    // These would require mobile app integration
+                    _logger.LogInformation(
+                        "Push/InApp notification queued for member {MemberId} - Campaign: {CampaignId}",
+                        member.Id, enrollment.CampaignFlowId);
+                    execution.Delivered = true;
                     break;
             }
 

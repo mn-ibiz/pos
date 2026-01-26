@@ -4,6 +4,9 @@ using HospitalityPOS.Core.Entities;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.Infrastructure.Data;
 using System.Text.RegularExpressions;
+using System.Globalization;
+using System.Xml.Linq;
+using ClosedXML.Excel;
 
 namespace HospitalityPOS.Infrastructure.Services;
 
@@ -204,26 +207,162 @@ public class BankReconciliationService : IBankReconciliationService
         int userId,
         CancellationToken cancellationToken = default)
     {
-        // Excel import would require a library like EPPlus or ClosedXML
-        // For now, return a placeholder implementation
         var batchId = $"XLS-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..8].ToUpper()}";
+        var transactions = new List<BankTransaction>();
+        var errors = new List<string>();
+        var duplicateCount = 0;
 
-        var importResult = new BankStatementImport
+        try
         {
-            BankAccountId = bankAccountId,
-            BatchId = batchId,
-            FileName = fileName,
-            FileFormat = "Excel",
-            ImportedByUserId = userId,
-            Status = "NotImplemented",
-            ErrorMessage = "Excel import requires additional library integration",
-            IsActive = true
-        };
+            using var workbook = new XLWorkbook(fileStream);
+            var worksheet = workbook.Worksheets.First();
 
-        _context.BankStatementImports.Add(importResult);
-        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            // Determine header row
+            var headerRow = options.HasHeaderRow ? options.HeaderRowNumber : 1;
+            var dataStartRow = options.HasHeaderRow ? headerRow + 1 : 1;
 
-        return importResult;
+            // Get the last row with data
+            var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? dataStartRow;
+
+            for (int row = dataStartRow; row <= lastRow; row++)
+            {
+                try
+                {
+                    // Read cell values based on column mapping
+                    var dateCell = worksheet.Cell(row, options.DateColumnIndex);
+                    var descCell = worksheet.Cell(row, options.DescriptionColumnIndex);
+                    var amountCell = options.AmountColumnIndex > 0
+                        ? worksheet.Cell(row, options.AmountColumnIndex)
+                        : null;
+                    var debitCell = options.DebitColumnIndex > 0
+                        ? worksheet.Cell(row, options.DebitColumnIndex)
+                        : null;
+                    var creditCell = options.CreditColumnIndex > 0
+                        ? worksheet.Cell(row, options.CreditColumnIndex)
+                        : null;
+                    var refCell = options.ReferenceColumnIndex > 0
+                        ? worksheet.Cell(row, options.ReferenceColumnIndex)
+                        : null;
+
+                    // Parse date
+                    DateTime transactionDate;
+                    if (dateCell.Value.IsDateTime)
+                    {
+                        transactionDate = dateCell.GetDateTime();
+                    }
+                    else if (!DateTime.TryParse(dateCell.GetString(), out transactionDate))
+                    {
+                        errors.Add($"Row {row}: Invalid date format");
+                        continue;
+                    }
+
+                    // Parse amount
+                    decimal amount = 0;
+                    if (amountCell != null && !amountCell.IsEmpty())
+                    {
+                        amount = amountCell.Value.IsNumber
+                            ? (decimal)amountCell.GetDouble()
+                            : ParseDecimal(amountCell.GetString());
+                    }
+                    else
+                    {
+                        // Separate debit/credit columns
+                        var debit = debitCell != null && !debitCell.IsEmpty()
+                            ? (debitCell.Value.IsNumber ? (decimal)debitCell.GetDouble() : ParseDecimal(debitCell.GetString()))
+                            : 0;
+                        var credit = creditCell != null && !creditCell.IsEmpty()
+                            ? (creditCell.Value.IsNumber ? (decimal)creditCell.GetDouble() : ParseDecimal(creditCell.GetString()))
+                            : 0;
+                        amount = credit - debit;
+                    }
+
+                    var description = descCell.GetString().Trim();
+                    var reference = refCell?.GetString().Trim() ?? "";
+
+                    // Check for duplicates
+                    var isDuplicate = await _context.BankTransactions
+                        .AnyAsync(t => t.BankAccountId == bankAccountId &&
+                                      t.TransactionDate == transactionDate &&
+                                      t.Amount == amount &&
+                                      t.Description == description,
+                                      cancellationToken).ConfigureAwait(false);
+
+                    if (isDuplicate)
+                    {
+                        duplicateCount++;
+                        continue;
+                    }
+
+                    transactions.Add(new BankTransaction
+                    {
+                        BankAccountId = bankAccountId,
+                        TransactionDate = transactionDate,
+                        Description = description,
+                        Reference = reference,
+                        Amount = amount,
+                        TransactionType = amount >= 0 ? BankTransactionType.Credit : BankTransactionType.Debit,
+                        MatchStatus = ReconciliationMatchStatus.Unmatched,
+                        ImportBatchId = batchId,
+                        IsActive = true
+                    });
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"Row {row}: {ex.Message}");
+                }
+            }
+
+            // Save transactions
+            if (transactions.Any())
+            {
+                _context.BankTransactions.AddRange(transactions);
+            }
+
+            var importResult = new BankStatementImport
+            {
+                BankAccountId = bankAccountId,
+                BatchId = batchId,
+                FileName = fileName,
+                FileFormat = "Excel",
+                ImportedByUserId = userId,
+                TransactionCount = transactions.Count,
+                DuplicateCount = duplicateCount,
+                ErrorCount = errors.Count,
+                Status = errors.Any() ? "CompletedWithErrors" : "Completed",
+                ErrorMessage = errors.Any() ? string.Join("; ", errors.Take(10)) : null,
+                IsActive = true
+            };
+
+            _context.BankStatementImports.Add(importResult);
+            await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            _logger.LogInformation(
+                "Excel import completed: {TransactionCount} transactions, {DuplicateCount} duplicates, {ErrorCount} errors",
+                transactions.Count, duplicateCount, errors.Count);
+
+            return importResult;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to import Excel file {FileName}", fileName);
+
+            var importResult = new BankStatementImport
+            {
+                BankAccountId = bankAccountId,
+                BatchId = batchId,
+                FileName = fileName,
+                FileFormat = "Excel",
+                ImportedByUserId = userId,
+                Status = "Failed",
+                ErrorMessage = ex.Message,
+                IsActive = true
+            };
+
+            _context.BankStatementImports.Add(importResult);
+            await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            return importResult;
+        }
     }
 
     public async Task<BankStatementImport> ImportFromOfxAsync(
@@ -233,25 +372,180 @@ public class BankReconciliationService : IBankReconciliationService
         int userId,
         CancellationToken cancellationToken = default)
     {
-        // OFX import would require parsing the OFX/QFX format
         var batchId = $"OFX-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..8].ToUpper()}";
+        var transactions = new List<BankTransaction>();
+        var errors = new List<string>();
+        var duplicateCount = 0;
 
-        var importResult = new BankStatementImport
+        try
         {
-            BankAccountId = bankAccountId,
-            BatchId = batchId,
-            FileName = fileName,
-            FileFormat = "OFX",
-            ImportedByUserId = userId,
-            Status = "NotImplemented",
-            ErrorMessage = "OFX import requires additional parser integration",
-            IsActive = true
-        };
+            using var reader = new StreamReader(fileStream);
+            var content = await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
 
-        _context.BankStatementImports.Add(importResult);
-        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            // Parse OFX/QFX format (SGML-based)
+            var ofxTransactions = ParseOfxTransactions(content);
 
-        return importResult;
+            foreach (var ofxTx in ofxTransactions)
+            {
+                // Check for duplicates
+                var isDuplicate = await _context.BankTransactions
+                    .AnyAsync(t => t.BankAccountId == bankAccountId &&
+                                  t.TransactionDate == ofxTx.Date &&
+                                  t.Amount == ofxTx.Amount &&
+                                  (t.Reference == ofxTx.FitId || t.Description == ofxTx.Name),
+                                  cancellationToken).ConfigureAwait(false);
+
+                if (isDuplicate)
+                {
+                    duplicateCount++;
+                    continue;
+                }
+
+                transactions.Add(new BankTransaction
+                {
+                    BankAccountId = bankAccountId,
+                    TransactionDate = ofxTx.Date,
+                    Description = ofxTx.Name ?? ofxTx.Memo ?? "Unknown",
+                    Reference = ofxTx.FitId ?? "",
+                    Amount = ofxTx.Amount,
+                    TransactionType = ofxTx.Amount >= 0 ? BankTransactionType.Credit : BankTransactionType.Debit,
+                    MatchStatus = ReconciliationMatchStatus.Unmatched,
+                    ImportBatchId = batchId,
+                    IsActive = true
+                });
+            }
+
+            // Save transactions
+            if (transactions.Any())
+            {
+                _context.BankTransactions.AddRange(transactions);
+            }
+
+            var importResult = new BankStatementImport
+            {
+                BankAccountId = bankAccountId,
+                BatchId = batchId,
+                FileName = fileName,
+                FileFormat = "OFX",
+                ImportedByUserId = userId,
+                TransactionCount = transactions.Count,
+                DuplicateCount = duplicateCount,
+                ErrorCount = errors.Count,
+                Status = "Completed",
+                IsActive = true
+            };
+
+            _context.BankStatementImports.Add(importResult);
+            await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            _logger.LogInformation(
+                "OFX import completed: {TransactionCount} transactions, {DuplicateCount} duplicates",
+                transactions.Count, duplicateCount);
+
+            return importResult;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to import OFX file {FileName}", fileName);
+
+            var importResult = new BankStatementImport
+            {
+                BankAccountId = bankAccountId,
+                BatchId = batchId,
+                FileName = fileName,
+                FileFormat = "OFX",
+                ImportedByUserId = userId,
+                Status = "Failed",
+                ErrorMessage = ex.Message,
+                IsActive = true
+            };
+
+            _context.BankStatementImports.Add(importResult);
+            await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            return importResult;
+        }
+    }
+
+    private static decimal ParseDecimal(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return 0;
+
+        // Remove currency symbols and whitespace
+        var cleaned = Regex.Replace(value, @"[^\d.,-]", "");
+
+        // Handle negative values in parentheses
+        if (value.Contains('(') && value.Contains(')'))
+        {
+            cleaned = "-" + Regex.Replace(cleaned, @"[()]", "");
+        }
+
+        return decimal.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out var result)
+            ? result
+            : 0;
+    }
+
+    private static List<OfxTransaction> ParseOfxTransactions(string ofxContent)
+    {
+        var transactions = new List<OfxTransaction>();
+
+        // OFX/QFX uses SGML format - parse transaction blocks
+        var stmtTrnPattern = @"<STMTTRN>(.*?)</STMTTRN>";
+        var matches = Regex.Matches(ofxContent, stmtTrnPattern, RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
+        foreach (Match match in matches)
+        {
+            var block = match.Groups[1].Value;
+            var tx = new OfxTransaction();
+
+            // Parse TRNTYPE
+            var trnTypeMatch = Regex.Match(block, @"<TRNTYPE>([^<\r\n]+)", RegexOptions.IgnoreCase);
+            tx.Type = trnTypeMatch.Success ? trnTypeMatch.Groups[1].Value.Trim() : "OTHER";
+
+            // Parse DTPOSTED (date)
+            var dtMatch = Regex.Match(block, @"<DTPOSTED>(\d{8})", RegexOptions.IgnoreCase);
+            if (dtMatch.Success)
+            {
+                var dateStr = dtMatch.Groups[1].Value;
+                tx.Date = new DateTime(
+                    int.Parse(dateStr[..4]),
+                    int.Parse(dateStr.Substring(4, 2)),
+                    int.Parse(dateStr.Substring(6, 2)));
+            }
+
+            // Parse TRNAMT (amount)
+            var amtMatch = Regex.Match(block, @"<TRNAMT>([^<\r\n]+)", RegexOptions.IgnoreCase);
+            if (amtMatch.Success)
+            {
+                tx.Amount = ParseDecimal(amtMatch.Groups[1].Value);
+            }
+
+            // Parse FITID (transaction ID)
+            var fitIdMatch = Regex.Match(block, @"<FITID>([^<\r\n]+)", RegexOptions.IgnoreCase);
+            tx.FitId = fitIdMatch.Success ? fitIdMatch.Groups[1].Value.Trim() : null;
+
+            // Parse NAME
+            var nameMatch = Regex.Match(block, @"<NAME>([^<\r\n]+)", RegexOptions.IgnoreCase);
+            tx.Name = nameMatch.Success ? nameMatch.Groups[1].Value.Trim() : null;
+
+            // Parse MEMO
+            var memoMatch = Regex.Match(block, @"<MEMO>([^<\r\n]+)", RegexOptions.IgnoreCase);
+            tx.Memo = memoMatch.Success ? memoMatch.Groups[1].Value.Trim() : null;
+
+            transactions.Add(tx);
+        }
+
+        return transactions;
+    }
+
+    private class OfxTransaction
+    {
+        public string Type { get; set; } = "OTHER";
+        public DateTime Date { get; set; }
+        public decimal Amount { get; set; }
+        public string? FitId { get; set; }
+        public string? Name { get; set; }
+        public string? Memo { get; set; }
     }
 
     public async Task<IEnumerable<BankStatementImport>> GetImportHistoryAsync(

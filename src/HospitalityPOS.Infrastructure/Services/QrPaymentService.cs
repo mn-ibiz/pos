@@ -6,6 +6,7 @@ using Serilog;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.Core.Models.Payments;
 using HospitalityPOS.Infrastructure.Data;
+using QRCoder;
 
 namespace HospitalityPOS.Infrastructure.Services;
 
@@ -210,103 +211,10 @@ public class QrPaymentService : IQrPaymentService
 
     private byte[] GenerateLocalQrCode(string content)
     {
-        // Simple QR code generation using basic approach
-        // In production, would use QRCoder or SkiaSharp.QrCode
-        // For now, return a placeholder image
-
-        // This creates a simple black and white QR-like pattern
-        // Real implementation would use: new QRCoder.QRCodeGenerator().CreateQrCode(content, ...)
-
-        var size = 300;
-        var moduleCount = 25;
-        var moduleSize = size / moduleCount;
-
-        // Create a simple bitmap representation
-        var bitmap = new byte[size * size * 4]; // RGBA
-
-        // Generate a simple pattern based on content hash
-        var hash = content.GetHashCode();
-        var random = new Random(hash);
-
-        // Add quiet zone (white border)
-        var quietZone = 4;
-
-        for (int y = 0; y < size; y++)
-        {
-            for (int x = 0; x < size; x++)
-            {
-                var moduleX = x / moduleSize;
-                var moduleY = y / moduleSize;
-
-                bool isBlack;
-
-                // Quiet zone
-                if (moduleX < quietZone || moduleX >= moduleCount - quietZone ||
-                    moduleY < quietZone || moduleY >= moduleCount - quietZone)
-                {
-                    isBlack = false;
-                }
-                // Finder patterns (corners)
-                else if ((moduleX < quietZone + 7 && moduleY < quietZone + 7) ||
-                         (moduleX >= moduleCount - quietZone - 7 && moduleY < quietZone + 7) ||
-                         (moduleX < quietZone + 7 && moduleY >= moduleCount - quietZone - 7))
-                {
-                    isBlack = IsFinderPatternModule(moduleX - quietZone, moduleY - quietZone, moduleCount - 2 * quietZone);
-                }
-                else
-                {
-                    // Data area - pseudo-random based on content
-                    isBlack = random.Next(2) == 1;
-                }
-
-                var idx = (y * size + x) * 4;
-                var color = isBlack ? (byte)0 : (byte)255;
-                bitmap[idx] = color;     // R
-                bitmap[idx + 1] = color; // G
-                bitmap[idx + 2] = color; // B
-                bitmap[idx + 3] = 255;   // A
-            }
-        }
-
-        // Convert to PNG format (simplified - real implementation would use proper image library)
-        return CreateSimplePng(bitmap, size, size);
-    }
-
-    private bool IsFinderPatternModule(int x, int y, int totalSize)
-    {
-        // Finder patterns are 7x7 with specific pattern
-        var isTopLeft = x < 7 && y < 7;
-        var isTopRight = x >= totalSize - 7 && y < 7;
-        var isBottomLeft = x < 7 && y >= totalSize - 7;
-
-        if (!isTopLeft && !isTopRight && !isBottomLeft) return false;
-
-        var localX = isTopRight ? x - (totalSize - 7) : x;
-        var localY = isBottomLeft ? y - (totalSize - 7) : y;
-
-        // Finder pattern: black border, white, black center
-        if (localX == 0 || localX == 6 || localY == 0 || localY == 6) return true;
-        if (localX == 1 || localX == 5 || localY == 1 || localY == 5) return false;
-        if (localX >= 2 && localX <= 4 && localY >= 2 && localY <= 4) return true;
-
-        return false;
-    }
-
-    private byte[] CreateSimplePng(byte[] rgba, int width, int height)
-    {
-        // Simplified PNG creation - returns raw RGBA for now
-        // Real implementation would create proper PNG file
-        using var ms = new MemoryStream();
-
-        // PNG header
-        byte[] header = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
-        ms.Write(header, 0, header.Length);
-
-        // For simplicity, just return the raw data with a marker
-        // Real implementation would use System.Drawing or SkiaSharp
-        ms.Write(rgba, 0, Math.Min(rgba.Length, 50000));
-
-        return ms.ToArray();
+        using var qrGenerator = new QRCodeGenerator();
+        var qrCodeData = qrGenerator.CreateQrCode(content, QRCodeGenerator.ECCLevel.Q);
+        using var qrCode = new PngByteQRCode(qrCodeData);
+        return qrCode.GetGraphic(20);
     }
 
     #endregion

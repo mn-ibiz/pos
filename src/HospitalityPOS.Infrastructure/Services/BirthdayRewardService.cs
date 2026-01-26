@@ -15,16 +15,22 @@ public class BirthdayRewardService : IBirthdayRewardService
 {
     private readonly POSDbContext _context;
     private readonly ILoyaltyService _loyaltyService;
+    private readonly ISmsService _smsService;
+    private readonly IEmailService _emailService;
     private readonly ILogger<BirthdayRewardService> _logger;
     private static readonly Random _random = new();
 
     public BirthdayRewardService(
         POSDbContext context,
         ILoyaltyService loyaltyService,
+        ISmsService smsService,
+        IEmailService emailService,
         ILogger<BirthdayRewardService> logger)
     {
         _context = context;
         _loyaltyService = loyaltyService;
+        _smsService = smsService;
+        _emailService = emailService;
         _logger = logger;
     }
 
@@ -249,19 +255,27 @@ public class BirthdayRewardService : IBirthdayRewardService
         var smsSent = false;
         var emailSent = false;
 
-        if (template.SendSmsNotification && !string.IsNullOrEmpty(template.SmsTemplate))
+        if (template.SendSmsNotification && !string.IsNullOrEmpty(template.SmsTemplate) && !string.IsNullOrEmpty(member.PhoneNumber))
         {
             try
             {
                 var smsMessage = FormatNotificationTemplate(template.SmsTemplate, member, memberReward, template);
-                // TODO: Integrate with SMS service
-                // await _smsService.SendAsync(member.PhoneNumber, smsMessage, cancellationToken);
-                memberReward.SmsNotificationSent = true;
-                memberReward.SmsNotificationSentAt = DateTime.UtcNow;
-                smsSent = true;
-                _logger.LogInformation(
-                    "Birthday reward SMS sent to member {MemberId} ({Phone})",
-                    memberId, member.PhoneNumber);
+                var smsResult = await _smsService.SendSmsAsync(member.PhoneNumber, smsMessage, cancellationToken);
+                if (smsResult.Success)
+                {
+                    memberReward.SmsNotificationSent = true;
+                    memberReward.SmsNotificationSentAt = DateTime.UtcNow;
+                    smsSent = true;
+                    _logger.LogInformation(
+                        "Birthday reward SMS sent to member {MemberId} ({Phone})",
+                        memberId, member.PhoneNumber);
+                }
+                else
+                {
+                    _logger.LogWarning(
+                        "Birthday reward SMS failed for member {MemberId}: {Error}",
+                        memberId, smsResult.ErrorMessage);
+                }
             }
             catch (Exception ex)
             {
@@ -276,14 +290,28 @@ public class BirthdayRewardService : IBirthdayRewardService
             try
             {
                 var emailContent = FormatNotificationTemplate(template.EmailTemplate, member, memberReward, template);
-                // TODO: Integrate with email service
-                // await _emailService.SendAsync(member.Email, "Happy Birthday!", emailContent, cancellationToken);
-                memberReward.EmailNotificationSent = true;
-                memberReward.EmailNotificationSentAt = DateTime.UtcNow;
-                emailSent = true;
-                _logger.LogInformation(
-                    "Birthday reward email sent to member {MemberId} ({Email})",
-                    memberId, member.Email);
+                var emailResult = await _emailService.SendEmailAsync(
+                    member.Email,
+                    member.Name ?? "Valued Customer",
+                    "Happy Birthday! 🎂 Your Special Reward Awaits",
+                    emailContent,
+                    isHtml: true,
+                    cancellationToken: cancellationToken);
+                if (emailResult.Success)
+                {
+                    memberReward.EmailNotificationSent = true;
+                    memberReward.EmailNotificationSentAt = DateTime.UtcNow;
+                    emailSent = true;
+                    _logger.LogInformation(
+                        "Birthday reward email sent to member {MemberId} ({Email})",
+                        memberId, member.Email);
+                }
+                else
+                {
+                    _logger.LogWarning(
+                        "Birthday reward email failed for member {MemberId}: {Error}",
+                        memberId, emailResult.ErrorMessage);
+                }
             }
             catch (Exception ex)
             {
@@ -629,11 +657,45 @@ public class BirthdayRewardService : IBirthdayRewardService
 
         foreach (var reward in expiringRewards)
         {
-            // TODO: Send expiry warning SMS/email
-            _logger.LogInformation(
-                "Expiry warning: Reward {RewardId} for member {MemberId} expires on {ExpiresAt}",
-                reward.Id, reward.LoyaltyMemberId, reward.ExpiresAt);
-            warnedCount++;
+            try
+            {
+                var member = reward.LoyaltyMember;
+                var daysLeft = (reward.ExpiresAt!.Value - DateTime.UtcNow).Days;
+                var expiryDateStr = reward.ExpiresAt.Value.ToString("MMM dd");
+
+                // Send SMS warning
+                if (!string.IsNullOrEmpty(member?.PhoneNumber))
+                {
+                    var smsMessage = $"Your {reward.OneTimeReward?.Name ?? "reward"} expires in {daysLeft} days ({expiryDateStr}). " +
+                                     $"Don't forget to redeem it! Code: {reward.RedemptionCode}";
+                    await _smsService.SendSmsAsync(member.PhoneNumber, smsMessage, cancellationToken);
+                }
+
+                // Send email warning
+                if (!string.IsNullOrEmpty(member?.Email))
+                {
+                    var emailContent = $"<p>Hi {member.Name ?? "Valued Customer"},</p>" +
+                                       $"<p>Your <strong>{reward.OneTimeReward?.Name ?? "reward"}</strong> is expiring in {daysLeft} days on {expiryDateStr}!</p>" +
+                                       $"<p>Redemption Code: <strong>{reward.RedemptionCode}</strong></p>" +
+                                       $"<p>Visit us before it expires to enjoy your special reward.</p>";
+                    await _emailService.SendEmailAsync(
+                        member.Email,
+                        member.Name ?? "Valued Customer",
+                        "⏰ Your Reward is Expiring Soon!",
+                        emailContent,
+                        isHtml: true,
+                        cancellationToken: cancellationToken);
+                }
+
+                _logger.LogInformation(
+                    "Expiry warning sent: Reward {RewardId} for member {MemberId} expires on {ExpiresAt}",
+                    reward.Id, reward.LoyaltyMemberId, reward.ExpiresAt);
+                warnedCount++;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send expiry warning for reward {RewardId}", reward.Id);
+            }
         }
 
         return warnedCount;

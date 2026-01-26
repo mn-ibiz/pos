@@ -1,3 +1,5 @@
+using System.Text;
+using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using HospitalityPOS.Core.DTOs;
@@ -294,10 +296,394 @@ public class XReportService : IXReportService
         ReportExportFormat format,
         CancellationToken cancellationToken = default)
     {
-        // Export functionality will be implemented in a separate service
-        // For now, return a placeholder
-        _logger.Information("Export X-Report {ReportNumber} to {Format}", report.ReportNumber, format);
-        return Task.FromResult(Array.Empty<byte>());
+        _logger.Information("Exporting X-Report {ReportNumber} to {Format}", report.ReportNumber, format);
+
+        return format switch
+        {
+            ReportExportFormat.Excel => Task.FromResult(ExportToExcel(report)),
+            ReportExportFormat.Csv => Task.FromResult(ExportToCsv(report)),
+            ReportExportFormat.Pdf => Task.FromResult(ExportToPdf(report)),
+            ReportExportFormat.ThermalPrint => Task.FromResult(ExportToThermalPrint(report)),
+            _ => Task.FromResult(Array.Empty<byte>())
+        };
+    }
+
+    private byte[] ExportToExcel(XReportData report)
+    {
+        using var workbook = new XLWorkbook();
+        var ws = workbook.Worksheets.Add("X-Report");
+
+        var row = 1;
+
+        // Header
+        ws.Cell(row, 1).Value = report.BusinessName;
+        ws.Cell(row, 1).Style.Font.Bold = true;
+        ws.Cell(row, 1).Style.Font.FontSize = 16;
+        ws.Range(row, 1, row, 4).Merge();
+        row++;
+
+        ws.Cell(row, 1).Value = $"X-Report: {report.ReportNumber}";
+        ws.Cell(row, 1).Style.Font.Bold = true;
+        ws.Range(row, 1, row, 4).Merge();
+        row++;
+
+        ws.Cell(row, 1).Value = $"Terminal: {report.TerminalName} ({report.TerminalCode})";
+        row++;
+
+        ws.Cell(row, 1).Value = $"Generated: {report.GeneratedAt:yyyy-MM-dd HH:mm:ss}";
+        ws.Cell(row, 3).Value = $"By: {report.GeneratedByName}";
+        row++;
+
+        ws.Cell(row, 1).Value = $"Shift Started: {report.ShiftStarted:yyyy-MM-dd HH:mm}";
+        ws.Cell(row, 3).Value = $"Duration: {report.ShiftDurationFormatted}";
+        row += 2;
+
+        // Sales Summary Section
+        ws.Cell(row, 1).Value = "SALES SUMMARY";
+        ws.Cell(row, 1).Style.Font.Bold = true;
+        ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+        ws.Range(row, 1, row, 4).Merge();
+        row++;
+
+        ws.Cell(row, 1).Value = "Gross Sales";
+        ws.Cell(row, 2).Value = report.GrossSales;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        row++;
+
+        ws.Cell(row, 1).Value = "Discounts";
+        ws.Cell(row, 2).Value = -report.Discounts;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        row++;
+
+        ws.Cell(row, 1).Value = "Refunds";
+        ws.Cell(row, 2).Value = -report.Refunds;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        row++;
+
+        ws.Cell(row, 1).Value = "Voids";
+        ws.Cell(row, 2).Value = -report.Voids;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        row++;
+
+        ws.Cell(row, 1).Value = "Net Sales";
+        ws.Cell(row, 1).Style.Font.Bold = true;
+        ws.Cell(row, 2).Value = report.NetSales;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        ws.Cell(row, 2).Style.Font.Bold = true;
+        row++;
+
+        ws.Cell(row, 1).Value = "Tax Amount";
+        ws.Cell(row, 2).Value = report.TaxAmount;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        row++;
+
+        ws.Cell(row, 1).Value = "Tips Collected";
+        ws.Cell(row, 2).Value = report.TipsCollected;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        row++;
+
+        ws.Cell(row, 1).Value = "Grand Total";
+        ws.Cell(row, 1).Style.Font.Bold = true;
+        ws.Cell(row, 2).Value = report.GrandTotal;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        ws.Cell(row, 2).Style.Font.Bold = true;
+        row += 2;
+
+        // Payment Breakdown Section
+        ws.Cell(row, 1).Value = "PAYMENT BREAKDOWN";
+        ws.Cell(row, 1).Style.Font.Bold = true;
+        ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+        ws.Range(row, 1, row, 4).Merge();
+        row++;
+
+        ws.Cell(row, 1).Value = "Payment Method";
+        ws.Cell(row, 2).Value = "Amount";
+        ws.Cell(row, 3).Value = "Count";
+        ws.Cell(row, 4).Value = "%";
+        ws.Range(row, 1, row, 4).Style.Font.Bold = true;
+        row++;
+
+        foreach (var payment in report.PaymentBreakdown)
+        {
+            ws.Cell(row, 1).Value = payment.PaymentMethodName;
+            ws.Cell(row, 2).Value = payment.Amount;
+            ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+            ws.Cell(row, 3).Value = payment.TransactionCount;
+            ws.Cell(row, 4).Value = payment.Percentage / 100;
+            ws.Cell(row, 4).Style.NumberFormat.Format = "0.0%";
+            row++;
+        }
+
+        ws.Cell(row, 1).Value = "Total Payments";
+        ws.Cell(row, 1).Style.Font.Bold = true;
+        ws.Cell(row, 2).Value = report.TotalPayments;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        ws.Cell(row, 2).Style.Font.Bold = true;
+        row += 2;
+
+        // Cash Drawer Section
+        ws.Cell(row, 1).Value = "CASH DRAWER";
+        ws.Cell(row, 1).Style.Font.Bold = true;
+        ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+        ws.Range(row, 1, row, 4).Merge();
+        row++;
+
+        ws.Cell(row, 1).Value = "Opening Float";
+        ws.Cell(row, 2).Value = report.OpeningFloat;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        row++;
+
+        ws.Cell(row, 1).Value = "Cash Received";
+        ws.Cell(row, 2).Value = report.CashReceived;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        row++;
+
+        ws.Cell(row, 1).Value = "Cash Refunds";
+        ws.Cell(row, 2).Value = -report.CashRefunds;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        row++;
+
+        ws.Cell(row, 1).Value = "Cash Payouts";
+        ws.Cell(row, 2).Value = -report.CashPayouts;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        row++;
+
+        ws.Cell(row, 1).Value = "Expected Cash";
+        ws.Cell(row, 1).Style.Font.Bold = true;
+        ws.Cell(row, 2).Value = report.ExpectedCash;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        ws.Cell(row, 2).Style.Font.Bold = true;
+        row += 2;
+
+        // Statistics Section
+        ws.Cell(row, 1).Value = "STATISTICS";
+        ws.Cell(row, 1).Style.Font.Bold = true;
+        ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+        ws.Range(row, 1, row, 4).Merge();
+        row++;
+
+        ws.Cell(row, 1).Value = "Transaction Count";
+        ws.Cell(row, 2).Value = report.TransactionCount;
+        row++;
+
+        ws.Cell(row, 1).Value = "Average Transaction";
+        ws.Cell(row, 2).Value = report.AverageTransaction;
+        ws.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+        row++;
+
+        ws.Cell(row, 1).Value = "Customer Count";
+        ws.Cell(row, 2).Value = report.CustomerCount;
+        row++;
+
+        ws.Cell(row, 1).Value = "Voids";
+        ws.Cell(row, 2).Value = report.VoidCount;
+        row++;
+
+        ws.Cell(row, 1).Value = "Refunds";
+        ws.Cell(row, 2).Value = report.RefundCount;
+        row++;
+
+        ws.Cell(row, 1).Value = "Discounts Applied";
+        ws.Cell(row, 2).Value = report.DiscountCount;
+        row++;
+
+        ws.Cell(row, 1).Value = "Drawer Opens";
+        ws.Cell(row, 2).Value = report.DrawerOpenCount;
+        row += 2;
+
+        // Cashier Sessions Section
+        if (report.CashierSessions.Count > 0)
+        {
+            ws.Cell(row, 1).Value = "CASHIER SESSIONS";
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+            ws.Range(row, 1, row, 6).Merge();
+            row++;
+
+            ws.Cell(row, 1).Value = "Cashier";
+            ws.Cell(row, 2).Value = "Start Time";
+            ws.Cell(row, 3).Value = "Sales";
+            ws.Cell(row, 4).Value = "Transactions";
+            ws.Cell(row, 5).Value = "Cash";
+            ws.Cell(row, 6).Value = "Duration";
+            ws.Range(row, 1, row, 6).Style.Font.Bold = true;
+            row++;
+
+            foreach (var session in report.CashierSessions)
+            {
+                ws.Cell(row, 1).Value = session.CashierName;
+                ws.Cell(row, 2).Value = session.StartTime;
+                ws.Cell(row, 2).Style.NumberFormat.Format = "HH:mm";
+                ws.Cell(row, 3).Value = session.SalesTotal;
+                ws.Cell(row, 3).Style.NumberFormat.Format = "#,##0.00";
+                ws.Cell(row, 4).Value = session.TransactionCount;
+                ws.Cell(row, 5).Value = session.CashReceived;
+                ws.Cell(row, 5).Style.NumberFormat.Format = "#,##0.00";
+                ws.Cell(row, 6).Value = session.DurationFormatted;
+                row++;
+            }
+        }
+
+        // Auto-fit columns
+        ws.Columns().AdjustToContents();
+
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        return stream.ToArray();
+    }
+
+    private byte[] ExportToCsv(XReportData report)
+    {
+        var sb = new StringBuilder();
+
+        // Header
+        sb.AppendLine($"X-Report: {report.ReportNumber}");
+        sb.AppendLine($"Business: {report.BusinessName}");
+        sb.AppendLine($"Terminal: {report.TerminalName} ({report.TerminalCode})");
+        sb.AppendLine($"Generated: {report.GeneratedAt:yyyy-MM-dd HH:mm:ss}");
+        sb.AppendLine($"Generated By: {report.GeneratedByName}");
+        sb.AppendLine($"Shift Started: {report.ShiftStarted:yyyy-MM-dd HH:mm}");
+        sb.AppendLine($"Duration: {report.ShiftDurationFormatted}");
+        sb.AppendLine();
+
+        // Sales Summary
+        sb.AppendLine("SALES SUMMARY");
+        sb.AppendLine("Item,Amount");
+        sb.AppendLine($"Gross Sales,{report.GrossSales:F2}");
+        sb.AppendLine($"Discounts,{-report.Discounts:F2}");
+        sb.AppendLine($"Refunds,{-report.Refunds:F2}");
+        sb.AppendLine($"Voids,{-report.Voids:F2}");
+        sb.AppendLine($"Net Sales,{report.NetSales:F2}");
+        sb.AppendLine($"Tax Amount,{report.TaxAmount:F2}");
+        sb.AppendLine($"Tips Collected,{report.TipsCollected:F2}");
+        sb.AppendLine($"Grand Total,{report.GrandTotal:F2}");
+        sb.AppendLine();
+
+        // Payment Breakdown
+        sb.AppendLine("PAYMENT BREAKDOWN");
+        sb.AppendLine("Payment Method,Amount,Count,Percentage");
+        foreach (var payment in report.PaymentBreakdown)
+        {
+            sb.AppendLine($"{payment.PaymentMethodName},{payment.Amount:F2},{payment.TransactionCount},{payment.Percentage:F1}%");
+        }
+        sb.AppendLine($"Total Payments,{report.TotalPayments:F2},,");
+        sb.AppendLine();
+
+        // Cash Drawer
+        sb.AppendLine("CASH DRAWER");
+        sb.AppendLine("Item,Amount");
+        sb.AppendLine($"Opening Float,{report.OpeningFloat:F2}");
+        sb.AppendLine($"Cash Received,{report.CashReceived:F2}");
+        sb.AppendLine($"Cash Refunds,{-report.CashRefunds:F2}");
+        sb.AppendLine($"Cash Payouts,{-report.CashPayouts:F2}");
+        sb.AppendLine($"Expected Cash,{report.ExpectedCash:F2}");
+        sb.AppendLine();
+
+        // Statistics
+        sb.AppendLine("STATISTICS");
+        sb.AppendLine("Metric,Value");
+        sb.AppendLine($"Transaction Count,{report.TransactionCount}");
+        sb.AppendLine($"Average Transaction,{report.AverageTransaction:F2}");
+        sb.AppendLine($"Customer Count,{report.CustomerCount}");
+        sb.AppendLine($"Void Count,{report.VoidCount}");
+        sb.AppendLine($"Refund Count,{report.RefundCount}");
+        sb.AppendLine($"Discount Count,{report.DiscountCount}");
+        sb.AppendLine($"Drawer Open Count,{report.DrawerOpenCount}");
+        sb.AppendLine();
+
+        // Cashier Sessions
+        if (report.CashierSessions.Count > 0)
+        {
+            sb.AppendLine("CASHIER SESSIONS");
+            sb.AppendLine("Cashier,Start Time,Sales,Transactions,Cash,Duration");
+            foreach (var session in report.CashierSessions)
+            {
+                sb.AppendLine($"{session.CashierName},{session.StartTime:HH:mm},{session.SalesTotal:F2},{session.TransactionCount},{session.CashReceived:F2},{session.DurationFormatted}");
+            }
+        }
+
+        return Encoding.UTF8.GetBytes(sb.ToString());
+    }
+
+    private byte[] ExportToPdf(XReportData report)
+    {
+        // PDF generation requires a PDF library (e.g., QuestPDF, iTextSharp)
+        // For now, generate a basic HTML-like text that could be converted
+        var sb = new StringBuilder();
+        sb.AppendLine("=".PadRight(50, '='));
+        sb.AppendLine(report.BusinessName.PadLeft(25 + report.BusinessName.Length / 2));
+        sb.AppendLine($"X-Report: {report.ReportNumber}".PadLeft(25 + 10));
+        sb.AppendLine("=".PadRight(50, '='));
+        sb.AppendLine();
+        sb.AppendLine($"Terminal: {report.TerminalName} ({report.TerminalCode})");
+        sb.AppendLine($"Generated: {report.GeneratedAt:yyyy-MM-dd HH:mm:ss}");
+        sb.AppendLine($"By: {report.GeneratedByName}");
+        sb.AppendLine($"Shift: {report.ShiftStarted:HH:mm} - Duration: {report.ShiftDurationFormatted}");
+        sb.AppendLine("-".PadRight(50, '-'));
+        sb.AppendLine();
+        sb.AppendLine("SALES SUMMARY");
+        sb.AppendLine($"  Gross Sales:      {report.GrossSales,15:N2}");
+        sb.AppendLine($"  Discounts:        {-report.Discounts,15:N2}");
+        sb.AppendLine($"  Refunds:          {-report.Refunds,15:N2}");
+        sb.AppendLine($"  Net Sales:        {report.NetSales,15:N2}");
+        sb.AppendLine($"  Tax:              {report.TaxAmount,15:N2}");
+        sb.AppendLine($"  GRAND TOTAL:      {report.GrandTotal,15:N2}");
+        sb.AppendLine();
+        sb.AppendLine("PAYMENTS");
+        foreach (var p in report.PaymentBreakdown)
+        {
+            sb.AppendLine($"  {p.PaymentMethodName,-15} {p.Amount,12:N2} ({p.TransactionCount})");
+        }
+        sb.AppendLine($"  {"TOTAL",-15} {report.TotalPayments,12:N2}");
+        sb.AppendLine();
+        sb.AppendLine("CASH DRAWER");
+        sb.AppendLine($"  Opening Float:    {report.OpeningFloat,15:N2}");
+        sb.AppendLine($"  Cash In:          {report.CashReceived,15:N2}");
+        sb.AppendLine($"  Cash Out:         {-(report.CashRefunds + report.CashPayouts),15:N2}");
+        sb.AppendLine($"  Expected:         {report.ExpectedCash,15:N2}");
+        sb.AppendLine();
+        sb.AppendLine($"Transactions: {report.TransactionCount}  |  Avg: {report.AverageTransaction:N2}");
+        sb.AppendLine("=".PadRight(50, '='));
+
+        _logger.Warning("PDF export not fully implemented - returning text format. Consider adding QuestPDF library.");
+        return Encoding.UTF8.GetBytes(sb.ToString());
+    }
+
+    private byte[] ExportToThermalPrint(XReportData report)
+    {
+        // Generate ESC/POS commands for thermal printing
+        // This is a simplified version - actual implementation would use EscPosPrintDocument
+        var sb = new StringBuilder();
+        sb.AppendLine(report.BusinessName);
+        sb.AppendLine($"X-Report: {report.ReportNumber}");
+        sb.AppendLine(new string('-', 32));
+        sb.AppendLine($"Terminal: {report.TerminalCode}");
+        sb.AppendLine($"Generated: {report.GeneratedAt:dd/MM/yy HH:mm}");
+        sb.AppendLine($"By: {report.GeneratedByName}");
+        sb.AppendLine(new string('-', 32));
+        sb.AppendLine("SALES SUMMARY");
+        sb.AppendLine($"Gross:      {report.GrossSales,10:N2}");
+        sb.AppendLine($"Discounts:  {-report.Discounts,10:N2}");
+        sb.AppendLine($"Net Sales:  {report.NetSales,10:N2}");
+        sb.AppendLine($"Tax:        {report.TaxAmount,10:N2}");
+        sb.AppendLine($"TOTAL:      {report.GrandTotal,10:N2}");
+        sb.AppendLine(new string('-', 32));
+        sb.AppendLine("PAYMENTS");
+        foreach (var p in report.PaymentBreakdown)
+        {
+            sb.AppendLine($"{p.PaymentMethodName,-12}{p.Amount,10:N2}");
+        }
+        sb.AppendLine(new string('-', 32));
+        sb.AppendLine("CASH DRAWER");
+        sb.AppendLine($"Opening:    {report.OpeningFloat,10:N2}");
+        sb.AppendLine($"Cash In:    {report.CashReceived,10:N2}");
+        sb.AppendLine($"Expected:   {report.ExpectedCash,10:N2}");
+        sb.AppendLine(new string('-', 32));
+        sb.AppendLine($"Trans: {report.TransactionCount}  Avg: {report.AverageTransaction:N2}");
+        sb.AppendLine();
+        sb.AppendLine();
+
+        return Encoding.UTF8.GetBytes(sb.ToString());
     }
 
     #region Private Helper Methods

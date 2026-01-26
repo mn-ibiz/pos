@@ -47,86 +47,71 @@
     <Resource Include="Resources\**\*.ico" />
   </ItemGroup>
 
-  <!-- Temporarily exclude ViewModels with API mismatches -->
+  <!-- Re-enabling ViewModels and Views - all except Email settings (service disabled) -->
   <ItemGroup>
-    <Compile Remove="ViewModels\ViewModelLocator.cs" />
-    <!-- MainViewModel now enabled for sidebar navigation -->
-    <!-- <Compile Remove="ViewModels\MainViewModel.cs" /> -->
-    <!-- POSViewModel and SettlementViewModel now enabled -->
-    <Compile Remove="ViewModels\TableMapViewModel.cs" />
-    <!-- PayrollViewModel now enabled for HR section -->
-    <Compile Remove="ViewModels\PayslipHistoryViewModel.cs" />
-    <!-- Stock Transfer ViewModels (Epic 23) - NOW ENABLED after API fixes -->
-    <!-- <Compile Remove="ViewModels\StockTransferViewModel.cs" /> -->
-    <!-- <Compile Remove="ViewModels\CreateTransferRequestViewModel.cs" /> -->
-    <!-- <Compile Remove="ViewModels\TransferDetailsViewModel.cs" /> -->
-    <!-- <Compile Remove="ViewModels\TransferApprovalViewModel.cs" /> -->
-    <!-- <Compile Remove="ViewModels\TransferReceiveViewModel.cs" /> -->
-    <Compile Remove="ViewModels\SupplierStatementViewModel.cs" />
-    <!-- <Compile Remove="ViewModels\QrPaymentDialogViewModel.cs" /> --> <!-- M-Pesa QR payments -->
-    <Compile Remove="ViewModels\BatchManagementViewModel.cs" />
-    <Compile Remove="ViewModels\ExpiryAlertsViewModel.cs" />
-    <!-- Customer/Loyalty ViewModels - EXCLUDED due to API mismatches -->
-    <Compile Remove="ViewModels\CustomerListViewModel.cs" />
-    <Compile Remove="ViewModels\CustomerEnrollmentViewModel.cs" />
-    <Compile Remove="ViewModels\LoyaltySettingsViewModel.cs" />
-    <!-- Email settings excluded due to API mismatches -->
+    <!-- ViewModelLocator - Re-enabled -->
+    <!-- <Compile Remove="ViewModels\ViewModelLocator.cs" /> -->
+
+    <!-- Table Map - Re-enabled -->
+    <!-- <Compile Remove="ViewModels\TableMapViewModel.cs" /> -->
+    <!-- <Compile Remove="Models\TableDisplayItem.cs" /> -->
+
+    <!-- Payslip History - Re-enabled -->
+    <!-- <Compile Remove="ViewModels\PayslipHistoryViewModel.cs" /> -->
+
+    <!-- Supplier Statement - Re-enabled -->
+    <!-- <Compile Remove="ViewModels\SupplierStatementViewModel.cs" /> -->
+
+    <!-- Batch & Expiry - Re-enabled -->
+    <!-- <Compile Remove="ViewModels\BatchManagementViewModel.cs" /> -->
+    <!-- <Compile Remove="ViewModels\ExpiryAlertsViewModel.cs" /> -->
+
+    <!-- Customer/Loyalty ViewModels - Re-enabled -->
+    <!-- <Compile Remove="ViewModels\CustomerListViewModel.cs" /> -->
+    <!-- <Compile Remove="ViewModels\CustomerEnrollmentViewModel.cs" /> -->
+    <!-- <Compile Remove="ViewModels\LoyaltySettingsViewModel.cs" /> -->
+
+    <!-- Email settings - STILL DISABLED (EmailReportService disabled in Infrastructure) -->
     <Compile Remove="ViewModels\EmailSettingsViewModel.cs" />
-    <!-- Report ViewModels - enabling for fixes -->
-    <!-- <Compile Remove="ViewModels\InventoryReportsViewModel.cs" /> -->
-    <!-- <Compile Remove="ViewModels\JournalEntriesViewModel.cs" /> -->
-    <!-- <Compile Remove="ViewModels\MarginReportViewModel.cs" /> -->
-    <!-- <Compile Remove="ViewModels\MpesaDashboardViewModel.cs" /> --> <!-- M-Pesa dashboard -->
-    <!-- <Compile Remove="ViewModels\MpesaSettingsViewModel.cs" /> --> <!-- M-Pesa settings -->
-    <!-- <Compile Remove="ViewModels\OfferReportViewModel.cs" /> -->
-    <Compile Remove="ViewModels\PLUManagementViewModel.cs" />
-    <!-- AttendanceViewModel now enabled for HR section -->
-    <!-- <Compile Remove="ViewModels\SalesReportsViewModel.cs" /> -->
-    <Compile Remove="ViewModels\WeightScaleDialogViewModel.cs" />
-    <!-- <Compile Remove="ViewModels\AuditReportsViewModel.cs" /> -->
-    <Compile Remove="ViewModels\CurrencyPaymentViewModel.cs" />
-    <Compile Remove="ViewModels\ComparativeAnalyticsViewModel.cs" />
-    <!-- DashboardViewModel now enabled for sidebar navigation -->
-    <!-- <Compile Remove="ViewModels\DashboardViewModel.cs" /> -->
-    <Compile Remove="ViewModels\CustomerDisplayViewModel.cs" />
-    <Compile Remove="ViewModels\StockAlertWidgetViewModel.cs" />
-    <!-- <Compile Remove="ViewModels\ExceptionReportsViewModel.cs" /> -->
-    <Compile Remove="Models\TableDisplayItem.cs" />
-    <!-- M-Pesa views - enabling -->
-    <!-- <Compile Remove="Views\QrPaymentDialog.xaml.cs" /> -->
-    <!-- <Page Remove="Views\QrPaymentDialog.xaml" /> -->
-    <!-- <Compile Remove="Views\MpesaDashboardView.xaml.cs" /> -->
-    <!-- <Page Remove="Views\MpesaDashboardView.xaml" /> -->
-    <!-- <Compile Remove="Views\MpesaSettingsView.xaml.cs" /> -->
-    <!-- <Page Remove="Views\MpesaSettingsView.xaml" /> -->
-    <Compile Remove="Views\PLUManagementView.xaml.cs" />
-    <Page Remove="Views\PLUManagementView.xaml" />
-    <!-- SalesReportsView now enabled for sidebar navigation -->
-    <!-- <Compile Remove="Views\SalesReportsView.xaml.cs" /> -->
-    <!-- <Page Remove="Views\SalesReportsView.xaml" /> -->
-    <!-- AttendanceView now enabled for HR section -->
-    <Compile Remove="Views\CurrencyPaymentDialog.xaml.cs" />
-    <Page Remove="Views\CurrencyPaymentDialog.xaml" />
-    <Compile Remove="Views\CustomerDisplayWindow.xaml.cs" />
-    <Page Remove="Views\CustomerDisplayWindow.xaml" />
-    <Compile Remove="Views\WeightScaleDialog.xaml.cs" />
-    <Page Remove="Views\WeightScaleDialog.xaml" />
-    <!-- POSView now enabled -->
-    <!-- PayrollView now enabled for HR section -->
-    <!-- Email settings excluded due to API mismatches -->
     <Compile Remove="Views\EmailSettingsView.xaml.cs" />
     <Page Remove="Views\EmailSettingsView.xaml" />
-    <!-- <Compile Remove="Views\JournalEntriesView.xaml.cs" /> -->
-    <!-- <Page Remove="Views\JournalEntriesView.xaml" /> -->
-    <Compile Remove="Converters\PermissionConverters.cs" />
-    <!-- Customer/Loyalty Views - EXCLUDED due to API mismatches -->
-    <Compile Remove="Views\CustomerListView.xaml.cs" />
-    <Page Remove="Views\CustomerListView.xaml" />
-    <Compile Remove="Views\CustomerEnrollmentView.xaml.cs" />
-    <Page Remove="Views\CustomerEnrollmentView.xaml" />
-    <Compile Remove="Views\LoyaltySettingsView.xaml.cs" />
-    <Page Remove="Views\LoyaltySettingsView.xaml" />
-    <!-- SettlementView now enabled -->
+
+    <!-- PLU Management - Re-enabled -->
+    <!-- <Compile Remove="ViewModels\PLUManagementViewModel.cs" /> -->
+    <!-- <Compile Remove="Views\PLUManagementView.xaml.cs" /> -->
+    <!-- <Page Remove="Views\PLUManagementView.xaml" /> -->
+
+    <!-- Weight Scale - Re-enabled -->
+    <!-- <Compile Remove="ViewModels\WeightScaleDialogViewModel.cs" /> -->
+    <!-- <Compile Remove="Views\WeightScaleDialog.xaml.cs" /> -->
+    <!-- <Page Remove="Views\WeightScaleDialog.xaml" /> -->
+
+    <!-- Currency Payment - Re-enabled -->
+    <!-- <Compile Remove="ViewModels\CurrencyPaymentViewModel.cs" /> -->
+    <!-- <Compile Remove="Views\CurrencyPaymentDialog.xaml.cs" /> -->
+    <!-- <Page Remove="Views\CurrencyPaymentDialog.xaml" /> -->
+
+    <!-- Comparative Analytics - Re-enabled -->
+    <!-- <Compile Remove="ViewModels\ComparativeAnalyticsViewModel.cs" /> -->
+
+    <!-- Customer Display - Re-enabled -->
+    <!-- <Compile Remove="ViewModels\CustomerDisplayViewModel.cs" /> -->
+    <!-- <Compile Remove="Views\CustomerDisplayWindow.xaml.cs" /> -->
+    <!-- <Page Remove="Views\CustomerDisplayWindow.xaml" /> -->
+
+    <!-- Stock Alert Widget - Re-enabled -->
+    <!-- <Compile Remove="ViewModels\StockAlertWidgetViewModel.cs" /> -->
+
+    <!-- Permission Converters - Re-enabled -->
+    <!-- <Compile Remove="Converters\PermissionConverters.cs" /> -->
+
+    <!-- Customer/Loyalty Views - Re-enabled -->
+    <!-- <Compile Remove="Views\CustomerListView.xaml.cs" /> -->
+    <!-- <Page Remove="Views\CustomerListView.xaml" /> -->
+    <!-- <Compile Remove="Views\CustomerEnrollmentView.xaml.cs" /> -->
+    <!-- <Page Remove="Views\CustomerEnrollmentView.xaml" /> -->
+    <!-- <Compile Remove="Views\LoyaltySettingsView.xaml.cs" /> -->
+    <!-- <Page Remove="Views\LoyaltySettingsView.xaml" /> -->
   </ItemGroup>
 
 </Project>

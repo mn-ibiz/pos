@@ -302,13 +302,13 @@ public partial class App : Application
         services.Configure<PointsExpiryOptions>(Configuration.GetSection(PointsExpiryOptions.SectionName));
 
         // Printer discovery service (Singleton - stateless printer detection)
-        // services.AddSingleton<IPrinterDiscoveryService, PrinterDiscoveryService>(); // Excluded from compilation
+        services.AddSingleton<IPrinterDiscoveryService, PrinterDiscoveryService>(); // Re-enabled
 
         // Printer service (Scoped - accesses DbContext directly)
         services.AddScoped<IPrinterService, PrinterService>();
 
         // Kitchen order routing service (Scoped - accesses DbContext for order routing)
-        // services.AddScoped<IKitchenOrderRoutingService, KitchenOrderRoutingService>(); // Excluded from compilation
+        services.AddScoped<IKitchenOrderRoutingService, KitchenOrderRoutingService>(); // Re-enabled
 
         // Printer communication service (Singleton - Windows API for raw printing)
         services.AddSingleton<IPrinterCommunicationService, PrinterCommunicationService>();
@@ -346,7 +346,7 @@ public partial class App : Application
         services.AddTransient<SettlementViewModel>(); // Now enabled
         services.AddTransient<PaymentMethodsViewModel>();
         services.AddTransient<InventoryViewModel>();
-        // services.AddTransient<StockAlertWidgetViewModel>(); // Excluded
+        services.AddTransient<StockAlertWidgetViewModel>(); // Re-enabled
         services.AddTransient<SuppliersViewModel>();
         services.AddTransient<PurchaseOrdersViewModel>();
         services.AddTransient<PurchaseOrderReviewViewModel>();
@@ -369,7 +369,7 @@ public partial class App : Application
         services.AddTransient<FloorDialogViewModel>();
         services.AddTransient<TableDialogViewModel>();
         services.AddTransient<SectionDialogViewModel>();
-        // services.AddTransient<TableMapViewModel>(); // Excluded
+        services.AddTransient<TableMapViewModel>(); // Re-enabled
         services.AddTransient<PrinterSettingsViewModel>();
         services.AddTransient<KitchenPrinterSettingsViewModel>();
         services.AddTransient<CashDrawerSettingsViewModel>();
@@ -381,7 +381,7 @@ public partial class App : Application
         services.AddTransient<OfferEditorViewModel>();
         // services.AddTransient<OfferReportViewModel>(); // Excluded
         services.AddTransient<SupplierInvoicesViewModel>();
-        // services.AddTransient<SupplierStatementViewModel>(); // Excluded
+        services.AddTransient<SupplierStatementViewModel>(); // Re-enabled
         // HR ViewModels
         services.AddTransient<EmployeesViewModel>();
         services.AddTransient<EmployeeEditorViewModel>();
@@ -397,9 +397,9 @@ public partial class App : Application
         services.AddTransient<MpesaSettingsViewModel>();
         services.AddTransient<QrPaymentDialogViewModel>();
         services.AddTransient<SmsSettingsViewModel>();
-        // services.AddTransient<PLUManagementViewModel>(); // Excluded
+        services.AddTransient<PLUManagementViewModel>(); // Re-enabled
         services.AddTransient<BarcodeSettingsViewModel>();
-        // services.AddTransient<CustomerEnrollmentViewModel>(); // EXCLUDED - API mismatches
+        services.AddTransient<CustomerEnrollmentViewModel>(); // Re-enabled
         services.AddTransient<DashboardViewModel>();
 
         // Expense Management ViewModels
@@ -467,15 +467,21 @@ public partial class App : Application
         // Terminal Configuration ViewModel (MT-030)
         services.AddTransient<TerminalConfigurationViewModel>();
 
-        // Batch/Expiry ViewModels (Epic 24) - Excluded
-        // services.AddTransient<BatchManagementViewModel>();
-        // services.AddTransient<ExpiryAlertsViewModel>();
+        // Analytics & Display ViewModels - Re-enabled
+        services.AddTransient<ComparativeAnalyticsViewModel>();
+        services.AddTransient<CustomerDisplayViewModel>();
+        services.AddTransient<WeightScaleDialogViewModel>();
+        services.AddTransient<CurrencyPaymentViewModel>();
 
-        // Loyalty ViewModels (Epic 39) - EXCLUDED due to API mismatches
-        // services.AddTransient<CustomerListViewModel>();
-        // services.AddTransient<LoyaltySettingsViewModel>();
+        // Batch/Expiry ViewModels (Epic 24) - Re-enabled
+        services.AddTransient<BatchManagementViewModel>();
+        services.AddTransient<ExpiryAlertsViewModel>();
 
-        // Email ViewModels (Epic 40) - Excluded due to API mismatches
+        // Loyalty ViewModels (Epic 39) - Re-enabled
+        services.AddTransient<CustomerListViewModel>();
+        services.AddTransient<LoyaltySettingsViewModel>();
+
+        // Email ViewModels (Epic 40) - Still disabled (EmailReportService disabled)
         // services.AddTransient<EmailSettingsViewModel>();
 
         // Email Services (Epic 40)

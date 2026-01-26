@@ -18,6 +18,7 @@ public partial class LabelTemplateDesignerViewModel : ViewModelBase, INavigation
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IDialogService _dialogService;
+    private readonly ISessionService _sessionService;
     private readonly LabelCodeGeneratorService _codeGenerator;
 
     #region Observable Properties - Template Info
@@ -167,11 +168,13 @@ public partial class LabelTemplateDesignerViewModel : ViewModelBase, INavigation
     public LabelTemplateDesignerViewModel(
         ILogger logger,
         IServiceScopeFactory scopeFactory,
-        IDialogService dialogService)
+        IDialogService dialogService,
+        ISessionService sessionService)
         : base(logger)
     {
         _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         _codeGenerator = new LabelCodeGeneratorService();
 
         // Initialize toolbox items
@@ -606,7 +609,7 @@ public partial class LabelTemplateDesignerViewModel : ViewModelBase, INavigation
                 {
                     Name = TemplateName,
                     LabelSizeId = LabelSize.Id,
-                    StoreId = 1, // TODO: Get actual store ID
+                    StoreId = _sessionService.CurrentStoreId ?? 1,
                     PrintLanguage = PrintLanguage,
                     TemplateContent = code,
                     IsDefault = false,

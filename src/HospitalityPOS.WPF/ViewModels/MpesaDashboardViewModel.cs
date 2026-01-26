@@ -16,6 +16,7 @@ namespace HospitalityPOS.WPF.ViewModels;
 public partial class MpesaDashboardViewModel : ObservableObject
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly ISessionService _sessionService;
 
     [ObservableProperty]
     private bool _isLoading;
@@ -120,9 +121,10 @@ public partial class MpesaDashboardViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<MpesaHourlyStats> _hourlyStats = [];
 
-    public MpesaDashboardViewModel(IServiceProvider serviceProvider)
+    public MpesaDashboardViewModel(IServiceProvider serviceProvider, ISessionService sessionService)
     {
         _serviceProvider = serviceProvider;
+        _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
     }
 
     [RelayCommand]
@@ -264,7 +266,7 @@ public partial class MpesaDashboardViewModel : ObservableObject
                 ManualPhoneNumber,
                 ManualTransactionDate,
                 ManualNotes,
-                1); // TODO: Get actual user ID
+                _sessionService.CurrentUserId);
 
             ManualResultMessage = "Manual transaction recorded successfully!";
 
@@ -360,7 +362,7 @@ public partial class MpesaDashboardViewModel : ObservableObject
 
             var success = await mpesaService.VerifyTransactionAsync(
                 SelectedUnverifiedTransaction.Id,
-                1); // TODO: Get actual user ID
+                _sessionService.CurrentUserId);
 
             if (success)
             {

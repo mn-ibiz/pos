@@ -16,6 +16,7 @@ public partial class CombinedZReportViewModel : ObservableObject, INavigationAwa
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IDialogService _dialogService;
+    private readonly IReportPrintService _reportPrintService;
     private readonly ILogger<CombinedZReportViewModel> _logger;
     private int _workPeriodId;
 
@@ -83,10 +84,12 @@ public partial class CombinedZReportViewModel : ObservableObject, INavigationAwa
     public CombinedZReportViewModel(
         IServiceScopeFactory scopeFactory,
         IDialogService dialogService,
+        IReportPrintService reportPrintService,
         ILogger<CombinedZReportViewModel> logger)
     {
         _scopeFactory = scopeFactory;
         _dialogService = dialogService;
+        _reportPrintService = reportPrintService;
         _logger = logger;
     }
 
@@ -113,8 +116,29 @@ public partial class CombinedZReportViewModel : ObservableObject, INavigationAwa
     {
         try
         {
-            // TODO: Implement print functionality for combined Z-Report
-            await _dialogService.ShowMessageAsync("Print", "Print functionality will be implemented in MT-026.");
+            using var scope = _scopeFactory.CreateScope();
+            var combinedReportService = scope.ServiceProvider.GetRequiredService<ICombinedReportService>();
+
+            // Get current work period if not set
+            if (_workPeriodId == 0)
+            {
+                var workPeriodService = scope.ServiceProvider.GetRequiredService<IWorkPeriodService>();
+                var currentWorkPeriod = await workPeriodService.GetCurrentWorkPeriodAsync();
+                if (currentWorkPeriod == null)
+                {
+                    await _dialogService.ShowErrorAsync("No active work period found.");
+                    return;
+                }
+                _workPeriodId = currentWorkPeriod.Id;
+            }
+
+            // Get the combined Z-Report preview data
+            var preview = await combinedReportService.PreviewCombinedZReportAsync(_workPeriodId);
+
+            // Print the report using the print service
+            await _reportPrintService.PrintCombinedZReportAsync(preview);
+
+            _logger.LogInformation("Combined Z-Report preview printed successfully");
         }
         catch (Exception ex)
         {

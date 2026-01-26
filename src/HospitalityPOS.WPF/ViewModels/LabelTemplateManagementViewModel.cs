@@ -20,6 +20,7 @@ public partial class LabelTemplateManagementViewModel : ViewModelBase, INavigati
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IDialogService _dialogService;
     private readonly INavigationService _navigationService;
+    private readonly ISessionService _sessionService;
 
     #region Observable Properties - Collections
 
@@ -150,12 +151,14 @@ public partial class LabelTemplateManagementViewModel : ViewModelBase, INavigati
         ILogger logger,
         IServiceScopeFactory scopeFactory,
         IDialogService dialogService,
-        INavigationService navigationService)
+        INavigationService navigationService,
+        ISessionService sessionService)
         : base(logger)
     {
         _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
+        _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
 
         _logger.Information("LabelTemplateManagementViewModel initialized");
     }
@@ -216,7 +219,7 @@ public partial class LabelTemplateManagementViewModel : ViewModelBase, INavigati
             var templateService = scope.ServiceProvider.GetService<ILabelTemplateService>();
             if (templateService != null)
             {
-                _allTemplates = await templateService.GetAllTemplatesAsync(1); // TODO: Get actual store ID
+                _allTemplates = await templateService.GetAllTemplatesAsync(_sessionService.CurrentStoreId ?? 1);
                 AvailablePlaceholders = templateService.GetAvailablePlaceholders();
             }
 
@@ -342,7 +345,7 @@ public partial class LabelTemplateManagementViewModel : ViewModelBase, INavigati
                     LibraryTemplateId = SelectedLibraryTemplate.Id,
                     Name = NewTemplateName,
                     LabelSizeId = NewTemplateSizeId.Value,
-                    StoreId = 1 // TODO: Get actual store ID
+                    StoreId = _sessionService.CurrentStoreId ?? 1
                 };
                 await templateService.ImportFromLibraryAsync(importDto);
             }
@@ -358,7 +361,7 @@ public partial class LabelTemplateManagementViewModel : ViewModelBase, INavigati
                 {
                     Name = NewTemplateName,
                     LabelSizeId = NewTemplateSizeId.Value,
-                    StoreId = 1, // TODO: Get actual store ID
+                    StoreId = _sessionService.CurrentStoreId ?? 1,
                     PrintLanguage = NewTemplateLanguage,
                     TemplateContent = GetBlankTemplateContent(NewTemplateLanguage),
                     IsDefault = false,
@@ -482,7 +485,7 @@ public partial class LabelTemplateManagementViewModel : ViewModelBase, INavigati
             using var scope = _scopeFactory.CreateScope();
             var templateService = scope.ServiceProvider.GetRequiredService<ILabelTemplateService>();
 
-            await templateService.SetDefaultTemplateAsync(template.Id, 1); // TODO: Get actual store ID
+            await templateService.SetDefaultTemplateAsync(template.Id, _sessionService.CurrentStoreId ?? 1);
 
             await LoadDataAsync();
             StatusMessage = $"'{template.Name}' is now the default template";
@@ -588,7 +591,7 @@ public partial class LabelTemplateManagementViewModel : ViewModelBase, INavigati
             using var scope = _scopeFactory.CreateScope();
             var templateService = scope.ServiceProvider.GetRequiredService<ILabelTemplateService>();
 
-            ImportValidation = await templateService.ValidateImportFileAsync(fileData, 1); // TODO: Get actual store ID
+            ImportValidation = await templateService.ValidateImportFileAsync(fileData, _sessionService.CurrentStoreId ?? 1);
 
             if (ImportValidation.Errors.Any())
             {
@@ -647,7 +650,7 @@ public partial class LabelTemplateManagementViewModel : ViewModelBase, INavigati
 
             var options = new TemplateImportOptionsDto
             {
-                StoreId = 1, // TODO: Get actual store ID
+                StoreId = _sessionService.CurrentStoreId ?? 1,
                 ConflictResolution = SelectedConflictResolution,
                 CreateMissingSize = ImportCreateMissingSize
             };
@@ -767,7 +770,7 @@ public partial class LabelTemplateManagementViewModel : ViewModelBase, INavigati
                 LibraryTemplateId = SelectedLibraryTemplate.Id,
                 Name = ImportTemplateName,
                 LabelSizeId = matchingSize.Id,
-                StoreId = 1 // TODO: Get actual store ID
+                StoreId = _sessionService.CurrentStoreId ?? 1
             };
 
             await templateService.ImportFromLibraryAsync(dto);

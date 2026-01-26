@@ -126,5 +126,45 @@ public interface IReportPrintService
     /// <returns>A task representing the async operation.</returns>
     Task PrintDeadStockReportAsync(DeadStockReportResult report);
 
+    /// <summary>
+    /// Prints an expiry alerts report.
+    /// </summary>
+    /// <param name="alerts">The list of expiry alert items.</param>
+    /// <param name="summary">Summary statistics (expired, critical, warning counts and total value).</param>
+    /// <returns>A task representing the async operation.</returns>
+    Task PrintExpiryAlertsReportAsync(
+        IEnumerable<ExpiryAlertReportItem> alerts,
+        ExpiryAlertSummary summary);
+
     #endregion
+}
+
+/// <summary>
+/// Expiry alert item for printing.
+/// </summary>
+public class ExpiryAlertReportItem
+{
+    public string BatchNumber { get; set; } = string.Empty;
+    public string ProductName { get; set; } = string.Empty;
+    public string? ProductSKU { get; set; }
+    public int CurrentQuantity { get; set; }
+    public DateTime ExpiryDate { get; set; }
+    public int DaysUntilExpiry { get; set; }
+    public decimal UnitCost { get; set; }
+    public decimal TotalValue { get; set; }
+    public string AlertLevel { get; set; } = string.Empty; // Expired, Critical, Warning
+}
+
+/// <summary>
+/// Summary for expiry alerts report.
+/// </summary>
+public class ExpiryAlertSummary
+{
+    public int ExpiredCount { get; set; }
+    public int CriticalCount { get; set; }
+    public int WarningCount { get; set; }
+    public int TotalCount { get; set; }
+    public decimal TotalAtRiskValue { get; set; }
+    public DateTime GeneratedAt { get; set; } = DateTime.UtcNow;
+    public string GeneratedBy { get; set; } = string.Empty;
 }

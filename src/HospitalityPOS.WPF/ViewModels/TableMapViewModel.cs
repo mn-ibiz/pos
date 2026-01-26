@@ -8,6 +8,7 @@ using HospitalityPOS.Core.Enums;
 using HospitalityPOS.Core.Interfaces;
 using HospitalityPOS.WPF.Models;
 using HospitalityPOS.WPF.Services;
+using HospitalityPOS.WPF.Views.Dialogs;
 
 namespace HospitalityPOS.WPF.ViewModels;
 
@@ -21,6 +22,8 @@ public partial class TableMapViewModel : ViewModelBase, INavigationAware, IDispo
     private readonly IReceiptService _receiptService;
     private readonly INavigationService _navigationService;
     private readonly IUserService _userService;
+    private readonly IPrinterService _printerService;
+    private readonly ITableTransferService _tableTransferService;
     private readonly DispatcherTimer _refreshTimer;
     private bool _isDisposed;
 
@@ -138,12 +141,16 @@ public partial class TableMapViewModel : ViewModelBase, INavigationAware, IDispo
         IReceiptService receiptService,
         INavigationService navigationService,
         IUserService userService,
+        IPrinterService printerService,
+        ITableTransferService tableTransferService,
         ILogger logger) : base(logger)
     {
         _floorService = floorService ?? throw new ArgumentNullException(nameof(floorService));
         _receiptService = receiptService ?? throw new ArgumentNullException(nameof(receiptService));
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+        _printerService = printerService ?? throw new ArgumentNullException(nameof(printerService));
+        _tableTransferService = tableTransferService ?? throw new ArgumentNullException(nameof(tableTransferService));
 
         Title = "Table Map";
 
@@ -649,13 +656,91 @@ public partial class TableMapViewModel : ViewModelBase, INavigationAware, IDispo
                 }
                 break;
             case "Print Bill":
-                // TODO: Implement print bill
-                await DialogService.ShowMessageAsync("Print Bill", "Bill printing will be implemented in Epic 12.");
+                if (tableItem.Table.CurrentReceiptId.HasValue)
+                {
+                    try
+                    {
+                        var receipt = await _receiptService.GetReceiptByIdAsync(tableItem.Table.CurrentReceiptId.Value);
+                        if (receipt != null)
+                        {
+                            var result = await _printerService.PrintReceiptAsync(receipt);
+                            if (!result.Success)
+                            {
+                                await DialogService.ShowErrorAsync($"Failed to print bill: {result.ErrorMessage}");
+                            }
+                        }
+                        else
+                        {
+                            await DialogService.ShowErrorAsync("Receipt not found for this table.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex, "Failed to print bill for table {TableName}", tableItem.Table.Name);
+                        await DialogService.ShowErrorAsync($"Failed to print bill: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    await DialogService.ShowMessageAsync("Print Bill", "No active order on this table.");
+                }
                 break;
             case "Transfer Table":
-                // Navigate to transfer - will be implemented in Story 11-3
-                await DialogService.ShowMessageAsync("Transfer Table", "Table transfer will be implemented in Story 11-3.");
+                await TransferTableAsync(tableItem);
                 break;
+        }
+    }
+
+    /// <summary>
+    /// Shows the table transfer dialog and processes the transfer.
+    /// </summary>
+    /// <param name="tableItem">The table to transfer.</param>
+    private async Task TransferTableAsync(TableDisplayItem tableItem)
+    {
+        try
+        {
+            // Only occupied tables can be transferred
+            if (tableItem.Table.Status != TableStatus.Occupied)
+            {
+                await DialogService.ShowMessageAsync("Transfer Table", "Only occupied tables can be transferred.");
+                return;
+            }
+
+            // Get current user ID from session
+            var currentUserId = SessionService.CurrentUserId ?? 0;
+            if (currentUserId == 0)
+            {
+                await DialogService.ShowErrorAsync("Unable to identify current user. Please log in again.");
+                return;
+            }
+
+            // Show the transfer dialog
+            var dialog = new TableTransferDialog(
+                tableItem.Table,
+                _tableTransferService,
+                currentUserId)
+            {
+                Owner = System.Windows.Application.Current.MainWindow
+            };
+
+            var result = dialog.ShowDialog();
+
+            if (result == true && dialog.TransferResult?.IsSuccess == true)
+            {
+                Logger.Information(
+                    "Table {TableName} transferred from waiter {FromWaiter} to {ToWaiter}",
+                    tableItem.Table.Name,
+                    tableItem.Table.AssignedUser?.FullName ?? "Unknown",
+                    dialog.TransferResult.NewWaiterName);
+
+                // Refresh the table data
+                await LoadTablesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Failed to transfer table {TableName}", tableItem.Table.Name);
+            await DialogService.ShowErrorAsync($"Failed to transfer table: {ex.Message}");
         }
     }
 

@@ -49,6 +49,7 @@ public partial class ExpiryAlertsViewModel : ViewModelBase
     private readonly IProductBatchService _batchService;
     private readonly IExpiryValidationService _expiryService;
     private readonly INavigationService _navigationService;
+    private readonly IReportPrintService _reportPrintService;
 
     [ObservableProperty]
     private ObservableCollection<ExpiryAlertItem> _alerts = new();
@@ -96,6 +97,7 @@ public partial class ExpiryAlertsViewModel : ViewModelBase
         _batchService = App.Services.GetRequiredService<IProductBatchService>();
         _expiryService = App.Services.GetRequiredService<IExpiryValidationService>();
         _navigationService = App.Services.GetRequiredService<INavigationService>();
+        _reportPrintService = App.Services.GetRequiredService<IReportPrintService>();
     }
 
     [RelayCommand]
@@ -288,9 +290,40 @@ public partial class ExpiryAlertsViewModel : ViewModelBase
     {
         await ExecuteAsync(async () =>
         {
-            // TODO: Implement report printing
-            await Task.Delay(100);
-            await DialogService.ShowMessageAsync("Print", "Report printing not yet implemented.");
+            if (Alerts.Count == 0)
+            {
+                await DialogService.ShowMessageAsync("Print", "No alerts to print.");
+                return;
+            }
+
+            // Convert alerts to report items
+            var reportItems = Alerts.Select(a => new ExpiryAlertReportItem
+            {
+                BatchNumber = a.BatchNumber,
+                ProductName = a.ProductName,
+                ProductSKU = a.ProductSKU,
+                CurrentQuantity = a.CurrentQuantity,
+                ExpiryDate = a.ExpiryDate,
+                DaysUntilExpiry = a.DaysUntilExpiry,
+                UnitCost = a.UnitCost,
+                TotalValue = a.TotalValue,
+                AlertLevel = a.AlertLevel
+            });
+
+            // Create summary
+            var summary = new ExpiryAlertSummary
+            {
+                ExpiredCount = ExpiredCount,
+                CriticalCount = CriticalCount,
+                WarningCount = WarningCount,
+                TotalCount = Alerts.Count,
+                TotalAtRiskValue = TotalAtRiskValue,
+                GeneratedAt = DateTime.UtcNow,
+                GeneratedBy = SessionService.CurrentUserName ?? "Unknown"
+            };
+
+            // Print using the print service
+            await _reportPrintService.PrintExpiryAlertsReportAsync(reportItems, summary);
         }, "Generating report...");
     }
 

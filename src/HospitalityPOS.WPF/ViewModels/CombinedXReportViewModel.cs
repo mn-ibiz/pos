@@ -17,6 +17,7 @@ public partial class CombinedXReportViewModel : ObservableObject, INavigationAwa
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IDialogService _dialogService;
+    private readonly IReportPrintService _reportPrintService;
     private readonly ILogger<CombinedXReportViewModel> _logger;
 
     [ObservableProperty]
@@ -119,10 +120,12 @@ public partial class CombinedXReportViewModel : ObservableObject, INavigationAwa
     public CombinedXReportViewModel(
         IServiceScopeFactory scopeFactory,
         IDialogService dialogService,
+        IReportPrintService reportPrintService,
         ILogger<CombinedXReportViewModel> logger)
     {
         _scopeFactory = scopeFactory;
         _dialogService = dialogService;
+        _reportPrintService = reportPrintService;
         _logger = logger;
     }
 
@@ -144,8 +147,16 @@ public partial class CombinedXReportViewModel : ObservableObject, INavigationAwa
     {
         try
         {
-            // TODO: Implement print functionality for combined report
-            await _dialogService.ShowMessageAsync("Print", "Print functionality will be implemented in MT-026.");
+            using var scope = _scopeFactory.CreateScope();
+            var combinedReportService = scope.ServiceProvider.GetRequiredService<ICombinedReportService>();
+
+            // Get fresh report data
+            var report = await combinedReportService.GenerateCombinedXReportAsync();
+
+            // Print the report using the print service
+            await _reportPrintService.PrintCombinedXReportAsync(report);
+
+            _logger.LogInformation("Combined X-Report printed successfully");
         }
         catch (Exception ex)
         {

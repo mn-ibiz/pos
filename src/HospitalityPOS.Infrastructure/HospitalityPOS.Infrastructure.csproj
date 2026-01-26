@@ -34,54 +34,60 @@
     <PackageReference Include="MimeKit" Version="4.9.0" />
     <PackageReference Include="SkiaSharp" Version="3.116.1" />
     <PackageReference Include="ZXing.Net" Version="0.16.9" />
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\HospitalityPOS.Core\HospitalityPOS.Core.csproj" />
   </ItemGroup>
 
-  <!-- Temporarily exclude problematic files to allow migrations -->
+  <!-- Re-enabling services - fixing compilation errors incrementally -->
   <ItemGroup>
-    <Compile Remove="Services\WasteReportService.cs" />
-    <Compile Remove="Services\InventoryAnalyticsService.cs" />
-    <Compile Remove="Data\Configurations\BatchTrackingConfiguration.cs" />
-    <Compile Remove="Services\WasteService.cs" />
-    <Compile Remove="Services\BudgetService.cs" />
-    <Compile Remove="Services\ReportService.cs" />
-    <Compile Remove="Services\FinancialReportingService.cs" />
+    <!-- Budget & Waste Services - Re-enabled -->
+    <!-- <Compile Remove="Services\WasteReportService.cs" /> -->
+    <!-- <Compile Remove="Services\InventoryAnalyticsService.cs" /> -->
+    <!-- <Compile Remove="Data\Configurations\BatchTrackingConfiguration.cs" /> -->
+    <!-- <Compile Remove="Services\WasteService.cs" /> -->
+    <!-- <Compile Remove="Services\BudgetService.cs" /> -->
+    <!-- <Compile Remove="Services\ReportService.cs" /> -->
+    <!-- <Compile Remove="Services\FinancialReportingService.cs" /> -->
     <!-- EmailReportService has too many API mismatches to fix quickly -->
     <Compile Remove="Services\EmailReportService.cs" />
-    <Compile Remove="Services\BatchPrepService.cs" />
-    <Compile Remove="Services\StockTransferService.cs" />
-    <Compile Remove="Services\StockReservationService.cs" />
-    <Compile Remove="Services\SyncStatusService.cs" />
-    <Compile Remove="Services\RecipeCostService.cs" />
-    <Compile Remove="Services\MultiStoreService.cs" />
-    <Compile Remove="Services\LabelPrintService.cs" />
-    <Compile Remove="Services\CheckoutEnhancementService.cs" />
-    <Compile Remove="Services\ComparativeAnalyticsService.cs" />
-    <Compile Remove="Services\ExpiryValidationService.cs" />
-    <Compile Remove="Services\ShrinkageAnalysisService.cs" />
-    <Compile Remove="Services\IntelligentReorderService.cs" />
-    <Compile Remove="Services\CustomerDisplayService.cs" />
-    <Compile Remove="Services\ChainReportingService.cs" />
-    <Compile Remove="Services\StockTakeService.cs" />
-    <Compile Remove="Services\SmsMarketingService.cs" />
-    <Compile Remove="Services\PrinterDiscoveryService.cs" />
-    <Compile Remove="Services\LabelPrinterService.cs" />
-    <Compile Remove="Services\MobileMoneyService.cs" />
-    <Compile Remove="Services\KdsOrderService.cs" />
-    <Compile Remove="Services\KdsStatusService.cs" />
-    <Compile Remove="Services\IngredientDeductionService.cs" />
-    <Compile Remove="Services\KitchenOrderRoutingService.cs" />
+    <!-- Batch & Stock Services - Re-enabled -->
+    <!-- <Compile Remove="Services\BatchPrepService.cs" /> -->
+    <!-- <Compile Remove="Services\StockTransferService.cs" /> -->
+    <!-- <Compile Remove="Services\StockReservationService.cs" /> -->
+    <!-- <Compile Remove="Services\SyncStatusService.cs" /> -->
+    <!-- <Compile Remove="Services\RecipeCostService.cs" /> -->
+    <!-- <Compile Remove="Services\MultiStoreService.cs" /> -->
+    <!-- <Compile Remove="Services\LabelPrintService.cs" /> -->
+    <!-- <Compile Remove="Services\CheckoutEnhancementService.cs" /> -->
+    <!-- <Compile Remove="Services\ComparativeAnalyticsService.cs" /> -->
+    <!-- <Compile Remove="Services\ExpiryValidationService.cs" /> -->
+    <!-- <Compile Remove="Services\ShrinkageAnalysisService.cs" /> -->
+    <!-- <Compile Remove="Services\IntelligentReorderService.cs" /> -->
+    <!-- <Compile Remove="Services\CustomerDisplayService.cs" /> -->
+    <!-- <Compile Remove="Services\ChainReportingService.cs" /> -->
+    <!-- <Compile Remove="Services\StockTakeService.cs" /> -->
+    <!-- <Compile Remove="Services\SmsMarketingService.cs" /> -->
+    <!-- <Compile Remove="Services\PrinterDiscoveryService.cs" /> -->
+    <!-- <Compile Remove="Services\LabelPrinterService.cs" /> -->
+    <!-- <Compile Remove="Services\MobileMoneyService.cs" /> -->
+    <!-- KDS Services - Re-enabled -->
+    <!-- <Compile Remove="Services\KdsOrderService.cs" /> -->
+    <!-- <Compile Remove="Services\KdsStatusService.cs" /> -->
+    <!-- <Compile Remove="Services\IngredientDeductionService.cs" /> -->
+    <!-- <Compile Remove="Services\KitchenOrderRoutingService.cs" /> -->
     <!-- Email services enabled for Phase 3 -->
     <!-- <Compile Remove="Services\EmailService.cs" /> -->
     <!-- <Compile Remove="Data\Configurations\EmailConfiguration.cs" /> -->
-    <Compile Remove="Services\PrintReceiptService.cs" />
-    <Compile Remove="Printing\ImageConverter.cs" />
-    <Compile Remove="Services\BatchTraceabilityService.cs" />
-    <Compile Remove="Services\CommissionService.cs" />
-    <Compile Remove="Services\CentralPromotionService.cs" />
+    <!-- Printing Services - Re-enabled -->
+    <!-- <Compile Remove="Services\PrintReceiptService.cs" /> -->
+    <!-- <Compile Remove="Printing\ImageConverter.cs" /> -->
+    <!-- Additional Services - Re-enabled -->
+    <!-- <Compile Remove="Services\BatchTraceabilityService.cs" /> -->
+    <!-- <Compile Remove="Services\CommissionService.cs" /> -->
+    <!-- <Compile Remove="Services\CentralPromotionService.cs" /> -->
   </ItemGroup>
 
 </Project>

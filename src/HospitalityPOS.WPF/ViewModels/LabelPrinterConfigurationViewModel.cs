@@ -17,6 +17,7 @@ public partial class LabelPrinterConfigurationViewModel : ViewModelBase, INaviga
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IDialogService _dialogService;
+    private readonly ISessionService _sessionService;
 
     #region Observable Properties - Collections
 
@@ -132,11 +133,13 @@ public partial class LabelPrinterConfigurationViewModel : ViewModelBase, INaviga
     public LabelPrinterConfigurationViewModel(
         ILogger logger,
         IServiceScopeFactory scopeFactory,
-        IDialogService dialogService)
+        IDialogService dialogService,
+        ISessionService sessionService)
         : base(logger)
     {
         _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
 
         _logger.Information("LabelPrinterConfigurationViewModel initialized");
     }
@@ -187,7 +190,7 @@ public partial class LabelPrinterConfigurationViewModel : ViewModelBase, INaviga
             var printerService = scope.ServiceProvider.GetService<ILabelPrinterService>();
             if (printerService != null)
             {
-                var printers = await printerService.GetAllPrintersAsync(1); // TODO: Get actual store ID
+                var printers = await printerService.GetAllPrintersAsync(_sessionService.CurrentStoreId ?? 1);
                 Printers = new ObservableCollection<LabelPrinterDto>(printers);
             }
 
@@ -195,7 +198,7 @@ public partial class LabelPrinterConfigurationViewModel : ViewModelBase, INaviga
             var templateService = scope.ServiceProvider.GetService<ILabelTemplateService>();
             if (templateService != null)
             {
-                var templates = await templateService.GetAllTemplatesAsync(1); // TODO: Get actual store ID
+                var templates = await templateService.GetAllTemplatesAsync(_sessionService.CurrentStoreId ?? 1);
                 Templates = new ObservableCollection<LabelTemplateDto>(templates);
             }
 
@@ -318,7 +321,7 @@ public partial class LabelPrinterConfigurationViewModel : ViewModelBase, INaviga
                 {
                     Name = FormName,
                     ConnectionString = FormConnectionString,
-                    StoreId = 1, // TODO: Get actual store ID
+                    StoreId = _sessionService.CurrentStoreId ?? 1,
                     PrinterType = FormPrinterType,
                     PrintLanguage = FormPrintLanguage,
                     DefaultLabelSizeId = FormDefaultLabelSizeId,
@@ -396,7 +399,7 @@ public partial class LabelPrinterConfigurationViewModel : ViewModelBase, INaviga
             using var scope = _scopeFactory.CreateScope();
             var printerService = scope.ServiceProvider.GetRequiredService<ILabelPrinterService>();
 
-            await printerService.SetDefaultPrinterAsync(printer.Id, 1); // TODO: Get actual store ID
+            await printerService.SetDefaultPrinterAsync(printer.Id, _sessionService.CurrentStoreId ?? 1);
 
             // Update local state
             foreach (var p in Printers)

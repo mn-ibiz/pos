@@ -178,8 +178,90 @@ public partial class SmsCampaignDashboardViewModel : ObservableObject, INavigati
     [RelayCommand]
     private async Task CreateCampaignAsync()
     {
-        // TODO: Show campaign creation dialog
-        await _dialogService.ShowInfoAsync("Coming Soon", "Campaign creation wizard will be available soon.");
+        try
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var marketingService = scope.ServiceProvider.GetService<ISmsMarketingService>();
+
+            if (marketingService == null)
+            {
+                await _dialogService.ShowErrorAsync("Error", "SMS Marketing service is not available.");
+                return;
+            }
+
+            // Check if templates exist
+            var templates = await marketingService.GetTemplatesAsync();
+            if (templates.Count == 0)
+            {
+                var createTemplate = await _dialogService.ShowConfirmAsync(
+                    "No Templates",
+                    "You need at least one SMS template before creating a campaign. Would you like to create a template now?");
+
+                if (createTemplate)
+                {
+                    NavigateToTemplates();
+                }
+                return;
+            }
+
+            // Check if segments exist
+            var segments = await marketingService.GetSegmentsAsync();
+            if (segments.Count == 0)
+            {
+                var createSegment = await _dialogService.ShowConfirmAsync(
+                    "No Customer Segments",
+                    "You need at least one customer segment before creating a campaign. Would you like to create a segment now?");
+
+                if (createSegment)
+                {
+                    NavigateToSegments();
+                }
+                return;
+            }
+
+            // Get campaign name from user
+            var campaignName = await _dialogService.ShowInputAsync(
+                "New Campaign",
+                "Enter a name for the campaign:",
+                $"Campaign {DateTime.Now:yyyy-MM-dd}");
+
+            if (string.IsNullOrWhiteSpace(campaignName))
+            {
+                return; // User cancelled
+            }
+
+            // Create a draft campaign with the first template and segment
+            var request = new SmsCampaignRequest
+            {
+                Name = campaignName,
+                TemplateId = templates.First().Id,
+                SegmentId = segments.First().Id,
+                Status = CampaignStatus.Draft
+            };
+
+            var result = await marketingService.CreateCampaignAsync(request);
+
+            if (result.Success)
+            {
+                await _dialogService.ShowInfoAsync(
+                    "Campaign Created",
+                    $"Draft campaign '{campaignName}' has been created.\n\n" +
+                    $"Template: {templates.First().Name}\n" +
+                    $"Segment: {segments.First().Name}\n\n" +
+                    "You can now view and configure the campaign from the list.");
+
+                await LoadDashboardAsync();
+            }
+            else
+            {
+                await _dialogService.ShowErrorAsync("Error", result.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Failed to create campaign");
+            await _dialogService.ShowErrorAsync("Error", "Failed to create campaign. Please try again.");
+        }
     }
 
     [RelayCommand]

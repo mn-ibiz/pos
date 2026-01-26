@@ -370,6 +370,24 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IXReportService, XReportService>();
         services.AddScoped<ICombinedReportService, CombinedReportService>();
 
+        // Comparative Analytics Service
+        services.AddScoped<IComparativeAnalyticsService, ComparativeAnalyticsService>();
+
+        // Customer Display Service
+        services.AddScoped<ICustomerDisplayService, CustomerDisplayService>();
+
+        // SMS Marketing Service
+        services.AddScoped<ISmsMarketingService, SmsMarketingService>();
+
+        // Printer Discovery Service
+        services.AddScoped<IPrinterDiscoveryService, PrinterDiscoveryService>();
+
+        // Kitchen Order Routing Service
+        services.AddScoped<IKitchenOrderRoutingService, KitchenOrderRoutingService>();
+
+        // Commission Service
+        services.AddScoped<ICommissionService, CommissionService>();
+
         return services;
     }
 
